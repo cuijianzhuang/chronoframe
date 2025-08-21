@@ -8,7 +8,8 @@ export default defineNuxtConfig({
     '@nuxt/fonts',
     '@nuxt/icon',
     '@nuxt/image',
-    '@nuxt/test-utils'
+    '@nuxt/test-utils',
+    '@nuxtjs/tailwindcss',
   ],
 
   runtimeConfig: {
@@ -21,8 +22,13 @@ export default defineNuxtConfig({
     S3_CDN_URL: '',
   },
 
-  nitro: {},
-
+  nitro: {
+    preset: 'cloudflare-module',
+    cloudflare: {
+      deployConfig: true,
+      nodeCompat: true
+    }
+  },
 
   vite: {},
 })
