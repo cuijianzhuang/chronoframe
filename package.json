@@ -1,5 +1,10 @@
 {
-  "name": "nuxt-app",
+  "name": "chronoframe",
+  "author": {
+    "name": "Timothy Yin",
+    "email": "master@uniiem.com"
+  },
+  "license": "MIT",
   "type": "module",
   "private": true,
   "scripts": {
