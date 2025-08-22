@@ -17,14 +17,16 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.872.0",
     "@aws-sdk/s3-request-presigner": "^3.872.0",
+    "@chronoframe/webgl-image": "workspace:*",
     "@nuxt/eslint": "1.9.0",
     "@nuxt/fonts": "0.11.4",
     "@nuxt/icon": "2.0.0",
     "@nuxt/image": "1.11.0",
     "@nuxt/test-utils": "3.19.2",
-    "@nuxtjs/tailwindcss": "6.14.0",
+    "@tailwindcss/vite": "^4.1.12",
     "eslint": "^9.0.0",
     "nuxt": "^4.0.3",
+    "tailwindcss": "^4.1.12",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1",
     "wrangler": "^4.32.0"

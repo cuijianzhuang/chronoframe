@@ -1,3 +1,5 @@
+import tailwindcss from '@tailwindcss/vite'
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -9,8 +11,9 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/image',
     '@nuxt/test-utils',
-    '@nuxtjs/tailwindcss',
   ],
+
+  css: ['~/assets/css/tailwind.css'],
 
   runtimeConfig: {
     S3_ENDPOINT: '',
@@ -26,9 +29,11 @@ export default defineNuxtConfig({
     preset: 'cloudflare-module',
     cloudflare: {
       deployConfig: true,
-      nodeCompat: true
-    }
+      nodeCompat: true,
+    },
   },
 
-  vite: {},
+  vite: {
+    plugins: [tailwindcss() as any],
+  },
 })
