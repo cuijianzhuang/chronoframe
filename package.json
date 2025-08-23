@@ -15,16 +15,18 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.872.0",
-    "@aws-sdk/s3-request-presigner": "^3.872.0",
+    "@aws-sdk/client-s3": "^3.873.0",
     "@chronoframe/webgl-image": "workspace:*",
     "@nuxt/eslint": "1.9.0",
     "@nuxt/fonts": "0.11.4",
     "@nuxt/icon": "2.0.0",
     "@nuxt/image": "1.11.0",
     "@nuxt/test-utils": "3.19.2",
+    "@nuxthub/core": "0.9.0",
     "@tailwindcss/vite": "^4.1.12",
+    "cloudflare": "^4.5.0",
     "eslint": "^9.0.0",
+    "motion-v": "^1.7.0",
     "nuxt": "^4.0.3",
     "tailwindcss": "^4.1.12",
     "vue": "^3.5.18",
@@ -33,6 +35,7 @@
   },
   "packageManager": "pnpm@9.15.3+sha512.1f79bc245a66eb0b07c5d4d83131240774642caaa86ef7d0434ab47c0d16f66b04e21e0c086eb61e62c77efc4d7f7ec071afad3796af64892fae66509173893a",
   "devDependencies": {
+    "consola": "^3.4.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.6.2"
