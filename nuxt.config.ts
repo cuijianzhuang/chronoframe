@@ -13,6 +13,7 @@ export default defineNuxtConfig({
     '@nuxt/test-utils',
     'motion-v/nuxt',
     '@nuxthub/core',
+    'nuxt-auth-utils',
   ],
 
   css: ['~/assets/css/tailwind.css'],

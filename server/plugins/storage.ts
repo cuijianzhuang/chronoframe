@@ -21,6 +21,7 @@ export default nitroPlugin(async (nitroApp) => {
     r2: {
       provider: 'hub-r2',
       prefix: 'photos/',
+      cdnUrl: import.meta.dev ? 'http://localhost:3000/image/' : 'https://cdn-dev.lens.bh8.ga/',
       maxKeys: 100,
     },
   }
