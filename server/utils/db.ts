@@ -10,3 +10,4 @@ export function useDB() {
 }
 
 export type User = typeof schema.users.$inferSelect
+export type Photo = typeof schema.photos.$inferSelect

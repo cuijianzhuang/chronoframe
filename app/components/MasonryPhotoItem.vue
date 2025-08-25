@@ -1,10 +1,5 @@
 <script setup lang="ts">
-interface Photo {
-  id?: string
-  url: string
-  title?: string
-  date?: string | Date
-}
+import { thumbHashToDataURL } from 'thumbhash'
 
 interface Props {
   photo: Photo
@@ -24,23 +19,41 @@ const emit = defineEmits<{
 
 // Constants
 const ITEM_GAP = 2
-const ESTIMATED_HEIGHT = 280
+const DEFAULT_WIDTH = 280
 
 // Reactive state
 const isLoading = ref(true)
-const estimatedHeight = ref(ESTIMATED_HEIGHT)
+const actualHeight = ref(0)
 const photoRef = ref<HTMLElement>()
 const isVisible = ref(false)
+const thumbHashDataUrl = ref<string | null>(null)
+
+// Computed
+const containerHeight = computed(() => {
+  // Use actual dimensions from photo data if available
+  if (props.photo.width && props.photo.height) {
+    const aspectRatio = props.photo.height / props.photo.width
+    return Math.round(DEFAULT_WIDTH * aspectRatio)
+  }
+  
+  // Fallback to calculated height if image has loaded
+  if (actualHeight.value > 0) {
+    return actualHeight.value
+  }
+  
+  // Default fallback height
+  return 280
+})
 
 // Methods
 const handleImageLoad = (event: Event) => {
   const img = event.target as HTMLImageElement
   isLoading.value = false
 
-  // Update estimated height based on actual image dimensions
+  // Update actual height based on loaded image dimensions
   if (img.naturalWidth && img.naturalHeight) {
     const aspectRatio = img.naturalHeight / img.naturalWidth
-    estimatedHeight.value = 280 * aspectRatio // Assuming 280px width
+    actualHeight.value = Math.round(DEFAULT_WIDTH * aspectRatio)
   }
 
   // Trigger animation after image loads
@@ -53,7 +66,7 @@ const handleImageLoad = (event: Event) => {
 
 const handleImageError = () => {
   isLoading.value = false
-  console.warn(`Failed to load image: ${props.photo.url}`)
+  console.warn(`Failed to load image: ${props.photo.thumbnailUrl}`)
 }
 
 const formatDate = (date: string | Date): string => {
@@ -66,16 +79,77 @@ const formatDate = (date: string | Date): string => {
   })
 }
 
-// Preload image on mount to get dimensions
+const formatExposureTime = (exposureTime: string | number | undefined): string => {
+  if (!exposureTime) return ''
+  
+  let seconds: number
+  
+  // Handle different input formats
+  if (typeof exposureTime === 'string') {
+    // Try to parse fraction format like "1/60"
+    if (exposureTime.includes('/')) {
+      const parts = exposureTime.split('/')
+      if (parts.length === 2 && parts[0] && parts[1]) {
+        const numerator = parseFloat(parts[0])
+        const denominator = parseFloat(parts[1])
+        if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
+          seconds = numerator / denominator
+        } else {
+          return exposureTime // Return original if can't parse
+        }
+      } else {
+        return exposureTime // Return original if format is unexpected
+      }
+    } else {
+      // Try to parse as decimal
+      seconds = parseFloat(exposureTime)
+      if (isNaN(seconds)) {
+        return exposureTime // Return original if can't parse
+      }
+    }
+  } else {
+    seconds = exposureTime
+  }
+  
+  // Convert to fraction format
+  if (seconds >= 1) {
+    // For exposures 1 second or longer, show as decimal with "s"
+    return `${seconds}s`
+  } else {
+    // For fast exposures, convert to 1/x format
+    const denominator = Math.round(1 / seconds)
+    return `1/${denominator}`
+  }
+}
+
+// Preload image on mount to get dimensions and generate thumbhash
 onMounted(() => {
-  const img = new Image()
-  img.onload = () => {
-    if (img.naturalWidth && img.naturalHeight) {
-      const aspectRatio = img.naturalHeight / img.naturalWidth
-      estimatedHeight.value = 280 * aspectRatio
+  // Generate thumbhash data URL if available
+  if (props.photo.thumbnailHash) {
+    try {
+      // Convert base64 to Uint8Array
+      const binaryString = atob(props.photo.thumbnailHash)
+      const bytes = new Uint8Array(binaryString.length)
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i)
+      }
+      thumbHashDataUrl.value = thumbHashToDataURL(bytes)
+    } catch (error) {
+      console.warn('Failed to decode thumbhash:', error)
     }
   }
-  img.src = props.photo.url
+
+  // Preload thumbnail image
+  if (props.photo.thumbnailUrl) {
+    const img = new Image()
+    img.onload = () => {
+      if (img.naturalWidth && img.naturalHeight) {
+        const aspectRatio = img.naturalHeight / img.naturalWidth
+        actualHeight.value = Math.round(DEFAULT_WIDTH * aspectRatio)
+      }
+    }
+    img.src = props.photo.thumbnailUrl
+  }
 
   // Set up intersection observer for visibility tracking
   nextTick(() => {
@@ -89,7 +163,7 @@ onMounted(() => {
               emit('visibility-change', {
                 index: props.index,
                 isVisible: newVisibility,
-                date: props.photo.date || new Date(),
+                date: props.photo.dateTaken || new Date().toISOString(),
               })
             }
           })
@@ -128,18 +202,31 @@ onMounted(() => {
     <div
       class="relative group overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
     >
-      <!-- Loading placeholder -->
+      <!-- Thumbhash placeholder -->
       <div
-        v-if="isLoading"
+        v-if="isLoading && thumbHashDataUrl"
+        class="w-full absolute inset-0"
+        :style="{ height: `${containerHeight}px` }"
+      >
+        <img
+          :src="thumbHashDataUrl"
+          :alt="photo.title || 'Photo placeholder'"
+          class="w-full h-full object-cover filter blur-sm"
+        />
+      </div>
+
+      <!-- Loading placeholder (fallback when no thumbhash) -->
+      <div
+        v-if="isLoading && !thumbHashDataUrl"
         class="w-full bg-gray-200 dark:bg-gray-700 animate-pulse"
-        :style="{ height: `${estimatedHeight}px` }"
+        :style="{ height: `${containerHeight}px` }"
       />
 
-      <!-- Image -->
+      <!-- Main image -->
       <img
         v-show="!isLoading"
-        :src="photo.url"
-        :alt="`Photo ${index + 1}`"
+        :src="photo.thumbnailUrl || ''"
+        :alt="photo.title || photo.description || 'Photo'"
         class="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
         @load="handleImageLoad"
         @error="handleImageError"
@@ -157,17 +244,39 @@ onMounted(() => {
       >
         <div class="text-white">
           <p
-            class="text-sm font-medium"
             v-if="photo.title"
+            class="text-sm font-medium mb-1"
           >
             {{ photo.title }}
           </p>
           <p
-            class="text-xs opacity-80"
-            v-if="photo.date"
+            v-if="photo.description"
+            class="text-xs opacity-80 mb-1"
           >
-            {{ formatDate(photo.date) }}
+            {{ photo.description }}
           </p>
+          <p
+            v-if="photo.dateTaken"
+            class="text-xs opacity-80"
+          >
+            {{ formatDate(photo.dateTaken) }}
+          </p>
+          <!-- Camera info from EXIF if available -->
+          <div
+            v-if="photo.exif && (photo.exif.Make || photo.exif.Model)"
+            class="text-xs opacity-70 mt-1"
+          >
+            {{ [photo.exif.Make, photo.exif.Model].filter(Boolean).join(' ') }}
+          </div>
+          <!-- Photo specs from EXIF -->
+          <div
+            v-if="photo.exif && (photo.exif.FNumber || photo.exif.ExposureTime || photo.exif.ISO)"
+            class="text-xs opacity-70 mt-1 flex gap-2"
+          >
+            <span v-if="photo.exif.FNumber">f/{{ photo.exif.FNumber }}</span>
+            <span v-if="photo.exif.ExposureTime">{{ formatExposureTime(photo.exif.ExposureTime) }}</span>
+            <span v-if="photo.exif.ISO">ISO {{ photo.exif.ISO }}</span>
+          </div>
         </div>
       </div>
     </div>

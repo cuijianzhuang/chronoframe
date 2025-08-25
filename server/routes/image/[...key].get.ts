@@ -1,5 +1,5 @@
 export default eventHandler(async (event) => {
-  const { storageProvider } = useStorageManager(event)
+  const { storageProvider } = useStorageProvider(event)
   const key = getRouterParam(event, 'key')
 
   if (!key) {
@@ -10,5 +10,6 @@ export default eventHandler(async (event) => {
   if (!photo) {
     throw createError({ statusCode: 404, statusMessage: 'Photo not found' })
   }
+  logger.chrono.info('Serve image from key', key)
   return photo
 })

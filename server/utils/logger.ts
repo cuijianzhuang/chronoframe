@@ -12,6 +12,7 @@ export const logger = {
   chrono: mConsola.withTag('CHRONO'),
   storage: mConsola.withTag('STORAGE'),
   fs: mConsola.withTag('FS'),
+  image: mConsola.withTag('IMG/PHOTO'),
   dynamic: (id: string) => mConsola.withTag(id.toUpperCase()),
 }
 

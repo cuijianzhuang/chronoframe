@@ -1,11 +1,4 @@
 <script setup lang="ts">
-interface Photo {
-  id?: string
-  url: string
-  title?: string
-  date?: string | Date
-}
-
 interface Props {
   photos: Photo[]
   columns?: number | 'auto'
@@ -18,8 +11,6 @@ const props = withDefaults(defineProps<Props>(), {
 // Constants
 const FIRST_SCREEN_ITEMS_COUNT = 30
 const COLUMN_GAP = 2
-const MIN_COLUMN_WIDTH = 200
-const MAX_COLUMN_WIDTH = 400
 const AUTO_COLUMN_WIDTH = 280
 
 // Reactive state
@@ -51,6 +42,39 @@ const columnCount = computed(() => {
   }
 
   return props.columns
+})
+
+const photoStats = computed(() => {
+  const totalPhotos = props.photos.length
+  const photosWithDates = props.photos.filter(p => p.dateTaken).length
+  const photosWithTitles = props.photos.filter(p => p.title).length
+  const photosWithExif = props.photos.filter(p => p.exif).length
+  
+  // Get date range of all photos
+  const allDates = props.photos
+    .map(p => p.dateTaken)
+    .filter((date): date is string => Boolean(date))
+    .map(date => new Date(date))
+    .sort((a, b) => a.getTime() - b.getTime())
+  
+  const dateRange = allDates.length > 0 ? {
+    start: allDates[0],
+    end: allDates[allDates.length - 1]
+  } : null
+  
+  return {
+    total: totalPhotos,
+    withDates: photosWithDates,
+    withTitles: photosWithTitles,
+    withExif: photosWithExif,
+    dateRange
+  }
+})
+
+const dateRangeText = computed(() => {
+  const range = photoStats.value.dateRange
+  if (!range || !range.start || !range.end) return ''
+  return `${range.start.toLocaleDateString('zh-CN')} - ${range.end.toLocaleDateString('zh-CN')}`
 })
 
 // Methods
@@ -86,8 +110,8 @@ const updateDateRange = () => {
   }
 
   const visibleDates = Array.from(visiblePhotos.value)
-    .map((index) => props.photos[index]?.date)
-    .filter((date): date is string | Date => Boolean(date))
+    .map((index) => props.photos[index]?.dateTaken)
+    .filter((date): date is string => Boolean(date))
     .map((date) => new Date(date))
     .sort((a, b) => a.getTime() - b.getTime())
 
@@ -104,13 +128,27 @@ const updateDateRange = () => {
     return
   }
 
-  // Format date range
+  // Format date range with better logic
   const formatOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'long',
   }
 
+  const formatOptionsWithDay: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }
+
+  // Check if dates are the same day
   if (
+    startDate.getFullYear() === endDate.getFullYear() &&
+    startDate.getMonth() === endDate.getMonth() &&
+    startDate.getDate() === endDate.getDate()
+  ) {
+    // Same day
+    dateRange.value = startDate.toLocaleDateString('zh-CN', formatOptionsWithDay)
+  } else if (
     startDate.getFullYear() === endDate.getFullYear() &&
     startDate.getMonth() === endDate.getMonth()
   ) {
@@ -176,7 +214,7 @@ onMounted(() => {
         class="flex flex-col gap-1 bg-black/60 backdrop-blur-[70px] rounded-xl border border-white/10 px-4 py-2 shadow-2xl"
       >
         <span class="text-white text-4xl font-black">{{ dateRange }}</span>
-        <span class="text-white/60 text-xl font-bold">重庆、山东</span>
+        <span class="text-white/60 text-xl font-bold">重庆、新加坡</span>
       </div>
     </div>
 
@@ -297,22 +335,36 @@ onMounted(() => {
             <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
               Photo Gallery
             </h1>
-            <p class="text-gray-600 dark:text-gray-400">
-              {{ photos.length }} photos
-            </p>
+            <div class="text-gray-600 dark:text-gray-400 space-y-1">
+              <p class="text-lg">{{ photoStats.total }} 张照片</p>
+              <div class="text-sm space-y-1">
+                <p v-if="dateRangeText">
+                  时间跨度: {{ dateRangeText }}
+                </p>
+                <p>{{ photoStats.withDates }} 张包含拍摄时间 · {{ photoStats.withExif }} 张包含 EXIF 数据</p>
+              </div>
+            </div>
             <AuthState>
               <template #default="{ loggedIn, user, clear }">
                 <div
                   v-if="loggedIn"
-                  class="text-gray-600 dark:text-gray-400"
+                  class="text-gray-600 dark:text-gray-400 flex flex-col items-center"
                 >
                   Logged in as {{ user?.username || user?.email }}
-                  <button
-                    @click="clear"
-                    class="ml-2 text-blue-500"
-                  >
-                    Logout
-                  </button>
+                  <div class="gap-3">
+                    <NuxtLink
+                      to="/dashboard"
+                      class="ml-2 text-blue-500"
+                    >
+                      Dashboard
+                    </NuxtLink>
+                    <button
+                      @click="clear"
+                      class="ml-2 text-blue-500"
+                    >
+                      Logout
+                    </button>
+                  </div>
                 </div>
                 <div v-else>
                   <a

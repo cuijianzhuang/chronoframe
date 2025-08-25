@@ -4,6 +4,16 @@ import {
   StorageManager,
 } from '../services/storage'
 
+// 全局 storageManager 实例，可以在非请求上下文中使用
+let globalStorageManager: StorageManager
+
+export function getStorageManager(): StorageManager {
+  if (!globalStorageManager) {
+    throw new Error('Storage manager not initialized')
+  }
+  return globalStorageManager
+}
+
 export default nitroPlugin(async (nitroApp) => {
   const config = useRuntimeConfig()
 
@@ -27,6 +37,9 @@ export default nitroPlugin(async (nitroApp) => {
   }
 
   const storageManager = new StorageManager(devConfigs.r2, logger.storage)
+  
+  // 设置全局实例
+  globalStorageManager = storageManager
 
   nitroApp.hooks.hook('request', (event) => {
     event.context.storage = storageManager

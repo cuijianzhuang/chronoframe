@@ -32,7 +32,6 @@ export class HubR2StorageProvider implements StorageProvider {
 
     ensureBlob(file, {
       maxSize: '128MB',
-      types: ['image'],
     })
 
     const blob = await hubBlob().put(key, file, {
