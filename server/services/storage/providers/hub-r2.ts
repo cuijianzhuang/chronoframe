@@ -23,7 +23,11 @@ export class HubR2StorageProvider implements StorageProvider {
     this.logger = logger
   }
 
-  async create(key: string, fileBuffer: Buffer): Promise<StorageObject> {
+  async create(
+    key: string,
+    fileBuffer: Buffer,
+    contentType?: string,
+  ): Promise<StorageObject> {
     const file = new File([new Uint8Array(fileBuffer)], key)
 
     if (!file || !file.size) {

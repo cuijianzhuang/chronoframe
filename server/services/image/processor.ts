@@ -54,7 +54,8 @@ export const convertHeicToJpeg = async (heicBuffer: Buffer) => {
     logger.image.info('Converting HEIC to JPEG...')
 
     const jpegBuffer = await heicConvert({
-      buffer: heicBuffer.buffer,
+      // @ts-expect-error idk why there is a type error here
+      buffer: heicBuffer,
       format: 'JPEG',
       quality: 0.95,
     })

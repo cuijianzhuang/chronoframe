@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { thumbHashToDataURL } from 'thumbhash'
+import Thumbhash from './Thumbhash.vue'
 
 interface Props {
   photo: Photo
@@ -26,7 +26,6 @@ const isLoading = ref(true)
 const actualHeight = ref(0)
 const photoRef = ref<HTMLElement>()
 const isVisible = ref(false)
-const thumbHashDataUrl = ref<string | null>(null)
 
 // Computed
 const containerHeight = computed(() => {
@@ -35,12 +34,12 @@ const containerHeight = computed(() => {
     const aspectRatio = props.photo.height / props.photo.width
     return Math.round(DEFAULT_WIDTH * aspectRatio)
   }
-  
+
   // Fallback to calculated height if image has loaded
   if (actualHeight.value > 0) {
     return actualHeight.value
   }
-  
+
   // Default fallback height
   return 280
 })
@@ -79,11 +78,13 @@ const formatDate = (date: string | Date): string => {
   })
 }
 
-const formatExposureTime = (exposureTime: string | number | undefined): string => {
+const formatExposureTime = (
+  exposureTime: string | number | undefined,
+): string => {
   if (!exposureTime) return ''
-  
+
   let seconds: number
-  
+
   // Handle different input formats
   if (typeof exposureTime === 'string') {
     // Try to parse fraction format like "1/60"
@@ -110,7 +111,7 @@ const formatExposureTime = (exposureTime: string | number | undefined): string =
   } else {
     seconds = exposureTime
   }
-  
+
   // Convert to fraction format
   if (seconds >= 1) {
     // For exposures 1 second or longer, show as decimal with "s"
@@ -122,30 +123,15 @@ const formatExposureTime = (exposureTime: string | number | undefined): string =
   }
 }
 
-// Preload image on mount to get dimensions and generate thumbhash
+// Preload image on mount to get dimensions
 onMounted(() => {
-  // Generate thumbhash data URL if available
-  if (props.photo.thumbnailHash) {
-    try {
-      // Convert base64 to Uint8Array
-      const binaryString = atob(props.photo.thumbnailHash)
-      const bytes = new Uint8Array(binaryString.length)
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i)
-      }
-      thumbHashDataUrl.value = thumbHashToDataURL(bytes)
-    } catch (error) {
-      console.warn('Failed to decode thumbhash:', error)
-    }
-  }
-
   // Preload thumbnail image
   if (props.photo.thumbnailUrl) {
     const img = new Image()
     img.onload = () => {
       if (img.naturalWidth && img.naturalHeight) {
         const aspectRatio = img.naturalHeight / img.naturalWidth
-        actualHeight.value = Math.round(DEFAULT_WIDTH * aspectRatio)
+        actualHeight.value = Math.round(DEFAULT_WIDTH * (props.photo.aspectRatio || aspectRatio))
       }
     }
     img.src = props.photo.thumbnailUrl
@@ -201,25 +187,24 @@ onMounted(() => {
   >
     <div
       class="relative group overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+      :style="{ height: `${containerHeight}px` }"
     >
-      <!-- Thumbhash placeholder -->
+      <!-- Thumbhash 组件占位符 -->
       <div
-        v-if="isLoading && thumbHashDataUrl"
+        v-if="isLoading && photo.thumbnailHash"
         class="w-full absolute inset-0"
-        :style="{ height: `${containerHeight}px` }"
       >
-        <img
-          :src="thumbHashDataUrl"
-          :alt="photo.title || 'Photo placeholder'"
+        <Thumbhash
+          :thumbhash="photo.thumbnailHash"
           class="w-full h-full object-cover filter blur-sm"
+          :alt="photo.title || 'Photo placeholder'"
         />
       </div>
 
       <!-- Loading placeholder (fallback when no thumbhash) -->
       <div
-        v-if="isLoading && !thumbHashDataUrl"
+        v-if="isLoading && !photo.thumbnailHash"
         class="w-full bg-gray-200 dark:bg-gray-700 animate-pulse"
-        :style="{ height: `${containerHeight}px` }"
       />
 
       <!-- Main image -->
@@ -270,11 +255,16 @@ onMounted(() => {
           </div>
           <!-- Photo specs from EXIF -->
           <div
-            v-if="photo.exif && (photo.exif.FNumber || photo.exif.ExposureTime || photo.exif.ISO)"
+            v-if="
+              photo.exif &&
+              (photo.exif.FNumber || photo.exif.ExposureTime || photo.exif.ISO)
+            "
             class="text-xs opacity-70 mt-1 flex gap-2"
           >
             <span v-if="photo.exif.FNumber">f/{{ photo.exif.FNumber }}</span>
-            <span v-if="photo.exif.ExposureTime">{{ formatExposureTime(photo.exif.ExposureTime) }}</span>
+            <span v-if="photo.exif.ExposureTime">{{
+              formatExposureTime(photo.exif.ExposureTime)
+            }}</span>
             <span v-if="photo.exif.ISO">ISO {{ photo.exif.ISO }}</span>
           </div>
         </div>

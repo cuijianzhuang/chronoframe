@@ -43,7 +43,11 @@ export interface UploadOptions {
 }
 
 export interface StorageProvider {
-  create(key: string, fileBuffer: Buffer): Promise<StorageObject>
+  create(
+    key: string,
+    fileBuffer: Buffer,
+    contentType?: string,
+  ): Promise<StorageObject>
   delete(key: string): Promise<void>
   get(key: string): Promise<Buffer | null>
   getPublicUrl(key: string): string

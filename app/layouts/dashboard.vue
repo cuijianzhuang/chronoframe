@@ -12,6 +12,11 @@ const items = ref<NavigationMenuItem[]>([
     icon: 'tabler:photo-cog',
     to: '/dashboard/photos',
   },
+  {
+    label: 'Workers',
+    icon: 'tabler:automatic-gearbox',
+    to: '/dashboard/workers',
+  }
 ])
 </script>
 

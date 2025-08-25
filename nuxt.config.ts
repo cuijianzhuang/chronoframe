@@ -13,7 +13,6 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@nuxt/test-utils',
     'motion-v/nuxt',
-    '@nuxthub/core',
     'nuxt-auth-utils',
   ],
 
@@ -32,13 +31,8 @@ export default defineNuxtConfig({
     CLOUDFLARE_D1_UUID: '',
   },
 
-  hub: {
-    database: true,
-    blob: true,
-  },
-
   nitro: {
-    preset: 'cloudflare-module',
+    preset: 'node_server',
     cloudflare: {
       deployConfig: true,
       nodeCompat: true,

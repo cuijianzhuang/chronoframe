@@ -8,6 +8,7 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "db": "drizzle-kit",
     "db:generate": "drizzle-kit generate",
     "build": "nuxt build",
     "build:deps": "pnpm --filter @chronoframe/webgl-image build",
@@ -20,6 +21,8 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.873.0",
     "@chronoframe/webgl-image": "workspace:*",
+    "@img/sharp-libvips-dev": "^1.2.1",
+    "@img/sharp-wasm32": "^0.34.3",
     "@nuxt/eslint": "1.9.0",
     "@nuxt/fonts": "0.11.4",
     "@nuxt/icon": "2.0.0",
@@ -29,8 +32,10 @@
     "@nuxthub/core": "0.9.0",
     "@tailwindcss/vite": "^4.1.12",
     "@vingle/bmp-js": "^0.2.5",
+    "better-sqlite3": "^12.2.0",
     "cloudflare": "^4.5.0",
     "concurrently": "^9.2.0",
+    "db0": "^0.3.2",
     "drizzle-orm": "^0.44.4",
     "es-toolkit": "^1.39.10",
     "eslint": "^9.0.0",
@@ -42,6 +47,7 @@
     "nuxt": "^4.0.3",
     "nuxt-auth-utils": "0.5.23",
     "sharp": "^0.34.3",
+    "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.12",
     "thumbhash": "^0.1.1",
     "vue": "^3.5.18",
@@ -52,11 +58,19 @@
   "packageManager": "pnpm@9.15.3+sha512.1f79bc245a66eb0b07c5d4d83131240774642caaa86ef7d0434ab47c0d16f66b04e21e0c086eb61e62c77efc4d7f7ec071afad3796af64892fae66509173893a",
   "devDependencies": {
     "@iconify-json/tabler": "^1.2.22",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/heic-convert": "^2.1.0",
     "consola": "^3.4.2",
     "drizzle-kit": "^0.31.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "prettier": "^3.6.2"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "ignoreMissing": [
+        "@nuxt/kit"
+      ]
+    }
   }
 }

@@ -1,10 +1,17 @@
-import path from 'path'
+import path from 'node:path'
+import { mkdir, unlink, writeFile } from 'node:fs/promises'
 import sharp, { Metadata } from 'sharp'
 import type { NeededExif, PhotoInfo } from '../../../shared/types/photo'
 import exifr from 'exifr'
-import { ExifDateTime, Tags } from 'exiftool-vendored'
+import { exiftool, ExifDateTime, Tags } from 'exiftool-vendored'
+import { noop } from 'es-toolkit'
+import { Logger } from '~~/server/utils/logger'
 
 const neededKeys: Array<keyof Tags | (string & {})> = [
+  'Title',
+  'Subject',
+  'Keywords',
+
   'tz',
   'tzSource',
   'Orientation',
@@ -111,29 +118,41 @@ const processExifData = (exifData: Tags, metadata: Metadata): NeededExif => {
 export const extractExifData = async (
   imageBuffer: Buffer,
   rawImageBuffer?: Buffer,
+  logger?: Logger['image'],
 ): Promise<NeededExif | null> => {
   try {
     let metadata = await sharp(imageBuffer).metadata()
 
-    if (!metadata && rawImageBuffer) {
+    if (!metadata.exif && rawImageBuffer) {
       try {
         metadata = await sharp(rawImageBuffer).metadata()
       } catch (err) {
-        logger.image.warn(
-          'Error extracting EXIF data from raw image buffer:',
-          err,
-        )
+        logger?.warn('Error extracting EXIF data from raw image buffer:', err)
       }
     }
 
     if (!metadata.exif) {
+      logger?.warn('No EXIF data found in image metadata')
       return null
     }
 
-    const exifData = await exifr.parse(imageBuffer, true)
-    return processExifData(exifData, metadata)
+    // const exifData = await exifr.parse(rawImageBuffer || imageBuffer, true)
+    // return processExifData(exifData, metadata)
+
+    logger?.info('Extracting EXIF data using exiftool...')
+
+    const tempDir = path.resolve(process.cwd(), 'exif_workdir')
+    await mkdir(tempDir, { recursive: true })
+    const tempImagePath = path.resolve(tempDir, `${crypto.randomUUID()}.jpg`)
+
+    await writeFile(tempImagePath, rawImageBuffer || imageBuffer)
+    const exifData = await exiftool.read(tempImagePath)
+    const result = processExifData(exifData, metadata)
+
+    await unlink(tempImagePath).catch(noop)
+    return result
   } catch (err) {
-    logger.image.error('EXIF extraction failed:', err)
+    logger?.error('EXIF extraction failed:', err)
     return null
   }
 }
@@ -150,7 +169,9 @@ export const extractPhotoInfo = (
   let tags: string[] = []
 
   const dirPath = path.dirname(s3key)
-  if (dirPath && dirPath !== '.' && dirPath !== '/') {
+  if (exifData?.Subject || exifData?.Keywords) {
+    tags = [...(exifData.Subject || []), ...(exifData.Keywords || [])]
+  } else if (dirPath && dirPath !== '.' && dirPath !== '/') {
     let relativePath = dirPath
     relativePath = dirPath.slice('/photos'.length)
 
@@ -189,11 +210,13 @@ export const extractPhotoInfo = (
     views = Number.parseInt(viewsMatch[1])
   }
 
-  title = fileName
-    .replaceAll(/\d{4}-\d{2}-\d{2}[_-]?/g, '')
-    .replaceAll(/[_-]?\d+views?/gi, '')
-    .replaceAll(/[_-]+/g, ' ')
-    .trim()
+  title =
+    exifData?.Title ||
+    fileName
+      .replaceAll(/\d{4}-\d{2}-\d{2}[_-]?/g, '')
+      .replaceAll(/[_-]?\d+views?/gi, '')
+      .replaceAll(/[_-]+/g, ' ')
+      .trim()
 
   if (!title) {
     title = path.basename(s3key, path.extname(s3key))

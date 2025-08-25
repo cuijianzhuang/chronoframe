@@ -1,7 +1,9 @@
 import {
   _Object,
+  DeleteObjectCommand,
   GetObjectCommand,
   ListObjectsCommand,
+  PutObjectCommand,
   S3Client,
   S3ClientConfig,
 } from '@aws-sdk/client-s3'
@@ -56,12 +58,44 @@ export class S3StorageProvider implements StorageProvider {
     this.client = createClient(config)
   }
 
-  create(key: string, data: Buffer): Promise<StorageObject> {
-    throw new Error('Method not implemented.')
+  async create(key: string, data: Buffer, contentType?: string): Promise<StorageObject> {
+    try {
+      const cmd = new PutObjectCommand({
+        Bucket: this.config.bucket,
+        Key: key,
+        Body: data,
+        ContentType: contentType || 'application/octet-stream',
+      })
+
+      const resp = await this.client.send(cmd)
+      
+      this.logger?.success(`Created object with key: ${key}`)
+
+      return {
+        key,
+        size: data.length,
+        lastModified: new Date(),
+        etag: resp.ETag,
+      }
+    } catch (error) {
+      this.logger?.error(`Failed to create object with key: ${key}`, error)
+      throw error
+    }
   }
 
-  delete(key: string): Promise<void> {
-    throw new Error('Method not implemented.')
+  async delete(key: string): Promise<void> {
+    try {
+      const cmd = new DeleteObjectCommand({
+        Bucket: this.config.bucket,
+        Key: key,
+      })
+
+      await this.client.send(cmd)
+      this.logger?.success(`Deleted object with key: ${key}`)
+    } catch (error) {
+      this.logger?.error(`Failed to delete object with key: ${key}`, error)
+      throw error
+    }
   }
 
   async get(key: string): Promise<Buffer | null> {
@@ -123,7 +157,9 @@ export class S3StorageProvider implements StorageProvider {
     expiresIn?: number,
     options?: UploadOptions,
   ): Promise<{ url: string }> {
-    throw new Error('Method not implemented.')
+    // TODO: Implement presigned URL generation
+    // This requires @aws-sdk/s3-request-presigner package
+    throw new Error('Presigned upload URL generation not implemented. Please install @aws-sdk/s3-request-presigner and implement this method.')
   }
 
   async listAll(): Promise<StorageObject[]> {

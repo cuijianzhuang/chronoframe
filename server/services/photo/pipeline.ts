@@ -6,7 +6,7 @@ import {
 import { generateThumbnailAndHash } from '../image/thumbnail'
 import { Photo } from '~~/server/utils/db'
 import { getStorageManager } from '~~/server/plugins/storage'
-import { compressUint8Array } from '~~/server/utils/u8array'
+import { compressUint8Array } from '~~/shared/utils/u8array'
 import { StorageObject } from '../storage'
 import { extractExifData, extractPhotoInfo } from '../image/exif'
 
@@ -40,15 +40,16 @@ export const execPhotoPipeline = async (
       await generateThumbnailAndHash(imageBuffer)
 
     // 4. EXIF
-    const exifData = await extractExifData(imageBuffer, imageBuffers.raw)
+    const exifData = await extractExifData(imageBuffer, imageBuffers.raw, log)
 
     // 5. 提取照片信息
     const photoInfo = extractPhotoInfo(s3key, exifData)
 
     // 6. 上传缩略图
     const thumbnailObject = await storageProvider.create(
-      `thumbnails/${photoId}`,
+      `thumbnails/${photoId}.webp`,
       thumbnailBuffer,
+      'image/webp'
     )
 
     return {

@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core'
 import { NeededExif } from '~~/shared/types/photo'
 
 export const users = sqliteTable('users', {
@@ -14,10 +14,10 @@ export const users = sqliteTable('users', {
 export const photos = sqliteTable('photos', {
   id: text('id').primaryKey().unique(),
   title: text('title'),
-  description: text(),
+  description: text('description'),
   width: integer('width'),
   height: integer('height'),
-  aspectRatio: integer('aspect_ratio'),
+  aspectRatio: real('aspect_ratio'),
   dateTaken: text('date_taken'),
   storageKey: text('storage_key'),
   fileSize: integer('file_size'),

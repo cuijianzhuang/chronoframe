@@ -1,6 +1,10 @@
 import type { Tags } from 'exiftool-vendored'
 
 export interface NeededExif {
+  Title?: string
+  Subject?: string[]
+  Keywords?: string[]
+
   zone?: string
   tz?: string
   tzSource?: string

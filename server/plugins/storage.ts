@@ -36,7 +36,7 @@ export default nitroPlugin(async (nitroApp) => {
     },
   }
 
-  const storageManager = new StorageManager(devConfigs.r2, logger.storage)
+  const storageManager = new StorageManager(devConfigs.s3, logger.storage)
   
   // 设置全局实例
   globalStorageManager = storageManager
