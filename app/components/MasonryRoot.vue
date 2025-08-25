@@ -10,7 +10,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 // Constants
 const FIRST_SCREEN_ITEMS_COUNT = 30
-const COLUMN_GAP = 2
+const COLUMN_GAP = 4
 const AUTO_COLUMN_WIDTH = 280
 
 // Reactive state

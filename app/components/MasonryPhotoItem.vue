@@ -18,7 +18,7 @@ const emit = defineEmits<{
 }>()
 
 // Constants
-const ITEM_GAP = 2
+const ITEM_GAP = 4
 const DEFAULT_WIDTH = 280
 
 // Reactive state
@@ -186,7 +186,7 @@ onMounted(() => {
     }"
   >
     <div
-      class="relative group overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300"
+      class="relative group overflow-hidden transition-all duration-300"
       :style="{ height: `${containerHeight}px` }"
     >
       <!-- Thumbhash 组件占位符 -->
