@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "@nuxt/ui";
+@import 'tailwindcss';
+@import '@nuxt/ui';
 
 :root {
   --ui-text-dimmed: var(--ui-color-neutral-400);
@@ -41,3 +41,8 @@
   --ui-border-inverted: var(--color-white);
 }
 
+@theme {
+  --font-sans: Rubik, 'Noto Sans SC', sans-serif;
+
+  --leading-normal: normal;
+}

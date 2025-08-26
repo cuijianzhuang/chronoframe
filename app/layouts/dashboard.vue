@@ -16,18 +16,32 @@ const items = ref<NavigationMenuItem[]>([
     label: 'Workers',
     icon: 'tabler:automatic-gearbox',
     to: '/dashboard/workers',
-  }
+  },
 ])
+
+const { loggedIn, user } = useUserSession()
+
+const handleLogin = () => {
+  window.location.href = '/api/auth/github'
+}
 </script>
 
 <template>
-  <header class="w-full px-4 border-b border-default flex items-center gap-4">
+  <header
+    v-if="loggedIn"
+    class="w-full px-4 border-b border-default flex items-center gap-4"
+  >
     <div class="flex items-center gap-2">
       <Icon
         name="tabler:photo-circle"
         class="size-6 text-primary"
       />
-      <h1 class="text-lg font-medium text-nowrap">Timothy Yin's Photos</h1>
+      <NuxtLink
+        to="/"
+        class="text-lg font-medium text-nowrap"
+      >
+        Timothy Yin's Photos
+      </NuxtLink>
     </div>
     <UNavigationMenu
       variant="pill"
@@ -38,9 +52,26 @@ const items = ref<NavigationMenuItem[]>([
       class="w-full"
     />
   </header>
-  <main>
+  <main v-if="loggedIn && user?.isAdmin">
     <NuxtPage />
   </main>
+  <div
+    v-else
+    class="h-svh flex flex-col gap-4 items-center justify-center"
+  >
+    <Icon
+      name="tabler:alert-triangle"
+      class="size-12 text-primary"
+    />
+    <p class="text-gray-500">
+      {{
+        !user?.isAdmin
+          ? 'Please login to view dashboard'
+          : 'Sorry, you do not have access to this page.'
+      }}
+    </p>
+    <UButton @click="handleLogin">Login with GitHub</UButton>
+  </div>
 </template>
 
 <style scoped></style>

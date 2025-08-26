@@ -9,6 +9,7 @@ const emit = defineEmits<{
   'visibility-change': [
     { index: number; isVisible: boolean; date: string | Date },
   ]
+  openViewer: [number]
 }>()
 
 // Constants
@@ -195,6 +196,7 @@ onMounted(() => {
     :style="{
       marginBottom: `${ITEM_GAP}px`,
     }"
+    @click="emit('openViewer', props.index)"
   >
     <div
       class="relative group overflow-hidden transition-all duration-300"
@@ -207,7 +209,7 @@ onMounted(() => {
       >
         <Thumbhash
           :thumbhash="photo.thumbnailHash"
-          class="w-full h-full object-cover filter blur-sm"
+          class="w-full h-full object-cover scale-110"
           :alt="photo.title || 'Photo placeholder'"
         />
       </div>
@@ -243,7 +245,7 @@ onMounted(() => {
           <div class="flex flex-col">
             <p
               v-if="photo.title"
-              class="text-base font-medium"
+              class="text-base font-medium text-ellipsis line-clamp-1"
             >
               {{ photo.title }}
             </p>
@@ -278,13 +280,10 @@ onMounted(() => {
             <!-- Camera info from EXIF if available -->
             <div
               v-if="photo.exif && (photo.exif.Make || photo.exif.Model)"
-              class="text-sm opacity-70 mt-1 flex items-center gap-0.5"
+              class="text-sm opacity-70 mt-1 flex items-center gap-1"
             >
-              <Icon
-                name="tabler:camera"
-                class="mt-[1px]"
-              />
-              <span class="text-xs font-medium">
+              <Icon name="tabler:camera" />
+              <span class="text-xs font-medium text-ellipsis line-clamp-1">
                 {{
                   [photo.exif.Make, photo.exif.Model].filter(Boolean).join(' ')
                 }}
@@ -302,11 +301,10 @@ onMounted(() => {
             >
               <div
                 v-if="photo.exif.FocalLength"
-                class="flex items-center gap-0.5"
+                class="flex items-center gap-1"
               >
                 <Icon
                   name="streamline:image-accessories-lenses-photos-camera-shutter-picture-photography-pictures-photo-lens"
-                  class="mt-[1px]"
                 />
                 <span class="text-xs font-medium">{{
                   photo.exif.FocalLengthIn35mmFormat
@@ -314,24 +312,18 @@ onMounted(() => {
               </div>
               <div
                 v-if="photo.exif.FNumber"
-                class="flex items-center gap-0.5"
+                class="flex items-center gap-1"
               >
-                <Icon
-                  name="tabler:aperture"
-                  class="mt-[1px]"
-                />
+                <Icon name="tabler:aperture" />
                 <span class="text-xs font-medium"
                   >f/{{ photo.exif.FNumber }}</span
                 >
               </div>
               <div
                 v-if="photo.exif.ExposureTime"
-                class="flex items-center gap-0.5"
+                class="flex items-center gap-1"
               >
-                <Icon
-                  name="material-symbols:shutter-speed"
-                  class="mt-[1px]"
-                />
+                <Icon name="material-symbols:shutter-speed" />
                 <span class="text-xs font-medium">
                   {{ formatExposureTime(photo.exif.ExposureTime) }}
                 </span>
@@ -340,10 +332,7 @@ onMounted(() => {
                 v-if="photo.exif.ISO"
                 class="flex items-center gap-0.5"
               >
-                <Icon
-                  name="carbon:iso-outline"
-                  class="mt-[1px]"
-                />
+                <Icon name="carbon:iso-outline" />
                 <span class="text-xs font-medium">{{ photo.exif.ISO }}</span>
               </div>
             </div>

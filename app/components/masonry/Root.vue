@@ -197,6 +197,9 @@ onMounted(() => {
     window.removeEventListener('scroll', handleScroll)
   })
 })
+
+const viewerIndex = ref(0)
+const isViewerOpen = ref(false)
 </script>
 
 <template>
@@ -204,34 +207,8 @@ onMounted(() => {
     <DateRangeIndicator
       :date-range="dateRange"
       :is-visible="!!dateRange && showFloatingActions"
+      :is-mobile="isMobile"
     />
-
-    <!-- Mobile Date Range Indicator -->
-    <div
-      v-if="isMobile && dateRange && showFloatingActions"
-      class="fixed top-0 right-0 left-0 z-50"
-    >
-      <div
-        class="bg-black/60 backdrop-blur-[70px] border-b border-white/10 px-4 py-3"
-      >
-        <span class="text-white text-sm">{{ dateRange }}</span>
-      </div>
-    </div>
-
-    <!-- Mobile Floating Action Button -->
-    <div
-      v-if="isMobile && showFloatingActions"
-      class="fixed bottom-6 right-6 z-50"
-    >
-      <button
-        class="w-14 h-14 bg-blue-500 rounded-full shadow-lg flex items-center justify-center"
-      >
-        <Icon
-          name="mdi:plus"
-          class="w-6 h-6 text-white"
-        />
-      </button>
-    </div>
 
     <!-- Masonry Container -->
     <div
@@ -261,9 +238,21 @@ onMounted(() => {
           :hasAnimated
           :first-screen-items="FIRST_SCREEN_ITEMS_COUNT"
           @visibility-change="handleVisibilityChange"
+          @open-viewer="idx => {
+            viewerIndex = idx
+            isViewerOpen = true
+          }"
         />
       </div>
     </div>
+
+    <PhotoViewer
+      :photos="photos"
+      :current-index="viewerIndex"
+      :is-open="isViewerOpen"
+      @close="isViewerOpen = false"
+      @index-change="viewerIndex = $event"
+    />
   </div>
 </template>
 

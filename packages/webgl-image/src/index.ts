@@ -17,8 +17,9 @@ export type {
   DebugInfo,
   TouchState,
   EngineConfig,
-  LoadingState,
-} from './types/index'
+} from './types'
+
+export { LoadingState } from './types'
 
 // 常量导出
 export {

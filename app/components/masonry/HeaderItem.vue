@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 defineProps<{
-  stats: {
+  stats?: {
     total: number
     withDates: number
     withTitles: number
@@ -23,12 +23,12 @@ defineProps<{
         Photo Gallery
       </h1>
       <div class="text-gray-600 dark:text-gray-400 space-y-1">
-        <p class="text-lg">{{ stats.total }} 张照片</p>
+        <p class="text-lg">{{ stats?.total }} 张照片</p>
         <div class="text-sm space-y-1">
           <p v-if="dateRangeText">时间跨度: {{ dateRangeText }}</p>
           <p>
-            {{ stats.withDates }} 张包含拍摄时间 ·
-            {{ stats.withExif }} 张包含 EXIF 数据
+            {{ stats?.withDates }} 张包含拍摄时间 ·
+            {{ stats?.withExif }} 张包含 EXIF 数据
           </p>
         </div>
       </div>
