@@ -1,17 +1,11 @@
 <script setup lang="ts">
-import Thumbhash from './Thumbhash.vue'
-
 interface Props {
   photo: Photo
   index: number
-  hasAnimated: boolean
-  shouldAnimate: boolean
-  animationDelay: number
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<{
-  'animation-complete': []
   'visibility-change': [
     { index: number; isVisible: boolean; date: string | Date },
   ]
@@ -55,13 +49,6 @@ const handleImageLoad = (event: Event) => {
     const aspectRatio = img.naturalHeight / img.naturalWidth
     actualHeight.value = Math.round(DEFAULT_WIDTH * aspectRatio)
   }
-
-  // Trigger animation after image loads
-  if (props.shouldAnimate) {
-    setTimeout(() => {
-      emit('animation-complete')
-    }, props.animationDelay * 1000)
-  }
 }
 
 const handleImageError = () => {
@@ -76,7 +63,7 @@ const checkImageLoaded = (img: HTMLImageElement) => {
     const syntheticEvent = new Event('load')
     Object.defineProperty(syntheticEvent, 'target', {
       value: img,
-      enumerable: true
+      enumerable: true,
     })
     handleImageLoad(syntheticEvent)
   }
@@ -145,7 +132,9 @@ onMounted(() => {
     img.onload = () => {
       if (img.naturalWidth && img.naturalHeight) {
         const aspectRatio = img.naturalHeight / img.naturalWidth
-        actualHeight.value = Math.round(DEFAULT_WIDTH * (props.photo.aspectRatio || aspectRatio))
+        actualHeight.value = Math.round(
+          DEFAULT_WIDTH * (props.photo.aspectRatio || aspectRatio),
+        )
       }
       // Update loading state after preload completes
       isLoading.value = false
@@ -202,15 +191,9 @@ onMounted(() => {
 <template>
   <div
     ref="photoRef"
-    class="masonry-item break-inside-avoid transition-all duration-300"
+    class="inline-block w-full align-top break-inside-avoid transition-all duration-300 cursor-pointer"
     :style="{
       marginBottom: `${ITEM_GAP}px`,
-      opacity: shouldAnimate ? (hasAnimated ? 1 : 0) : 1,
-      transform: shouldAnimate
-        ? hasAnimated
-          ? 'translateY(0) scale(1)'
-          : 'translateY(30px) scale(0.95)'
-        : 'none',
     }"
   >
     <div
@@ -254,47 +237,116 @@ onMounted(() => {
 
       <!-- Photo info overlay (bottom) -->
       <div
-        class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300"
+        class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300"
       >
-        <div class="text-white">
-          <p
-            v-if="photo.title"
-            class="text-sm font-medium mb-1"
-          >
-            {{ photo.title }}
-          </p>
-          <p
-            v-if="photo.description"
-            class="text-xs opacity-80 mb-1"
-          >
-            {{ photo.description }}
-          </p>
-          <p
-            v-if="photo.dateTaken"
-            class="text-xs opacity-80"
-          >
-            {{ formatDate(photo.dateTaken) }}
-          </p>
-          <!-- Camera info from EXIF if available -->
-          <div
-            v-if="photo.exif && (photo.exif.Make || photo.exif.Model)"
-            class="text-xs opacity-70 mt-1"
-          >
-            {{ [photo.exif.Make, photo.exif.Model].filter(Boolean).join(' ') }}
+        <div class="text-white flex flex-col gap-1">
+          <div class="flex flex-col">
+            <p
+              v-if="photo.title"
+              class="text-base font-medium"
+            >
+              {{ photo.title }}
+            </p>
+            <p
+              v-if="photo.description"
+              class="text-xs opacity-80"
+            >
+              {{ photo.description }}
+            </p>
+            <p
+              v-if="photo.dateTaken"
+              class="text-xs opacity-80"
+            >
+              {{ formatDate(photo.dateTaken) }}
+            </p>
           </div>
-          <!-- Photo specs from EXIF -->
           <div
-            v-if="
-              photo.exif &&
-              (photo.exif.FNumber || photo.exif.ExposureTime || photo.exif.ISO)
-            "
-            class="text-xs opacity-70 mt-1 flex gap-2"
+            v-if="photo.tags?.length"
+            class="opacity-80 mt-1 flex items-center gap-1"
           >
-            <span v-if="photo.exif.FNumber">f/{{ photo.exif.FNumber }}</span>
-            <span v-if="photo.exif.ExposureTime">{{
-              formatExposureTime(photo.exif.ExposureTime)
-            }}</span>
-            <span v-if="photo.exif.ISO">ISO {{ photo.exif.ISO }}</span>
+            <UBadge
+              v-for="tag in photo.tags"
+              :key="tag"
+              size="sm"
+              color="neutral"
+              class="bg-white/20 backdrop-blur-3xl"
+            >
+              {{ tag }}
+            </UBadge>
+          </div>
+          <div>
+            <!-- Camera info from EXIF if available -->
+            <div
+              v-if="photo.exif && (photo.exif.Make || photo.exif.Model)"
+              class="text-sm opacity-70 mt-1 flex items-center gap-0.5"
+            >
+              <Icon
+                name="tabler:camera"
+                class="mt-[1px]"
+              />
+              <span class="text-xs font-medium">
+                {{
+                  [photo.exif.Make, photo.exif.Model].filter(Boolean).join(' ')
+                }}
+              </span>
+            </div>
+            <!-- Photo specs from EXIF -->
+            <div
+              v-if="
+                photo.exif &&
+                (photo.exif.FNumber ||
+                  photo.exif.ExposureTime ||
+                  photo.exif.ISO)
+              "
+              class="text-sm opacity-70 mt-1 flex gap-2"
+            >
+              <div
+                v-if="photo.exif.FocalLength"
+                class="flex items-center gap-0.5"
+              >
+                <Icon
+                  name="streamline:image-accessories-lenses-photos-camera-shutter-picture-photography-pictures-photo-lens"
+                  class="mt-[1px]"
+                />
+                <span class="text-xs font-medium">{{
+                  photo.exif.FocalLengthIn35mmFormat
+                }}</span>
+              </div>
+              <div
+                v-if="photo.exif.FNumber"
+                class="flex items-center gap-0.5"
+              >
+                <Icon
+                  name="tabler:aperture"
+                  class="mt-[1px]"
+                />
+                <span class="text-xs font-medium"
+                  >f/{{ photo.exif.FNumber }}</span
+                >
+              </div>
+              <div
+                v-if="photo.exif.ExposureTime"
+                class="flex items-center gap-0.5"
+              >
+                <Icon
+                  name="material-symbols:shutter-speed"
+                  class="mt-[1px]"
+                />
+                <span class="text-xs font-medium">
+                  {{ formatExposureTime(photo.exif.ExposureTime) }}
+                </span>
+              </div>
+              <div
+                v-if="photo.exif.ISO"
+                class="flex items-center gap-0.5"
+              >
+                <Icon
+                  name="carbon:iso-outline"
+                  class="mt-[1px]"
+                />
+                <span class="text-xs font-medium">{{ photo.exif.ISO }}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -302,10 +354,4 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
-.masonry-item {
-  display: inline-block;
-  width: 100%;
-  vertical-align: top;
-}
-</style>
+<style scoped></style>
