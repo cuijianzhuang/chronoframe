@@ -25,6 +25,7 @@ const DEFAULT_WIDTH = 280
 const isLoading = ref(true)
 const actualHeight = ref(0)
 const photoRef = ref<HTMLElement>()
+const mainImageRef = ref<HTMLImageElement>()
 const isVisible = ref(false)
 
 // Computed
@@ -66,6 +67,19 @@ const handleImageLoad = (event: Event) => {
 const handleImageError = () => {
   isLoading.value = false
   console.warn(`Failed to load image: ${props.photo.thumbnailUrl}`)
+}
+
+// Check if image is already loaded (cached)
+const checkImageLoaded = (img: HTMLImageElement) => {
+  if (img.complete && img.naturalHeight !== 0) {
+    // Create a synthetic event for consistency
+    const syntheticEvent = new Event('load')
+    Object.defineProperty(syntheticEvent, 'target', {
+      value: img,
+      enumerable: true
+    })
+    handleImageLoad(syntheticEvent)
+  }
 }
 
 const formatDate = (date: string | Date): string => {
@@ -133,8 +147,17 @@ onMounted(() => {
         const aspectRatio = img.naturalHeight / img.naturalWidth
         actualHeight.value = Math.round(DEFAULT_WIDTH * (props.photo.aspectRatio || aspectRatio))
       }
+      // Update loading state after preload completes
+      isLoading.value = false
+    }
+    img.onerror = () => {
+      // Even if preload fails, we should stop loading state
+      isLoading.value = false
     }
     img.src = props.photo.thumbnailUrl
+  } else {
+    // If no thumbnail URL, stop loading immediately
+    isLoading.value = false
   }
 
   // Set up intersection observer for visibility tracking
@@ -167,6 +190,11 @@ onMounted(() => {
         observer.disconnect()
       })
     }
+
+    // Check if main image is already loaded from cache
+    if (mainImageRef.value) {
+      checkImageLoaded(mainImageRef.value)
+    }
   })
 })
 </script>
@@ -192,7 +220,7 @@ onMounted(() => {
       <!-- Thumbhash 组件占位符 -->
       <div
         v-if="isLoading && photo.thumbnailHash"
-        class="w-full absolute inset-0"
+        class="w-full h-full absolute inset-0"
       >
         <Thumbhash
           :thumbhash="photo.thumbnailHash"
@@ -204,11 +232,12 @@ onMounted(() => {
       <!-- Loading placeholder (fallback when no thumbhash) -->
       <div
         v-if="isLoading && !photo.thumbnailHash"
-        class="w-full bg-gray-200 dark:bg-gray-700 animate-pulse"
+        class="w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse absolute inset-0"
       />
 
       <!-- Main image -->
       <img
+        ref="mainImageRef"
         v-show="!isLoading"
         :src="photo.thumbnailUrl || ''"
         :alt="photo.title || photo.description || 'Photo'"
