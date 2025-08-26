@@ -109,36 +109,42 @@ const handleBlobSrcChange = (blobSrc: string | null) => {
 }
 
 // Keyboard navigation
-const handleKeyDown = (event: KeyboardEvent) => {
-  if (!props.isOpen) return
+// const handleKeyDown = (event: KeyboardEvent) => {
+//   if (!props.isOpen) return
 
-  switch (event.key) {
-    case 'ArrowLeft':
-      event.preventDefault()
-      handlePrevious()
-      break
-    case 'ArrowRight':
-      event.preventDefault()
-      handleNext()
-      break
-    case 'Escape':
-      event.preventDefault()
-      emit('close')
-      break
-    case 'i':
-    case 'I':
-      event.preventDefault()
-      showExifPanel.value = !showExifPanel.value
-      break
-  }
-}
+//   switch (event.key) {
+//     case 'ArrowLeft':
+//       event.preventDefault()
+//       handlePrevious()
+//       break
+//     case 'ArrowRight':
+//       event.preventDefault()
+//       handleNext()
+//       break
+//     case 'Escape':
+//       event.preventDefault()
+//       emit('close')
+//       break
+//     case 'i':
+//     case 'I':
+//       event.preventDefault()
+//       showExifPanel.value = !showExifPanel.value
+//       break
+//   }
+// }
 
-onMounted(() => {
-  document.addEventListener('keypress', handleKeyDown)
-})
+// onMounted(() => {
+//   document.addEventListener('keypress', handleKeyDown)
+// })
 
-onUnmounted(() => {
-  document.removeEventListener('keypress', handleKeyDown)
+// onUnmounted(() => {
+//   document.removeEventListener('keypress', handleKeyDown)
+// })
+
+defineShortcuts({
+  escape: () => {
+    emit('close')
+  },
 })
 
 // Swiper modules
