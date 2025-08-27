@@ -3,7 +3,7 @@ name: Build and Push Docker Image (GitHub Registry)
 on:
   push:
     tags:
-      - 'v.*'  # 匹配以 v. 开头的标签，如 v.1.0.0, v.2.1.3
+      - 'v*'  # 匹配以 v. 开头的标签，如 v.1.0.0, v.2.1.3
 
 env:
   REGISTRY: ghcr.io
