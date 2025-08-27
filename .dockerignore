@@ -1,14 +1,10 @@
-# 依赖目录
+# 依赖目录 (会在构建时重新安装)
 node_modules
 **/node_modules
 
-# 数据
+# 数据目录
 .data
-
-# 构建输出
-.output
-dist
-.nuxt
+data
 
 # 开发工具
 .vscode
@@ -31,6 +27,7 @@ pnpm-debug.log*
 .cache
 .temp
 .tmp
+.nuxt
 
 # 操作系统文件
 .DS_Store
@@ -38,11 +35,6 @@ Thumbs.db
 
 # Git 目录
 .git
-.gitignore
-
-# 文档
-README.md
-*.md
 
 # 测试文件
 coverage
@@ -53,13 +45,7 @@ __tests__
 # 开发配置
 docker-compose.yml
 docker-compose.yaml
-Dockerfile
 .dockerignore
 
 # 编辑器配置
 .editorconfig
-.eslintrc*
-.prettierrc*
-
-# TypeScript 配置
-tsconfig.json
