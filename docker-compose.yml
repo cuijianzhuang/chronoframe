@@ -26,7 +26,7 @@ services:
       # - CLOUDFLARE_D1_UUID=your-d1-uuid
     restart: unless-stopped
     volumes:
-      - ./data:/app/data
+      - ./data:/app/.data
 
   # database:
   #   image: postgres:15-alpine

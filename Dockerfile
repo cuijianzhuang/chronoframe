@@ -12,12 +12,13 @@ RUN pnpm run build
 RUN pnpm deploy --filter=chronoframe --prod /prod/chronoframe
 
 FROM base AS chronoframe
-COPY --from=build /prod/chronoframe /prod/chronoframe
-COPY --from=build /usr/src/app/.output /prod/chronoframe/.output
-COPY --from=build /usr/src/app/packages/webgl-image/dist /prod/chronoframe/packages/webgl-image/dist
-WORKDIR /prod/chronoframe
+COPY --from=build /prod/chronoframe /app
+COPY --from=build /usr/src/app/.output /app/.output
+COPY --from=build /usr/src/app/packages/webgl-image/dist /app/packages/webgl-image/dist
+WORKDIR /app
 
 EXPOSE 3000
+VOLUME ["/app/.data"]
 
 ENV NODE_ENV=production
 ENV NITRO_PORT=3000
