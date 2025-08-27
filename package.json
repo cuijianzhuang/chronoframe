@@ -10,6 +10,7 @@
   "private": true,
   "scripts": {
     "db": "drizzle-kit",
+    "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate",
     "build": "nuxt build",
     "build:deps": "pnpm --filter @chronoframe/webgl-image build",

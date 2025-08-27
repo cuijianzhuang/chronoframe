@@ -2,6 +2,9 @@
 node_modules
 **/node_modules
 
+# 数据
+.data
+
 # 构建输出
 .output
 dist

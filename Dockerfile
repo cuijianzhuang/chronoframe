@@ -24,4 +24,4 @@ ENV NODE_ENV=production
 ENV NITRO_PORT=3000
 ENV NITRO_HOST=0.0.0.0
 
-CMD ["node", ".output/server/index.mjs"]
+CMD ["sh", "-c", "pnpm run db:migrate && node .output/server/index.mjs"]
