@@ -9,7 +9,7 @@ export const tables = schema
 
 export function useDB() {
   // return drizzle(hubDatabase(), { schema })
-  const sqlite = new Database('.data/chronoframe.sqlite3')
+  const sqlite = new Database('data/app.sqlite3')
   return drizzle(sqlite, { schema })
 }
 
