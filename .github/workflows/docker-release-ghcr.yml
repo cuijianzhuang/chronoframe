@@ -3,7 +3,7 @@ name: Build and Push Docker Image (GitHub Registry)
 on:
   push:
     tags:
-      - 'v*'  # 匹配以 v. 开头的标签，如 v.1.0.0, v.2.1.3
+      - 'v*'
 
 env:
   REGISTRY: ghcr.io
@@ -23,8 +23,8 @@ jobs:
       - name: Extract version from tag
         id: version
         run: |
-          # 提取标签中的版本号，去掉 v. 前缀
-          VERSION=${GITHUB_REF#refs/tags/v.}
+          # 提取标签中的版本号，去掉 v 前缀
+          VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
 
