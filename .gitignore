@@ -6,6 +6,9 @@
 .cache
 dist
 
+# Date
+data
+
 # Wrangler
 .wrangler
 

@@ -14,7 +14,6 @@ import ProgressiveImage from './ProgressiveImage.vue'
 import GalleryThumbnail from './GalleryThumbnail.vue'
 import InfoPanel from './InfoPanel.vue'
 import type { LoadingIndicatorRef } from './LoadingIndicator.vue'
-import { useMediaQuery } from '~/composables/useMediaQuery'
 
 interface Props {
   photos: Photo[]
@@ -107,39 +106,6 @@ const handleZoomChange = (isZoomed: boolean) => {
 const handleBlobSrcChange = (blobSrc: string | null) => {
   currentBlobSrc.value = blobSrc
 }
-
-// Keyboard navigation
-// const handleKeyDown = (event: KeyboardEvent) => {
-//   if (!props.isOpen) return
-
-//   switch (event.key) {
-//     case 'ArrowLeft':
-//       event.preventDefault()
-//       handlePrevious()
-//       break
-//     case 'ArrowRight':
-//       event.preventDefault()
-//       handleNext()
-//       break
-//     case 'Escape':
-//       event.preventDefault()
-//       emit('close')
-//       break
-//     case 'i':
-//     case 'I':
-//       event.preventDefault()
-//       showExifPanel.value = !showExifPanel.value
-//       break
-//   }
-// }
-
-// onMounted(() => {
-//   document.addEventListener('keypress', handleKeyDown)
-// })
-
-// onUnmounted(() => {
-//   document.removeEventListener('keypress', handleKeyDown)
-// })
 
 defineShortcuts({
   escape: () => {

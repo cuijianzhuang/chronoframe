@@ -2,7 +2,6 @@
 import { ref, computed } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import type { NeededExif } from '../../../shared/types/photo'
-import { useMediaQuery } from '~/composables/useMediaQuery'
 
 interface Props {
   currentPhoto: Photo

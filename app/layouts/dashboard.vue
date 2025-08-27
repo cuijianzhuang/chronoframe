@@ -3,19 +3,14 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 
 const items = ref<NavigationMenuItem[]>([
   {
-    label: 'Dashboard',
+    label: '仪表盘',
     icon: 'tabler:dashboard',
     to: '/dashboard',
   },
   {
-    label: 'Photos',
+    label: '照片库',
     icon: 'tabler:photo-cog',
     to: '/dashboard/photos',
-  },
-  {
-    label: 'Workers',
-    icon: 'tabler:automatic-gearbox',
-    to: '/dashboard/workers',
   },
 ])
 
@@ -40,7 +35,7 @@ const handleLogin = () => {
         to="/"
         class="text-lg font-medium text-nowrap"
       >
-        Timothy Yin's Photos
+        TimoYin's mems
       </NuxtLink>
     </div>
     <UNavigationMenu

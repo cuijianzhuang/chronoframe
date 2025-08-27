@@ -12,6 +12,7 @@ const props = withDefaults(defineProps<Props>(), {
 const FIRST_SCREEN_ITEMS_COUNT = 30
 const COLUMN_GAP = 4
 const AUTO_COLUMN_WIDTH = 280
+const MIN_COLUMN_COUNT = 2
 
 // Reactive state
 const masonryContainer = ref<HTMLElement>()
@@ -22,15 +23,12 @@ const dateRange = ref<string>()
 const visiblePhotos = ref(new Set<number>())
 
 // Composables
-const isMobile = computed(() => {
-  if (typeof window === 'undefined') return false
-  return window.innerWidth < 768
-})
+const isMobile = useMediaQuery('(max-width: 768px)')
 
 // Computed
 const columnCount = computed(() => {
   if (props.columns === 'auto') {
-    if (!containerWidth.value) return 1
+    if (!containerWidth.value) return MIN_COLUMN_COUNT
 
     const availableWidth = containerWidth.value - (isMobile.value ? 16 : 32)
     const maxColumns = isMobile.value ? 2 : 6
@@ -38,24 +36,24 @@ const columnCount = computed(() => {
       (availableWidth + COLUMN_GAP) / (AUTO_COLUMN_WIDTH + COLUMN_GAP),
     )
 
-    return Math.min(Math.max(calculatedColumns, 1), maxColumns)
+    return Math.min(Math.max(calculatedColumns, MIN_COLUMN_COUNT), maxColumns)
   }
 
   return props.columns
 })
 
 const photoStats = computed(() => {
-  const totalPhotos = props.photos.length
-  const photosWithDates = props.photos.filter((p) => p.dateTaken).length
-  const photosWithTitles = props.photos.filter((p) => p.title).length
-  const photosWithExif = props.photos.filter((p) => p.exif).length
+  const totalPhotos = props.photos?.length || 0
+  const photosWithDates = props.photos?.filter((p) => p.dateTaken).length || 0
+  const photosWithTitles = props.photos?.filter((p) => p.title).length || 0
+  const photosWithExif = props.photos?.filter((p) => p.exif).length || 0
 
   // Get date range of all photos
   const allDates = props.photos
-    .map((p) => p.dateTaken)
+    ?.map((p) => p?.dateTaken)
     .filter((date): date is string => Boolean(date))
     .map((date) => new Date(date))
-    .sort((a, b) => a.getTime() - b.getTime())
+    .sort((a, b) => a.getTime() - b.getTime()) || []
 
   const dateRange =
     allDates.length > 0
@@ -210,10 +208,21 @@ const isViewerOpen = ref(false)
       :is-mobile="isMobile"
     />
 
+    <!-- 移动端时 HeaderItem 显示在瀑布流容器外 -->
+    <div
+      v-if="isMobile"
+      class="px-4 py-2"
+    >
+      <MasonryHeaderItem
+        :stats="photoStats"
+        :date-range-text
+      />
+    </div>
+
     <!-- Masonry Container -->
     <div
-      class="p-1 lg:px-0 lg:pb-0"
-      :style="{ userSelect: 'none' }"
+      class="lg:px-0 lg:pb-0"
+      :class="isMobile ? 'px-1 pb-1' : 'p-1'"
     >
       <!-- Masonry Grid -->
       <div
@@ -224,7 +233,9 @@ const isViewerOpen = ref(false)
           columnGap: `${COLUMN_GAP}px`,
         }"
       >
+        <!-- 非移动端时 HeaderItem 显示在瀑布流内 -->
         <MasonryHeaderItem
+          v-if="!isMobile"
           :stats="photoStats"
           :date-range-text
         />
@@ -238,10 +249,12 @@ const isViewerOpen = ref(false)
           :hasAnimated
           :first-screen-items="FIRST_SCREEN_ITEMS_COUNT"
           @visibility-change="handleVisibilityChange"
-          @open-viewer="idx => {
-            viewerIndex = idx
-            isViewerOpen = true
-          }"
+          @open-viewer="
+            (idx) => {
+              viewerIndex = idx
+              isViewerOpen = true
+            }
+          "
         />
       </div>
     </div>

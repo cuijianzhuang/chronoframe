@@ -14,6 +14,7 @@ export default defineNuxtConfig({
     '@nuxt/test-utils',
     'motion-v/nuxt',
     'nuxt-auth-utils',
+    '@vueuse/nuxt',
   ],
 
   css: ['~/assets/css/tailwind.css'],
@@ -42,4 +43,8 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss() as any],
   },
+
+  colorMode: {
+    preference: 'dark'
+  }
 })

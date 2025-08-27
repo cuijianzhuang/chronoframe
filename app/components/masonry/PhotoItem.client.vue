@@ -14,7 +14,6 @@ const emit = defineEmits<{
 
 // Constants
 const ITEM_GAP = 4
-const DEFAULT_WIDTH = 280
 
 // Reactive state
 const isLoading = ref(true)
@@ -22,13 +21,17 @@ const actualHeight = ref(0)
 const photoRef = ref<HTMLElement>()
 const mainImageRef = ref<HTMLImageElement>()
 const isVisible = ref(false)
+const containerWidth = ref(0)
 
 // Computed
 const containerHeight = computed(() => {
+  // Get the actual container width to calculate proper aspect ratio
+  const currentWidth = containerWidth.value || 280
+  
   // Use actual dimensions from photo data if available
   if (props.photo.width && props.photo.height) {
     const aspectRatio = props.photo.height / props.photo.width
-    return Math.round(DEFAULT_WIDTH * aspectRatio)
+    return Math.round(currentWidth * aspectRatio)
   }
 
   // Fallback to calculated height if image has loaded
@@ -36,8 +39,8 @@ const containerHeight = computed(() => {
     return actualHeight.value
   }
 
-  // Default fallback height
-  return 280
+  // Default fallback height based on current width
+  return Math.round(currentWidth * 1.2) // 1.2 is a reasonable default aspect ratio
 })
 
 // Methods
@@ -48,7 +51,8 @@ const handleImageLoad = (event: Event) => {
   // Update actual height based on loaded image dimensions
   if (img.naturalWidth && img.naturalHeight) {
     const aspectRatio = img.naturalHeight / img.naturalWidth
-    actualHeight.value = Math.round(DEFAULT_WIDTH * aspectRatio)
+    const currentWidth = containerWidth.value || 280
+    actualHeight.value = Math.round(currentWidth * aspectRatio)
   }
 }
 
@@ -127,14 +131,35 @@ const formatExposureTime = (
 
 // Preload image on mount to get dimensions
 onMounted(() => {
+  // Get container width
+  nextTick(() => {
+    if (photoRef.value) {
+      containerWidth.value = photoRef.value.offsetWidth
+      
+      // Set up resize observer to track width changes
+      const resizeObserver = new ResizeObserver(() => {
+        if (photoRef.value) {
+          containerWidth.value = photoRef.value.offsetWidth
+        }
+      })
+      
+      resizeObserver.observe(photoRef.value)
+      
+      onUnmounted(() => {
+        resizeObserver.disconnect()
+      })
+    }
+  })
+
   // Preload thumbnail image
   if (props.photo.thumbnailUrl) {
     const img = new Image()
     img.onload = () => {
       if (img.naturalWidth && img.naturalHeight) {
         const aspectRatio = img.naturalHeight / img.naturalWidth
+        const currentWidth = containerWidth.value || 280
         actualHeight.value = Math.round(
-          DEFAULT_WIDTH * (props.photo.aspectRatio || aspectRatio),
+          currentWidth * (props.photo.aspectRatio || aspectRatio),
         )
       }
       // Update loading state after preload completes
@@ -192,7 +217,7 @@ onMounted(() => {
 <template>
   <div
     ref="photoRef"
-    class="inline-block w-full align-top break-inside-avoid transition-all duration-300 cursor-pointer"
+    class="inline-block w-full align-top break-inside-avoid transition-all duration-300 cursor-pointer select-none"
     :style="{
       marginBottom: `${ITEM_GAP}px`,
     }"
@@ -200,12 +225,12 @@ onMounted(() => {
   >
     <div
       class="relative group overflow-hidden transition-all duration-300"
-      :style="{ height: `${containerHeight}px` }"
     >
       <!-- Thumbhash 组件占位符 -->
       <div
         v-if="isLoading && photo.thumbnailHash"
-        class="w-full h-full absolute inset-0"
+        class="w-full absolute inset-0"
+        :style="{ aspectRatio: `${photo.width || 1} / ${photo.height || 1}` }"
       >
         <Thumbhash
           :thumbhash="photo.thumbnailHash"
@@ -217,7 +242,8 @@ onMounted(() => {
       <!-- Loading placeholder (fallback when no thumbhash) -->
       <div
         v-if="isLoading && !photo.thumbnailHash"
-        class="w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse absolute inset-0"
+        class="w-full bg-gray-200 dark:bg-gray-700 animate-pulse"
+        :style="{ aspectRatio: `${photo.width || 1} / ${photo.height || 1.2}` }"
       />
 
       <!-- Main image -->
@@ -226,7 +252,7 @@ onMounted(() => {
         v-show="!isLoading"
         :src="photo.thumbnailUrl || ''"
         :alt="photo.title || photo.description || 'Photo'"
-        class="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
+        class="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105 block"
         @load="handleImageLoad"
         @error="handleImageError"
         loading="lazy"
@@ -264,14 +290,14 @@ onMounted(() => {
           </div>
           <div
             v-if="photo.tags?.length"
-            class="opacity-80 mt-1 flex items-center gap-1"
+            class="mt-1 flex items-center gap-1"
           >
             <UBadge
               v-for="tag in photo.tags"
               :key="tag"
               size="sm"
               color="neutral"
-              class="bg-white/20 backdrop-blur-3xl"
+              class="bg-white/20 text-white/80 backdrop-blur-3xl"
             >
               {{ tag }}
             </UBadge>
