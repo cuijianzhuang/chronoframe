@@ -15,6 +15,8 @@ export default defineNuxtConfig({
     'motion-v/nuxt',
     'nuxt-auth-utils',
     '@vueuse/nuxt',
+    'dayjs-nuxt',
+    'nuxt-mapbox'
   ],
 
   css: ['~/assets/css/tailwind.css'],
@@ -46,5 +48,12 @@ export default defineNuxtConfig({
 
   colorMode: {
     preference: 'dark'
+  },
+
+  dayjs: {
+    locales: ['zh-cn', 'en'],
+    plugins: ['relativeTime', 'utc', 'timezone'],
+    defaultLocale: 'zh-cn',
+    defaultTimezone: 'Asia/Shanghai'
   }
 })
