@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Navigation, Keyboard, Virtual } from 'swiper/modules'
 import type { Swiper as SwiperType } from 'swiper'
 
-// Import Swiper styles
 import 'swiper/css'
 import 'swiper/css/navigation'
 
@@ -50,8 +48,13 @@ watch(
       isImageZoomed.value = false
       showExifPanel.value = false
       currentBlobSrc.value = null
+      // TODO: 实现自定义的 ScrollArea 后移除
+      document.body.style.overflow = ''
+    } else {
+      document.body.style.overflow = 'hidden'
     }
   },
+  { immediate: true }
 )
 
 // 同步 Swiper 的索引

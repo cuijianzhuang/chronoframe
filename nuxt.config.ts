@@ -55,5 +55,9 @@ export default defineNuxtConfig({
     plugins: ['relativeTime', 'utc', 'timezone'],
     defaultLocale: 'zh-cn',
     defaultTimezone: 'Asia/Shanghai'
-  }
+  },
+
+  mapbox: {
+    accessToken: process.env.MAPBOX_TOKEN || ''
+  },
 })

@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import type { NeededExif } from '../../../shared/types/photo'
+import type { KVData } from './KVRenderer.vue'
 
 interface Props {
   currentPhoto: Photo
@@ -71,105 +72,292 @@ const formatFileSize = (bytes: number | undefined): string => {
   return `${mb.toFixed(2)} MB`
 }
 
-// EXIF 数据项
-const exifItems = computed(() => {
-  if (!props.exifData) return []
+const gpsCoordinates = computed(() => {
+  if (!props.exifData) return null
+  const { GPSLatitude, GPSLongitude } = props.exifData
+  if (GPSLatitude && GPSLongitude) {
+    return {
+      latitude: parseFloat(`${GPSLatitude}`),
+      longitude: parseFloat(`${GPSLongitude}`),
+    }
+  }
+  return null
+})
 
-  const items = []
+const formatedExifData = computed<Record<string, KVData[]>>(() => {
+  const sections: Record<string, KVData[]> = {}
 
   // 基本信息
-  if (props.currentPhoto.width && props.currentPhoto.height) {
-    items.push({
-      label: '尺寸',
-      value: `${props.currentPhoto.width} × ${props.currentPhoto.height}`,
-      icon: 'tabler:dimensions',
-    })
-  }
-
-  if (props.currentPhoto.fileSize) {
-    items.push({
-      label: '文件大小',
-      value: formatFileSize(props.currentPhoto.fileSize),
-      icon: 'tabler:file',
-    })
-  }
-
-  if (props.currentPhoto.dateTaken) {
-    items.push({
-      label: '拍摄时间',
-      value: formatDate(props.currentPhoto.dateTaken),
-      icon: 'tabler:calendar',
-    })
-  }
-
-  // 相机信息
-  if (props.exifData.Make && props.exifData.Model) {
-    items.push({
-      label: '相机',
-      value: `${props.exifData.Make} ${props.exifData.Model}`,
-      icon: 'tabler:camera',
-    })
-  }
-
-  if (props.exifData.LensMake && props.exifData.LensModel) {
-    items.push({
-      label: '镜头',
-      value: `${props.exifData.LensMake} ${props.exifData.LensModel}`,
-      icon: 'tabler:focus-2',
-    })
-  }
+  sections.basicInfo = [
+    {
+      title: '基本信息',
+      items: [
+        props.currentPhoto.storageKey
+          ? {
+              label: '文件名',
+              value: props.currentPhoto.storageKey,
+              icon: 'tabler:file',
+            }
+          : null,
+        props.currentPhoto.fileSize
+          ? {
+              label: '文件大小',
+              value: formatFileSize(props.currentPhoto.fileSize),
+              icon: 'tabler:database',
+            }
+          : null,
+        props.currentPhoto.width && props.currentPhoto.height
+          ? {
+              label: '分辨率',
+              value: `${props.currentPhoto.width} × ${props.currentPhoto.height}`,
+              icon: 'tabler:dimensions',
+            }
+          : null,
+        props.currentPhoto.width && props.currentPhoto.height
+          ? {
+              label: '像素',
+              value: `${((props.currentPhoto.width * props.currentPhoto.height) / 1000000).toFixed(2)} MP`,
+              icon: 'tabler:grid-dots',
+            }
+          : null,
+        props.exifData?.Artist
+          ? {
+              label: '艺术家',
+              value: props.exifData.Artist,
+              icon: 'tabler:user',
+            }
+          : null,
+        props.exifData?.Software
+          ? {
+              label: '软件',
+              value: props.exifData.Software,
+              icon: 'tabler:app-window',
+            }
+          : null,
+        props.exifData?.tz
+          ? {
+              label: '时区',
+              value: props.exifData.tz,
+              icon: 'tabler:world',
+            }
+          : null,
+        props.exifData?.DateTimeOriginal
+          ? {
+              label: '拍摄时间',
+              value: formatDate(props.exifData.DateTimeOriginal),
+              icon: 'tabler:calendar',
+            }
+          : null,
+        props.exifData?.ColorSpace
+          ? {
+              label: '色彩空间',
+              value: props.exifData.ColorSpace,
+              icon: 'tabler:palette',
+            }
+          : null,
+      ],
+    },
+  ]
 
   // 拍摄参数
-  if (props.exifData.FocalLengthIn35mmFormat) {
-    items.push({
-      label: '焦距',
-      value: `${props.exifData.FocalLengthIn35mmFormat}`,
-      icon: 'tabler:zoom-in',
-    })
-  }
+  sections.captureParams = [
+    {
+      title: '拍摄参数',
+      items: [
+        props.exifData?.FocalLengthIn35mmFormat
+          ? {
+              label: '焦距',
+              value: `${props.exifData.FocalLengthIn35mmFormat}`,
+              icon: 'tabler:telescope',
+            }
+          : null,
+        props.exifData?.FNumber
+          ? {
+              label: '光圈',
+              value: `f/${props.exifData.FNumber}`,
+              icon: 'tabler:aperture',
+            }
+          : null,
+        props.exifData?.ExposureTime
+          ? {
+              label: '曝光时间',
+              value: formatExposureTime(props.exifData.ExposureTime),
+              icon: 'tabler:clock',
+            }
+          : null,
+        props.exifData?.ISO
+          ? {
+              label: 'ISO',
+              value: props.exifData.ISO.toString(),
+              icon: 'tabler:sun-electricity',
+            }
+          : null,
+      ],
+    },
+  ]
 
-  if (props.exifData.FNumber) {
-    items.push({
-      label: '光圈',
-      value: `f/${props.exifData.FNumber}`,
-      icon: 'tabler:aperture',
-    })
-  }
+  // 设备信息
+  sections.deviceInfo = [
+    {
+      title: '设备信息',
+      items: [
+        props.exifData?.Make && props.exifData?.Model
+          ? {
+              label: '相机',
+              value: `${props.exifData.Make} ${props.exifData.Model}`,
+              icon: 'tabler:camera',
+            }
+          : null,
+        props.exifData?.LensModel
+          ? {
+              label: '镜头',
+              value: props.exifData.LensModel,
+              icon: 'tabler:focus',
+            }
+          : null,
+        props.exifData?.MaxApertureValue
+          ? {
+              label: '最大光圈',
+              value: `f/${props.exifData.MaxApertureValue}`,
+              icon: 'tabler:aperture',
+            }
+          : null,
+        props.exifData?.FocalLength
+          ? {
+              label: '焦距',
+              value: props.exifData.FocalLength,
+              icon: 'tabler:telescope',
+            }
+          : null,
+        props.exifData?.FocalLengthIn35mmFormat
+          ? {
+              label: '35mm 等效',
+              value: props.exifData.FocalLengthIn35mmFormat,
+              icon: 'tabler:zoom-in-area',
+            }
+          : null,
+      ],
+    },
+  ]
 
-  if (props.exifData.ExposureTime) {
-    items.push({
-      label: '快门速度',
-      value: formatExposureTime(props.exifData.ExposureTime),
-      icon: 'tabler:clock',
-    })
-  }
+  // 拍摄模式
+  sections.captureMode = [
+    {
+      title: '拍摄模式',
+      items: [
+        props.exifData?.WhiteBalance
+          ? {
+              label: '白平衡',
+              value: props.exifData.WhiteBalance,
+              icon: 'mdi:white-balance-auto',
+            }
+          : null,
+        props.exifData?.WBShiftAB
+          ? {
+              label: '白平衡偏移(琥珀-蓝)',
+              value: `${props.exifData.WBShiftAB}`,
+              icon: 'mdi:white-balance-auto',
+            }
+          : null,
+        props.exifData?.WBShiftGM
+          ? {
+              label: '白平衡偏移(绿-品红)',
+              value: `${props.exifData.WBShiftGM}`,
+              icon: 'mdi:white-balance-auto',
+            }
+          : null,
+        props.exifData?.WhiteBalanceBias
+          ? {
+              label: '白平衡偏移',
+              value: `${props.exifData.WhiteBalanceBias}`,
+              icon: 'mdi:white-balance-auto',
+            }
+          : null,
+        props.exifData?.WhiteBalanceFineTune
+          ? {
+              label: '白平衡微调',
+              value: `${props.exifData.WhiteBalanceFineTune}`,
+              icon: 'mdi:white-balance-auto',
+            }
+          : null,
+        props.exifData?.ExposureProgram
+          ? {
+              label: '曝光程序',
+              value: props.exifData.ExposureProgram,
+              icon: 'tabler:exposure',
+            }
+          : null,
+        props.exifData?.ExposureMode
+          ? {
+              label: '曝光模式',
+              value: props.exifData.ExposureMode,
+              icon: 'tabler:exposure-filled',
+            }
+          : null,
+        props.exifData?.MeteringMode
+          ? {
+              label: '测光模式',
+              value: props.exifData.MeteringMode,
+              icon: 'tabler:focus-auto',
+            }
+          : null,
+        props.exifData?.Flash
+          ? {
+              label: '闪光灯',
+              value: props.exifData.Flash,
+              icon: 'material-symbols:flash-on-rounded',
+            }
+          : null,
+        props.exifData?.FlashMeteringMode
+          ? {
+              label: '闪光灯测光模式',
+              value: props.exifData.FlashMeteringMode,
+              icon: 'material-symbols:flash-on-rounded',
+            }
+          : null,
+        props.exifData?.SceneCaptureType
+          ? {
+              label: '场景捕捉类型',
+              value: props.exifData.SceneCaptureType,
+              icon: 'material-symbols:scene',
+            }
+          : null,
+      ],
+    },
+  ]
 
-  if (props.exifData.ISO) {
-    items.push({
-      label: 'ISO',
-      value: props.exifData.ISO.toString(),
-      icon: 'tabler:sun',
-    })
-  }
+  // 技术参数
+  sections.technicalParams = [
+    {
+      title: '技术参数',
+      items: [
+        props.exifData?.BrightnessValue
+          ? {
+              label: '亮度',
+              value: `${props.exifData.BrightnessValue.toFixed(1)} EV`,
+              icon: 'tabler:sun',
+            }
+          : null,
+        props.exifData?.SensingMethod
+          ? {
+              label: '感光元件',
+              value: props.exifData.SensingMethod,
+              icon: 'tabler:photo-sensor',
+            }
+          : null,
+        props.exifData?.FocalPlaneXResolution &&
+        props.exifData?.FocalPlaneYResolution
+          ? {
+              label: '焦平面分辨率',
+              value: `${props.exifData.FocalPlaneXResolution} x ${props.exifData.FocalPlaneYResolution}`,
+              icon: 'tabler:photo-sensor',
+            }
+          : null,
+      ],
+    },
+  ]
 
-  // GPS 信息
-  if (props.exifData.GPSLatitude && props.exifData.GPSLongitude) {
-    const lat =
-      typeof props.exifData.GPSLatitude === 'number'
-        ? props.exifData.GPSLatitude
-        : parseFloat(props.exifData.GPSLatitude)
-    const lng =
-      typeof props.exifData.GPSLongitude === 'number'
-        ? props.exifData.GPSLongitude
-        : parseFloat(props.exifData.GPSLongitude)
-    items.push({
-      label: 'GPS 坐标',
-      value: `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
-      icon: 'tabler:map-pin',
-    })
-  }
-
-  return items
+  return sections
 })
 
 const isMobile = useMediaQuery('(max-width: 768px)')
@@ -195,78 +383,54 @@ const isMobile = useMediaQuery('(max-width: 768px)')
     :transition="{ type: 'spring', duration: 0.4, bounce: 0, delay: 0.1 }"
     class="bg-black/30 backdrop-blur-xl border-white/10"
     :class="{
-      'fixed inset-x-2 bottom-2 max-h-[60vh] border rounded-xl z-50': isMobile,
+      'fixed inset-x-2 bottom-2 max-h-[80vh] border rounded-xl z-50 flex flex-col': isMobile,
       'w-80 border-l': !isMobile,
     }"
   >
-    <!-- 移动端头部 -->
     <div
-      v-if="isMobile && onClose"
-      class="flex items-center justify-between p-4 border-b border-white/10"
+      class="flex items-center justify-between px-4 py-3 border-b border-white/10 flex-shrink-0"
     >
-      <h3 class="text-lg font-medium text-white">照片信息</h3>
-      <button
-        type="button"
-        class="p-1 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+      <h3 class="font-black text-white text-ellipsis line-clamp-1">
+        {{ currentPhoto.title }}
+      </h3>
+      <UButton
+        v-if="isMobile && onClose"
         @click="onClose"
-      >
-        <Icon
-          name="tabler:x"
-          class="w-5 h-5"
-        />
-      </button>
+        icon="tabler:x"
+        variant="ghost"
+        color="neutral"
+        size="sm"
+      />
     </div>
 
     <!-- 内容区域 -->
-    <div class="p-4 overflow-y-auto max-h-full">
-      <!-- 照片标题 -->
-      <div
-        v-if="currentPhoto.title"
-        class="mb-4"
-      >
-        <h3
-          class="text-lg font-medium text-white mb-1 text-ellipsis line-clamp-1"
-        >
-          {{ currentPhoto.title }}
-        </h3>
-      </div>
-
+    <div 
+      class="p-4 space-y-4 flex-1 min-h-0"
+      :class="{
+        'overflow-y-auto': isMobile,
+        'overflow-y-auto max-h-full pb-16': !isMobile,
+      }"
+    >
       <!-- 照片描述 -->
       <div
         v-if="currentPhoto.description"
-        class="mb-4 text-sm text-white/80"
+        class="text-sm text-white"
       >
         {{ currentPhoto.description }}
       </div>
 
-      <!-- EXIF 信息 -->
-      <div
-        v-if="exifItems.length > 0"
-        class="space-y-3"
-      >
-        <h4 class="text-sm font-medium text-white/90 uppercase tracking-wide">
-          照片信息
-        </h4>
+      <PhotoMiniMap
+        v-if="gpsCoordinates"
+        :photo-id="currentPhoto.id"
+        :latitude="gpsCoordinates?.latitude"
+        :longitude="gpsCoordinates?.longitude"
+      />
 
-        <div class="space-y-2">
-          <div
-            v-for="item in exifItems"
-            :key="item.label"
-            class="flex items-center gap-3 text-sm"
-          >
-            <Icon
-              :name="item.icon"
-              class="w-4 h-4 text-white/60 flex-shrink-0"
-            />
-            <div class="flex-1 min-w-0">
-              <div class="text-white/60">{{ item.label }}</div>
-              <div class="text-white font-medium truncate">
-                {{ item.value }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <!-- EXIF/对象信息渲染器 -->
+      <PhotoKVRenderer
+        v-if="formatedExifData.basicInfo"
+        :data="formatedExifData.basicInfo"
+      />
 
       <!-- 标签 -->
       <div
@@ -288,6 +452,22 @@ const isMobile = useMediaQuery('(max-width: 768px)')
           </span>
         </div>
       </div>
+      <PhotoKVRenderer
+        v-if="formatedExifData.captureParams"
+        :data="formatedExifData.captureParams"
+      />
+      <PhotoKVRenderer
+        v-if="formatedExifData.deviceInfo"
+        :data="formatedExifData.deviceInfo"
+      />
+      <PhotoKVRenderer
+        v-if="formatedExifData.captureMode"
+        :data="formatedExifData.captureMode"
+      />
+      <PhotoKVRenderer
+        v-if="formatedExifData.technicalParams"
+        :data="formatedExifData.technicalParams"
+      />
     </div>
   </motion.div>
 </template>
@@ -299,7 +479,7 @@ const isMobile = useMediaQuery('(max-width: 768px)')
 }
 
 .overflow-y-auto::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0);
   border-radius: 2px;
 }
 
