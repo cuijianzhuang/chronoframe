@@ -211,7 +211,7 @@ const isViewerOpen = ref(false)
     <!-- 移动端时 HeaderItem 显示在瀑布流容器外 -->
     <div
       v-if="isMobile"
-      class="px-4 py-2"
+      class="px-1 pt-2 pb-1"
     >
       <MasonryHeaderItem
         :stats="photoStats"
