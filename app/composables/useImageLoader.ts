@@ -14,11 +14,12 @@ export const useImageLoader = (
   updateError?: (error: boolean) => void,
   updateHighResImageRendered?: (isRendered: boolean) => void
 ) => {
-  if (highResLoaded || !isCurrentImage || error) return
+  if (highResLoaded || !isCurrentImage || error) return null
 
   const loaderManager = new ImageLoaderManager()
 
   const cleanup = () => {
+    loaderManager.cleanup()
     updateBlobSrc?.(null)
     updateHighResImageRendered?.(false)
     updateHighResLoaded?.(false)

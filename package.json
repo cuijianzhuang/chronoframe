@@ -58,6 +58,9 @@
   },
   "packageManager": "pnpm@9.15.3+sha512.1f79bc245a66eb0b07c5d4d83131240774642caaa86ef7d0434ab47c0d16f66b04e21e0c086eb61e62c77efc4d7f7ec071afad3796af64892fae66509173893a",
   "devDependencies": {
+    "@iconify-json/carbon": "^1.2.13",
+    "@iconify-json/material-symbols": "^1.2.33",
+    "@iconify-json/streamline": "^1.2.5",
     "@iconify-json/tabler": "^1.2.22",
     "@nuxt/eslint": "1.9.0",
     "@nuxt/test-utils": "3.19.2",
@@ -65,6 +68,7 @@
     "@types/heic-convert": "^2.1.0",
     "concurrently": "^9.2.0",
     "consola": "^3.4.2",
+    "dayjs": "^1.11.15",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9.33.0",
     "eslint-config-prettier": "^10.1.8",

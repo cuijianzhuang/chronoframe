@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { WebGLImageViewer } from '@chronoframe/webgl-image'
 import type { LoadingIndicatorRef } from './LoadingIndicator.vue'
+import { ImageLoaderManager } from '~/libs/image-loader-manager'
 
 interface Props {
   src: string
@@ -39,6 +40,7 @@ const currentSrc = ref<string | null>()
 
 // 使用 WebGLImageViewer 的引用
 const webglViewerRef = ref()
+const loaderManagerRef = ref<ImageLoaderManager | null>(null)
 
 const showThumbnail = computed(() => {
   return props.thumbnailSrc && (!highResRendered.value || hasError.value)
@@ -54,7 +56,7 @@ const showWebGLViewer = computed(() => {
 })
 
 const loadImage = () => {
-  useImageLoader(
+  loaderManagerRef.value = useImageLoader(
     props.src,
     props.isCurrentImage,
     highResLoaded.value,
@@ -73,7 +75,11 @@ const loadImage = () => {
 watch(
   () => props.isCurrentImage,
   (isCurrent, wasCurrent) => {
-    if (isCurrent && !wasCurrent && !highResLoaded.value && !hasError.value) {
+    if (!isCurrent && wasCurrent) {
+      // 当图片不再是当前图片时，中断加载
+      loaderManagerRef.value?.cleanup()
+      loaderManagerRef.value = null
+    } else if (isCurrent && !wasCurrent && !highResLoaded.value && !hasError.value) {
       // 当图片变为当前图片且尚未加载高分辨率图片时，触发加载
       loadImage()
     }
@@ -86,6 +92,10 @@ watch(
   () => props.src,
   (newSrc, oldSrc) => {
     if (newSrc !== oldSrc) {
+      // 中断之前的加载
+      loaderManagerRef.value?.cleanup()
+      loaderManagerRef.value = null
+
       // 重置状态
       highResLoaded.value = false
       highResRendered.value = false
@@ -113,6 +123,12 @@ const handleZoomChange = (originalScale: number, relativeScale: number) => {
     props.onZoomChange(isZoomed)
   }
 }
+
+// 组件卸载时清理
+onUnmounted(() => {
+  loaderManagerRef.value?.cleanup()
+  loaderManagerRef.value = null
+})
 </script>
 
 <template>

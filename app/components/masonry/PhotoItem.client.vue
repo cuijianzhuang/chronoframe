@@ -23,6 +23,10 @@ const mainImageRef = ref<HTMLImageElement>()
 const isVisible = ref(false)
 const containerWidth = ref(0)
 
+// Observers
+const resizeObserverRef = ref<ResizeObserver | null>(null)
+const intersectionObserverRef = ref<IntersectionObserver | null>(null)
+
 // Computed
 const containerHeight = computed(() => {
   // Get the actual container width to calculate proper aspect ratio
@@ -142,12 +146,8 @@ onMounted(() => {
           containerWidth.value = photoRef.value.offsetWidth
         }
       })
-      
       resizeObserver.observe(photoRef.value)
-      
-      onUnmounted(() => {
-        resizeObserver.disconnect()
-      })
+      resizeObserverRef.value = resizeObserver
     }
   })
 
@@ -199,11 +199,7 @@ onMounted(() => {
       )
 
       observer.observe(photoRef.value)
-
-      // Cleanup observer on unmount
-      onUnmounted(() => {
-        observer.disconnect()
-      })
+      intersectionObserverRef.value = observer
     }
 
     // Check if main image is already loaded from cache
@@ -211,6 +207,16 @@ onMounted(() => {
       checkImageLoaded(mainImageRef.value)
     }
   })
+})
+
+// Cleanup observers on unmount
+onUnmounted(() => {
+  if (resizeObserverRef.value) {
+    resizeObserverRef.value.disconnect()
+  }
+  if (intersectionObserverRef.value) {
+    intersectionObserverRef.value.disconnect()
+  }
 })
 </script>
 
