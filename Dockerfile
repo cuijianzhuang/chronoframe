@@ -10,10 +10,12 @@ COPY packages/webgl-image/package.json ./packages/webgl-image/
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 FROM base AS build
+ARG MAPBOX_TOKEN
 WORKDIR /usr/src/app
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY --from=deps /usr/src/app/packages/webgl-image/node_modules ./packages/webgl-image/node_modules
 COPY . .
+ENV MAPBOX_TOKEN=$MAPBOX_TOKEN
 RUN pnpm run build:deps
 RUN pnpm run build
 
