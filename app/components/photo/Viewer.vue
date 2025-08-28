@@ -26,6 +26,8 @@ const emit = defineEmits<{
   indexChange: [index: number]
 }>()
 
+const router = useRouter()
+
 // Refs
 const containerRef = ref<HTMLDivElement>()
 const swiperRef = ref<SwiperType>()
@@ -53,8 +55,18 @@ watch(
     } else {
       document.body.style.overflow = 'hidden'
     }
+
+    if (isOpen && currentPhoto.value) {
+      useHead({
+        title: currentPhoto.value.title
+      })
+    } else {
+      useHead({
+        title: 'Gallery'
+      })
+    }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // 同步 Swiper 的索引

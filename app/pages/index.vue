@@ -1,6 +1,10 @@
 <script lang="ts" setup>
-import { motion } from 'motion-v'
 const { data } = useFetch('/api/photos')
+
+useHead({
+  title: 'Gallery',
+  titleTemplate: (title) => `${title} - TimoYin\'s mems`,
+})
 </script>
 
 <template>
