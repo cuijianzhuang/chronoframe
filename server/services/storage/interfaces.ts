@@ -33,7 +33,10 @@ export type GitHubStorageConfig = {
   token?: string
 }
 
-export type StorageConfig = S3StorageConfig | HubR2StorageConfig | GitHubStorageConfig
+export type StorageConfig =
+  | S3StorageConfig
+  | HubR2StorageConfig
+  | GitHubStorageConfig
 
 export interface UploadOptions {
   contentType?: string
@@ -51,6 +54,11 @@ export interface StorageProvider {
   delete(key: string): Promise<void>
   get(key: string): Promise<Buffer | null>
   getPublicUrl(key: string): string
+  getSignedUrl?(
+    key: string,
+    expiresIn?: number,
+    options?: UploadOptions,
+  ): Promise<string>
   listAll(): Promise<StorageObject[]>
   listImages(): Promise<StorageObject[]>
 }

@@ -7,6 +7,7 @@ import {
   S3Client,
   S3ClientConfig,
 } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import {
   S3StorageConfig,
   StorageObject,
@@ -58,7 +59,11 @@ export class S3StorageProvider implements StorageProvider {
     this.client = createClient(config)
   }
 
-  async create(key: string, data: Buffer, contentType?: string): Promise<StorageObject> {
+  async create(
+    key: string,
+    data: Buffer,
+    contentType?: string,
+  ): Promise<StorageObject> {
     try {
       const cmd = new PutObjectCommand({
         Bucket: this.config.bucket,
@@ -68,7 +73,7 @@ export class S3StorageProvider implements StorageProvider {
       })
 
       const resp = await this.client.send(cmd)
-      
+
       this.logger?.success(`Created object with key: ${key}`)
 
       return {
@@ -152,14 +157,23 @@ export class S3StorageProvider implements StorageProvider {
     return `${endpoint.replace(/\/+$/, '')}/${key}`
   }
 
-  async getPresignedUploadUrl(
+  async getSignedUrl(
     key: string,
-    expiresIn?: number,
+    expiresIn: number = 3600,
     options?: UploadOptions,
-  ): Promise<{ url: string }> {
-    // TODO: Implement presigned URL generation
-    // This requires @aws-sdk/s3-request-presigner package
-    throw new Error('Presigned upload URL generation not implemented. Please install @aws-sdk/s3-request-presigner and implement this method.')
+  ): Promise<string> {
+    const cmd = new PutObjectCommand({
+      Bucket: this.config.bucket,
+      Key: key,
+      ContentType: options?.contentType || 'application/octet-stream',
+    })
+
+    const url = await getSignedUrl(this.client, cmd, { 
+      expiresIn,
+      // 为了更好的 CORS 支持，添加一些额外参数
+      unhoistableHeaders: new Set(['Content-Type']),
+    })
+    return url
   }
 
   async listAll(): Promise<StorageObject[]> {

@@ -10,6 +10,8 @@ interface Props {
   onClose?: () => void
 }
 
+const dayjs = useDayjs()
+
 const props = defineProps<Props>()
 
 // 格式化曝光时间
@@ -52,26 +54,6 @@ const formatExposureTime = (
   }
 }
 
-// 格式化日期
-const formatDate = (date: string | undefined): string => {
-  if (!date) return ''
-  const d = new Date(date)
-  return d.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
-// 格式化文件大小
-const formatFileSize = (bytes: number | undefined): string => {
-  if (!bytes) return ''
-  const mb = bytes / 1024 / 1024
-  return `${mb.toFixed(2)} MB`
-}
-
 const gpsCoordinates = computed(() => {
   if (!props.exifData) return null
   const { GPSLatitude, GPSLongitude } = props.exifData
@@ -102,7 +84,7 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.currentPhoto.fileSize
           ? {
               label: '文件大小',
-              value: formatFileSize(props.currentPhoto.fileSize),
+              value: formatBytes(props.currentPhoto.fileSize),
               icon: 'tabler:database',
             }
           : null,
@@ -144,7 +126,7 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.exifData?.DateTimeOriginal
           ? {
               label: '拍摄时间',
-              value: formatDate(props.exifData.DateTimeOriginal),
+              value: dayjs(props.exifData.DateTimeOriginal).format('YYYY-MM-DD HH:mm:ss'),
               icon: 'tabler:calendar',
             }
           : null,
@@ -383,7 +365,7 @@ const isMobile = useMediaQuery('(max-width: 768px)')
     :transition="{ type: 'spring', duration: 0.4, bounce: 0, delay: 0.1 }"
     class="bg-black/30 backdrop-blur-xl border-white/10"
     :class="{
-      'fixed inset-x-2 bottom-2 max-h-[80vh] border rounded-xl z-50 flex flex-col': isMobile,
+      'fixed inset-x-2 bottom-2 max-h-[70vh] border rounded-xl z-50 flex flex-col': isMobile,
       'w-80 border-l': !isMobile,
     }"
   >

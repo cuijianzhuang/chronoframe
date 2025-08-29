@@ -16,7 +16,7 @@ export default defineNuxtConfig({
     'nuxt-auth-utils',
     '@vueuse/nuxt',
     'dayjs-nuxt',
-    'nuxt-mapbox'
+    'nuxt-mapbox',
   ],
 
   css: ['~/assets/css/tailwind.css'],
@@ -47,17 +47,17 @@ export default defineNuxtConfig({
   },
 
   colorMode: {
-    preference: 'dark'
+    preference: 'dark',
   },
 
   dayjs: {
     locales: ['zh-cn', 'en'],
-    plugins: ['relativeTime', 'utc', 'timezone'],
+    plugins: ['relativeTime', 'utc', 'timezone', 'duration'],
     defaultLocale: 'zh-cn',
-    defaultTimezone: 'Asia/Shanghai'
+    defaultTimezone: 'Asia/Shanghai',
   },
 
   mapbox: {
-    accessToken: process.env.MAPBOX_TOKEN || ''
+    accessToken: process.env.MAPBOX_TOKEN || '',
   },
 })

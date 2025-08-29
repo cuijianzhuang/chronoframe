@@ -31,7 +31,7 @@ const intersectionObserverRef = ref<IntersectionObserver | null>(null)
 const containerHeight = computed(() => {
   // Get the actual container width to calculate proper aspect ratio
   const currentWidth = containerWidth.value || 280
-  
+
   // Use actual dimensions from photo data if available
   if (props.photo.width && props.photo.height) {
     const aspectRatio = props.photo.height / props.photo.width
@@ -76,16 +76,6 @@ const checkImageLoaded = (img: HTMLImageElement) => {
     })
     handleImageLoad(syntheticEvent)
   }
-}
-
-const formatDate = (date: string | Date): string => {
-  if (!date) return ''
-  const d = new Date(date)
-  return d.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
 }
 
 const formatExposureTime = (
@@ -139,7 +129,7 @@ onMounted(() => {
   nextTick(() => {
     if (photoRef.value) {
       containerWidth.value = photoRef.value.offsetWidth
-      
+
       // Set up resize observer to track width changes
       const resizeObserver = new ResizeObserver(() => {
         if (photoRef.value) {
@@ -229,9 +219,7 @@ onUnmounted(() => {
     }"
     @click="emit('openViewer', props.index)"
   >
-    <div
-      class="relative group overflow-hidden transition-all duration-300"
-    >
+    <div class="relative group overflow-hidden transition-all duration-300">
       <!-- Thumbhash 组件占位符 -->
       <div
         v-if="isLoading && photo.thumbnailHash"
@@ -289,9 +277,9 @@ onUnmounted(() => {
             </p>
             <p
               v-if="photo.dateTaken"
-              class="text-xs opacity-80"
+              class="text-xs font-medium opacity-80"
             >
-              {{ formatDate(photo.dateTaken) }}
+              {{ $dayjs(photo.dateTaken).format('YYYY-MM-DD') }}
             </p>
           </div>
           <div

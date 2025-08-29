@@ -1,12 +1,9 @@
-import { StorageObject } from '~~/server/services/storage'
-import { useStorageProvider } from '~~/server/utils/useStorageProvider'
+import { desc } from 'drizzle-orm'
 
-export default eventHandler(async (event) => {
-  // const { storageProvider } = useStorageProvider(event)
-  // const photos = await storageProvider.listAll()
-  // return {
-  //   urls: photos.map((photo) => storageProvider.getPublicUrl(photo.key)),
-  //   objects: photos as StorageObject[],
-  // }
-  return await useDB().select().from(tables.photos).orderBy(tables.photos.dateTaken).all()
+export default eventHandler(async (_event) => {
+  return useDB()
+    .select()
+    .from(tables.photos)
+    .orderBy(desc(tables.photos.dateTaken))
+    .all()
 })

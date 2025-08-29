@@ -189,17 +189,20 @@ onBeforeUnmount(() => {
             <img
               :src="photo.thumbnailUrl || ''"
               alt="Photo thumbnail"
-              class="w-full h-full rounded"
+              class="w-full h-full rounded object-cover"
             />
           </div>
           <div class="flex-1 min-w-0">
             <p class="font-medium truncate">{{ photo.title || photo.id }}</p>
-            <p class="text-sm text-neutral-500">
-              {{
-                photo.dateTaken
-                  ? new Date(photo.dateTaken).toLocaleDateString('zh-CN')
-                  : '未知日期'
-              }}
+            <p class="text-sm text-neutral-500 inline-flex gap-2">
+              <span>
+                {{
+                  photo.dateTaken
+                    ? $dayjs(photo.dateTaken).format('YYYY-MM-DD')
+                    : '未知日期'
+                }}
+              </span>
+              <span>{{ formatBytes(photo.fileSize || 0) }}</span>
             </p>
           </div>
         </div>

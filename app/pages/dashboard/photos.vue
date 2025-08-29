@@ -1,39 +1,173 @@
 <script lang="ts" setup>
 import type { TableColumn } from '@nuxt/ui'
-import type { StorageObject } from '~~/server/services/storage'
 import type { Photo } from '~~/server/utils/db'
 
 definePageMeta({
   layout: 'dashboard',
 })
 
+const dayjs = useDayjs()
+
 const { data, status, refresh } = useFetch('/api/photos')
 
-// 原生文件上传函数
+// 当前上传的文件信息
+interface UploadingFile {
+  file: File
+  fileName: string
+  status: 'preparing' | 'uploading' | 'processing' | 'completed' | 'error'
+  progress?: number
+  error?: string
+  signedUrlResponse?: { signedUrl: string; fileKey: string; expiresIn: number }
+  // 添加详细进度信息
+  uploadProgress?: {
+    loaded: number
+    total: number
+    percentage: number
+    speed?: number
+    timeRemaining?: number
+    speedText?: string
+    timeRemainingText?: string
+  }
+  // 添加上传管理器的关键方法
+  canAbort?: boolean
+  abortUpload?: () => void
+}
+
+const uploadingFiles = ref<Map<string, UploadingFile>>(new Map())
+
+// 使用预签名 URL 上传文件函数
 const uploadImage = async (file: File) => {
-  const formData = new FormData()
-  formData.append('file', file)
+  const fileName = file.name
+  const fileId = `${Date.now()}-${fileName}`
+
+  // 为每个文件创建独立的上传管理器
+  const uploadManager = useUpload({
+    timeout: 10 * 60 * 1000, // 10分钟超时
+  })
+
+  // 添加到上传队列
+  const uploadingFile: UploadingFile = {
+    file,
+    fileName,
+    status: 'preparing',
+    canAbort: false,
+    abortUpload: () => uploadManager.abortUpload(),
+  }
+  uploadingFiles.value.set(fileId, uploadingFile)
 
   try {
-    const response = await $fetch('/api/photos', {
-      method: 'PUT',
-      body: formData,
-    })
+    // 第一步：获取预签名 URL
+    uploadingFile.status = 'preparing'
+    const signedUrlResponse = (await $fetch('/api/photos', {
+      method: 'POST',
+      body: {
+        fileName: file.name,
+        contentType: file.type,
+      },
+    })) as { signedUrl: string; fileKey: string; expiresIn: number }
 
-    return response
+    uploadingFile.signedUrlResponse = signedUrlResponse
+    uploadingFile.status = 'uploading'
+    uploadingFile.canAbort = true
+
+    // 第二步：使用 composable 上传文件到 S3
+    await uploadManager.uploadFile(file, signedUrlResponse.signedUrl, {
+      onProgress: (progress: UploadProgress) => {
+        // 更新文件特定的进度信息
+        console.log(`文件 ${fileName} 上传进度:`, progress.percentage + '%')
+        uploadingFile.progress = progress.percentage
+        uploadingFile.uploadProgress = {
+          loaded: progress.loaded,
+          total: progress.total,
+          percentage: progress.percentage,
+          speed: progress.speed,
+          timeRemaining: progress.timeRemaining,
+          speedText: progress.speed ? `${formatBytes(progress.speed)}/s` : '',
+          timeRemainingText: progress.timeRemaining
+            ? dayjs.duration(progress.timeRemaining, 'seconds').humanize()
+            : '',
+        }
+
+        // 触发响应式更新
+        uploadingFiles.value = new Map(uploadingFiles.value)
+      },
+      onStatusChange: (status: string) => {
+        console.log(`文件 ${fileName} 上传状态变更:`, status)
+        // 根据状态更新 canAbort
+        uploadingFile.canAbort = status === 'uploading'
+        uploadingFiles.value = new Map(uploadingFiles.value)
+      },
+      onSuccess: async (xhr: XMLHttpRequest) => {
+        console.log(`文件 ${fileName} 上传成功`, xhr.status)
+
+        // 第三步：通知服务器开始处理照片
+        uploadingFile.status = 'processing'
+        uploadingFile.canAbort = false
+        uploadingFiles.value = new Map(uploadingFiles.value)
+
+        try {
+          await $fetch('/api/photos/process', {
+            method: 'POST' as any,
+            body: {
+              fileKey: signedUrlResponse.fileKey,
+              fileName: file.name,
+              fileSize: file.size,
+            },
+          })
+
+          uploadingFile.status = 'completed'
+          uploadingFile.canAbort = false
+          uploadingFiles.value = new Map(uploadingFiles.value)
+
+          // 开始状态检查
+          if (!statusInterval) {
+            statusInterval = setInterval(checkProcessingStatus, 2000)
+          }
+        } catch (processError: any) {
+          uploadingFile.status = 'error'
+          uploadingFile.error = `处理失败: ${processError.message}`
+          uploadingFile.canAbort = false
+          uploadingFiles.value = new Map(uploadingFiles.value)
+          throw processError
+        }
+      },
+      onError: (error: string) => {
+        uploadingFile.status = 'error'
+        uploadingFile.error = error
+        uploadingFile.canAbort = false
+        uploadingFiles.value = new Map(uploadingFiles.value)
+        console.error(`文件 ${fileName} 上传失败:`, error)
+      },
+    })
   } catch (error: any) {
+    uploadingFile.status = 'error'
+    uploadingFile.error = error.message || '上传失败'
+    uploadingFile.canAbort = false
+    uploadingFiles.value = new Map(uploadingFiles.value)
+
     console.error('上传请求失败:', error)
 
     // 提供更详细的错误信息
     if (error.response?.status === 401) {
       throw new Error('未授权，请重新登录')
-    } else if (error.response?.status === 413) {
-      throw new Error('文件太大，请选择更小的文件')
-    } else if (error.response?.status === 415) {
-      throw new Error('不支持的文件格式')
+    } else if (error.message?.includes('CORS')) {
+      throw new Error('跨域请求失败，请检查存储服务的 CORS 配置')
+    } else if (
+      error.message?.includes('NetworkError') ||
+      error.name === 'TypeError'
+    ) {
+      throw new Error('网络连接失败或 CORS 错误，请检查网络连接和存储配置')
+    } else if (error.message?.includes('上传到存储失败')) {
+      throw new Error('文件上传到云存储失败，请重试')
     } else {
       throw new Error(error.message || '上传失败，请重试')
     }
+  } finally {
+    // 上传完成后从队列中移除（延迟移除以便用户看到结果）
+    setTimeout(() => {
+      uploadingFiles.value.delete(fileId)
+      uploadingFiles.value = new Map(uploadingFiles.value)
+    }, 5000)
   }
 }
 
@@ -61,6 +195,7 @@ const columns: TableColumn<Photo>[] = [
   {
     accessorKey: 'fileSize',
     header: '文件大小',
+    cell: (info) => formatBytes(info.getValue() as number),
   },
   {
     accessorKey: 'actions',
@@ -154,13 +289,19 @@ const handleUpload = async () => {
     processingFiles.value.add(fileName)
 
     toast.add({
-      title: '开始处理照片',
-      description: `正在后台处理 ${fileName}，请稍候...`,
+      title: '开始上传照片',
+      description: `正在上传 ${fileName} 到云存储...`,
       color: 'info',
     })
 
     try {
       await uploadImage(file)
+
+      toast.add({
+        title: '照片上传成功',
+        description: `${fileName} 已上传，正在后台处理...`,
+        color: 'success',
+      })
 
       // 开始状态检查
       if (!statusInterval) {
@@ -198,20 +339,109 @@ onUnmounted(() => {
 
 <template>
   <div class="flex flex-col gap-4 h-full p-4">
-    <UAlert
-      v-if="processingFiles.size > 0"
-      title="照片正在处理"
-      :description="`正在后台处理 ${processingFiles.size} 个文件...`"
-      icon="svg-spinners:270-ring"
-      variant="soft"
-      color="info"
-    />
+    <!-- 上传进度显示 -->
+    <div
+      v-if="uploadingFiles.size > 0"
+      class="space-y-3"
+    >
+      <h3 class="text-lg font-semibold">上传进度</h3>
+      <div class="space-y-2">
+        <div
+          v-for="[fileId, uploadingFile] of uploadingFiles"
+          :key="fileId"
+          class="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg"
+        >
+          <div class="flex items-center justify-between mb-2">
+            <span class="font-medium">{{ uploadingFile.fileName }}</span>
+            <div class="flex items-center gap-2">
+              <!-- 状态指示器 -->
+              <UBadge
+                :color="
+                  uploadingFile.status === 'completed'
+                    ? 'success'
+                    : uploadingFile.status === 'error'
+                      ? 'error'
+                      : uploadingFile.status === 'processing'
+                        ? 'info'
+                        : 'warning'
+                "
+                variant="soft"
+              >
+                {{
+                  uploadingFile.status === 'preparing'
+                    ? '准备中'
+                    : uploadingFile.status === 'uploading'
+                      ? '上传中'
+                      : uploadingFile.status === 'processing'
+                        ? '处理中'
+                        : uploadingFile.status === 'completed'
+                          ? '完成'
+                          : '错误'
+                }}
+              </UBadge>
 
+              <!-- 中止按钮 -->
+              <UButton
+                v-if="
+                  uploadingFile.status === 'uploading' && uploadingFile.canAbort
+                "
+                size="xs"
+                color="error"
+                variant="soft"
+                icon="tabler:file-x"
+                @click="uploadingFile.abortUpload?.()"
+              >
+                中止上传
+              </UButton>
+            </div>
+          </div>
+
+          <!-- 进度条 -->
+          <div
+            v-if="
+              uploadingFile.status === 'uploading' &&
+              uploadingFile.progress !== undefined
+            "
+            class="mb-2"
+          >
+            <div
+              class="flex justify-between text-sm text-neutral-600 dark:text-neutral-400 mb-1"
+            >
+              <span>{{ uploadingFile.progress }}%</span>
+              <span v-if="uploadingFile.uploadProgress?.speedText">
+                {{ uploadingFile.uploadProgress.speedText }}
+              </span>
+            </div>
+            <UProgress
+              :model-value="uploadingFile.progress"
+              class="h-2"
+            />
+            <div
+              v-if="uploadingFile.uploadProgress?.timeRemainingText"
+              class="text-xs text-neutral-500 mt-1"
+            >
+              ETA: {{ uploadingFile.uploadProgress.timeRemainingText }}
+            </div>
+          </div>
+
+          <!-- 错误信息 -->
+          <UAlert
+            v-if="uploadingFile.status === 'error' && uploadingFile.error"
+            :description="uploadingFile.error"
+            color="error"
+            variant="soft"
+            class="mt-2"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- 文件上传组件 -->
     <div class="relative">
       <UFileUpload
         v-model="selectedFiles"
         label="选择照片"
-        description="支持 JPEG、PNG、HEIC 格式，最大 128MB"
+        description="支持 JPEG、PNG、HEIC 格式，最大 256MB"
         layout="list"
         size="xl"
         accept="image/jpeg,image/png,image/heic,image/heif"
@@ -225,9 +455,11 @@ onUnmounted(() => {
         :disabled="selectedFiles.length === 0"
         @click="handleUpload"
       >
-        开始上传
+        上传照片
       </UButton>
     </div>
+
+    <!-- 照片列表 -->
     <div
       class="border border-neutral-300 dark:border-neutral-800 rounded overflow-hidden"
     >
