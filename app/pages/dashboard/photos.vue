@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import type { TableColumn } from '@nuxt/ui'
 import type { Photo } from '~~/server/utils/db'
+import { h, resolveComponent } from 'vue'
+
+const UCheckbox = resolveComponent('UCheckbox')
 
 definePageMeta({
   layout: 'dashboard',
@@ -180,10 +183,43 @@ const processingFiles = ref<Set<string>>(new Set())
 const toast = useToast()
 const selectedFiles = ref<File[]>([])
 
+// 表格多选状态 - 使用官方推荐的方式
+const rowSelection = ref({})
+const table: any = useTemplateRef('table')
+
+// 计算选中的行数
+const selectedRowsCount = computed((): number => {
+  return table.value?.tableApi?.getFilteredSelectedRowModel().rows.length || 0
+})
+
+// 计算总行数
+const totalRowsCount = computed((): number => {
+  return table.value?.tableApi?.getFilteredRowModel().rows.length || 0
+})
+
 // 状态检查间隔
 let statusInterval: NodeJS.Timeout | null = null
 
 const columns: TableColumn<Photo>[] = [
+  {
+    id: 'select',
+    header: ({ table }) =>
+      h(UCheckbox, {
+        modelValue: table.getIsSomePageRowsSelected()
+          ? 'indeterminate'
+          : table.getIsAllPageRowsSelected(),
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
+          table.toggleAllPageRowsSelected(!!value),
+        'aria-label': 'Select all',
+      }),
+    cell: ({ row }) =>
+      h(UCheckbox, {
+        modelValue: row.getIsSelected(),
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
+          row.toggleSelected(!!value),
+        'aria-label': 'Select row',
+      }),
+  },
   {
     accessorKey: 'id',
     header: 'Photo ID',
@@ -333,6 +369,57 @@ const handleDelete = async (photoId: string) => {
   refresh()
 }
 
+// 批量删除功能
+const handleBatchDelete = async () => {
+  const selectedRowModel = table.value?.tableApi?.getFilteredSelectedRowModel()
+  const selectedPhotos =
+    selectedRowModel?.rows.map((row: any) => row.original) || []
+
+  if (selectedPhotos.length === 0) {
+    toast.add({
+      title: '请选择照片',
+      description: '请至少选择一张照片进行删除',
+      color: 'warning',
+    })
+    return
+  }
+
+  try {
+    // 并发删除所有选中的照片
+    const deleteToast = toast.add({
+      title: '正在删除照片',
+      description: `正在删除 ${selectedPhotos.length} 张照片...`,
+      color: 'info',
+    })
+    await Promise.all(
+      selectedPhotos.map((photo: any) =>
+        $fetch(`/api/photos/${photo.id}`, {
+          method: 'DELETE',
+        }),
+      ),
+    )
+
+    toast.update(deleteToast.id, {
+      title: '批量删除成功',
+      description: `已成功删除 ${selectedPhotos.length} 张照片`,
+      color: 'success',
+    })
+
+    // 清空选中状态
+    rowSelection.value = {}
+
+    // 刷新列表
+    refresh()
+  } catch (error: any) {
+    toast.add({
+      title: '批量删除失败',
+      description: error.message || '删除过程中发生错误',
+      color: 'error',
+    })
+    console.error('批量删除错误:', error)
+  }
+}
+
 // 清理定时器
 onUnmounted(() => {
   if (statusInterval) {
@@ -463,11 +550,47 @@ onUnmounted(() => {
       </UButton>
     </div>
 
+    <!-- 批量操作栏 -->
+    <div
+      v-if="selectedRowsCount > 0"
+      class="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+    >
+      <div class="flex items-center gap-2">
+        <UIcon
+          name="tabler:check-circle"
+          class="text-blue-500"
+        />
+        <span class="font-medium text-blue-700 dark:text-blue-300">
+          已选择 {{ selectedRowsCount }} 张照片
+        </span>
+      </div>
+      <div class="flex items-center gap-2">
+        <UButton
+          variant="ghost"
+          size="sm"
+          @click="rowSelection = {}"
+        >
+          取消选择
+        </UButton>
+        <UButton
+          color="error"
+          variant="soft"
+          size="sm"
+          icon="tabler:trash"
+          @click="handleBatchDelete"
+        >
+          批量删除
+        </UButton>
+      </div>
+    </div>
+
     <!-- 照片列表 -->
     <div
       class="border border-neutral-300 dark:border-neutral-800 rounded overflow-hidden"
     >
       <UTable
+        ref="table"
+        v-model:row-selection="rowSelection"
         :data="data as Photo[]"
         :columns="columns"
         :loading="status === 'pending'"
@@ -489,6 +612,13 @@ onUnmounted(() => {
           </UButton>
         </template>
       </UTable>
+
+      <!-- 选择状态信息 -->
+      <div
+        class="px-4 py-3.5 border-t border-neutral-200 dark:border-neutral-700 text-sm text-neutral-600 dark:text-neutral-400"
+      >
+        {{ selectedRowsCount }} / {{ totalRowsCount }} 行已选择
+      </div>
     </div>
   </div>
 </template>
