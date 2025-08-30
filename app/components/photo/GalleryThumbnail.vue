@@ -133,7 +133,7 @@ watch(isSmallScreen, scrollToActiveThumbnail)
     :animate="{ opacity: 1, y: 0 }"
     :exit="{ opacity: 0, y: 100 }"
     :transition="{ type: 'spring', duration: 0.4, bounce: 0, delay: 0.1 }"
-    class="gallery-thumbnail-container bg-black/20 backdrop-blur-xl border-t border-white/10 shrink-0 z-10"
+    class="gallery-thumbnail-container bg-black/20 dark:bg-black/30 backdrop-blur-xl border-t border-white/10 shrink-0 z-10"
   >
     <div
       ref="galleryScrollContainer"

@@ -58,11 +58,11 @@ watch(
 
     if (isOpen && currentPhoto.value) {
       useHead({
-        title: currentPhoto.value.title
+        title: currentPhoto.value.title,
       })
     } else {
       useHead({
-        title: 'Gallery'
+        title: 'Gallery',
       })
     }
   },
@@ -142,7 +142,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
         :animate="{ opacity: 1 }"
         :exit="{ opacity: 0 }"
         :transition="{ duration: 0.3 }"
-        class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+        class="fixed inset-0 bg-white/50 dark:bg-black/50 backdrop-blur-sm z-50"
         @click="emit('close')"
       />
     </AnimatePresence>

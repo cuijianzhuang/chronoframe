@@ -23,14 +23,14 @@ const handleOpenLogin = () => {
     class="inline-block w-full align-top break-inside-avoid mb-[4px] relative overflow-hidden"
   >
     <div
-      class="absolute inset-0 -z-10 blur-3xl scale-110"
+      class="absolute inset-0 -z-10 blur-3xl scale-110 bg-cover bg-center opacity-35"
       :style="{
         backgroundImage: `url(${avatarImage})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
       }"
     ></div>
-    <div class="absolute inset-0 -z-10 bg-neutral-900/50"></div>
+    <div
+      class="absolute inset-0 -z-10 bg-white/50 dark:bg-neutral-900/50"
+    ></div>
     <div class="flex flex-col items-center py-6 gap-2">
       <AuthState>
         <template #default="{ loggedIn, user, clear }">

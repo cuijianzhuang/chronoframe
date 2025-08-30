@@ -126,7 +126,9 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.exifData?.DateTimeOriginal
           ? {
               label: '拍摄时间',
-              value: dayjs(props.exifData.DateTimeOriginal).format('YYYY-MM-DD HH:mm:ss'),
+              value: dayjs(props.exifData.DateTimeOriginal).format(
+                'YYYY-MM-DD HH:mm:ss',
+              ),
               icon: 'tabler:calendar',
             }
           : null,
@@ -331,7 +333,7 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.exifData?.FocalPlaneYResolution
           ? {
               label: '焦平面分辨率',
-              value: `${props.exifData.FocalPlaneXResolution} x ${props.exifData.FocalPlaneYResolution}`,
+              value: `${props.exifData.FocalPlaneXResolution.toFixed(2)} x ${props.exifData.FocalPlaneYResolution.toFixed(2)}`,
               icon: 'tabler:photo-sensor',
             }
           : null,
@@ -363,9 +365,10 @@ const isMobile = useMediaQuery('(max-width: 768px)')
       y: isMobile ? 20 : 0,
     }"
     :transition="{ type: 'spring', duration: 0.4, bounce: 0, delay: 0.1 }"
-    class="bg-black/30 backdrop-blur-xl border-white/10"
+    class="bg-black/20 dark:bg-black/30 backdrop-blur-xl border-white/10"
     :class="{
-      'fixed inset-x-2 bottom-2 max-h-[70vh] border rounded-xl z-50 flex flex-col': isMobile,
+      'fixed inset-x-2 bottom-2 max-h-[70vh] border rounded-xl z-50 flex flex-col':
+        isMobile,
       'w-80 border-l': !isMobile,
     }"
   >
@@ -386,7 +389,7 @@ const isMobile = useMediaQuery('(max-width: 768px)')
     </div>
 
     <!-- 内容区域 -->
-    <div 
+    <div
       class="p-4 space-y-4 flex-1 min-h-0"
       :class="{
         'overflow-y-auto': isMobile,
