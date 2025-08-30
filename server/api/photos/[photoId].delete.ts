@@ -27,11 +27,15 @@ export default eventHandler(async (event) => {
 
   if (photo.storageKey) {
     logger.image.info(`Deleting photo files for ${photoId} from storage`)
-    await storageProvider.delete(photo.storageKey)
-    await storageProvider.delete(`/thumbnails/${photo.storageKey}`)
+    try {
+      await storageProvider.delete(photo.storageKey)
+      await storageProvider.delete(
+        photo.thumbnailUrl?.replace(storageProvider.getPublicUrl(''), '') || '',
+      )
+    } catch (_) {}
   }
 
-  await useDB().delete(tables.photos).where(eq(tables.photos.id, photoId)).run()
+  useDB().delete(tables.photos).where(eq(tables.photos.id, photoId)).run()
 
   logger.image.success(`Photo ${photoId} deleted`)
 

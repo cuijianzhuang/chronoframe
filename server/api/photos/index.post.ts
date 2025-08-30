@@ -24,12 +24,11 @@ export default eventHandler(async (event) => {
   }
 
   try {
-    // 生成唯一的文件名，使用时间戳前缀避免冲突
-    const uniqueFileName = `${fileName}`
-    
+    const objectKey = `${(storageProvider.config?.prefix || '').replace(/\/+$/, '')}/${fileName}`
+
     // 获取预签名 URL，设置1小时过期时间
     const signedUrl = await storageProvider.getSignedUrl(
-      uniqueFileName, 
+      objectKey,
       3600, // 1小时过期
       {
         contentType: contentType || 'application/octet-stream',
@@ -38,7 +37,7 @@ export default eventHandler(async (event) => {
 
     return {
       signedUrl,
-      fileKey: uniqueFileName,
+      fileKey: objectKey,
       expiresIn: 3600,
     }
   } catch (error) {

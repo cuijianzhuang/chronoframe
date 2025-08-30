@@ -6,6 +6,10 @@ definePageMeta({
   layout: 'dashboard',
 })
 
+useHead({
+  title: 'Photos',
+})
+
 const dayjs = useDayjs()
 
 const { data, status, refresh } = useFetch('/api/photos')

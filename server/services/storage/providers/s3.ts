@@ -65,22 +65,24 @@ export class S3StorageProvider implements StorageProvider {
     contentType?: string,
   ): Promise<StorageObject> {
     try {
-      const cmd = new PutObjectCommand({
-        Bucket: this.config.bucket,
-        Key: `${(this.config.prefix || '').replace(/\/+$/, '')}/${key}`.replace(
+      const absoluteKey =
+        `${(this.config.prefix || '').replace(/\/+$/, '')}/${key}`.replace(
           /^\/+/,
           '',
-        ),
+        )
+      const cmd = new PutObjectCommand({
+        Bucket: this.config.bucket,
+        Key: absoluteKey,
         Body: data,
         ContentType: contentType || 'application/octet-stream',
       })
 
       const resp = await this.client.send(cmd)
 
-      this.logger?.success(`Created object with key: ${key}`)
+      this.logger?.success(`Created object with key: ${absoluteKey}`)
 
       return {
-        key,
+        key: absoluteKey,
         size: data.length,
         lastModified: new Date(),
         etag: resp.ETag,

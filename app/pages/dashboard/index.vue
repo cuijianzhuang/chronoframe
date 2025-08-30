@@ -3,6 +3,10 @@ definePageMeta({
   layout: 'dashboard',
 })
 
+useHead({
+  title: 'Dashboard',
+})
+
 interface SystemHealth {
   uptime: number
   memory: {

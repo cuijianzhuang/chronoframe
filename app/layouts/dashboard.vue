@@ -14,6 +14,11 @@ const items = ref<NavigationMenuItem[]>([
   },
 ])
 
+useHead({
+  title: "Dashboard",
+  titleTemplate: (title) => `${title} - TimoYin's mems`,
+})
+
 const { loggedIn, user } = useUserSession()
 
 const handleLogin = () => {

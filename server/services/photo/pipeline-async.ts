@@ -114,7 +114,7 @@ async function processPhotoInternal(
       setImmediate(async () => {
         try {
           const result = await storageProvider.create(
-            `${(storageProvider.config?.prefix || '').replace(/\/+$/, '')}/thumbnails/${photoId}.webp`,
+            `thumbnails/${photoId}.webp`,
             thumbnailBuffer,
             'image/webp'
           )
