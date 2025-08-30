@@ -67,7 +67,10 @@ export class S3StorageProvider implements StorageProvider {
     try {
       const cmd = new PutObjectCommand({
         Bucket: this.config.bucket,
-        Key: key,
+        Key: `${(this.config.prefix || '').replace(/\/+$/, '')}/${key}`.replace(
+          /^\/+/,
+          '',
+        ),
         Body: data,
         ContentType: contentType || 'application/octet-stream',
       })
@@ -168,7 +171,7 @@ export class S3StorageProvider implements StorageProvider {
       ContentType: options?.contentType || 'application/octet-stream',
     })
 
-    const url = await getSignedUrl(this.client, cmd, { 
+    const url = await getSignedUrl(this.client, cmd, {
       expiresIn,
       // 为了更好的 CORS 支持，添加一些额外参数
       unhoistableHeaders: new Set(['Content-Type']),

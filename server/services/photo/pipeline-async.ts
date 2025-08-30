@@ -11,7 +11,7 @@ import { StorageObject } from '../storage'
 import { extractExifData, extractPhotoInfo } from '../image/exif'
 
 const generatePhotoId = (s3key: string) => {
-  return path.basename(s3key, path.extname(s3key))
+  return path.basename(s3key, path.extname(s3key)).replace(/ /g, '_')
 }
 
 /**
