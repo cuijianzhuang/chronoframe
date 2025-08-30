@@ -30,6 +30,7 @@ export type GitHubStorageConfig = {
   repository?: string
   branch?: string
   path?: string
+  prefix?: string
   token?: string
 }
 
@@ -46,6 +47,7 @@ export interface UploadOptions {
 }
 
 export interface StorageProvider {
+  config?: StorageConfig
   create(
     key: string,
     fileBuffer: Buffer,

@@ -49,7 +49,7 @@ const convertToStorageObject = (s3object: _Object): StorageObject => {
 }
 
 export class S3StorageProvider implements StorageProvider {
-  private config: S3StorageConfig
+  config: S3StorageConfig
   private logger?: Logger['storage']
   private client: S3Client
 
