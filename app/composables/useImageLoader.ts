@@ -48,10 +48,6 @@ export const useImageLoader = (
     }
   }
 
-  onUnmounted(() => {
-    cleanup()
-  })
-
   cleanup()
   loadImage()
 
