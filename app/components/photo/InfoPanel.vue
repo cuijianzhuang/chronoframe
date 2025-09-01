@@ -55,6 +55,44 @@ const formatExposureTime = (
   }
 }
 
+// 格式化GPS坐标为标准的N/E格式
+const formatGPSCoordinates = (latitude: number, longitude: number): string => {
+  const latDirection = latitude >= 0 ? 'N' : 'S'
+  const lngDirection = longitude >= 0 ? 'E' : 'W'
+  
+  const latDegrees = Math.abs(latitude)
+  const lngDegrees = Math.abs(longitude)
+  
+  const latDeg = Math.floor(latDegrees)
+  const latMin = Math.floor((latDegrees - latDeg) * 60)
+  const latSec = ((latDegrees - latDeg) * 60 - latMin) * 60
+  
+  const lngDeg = Math.floor(lngDegrees)
+  const lngMin = Math.floor((lngDegrees - lngDeg) * 60)
+  const lngSec = ((lngDegrees - lngDeg) * 60 - lngMin) * 60
+  
+  return `${latDeg}°${latMin}'${latSec.toFixed(2)}"${latDirection}, ${lngDeg}°${lngMin}'${lngSec.toFixed(2)}"${lngDirection}`
+}
+
+// 格式化GPS坐标为两行显示
+const formatGPSCoordinatesMultiLine = (latitude: number, longitude: number): string => {
+  const latDirection = latitude >= 0 ? 'N' : 'S'
+  const lngDirection = longitude >= 0 ? 'E' : 'W'
+  
+  const latDegrees = Math.abs(latitude)
+  const lngDegrees = Math.abs(longitude)
+  
+  const latDeg = Math.floor(latDegrees)
+  const latMin = Math.floor((latDegrees - latDeg) * 60)
+  const latSec = ((latDegrees - latDeg) * 60 - latMin) * 60
+  
+  const lngDeg = Math.floor(lngDegrees)
+  const lngMin = Math.floor((lngDegrees - lngDeg) * 60)
+  const lngSec = ((lngDegrees - lngDeg) * 60 - lngMin) * 60
+  
+  return `${latDeg}°${latMin}'${latSec.toFixed(2)}"${latDirection}\n${lngDeg}°${lngMin}'${lngSec.toFixed(2)}"${lngDirection}`
+}
+
 const gpsCoordinates = computed(() => {
   // 优先使用数据库中存储的坐标
   if (props.currentPhoto.latitude && props.currentPhoto.longitude) {
@@ -112,25 +150,20 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
               icon: 'tabler:grid-dots',
             }
           : null,
-        props.currentPhoto.country
+        props.exifData?.DateTimeOriginal
           ? {
-              label: '国家',
-              value: props.currentPhoto.country,
-              icon: 'tabler:map-pin',
+              label: '拍摄时间',
+              value: dayjs(props.exifData.DateTimeOriginal).format(
+                'YYYY-MM-DD HH:mm:ss',
+              ),
+              icon: 'tabler:calendar',
             }
           : null,
-        props.currentPhoto.city
+        props.exifData?.ColorSpace
           ? {
-              label: '城市',
-              value: props.currentPhoto.city,
-              icon: 'tabler:building',
-            }
-          : null,
-        props.currentPhoto.latitude && props.currentPhoto.longitude
-          ? {
-              label: 'GPS坐标',
-              value: `${props.currentPhoto.latitude.toFixed(6)}, ${props.currentPhoto.longitude.toFixed(6)}`,
-              icon: 'tabler:gps',
+              label: '色彩空间',
+              value: props.exifData.ColorSpace,
+              icon: 'tabler:palette',
             }
           : null,
         props.exifData?.Artist
@@ -154,20 +187,25 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
               icon: 'tabler:world',
             }
           : null,
-        props.exifData?.DateTimeOriginal
+        props.currentPhoto.country
           ? {
-              label: '拍摄时间',
-              value: dayjs(props.exifData.DateTimeOriginal).format(
-                'YYYY-MM-DD HH:mm:ss',
-              ),
-              icon: 'tabler:calendar',
+              label: '国家',
+              value: props.currentPhoto.country,
+              icon: 'tabler:map-pin',
             }
           : null,
-        props.exifData?.ColorSpace
+        props.currentPhoto.city
           ? {
-              label: '色彩空间',
-              value: props.exifData.ColorSpace,
-              icon: 'tabler:palette',
+              label: '城市',
+              value: props.currentPhoto.city,
+              icon: 'tabler:building',
+            }
+          : null,
+        props.currentPhoto.latitude && props.currentPhoto.longitude
+          ? {
+              label: '坐标',
+              value: formatGPSCoordinatesMultiLine(props.currentPhoto.latitude, props.currentPhoto.longitude),
+              icon: 'tabler:gps',
             }
           : null,
       ],
