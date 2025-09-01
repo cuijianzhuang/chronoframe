@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { motion, AnimatePresence } from 'motion-v'
 import type { NeededExif } from '../../../shared/types/photo'
 import type { KVData } from './KVRenderer.vue'
+import { formatCameraInfo, formatLensInfo } from '~/utils/camera'
 
 interface Props {
   currentPhoto: Photo
@@ -188,14 +189,14 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.exifData?.Make && props.exifData?.Model
           ? {
               label: '相机',
-              value: `${props.exifData.Make} ${props.exifData.Model}`,
+              value: formatCameraInfo(props.exifData.Make, props.exifData.Model),
               icon: 'tabler:camera',
             }
           : null,
         props.exifData?.LensModel
           ? {
               label: '镜头',
-              value: props.exifData.LensModel,
+              value: formatLensInfo(props.exifData.LensMake, props.exifData.LensModel),
               icon: 'tabler:focus',
             }
           : null,

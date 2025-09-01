@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatCameraInfo } from '~/utils/camera'
+
 interface Props {
   photo: Photo
   index: number
@@ -287,9 +289,7 @@ onUnmounted(() => {
             >
               <Icon name="tabler:camera" />
               <span class="text-xs font-medium text-ellipsis line-clamp-1">
-                {{
-                  [photo.exif.Make, photo.exif.Model].filter(Boolean).join(' ')
-                }}
+                {{ formatCameraInfo(photo.exif.Make, photo.exif.Model) }}
               </span>
             </div>
             <!-- Photo specs from EXIF -->
