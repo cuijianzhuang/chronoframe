@@ -1,4 +1,9 @@
 <script lang="ts" setup>
+useHead({
+  title: 'Gallery',
+  titleTemplate: (title) => `${title} - TimoYin's mems`,
+})
+
 const { data } = useFetch('/api/photos')
 const photos = computed(() => (data.value as Photo[]) || [])
 </script>
