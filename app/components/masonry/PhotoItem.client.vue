@@ -303,24 +303,24 @@ onUnmounted(() => {
               class="text-sm opacity-70 mt-1 flex gap-2"
             >
               <div
-                v-if="photo.exif.FocalLength"
+                v-if="photo.exif.FocalLengthIn35mmFormat"
                 class="flex items-center gap-1"
               >
                 <Icon
                   name="streamline:image-accessories-lenses-photos-camera-shutter-picture-photography-pictures-photo-lens"
                 />
-                <span class="text-xs font-medium">{{
-                  photo.exif.FocalLengthIn35mmFormat
-                }}</span>
+                <span class="text-xs font-medium">
+                  {{ photo.exif.FocalLengthIn35mmFormat }}
+                </span>
               </div>
               <div
                 v-if="photo.exif.FNumber"
                 class="flex items-center gap-1"
               >
                 <Icon name="tabler:aperture" />
-                <span class="text-xs font-medium"
-                  >f/{{ photo.exif.FNumber }}</span
-                >
+                <span class="text-xs font-medium">
+                  f/{{ photo.exif.FNumber }}
+                </span>
               </div>
               <div
                 v-if="photo.exif.ExposureTime"
