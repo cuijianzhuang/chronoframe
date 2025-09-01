@@ -1,4 +1,4 @@
-import { isNull, and, isNotNull, sql, eq } from 'drizzle-orm'
+import { isNotNull, eq } from 'drizzle-orm'
 import {
   extractLocationFromGPS,
   parseGPSCoordinates,

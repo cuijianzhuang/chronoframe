@@ -1,8 +1,4 @@
-import { isNull, and, isNotNull, sql, eq } from 'drizzle-orm'
-import {
-  extractLocationFromGPS,
-  parseGPSCoordinates,
-} from '~~/server/services/location/geocoding'
+import { isNotNull } from 'drizzle-orm'
 
 export default eventHandler(async (event) => {
   await requireUserSession(event)
