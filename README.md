@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="public/favicon.svg" alt="Chronoframe Logo" width="192">
-
+  <br/>
   <img src="https://img.shields.io/badge/Version-0.1.14-blue.svg" alt="Version">
   <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
   <img src="https://img.shields.io/badge/Nuxt-4.0+-00DC82.svg" alt="Nuxt">
