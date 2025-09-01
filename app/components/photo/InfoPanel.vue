@@ -56,6 +56,15 @@ const formatExposureTime = (
 }
 
 const gpsCoordinates = computed(() => {
+  // 优先使用数据库中存储的坐标
+  if (props.currentPhoto.latitude && props.currentPhoto.longitude) {
+    return {
+      latitude: props.currentPhoto.latitude,
+      longitude: props.currentPhoto.longitude,
+    }
+  }
+  
+  // 如果数据库中没有，尝试从EXIF数据中获取
   if (!props.exifData) return null
   const { GPSLatitude, GPSLongitude } = props.exifData
   if (GPSLatitude && GPSLongitude) {
@@ -101,6 +110,27 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
               label: '像素',
               value: `${((props.currentPhoto.width * props.currentPhoto.height) / 1000000).toFixed(2)} MP`,
               icon: 'tabler:grid-dots',
+            }
+          : null,
+        props.currentPhoto.country
+          ? {
+              label: '国家',
+              value: props.currentPhoto.country,
+              icon: 'tabler:map-pin',
+            }
+          : null,
+        props.currentPhoto.city
+          ? {
+              label: '城市',
+              value: props.currentPhoto.city,
+              icon: 'tabler:building',
+            }
+          : null,
+        props.currentPhoto.latitude && props.currentPhoto.longitude
+          ? {
+              label: 'GPS坐标',
+              value: `${props.currentPhoto.latitude.toFixed(6)}, ${props.currentPhoto.longitude.toFixed(6)}`,
+              icon: 'tabler:gps',
             }
           : null,
         props.exifData?.Artist

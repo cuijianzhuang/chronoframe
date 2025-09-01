@@ -13,6 +13,7 @@ export const logger = {
   storage: mConsola.withTag('STORAGE'),
   fs: mConsola.withTag('FS'),
   image: mConsola.withTag('IMG/PHOTO'),
+  location: mConsola.withTag('LOCATION'),
   dynamic: (id: string) => mConsola.withTag(id.toUpperCase()),
 }
 

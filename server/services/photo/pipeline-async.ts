@@ -9,6 +9,7 @@ import { getStorageManager } from '~~/server/plugins/storage'
 import { compressUint8Array } from '~~/shared/utils/u8array'
 import { StorageObject } from '../storage'
 import { extractExifData, extractPhotoInfo } from '../image/exif'
+import { extractLocationFromGPS, parseGPSCoordinates } from '../location/geocoding'
 
 const generatePhotoId = (s3key: string) => {
   return path.basename(s3key, path.extname(s3key)).replace(/ /g, '_')
@@ -110,6 +111,24 @@ async function processPhotoInternal(
 
     const photoInfo = extractPhotoInfo(s3key, exifData)
 
+    // 处理地理位置信息
+    let locationInfo = null
+    if (exifData) {
+      const { latitude, longitude } = parseGPSCoordinates(exifData)
+      if (latitude && longitude) {
+        locationInfo = await new Promise<any>((resolve, reject) => {
+          setImmediate(async () => {
+            try {
+              const result = await extractLocationFromGPS(latitude, longitude)
+              resolve(result)
+            } catch (error) {
+              reject(error)
+            }
+          })
+        })
+      }
+    }
+
     const thumbnailObject = await new Promise<any>((resolve, reject) => {
       setImmediate(async () => {
         try {
@@ -142,6 +161,12 @@ async function processPhotoInternal(
       thumbnailUrl: storageProvider.getPublicUrl(thumbnailObject.key),
       thumbnailHash: thumbnailHash ? compressUint8Array(thumbnailHash) : null,
       exif: exifData,
+      // 地理位置信息
+      latitude: locationInfo?.latitude || null,
+      longitude: locationInfo?.longitude || null,
+      country: locationInfo?.country || null,
+      city: locationInfo?.city || null,
+      locationName: locationInfo?.locationName || null,
     }
 
     log.info(`Async processing completed for ${s3key}`)

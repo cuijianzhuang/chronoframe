@@ -8,6 +8,13 @@
       "when": 1756139400238,
       "tag": "0000_curvy_scarlet_witch",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1756737014171,
+      "tag": "0001_narrow_spot",
+      "breakpoints": true
     }
   ]
 }

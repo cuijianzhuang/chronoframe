@@ -97,17 +97,40 @@ const handleVisibilityChange = ({
   updateDateRange()
 }
 
+const visibleCities = ref<string>()
+
 const updateDateRange = () => {
   if (visiblePhotos.value.size === 0) {
     dateRange.value = undefined
+    visibleCities.value = undefined
     return
   }
 
-  const visibleDates = Array.from(visiblePhotos.value)
+  const visiblePhotosArray = Array.from(visiblePhotos.value)
+  
+  // Calculate visible dates
+  const visibleDates = visiblePhotosArray
     .map((index) => props.photos[index]?.dateTaken)
     .filter((date): date is string => Boolean(date))
     .map((date) => dayjs(date))
     .sort((a, b) => (a.isBefore(b) ? -1 : 1))
+
+  // Calculate visible cities
+  const cities = visiblePhotosArray
+    .map((index) => props.photos[index]?.city)
+    .filter((city): city is string => Boolean(city))
+  
+  const uniqueCities = [...new Set(cities)]
+  
+  if (uniqueCities.length === 0) {
+    visibleCities.value = undefined
+  } else if (uniqueCities.length === 1) {
+    visibleCities.value = uniqueCities[0]
+  } else if (uniqueCities.length <= 3) {
+    visibleCities.value = uniqueCities.join('、')
+  } else {
+    visibleCities.value = `${uniqueCities.slice(0, 2).join('、')} 等 ${uniqueCities.length} 个城市`
+  }
 
   if (visibleDates.length === 0) {
     dateRange.value = undefined
@@ -182,6 +205,7 @@ const handleOpenViewer = (index: number) => {
   <div class="relative w-full">
     <DateRangeIndicator
       :date-range="dateRange"
+      :locations="visibleCities"
       :is-visible="!!dateRange && showFloatingActions"
       :is-mobile="isMobile"
     />

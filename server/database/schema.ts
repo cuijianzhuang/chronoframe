@@ -26,5 +26,11 @@ export const photos = sqliteTable('photos', {
   thumbnailUrl: text('thumbnail_url'),
   thumbnailHash: text('thumbnail_hash'),
   tags: text('tags', { mode: 'json' }).$type<string[]>(),
-  exif: text('exif', {mode: 'json'}).$type<NeededExif>()
+  exif: text('exif', {mode: 'json'}).$type<NeededExif>(),
+  // 地理位置信息
+  latitude: real('latitude'),
+  longitude: real('longitude'),
+  country: text('country'),
+  city: text('city'),
+  locationName: text('location_name'),
 })
