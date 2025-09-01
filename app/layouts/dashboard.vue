@@ -12,6 +12,11 @@ const items = ref<NavigationMenuItem[]>([
     icon: 'tabler:photo-cog',
     to: '/dashboard/photos',
   },
+  {
+    label: '位置管理',
+    icon: 'tabler:map-pin-cog',
+    to: '/dashboard/location',
+  },
 ])
 
 useHead({
