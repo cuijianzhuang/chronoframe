@@ -5,8 +5,8 @@ defineProps<{
   stats?: {
     total: number
     dateRange: {
-      start: Date | undefined
-      end: Date | undefined
+      start: string | undefined
+      end: string | undefined
     } | null
   }
   dateRangeText?: string

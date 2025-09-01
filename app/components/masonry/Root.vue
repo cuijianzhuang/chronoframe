@@ -8,6 +8,7 @@ const props = withDefaults(defineProps<Props>(), {
   columns: 'auto',
 })
 
+const dayjs = useDayjs()
 const { openViewer } = useViewerState()
 
 // Constants
@@ -51,12 +52,11 @@ const photoStats = computed(() => {
   const photosWithExif = props.photos?.filter((p) => p.exif).length || 0
 
   // Get date range of all photos
-  const allDates =
-    props.photos
-      ?.map((p) => p?.dateTaken)
-      .filter((date): date is string => Boolean(date))
-      .map((date) => new Date(date))
-      .sort((a, b) => a.getTime() - b.getTime()) || []
+  const allDates = props.photos
+    ?.map((p) => p?.dateTaken)
+    .filter((date): date is string => Boolean(date))
+    .map((date) => dayjs(date).format('YYYY年MM月DD日'))
+    .sort((a, b) => (dayjs(a).isBefore(dayjs(b)) ? 1 : -1))
 
   const dateRange =
     allDates.length > 0
@@ -78,7 +78,7 @@ const photoStats = computed(() => {
 const dateRangeText = computed(() => {
   const range = photoStats.value?.dateRange
   if (!range || !range.start || !range.end) return ''
-  return `${range.start.toLocaleDateString('zh-CN')} - ${range.end.toLocaleDateString('zh-CN')}`
+  return `${range.start} - ${range.end}`
 })
 
 const handleVisibilityChange = ({
@@ -106,8 +106,8 @@ const updateDateRange = () => {
   const visibleDates = Array.from(visiblePhotos.value)
     .map((index) => props.photos[index]?.dateTaken)
     .filter((date): date is string => Boolean(date))
-    .map((date) => new Date(date))
-    .sort((a, b) => a.getTime() - b.getTime())
+    .map((date) => dayjs(date))
+    .sort((a, b) => (a.isBefore(b) ? -1 : 1))
 
   if (visibleDates.length === 0) {
     dateRange.value = undefined
@@ -122,46 +122,19 @@ const updateDateRange = () => {
     return
   }
 
-  // Format date range with better logic
-  const formatOptions: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'long',
-  }
-
-  const formatOptionsWithDay: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }
-
   // Check if dates are the same day
-  if (
-    startDate.getFullYear() === endDate.getFullYear() &&
-    startDate.getMonth() === endDate.getMonth() &&
-    startDate.getDate() === endDate.getDate()
-  ) {
+  if (startDate.isSame(endDate, 'day')) {
     // Same day
-    dateRange.value = startDate.toLocaleDateString(
-      'zh-CN',
-      formatOptionsWithDay,
-    )
-  } else if (
-    startDate.getFullYear() === endDate.getFullYear() &&
-    startDate.getMonth() === endDate.getMonth()
-  ) {
+    dateRange.value = startDate.format('YYYY年M月D日')
+  } else if (startDate.isSame(endDate, 'month')) {
     // Same month
-    dateRange.value = startDate.toLocaleDateString('zh-CN', formatOptions)
-  } else if (startDate.getFullYear() === endDate.getFullYear()) {
+    dateRange.value = startDate.format('YYYY年M月')
+  } else if (startDate.isSame(endDate, 'year')) {
     // Same year, different months
-    const startMonth = startDate.toLocaleDateString('zh-CN', { month: 'long' })
-    const endMonth = endDate.toLocaleDateString('zh-CN', { month: 'long' })
-    const year = startDate.getFullYear()
-    dateRange.value = `${startMonth} - ${endMonth} ${year}`
+    dateRange.value = `${startDate.format('M月')} - ${endDate.format('M月 YYYY')}`
   } else {
     // Different years
-    const startFormatted = startDate.toLocaleDateString('zh-CN', formatOptions)
-    const endFormatted = endDate.toLocaleDateString('zh-CN', formatOptions)
-    dateRange.value = `${startFormatted} - ${endFormatted}`
+    dateRange.value = `${startDate.format('YYYY年M月')} - ${endDate.format('YYYY年M月')}`
   }
 }
 
