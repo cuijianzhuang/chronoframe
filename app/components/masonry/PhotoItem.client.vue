@@ -17,7 +17,6 @@ const ITEM_GAP = 4
 
 // Reactive state
 const isLoading = ref(true)
-const actualHeight = ref(0)
 const photoRef = ref<HTMLElement>()
 const mainImageRef = ref<HTMLImageElement>()
 const isVisible = ref(false)
@@ -28,36 +27,29 @@ const resizeObserverRef = ref<ResizeObserver | null>(null)
 const intersectionObserverRef = ref<IntersectionObserver | null>(null)
 
 // Computed
-const containerHeight = computed(() => {
-  // Get the actual container width to calculate proper aspect ratio
-  const currentWidth = containerWidth.value || 280
-
-  // Use actual dimensions from photo data if available
+const aspectRatio = computed(() => {
+  // Priority 1: Use aspectRatio from photo data if available
+  if (props.photo.aspectRatio) {
+    return props.photo.aspectRatio
+  }
+  
+  // Priority 2: Calculate from width and height if available
   if (props.photo.width && props.photo.height) {
-    const aspectRatio = props.photo.height / props.photo.width
-    return Math.round(currentWidth * aspectRatio)
+    return props.photo.height / props.photo.width
   }
 
-  // Fallback to calculated height if image has loaded
-  if (actualHeight.value > 0) {
-    return actualHeight.value
-  }
+  // Fallback: Default aspect ratio
+  return 1.2
+})
 
-  // Default fallback height based on current width
-  return Math.round(currentWidth * 1.2) // 1.2 is a reasonable default aspect ratio
+const containerHeight = computed(() => {
+  const currentWidth = containerWidth.value || 280
+  return Math.round(currentWidth * aspectRatio.value)
 })
 
 // Methods
 const handleImageLoad = (event: Event) => {
-  const img = event.target as HTMLImageElement
   isLoading.value = false
-
-  // Update actual height based on loaded image dimensions
-  if (img.naturalWidth && img.naturalHeight) {
-    const aspectRatio = img.naturalHeight / img.naturalWidth
-    const currentWidth = containerWidth.value || 280
-    actualHeight.value = Math.round(currentWidth * aspectRatio)
-  }
 }
 
 const handleImageError = () => {
@@ -68,13 +60,7 @@ const handleImageError = () => {
 // Check if image is already loaded (cached)
 const checkImageLoaded = (img: HTMLImageElement) => {
   if (img.complete && img.naturalHeight !== 0) {
-    // Create a synthetic event for consistency
-    const syntheticEvent = new Event('load')
-    Object.defineProperty(syntheticEvent, 'target', {
-      value: img,
-      enumerable: true,
-    })
-    handleImageLoad(syntheticEvent)
+    isLoading.value = false
   }
 }
 
@@ -145,13 +131,6 @@ onMounted(() => {
   if (props.photo.thumbnailUrl) {
     const img = new Image()
     img.onload = () => {
-      if (img.naturalWidth && img.naturalHeight) {
-        const aspectRatio = img.naturalHeight / img.naturalWidth
-        const currentWidth = containerWidth.value || 280
-        actualHeight.value = Math.round(
-          currentWidth * (props.photo.aspectRatio || aspectRatio),
-        )
-      }
       // Update loading state after preload completes
       isLoading.value = false
     }
@@ -220,37 +199,41 @@ onUnmounted(() => {
     @click="emit('openViewer', props.index)"
   >
     <div class="relative group overflow-hidden transition-all duration-300">
-      <!-- Thumbhash 组件占位符 -->
+      <!-- Container with fixed aspect ratio -->
       <div
-        v-if="isLoading && photo.thumbnailHash"
-        class="w-full absolute inset-0"
-        :style="{ aspectRatio: `${photo.width || 1} / ${photo.height || 1}` }"
+        class="w-full relative"
+        :style="{ aspectRatio: `1 / ${aspectRatio}` }"
       >
-        <Thumbhash
-          :thumbhash="photo.thumbnailHash"
-          class="w-full h-full object-cover scale-110"
-          :alt="photo.title || 'Photo placeholder'"
+        <!-- Thumbhash placeholder -->
+        <div
+          v-if="isLoading && photo.thumbnailHash"
+          class="absolute inset-0 w-full h-full"
+        >
+          <Thumbhash
+            :thumbhash="photo.thumbnailHash"
+            class="w-full h-full object-cover scale-110"
+            :alt="photo.title || 'Photo placeholder'"
+          />
+        </div>
+
+        <!-- Loading placeholder (fallback when no thumbhash) -->
+        <div
+          v-if="isLoading && !photo.thumbnailHash"
+          class="absolute inset-0 w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse"
+        />
+
+        <!-- Main image -->
+        <img
+          ref="mainImageRef"
+          v-show="!isLoading"
+          :src="photo.thumbnailUrl || ''"
+          :alt="photo.title || photo.description || 'Photo'"
+          class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          @load="handleImageLoad"
+          @error="handleImageError"
+          loading="lazy"
         />
       </div>
-
-      <!-- Loading placeholder (fallback when no thumbhash) -->
-      <div
-        v-if="isLoading && !photo.thumbnailHash"
-        class="w-full bg-gray-200 dark:bg-gray-700 animate-pulse"
-        :style="{ aspectRatio: `${photo.width || 1} / ${photo.height || 1.2}` }"
-      />
-
-      <!-- Main image -->
-      <img
-        ref="mainImageRef"
-        v-show="!isLoading"
-        :src="photo.thumbnailUrl || ''"
-        :alt="photo.title || photo.description || 'Photo'"
-        class="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105 block"
-        @load="handleImageLoad"
-        @error="handleImageError"
-        loading="lazy"
-      />
 
       <!-- Overlay -->
       <div

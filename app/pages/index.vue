@@ -3,16 +3,18 @@ const { data } = useFetch('/api/photos')
 
 useHead({
   title: 'Gallery',
-  titleTemplate: (title) => `${title} - TimoYin\'s mems`,
+  titleTemplate: (title) => `${title} - TimoYin's mems`,
 })
+
+const photos = computed(() => (data.value as Photo[]) || [])
 </script>
 
 <template>
   <div class="h-svh px-1">
     <ClientOnly>
       <MasonryRoot
-        :photos="data as Photo[]"
-        :columns="'auto'"
+        :photos="photos"
+        columns="auto"
       />
       <template #fallback>
         <div
@@ -33,15 +35,16 @@ useHead({
   display: inline-block;
   position: relative;
 }
+
 .loading-scan-text {
   display: inline-block;
   background: linear-gradient(
     90deg,
-    #fff 0%,
-    #fff 30%,
-    rgba(255, 255, 255, 0.3) 50%,
-    #fff 70%,
-    #fff 100%
+    var(--ui-text-highlighted) 0%,
+    var(--ui-text-highlighted) 30%,
+    var(--ui-text-muted) 50%,
+    var(--ui-text-highlighted) 70%,
+    var(--ui-text-highlighted) 100%
   );
   background-size: 200% 100%;
   background-position: 200% 0;
