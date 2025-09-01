@@ -57,14 +57,16 @@ class NominatimGeocodingProvider implements GeocodingProvider {
       // 提取国家信息
       const country = address.country || address.country_code?.toUpperCase()
 
-      // 提取城市信息（优先级：state > city > town > village > hamlet）
+      // 提取城市信息（优先级：district > city > town > county > state > village > hamlet）
+      // 适配中国行政区划
       const city =
-        address.state ||
+        address.district ||
         address.city ||
         address.town ||
+        address.county ||
+        address.state ||
         address.village ||
-        address.hamlet ||
-        address.county
+        address.hamlet
 
       // 构建位置名称
       const locationName = data.display_name
