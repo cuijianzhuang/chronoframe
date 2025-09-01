@@ -1,5 +1,3 @@
-import { Logger } from '~~/server/utils/logger'
-
 export interface LocationInfo {
   latitude: number
   longitude: number
@@ -41,7 +39,9 @@ class NominatimGeocodingProvider implements GeocodingProvider {
       })
 
       if (!response.ok) {
-        logger.location.warn(`Nominatim API responded with status ${response.status}`)
+        logger.location.warn(
+          `Nominatim API responded with status ${response.status}`,
+        )
         return null
       }
 
@@ -53,17 +53,18 @@ class NominatimGeocodingProvider implements GeocodingProvider {
       }
 
       const address = data.address || {}
-      
+
       // 提取国家信息
       const country = address.country || address.country_code?.toUpperCase()
-      
-      // 提取城市信息（优先级：city > town > village > hamlet）
-      const city = address.city || 
-                   address.town || 
-                   address.village || 
-                   address.hamlet ||
-                   address.county ||
-                   address.state
+
+      // 提取城市信息（优先级：state > city > town > village > hamlet）
+      const city =
+        address.state ||
+        address.city ||
+        address.town ||
+        address.village ||
+        address.hamlet ||
+        address.county
 
       // 构建位置名称
       const locationName = data.display_name
@@ -84,12 +85,12 @@ class NominatimGeocodingProvider implements GeocodingProvider {
   private async applyRateLimit(): Promise<void> {
     const now = Date.now()
     const timeSinceLastRequest = now - this.lastRequestTime
-    
+
     if (timeSinceLastRequest < this.rateLimitMs) {
       const delay = this.rateLimitMs - timeSinceLastRequest
-      await new Promise(resolve => setTimeout(resolve, delay))
+      await new Promise((resolve) => setTimeout(resolve, delay))
     }
-    
+
     this.lastRequestTime = Date.now()
   }
 }
@@ -100,7 +101,7 @@ class NominatimGeocodingProvider implements GeocodingProvider {
 export async function extractLocationFromGPS(
   gpsLatitude?: number,
   gpsLongitude?: number,
-  provider: GeocodingProvider = new NominatimGeocodingProvider()
+  provider: GeocodingProvider = new NominatimGeocodingProvider(),
 ): Promise<LocationInfo | null> {
   if (!gpsLatitude || !gpsLongitude) {
     return null
@@ -108,21 +109,30 @@ export async function extractLocationFromGPS(
 
   // 验证坐标范围
   if (Math.abs(gpsLatitude) > 90 || Math.abs(gpsLongitude) > 180) {
-    logger.location.warn(`Invalid GPS coordinates: ${gpsLatitude}, ${gpsLongitude}`)
+    logger.location.warn(
+      `Invalid GPS coordinates: ${gpsLatitude}, ${gpsLongitude}`,
+    )
     return null
   }
 
-  logger.location.info(`Reverse geocoding coordinates: ${gpsLatitude}, ${gpsLongitude}`)
-  
+  logger.location.info(
+    `Reverse geocoding coordinates: ${gpsLatitude}, ${gpsLongitude}`,
+  )
+
   try {
-    const locationInfo = await provider.reverseGeocode(gpsLatitude, gpsLongitude)
-    
+    const locationInfo = await provider.reverseGeocode(
+      gpsLatitude,
+      gpsLongitude,
+    )
+
     if (locationInfo) {
-      logger.location.success(`Location found: ${locationInfo.city}, ${locationInfo.country}`)
+      logger.location.success(
+        `Location found: ${locationInfo.city}, ${locationInfo.country}`,
+      )
     } else {
       logger.location.warn('No location found for coordinates')
     }
-    
+
     return locationInfo
   } catch (error) {
     logger.location.error('Location extraction failed:', error)
@@ -133,7 +143,10 @@ export async function extractLocationFromGPS(
 /**
  * 解析EXIF GPS数据为十进制度数
  */
-export function parseGPSCoordinates(exifData: any): { latitude?: number; longitude?: number } {
+export function parseGPSCoordinates(exifData: any): {
+  latitude?: number
+  longitude?: number
+} {
   try {
     let latitude: number | undefined
     let longitude: number | undefined
