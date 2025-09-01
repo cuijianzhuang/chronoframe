@@ -15,18 +15,12 @@ import type { LoadingIndicatorRef } from './LoadingIndicator.vue'
 
 interface Props {
   photos: Photo[]
-  currentIndex: number
-  isOpen: boolean
 }
 
 const props = defineProps<Props>()
 
-const emit = defineEmits<{
-  close: []
-  indexChange: [index: number]
-}>()
-
-const router = useRouter()
+const { closeViewer } = useViewerState()
+const { currentPhotoIndex, isViewerOpen } = storeToRefs(useViewerState())
 
 // Refs
 const containerRef = ref<HTMLDivElement>()
@@ -39,12 +33,12 @@ const showExifPanel = ref(false)
 const currentBlobSrc = ref<string | null>(null)
 
 // Computed
-const currentPhoto = computed(() => props.photos[props.currentIndex])
+const currentPhoto = computed(() => props.photos[currentPhotoIndex.value])
 const isMobile = useMediaQuery('(max-width: 768px)')
 
 // 当 PhotoViewer 关闭时重置状态
 watch(
-  () => props.isOpen,
+  () => isViewerOpen,
   (isOpen) => {
     if (!isOpen) {
       isImageZoomed.value = false
@@ -71,7 +65,7 @@ watch(
 
 // 同步 Swiper 的索引
 watch(
-  () => props.currentIndex,
+  () => currentPhotoIndex.value,
   (newIndex) => {
     if (swiperRef.value && swiperRef.value.activeIndex !== newIndex) {
       swiperRef.value.slideTo(newIndex, 300)
@@ -90,15 +84,17 @@ watch(isImageZoomed, (isZoomed) => {
 
 // Navigation methods
 const handlePrevious = () => {
-  if (props.currentIndex > 0) {
-    emit('indexChange', props.currentIndex - 1)
+  if (currentPhotoIndex.value > 0) {
+    // emit('indexChange', currentPhotoIndex.value - 1)
+    currentPhotoIndex.value -= 1
     swiperRef.value?.slidePrev()
   }
 }
 
 const handleNext = () => {
-  if (props.currentIndex < props.photos.length - 1) {
-    emit('indexChange', props.currentIndex + 1)
+  if (currentPhotoIndex.value < props.photos.length - 1) {
+    // emit('indexChange', currentPhotoIndex.value + 1)
+    currentPhotoIndex.value += 1
     swiperRef.value?.slideNext()
   }
 }
@@ -110,7 +106,8 @@ const handleSwiperInit = (swiper: SwiperType) => {
 }
 
 const handleSlideChange = (swiper: SwiperType) => {
-  emit('indexChange', swiper.activeIndex)
+  // emit('indexChange', swiper.activeIndex)
+  currentPhotoIndex.value = swiper.activeIndex
 }
 
 // Handle image events
@@ -124,7 +121,8 @@ const handleBlobSrcChange = (blobSrc: string | null) => {
 
 defineShortcuts({
   escape: () => {
-    emit('close')
+    // emit('close')
+    closeViewer()
   },
 })
 
@@ -137,20 +135,20 @@ const swiperModules = [Navigation, Keyboard, Virtual]
     <!-- 背景层 -->
     <AnimatePresence>
       <motion.div
-        v-if="isOpen"
+        v-if="isViewerOpen"
         :initial="{ opacity: 0 }"
         :animate="{ opacity: 1 }"
         :exit="{ opacity: 0 }"
         :transition="{ duration: 0.3 }"
         class="fixed inset-0 bg-white/50 dark:bg-black/50 backdrop-blur-sm z-50"
-        @click="emit('close')"
+        @click="closeViewer"
       />
     </AnimatePresence>
 
     <!-- 交叉溶解的 Thumbhash 背景 -->
     <AnimatePresence mode="sync">
       <motion.div
-        v-if="isOpen && currentPhoto?.thumbnailHash"
+        v-if="isViewerOpen && currentPhoto?.thumbnailHash"
         :key="currentPhoto.id"
         :initial="{ opacity: 0 }"
         :animate="{ opacity: 1 }"
@@ -168,7 +166,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
     <!-- 主内容区域 -->
     <AnimatePresence>
       <motion.div
-        v-if="isOpen"
+        v-if="isViewerOpen"
         :initial="{ opacity: 0 }"
         :animate="{ opacity: 1 }"
         :exit="{ opacity: 0 }"
@@ -176,7 +174,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
         ref="containerRef"
         class="fixed inset-0 z-50 flex items-center justify-center"
         :style="{ touchAction: isMobile ? 'manipulation' : 'none' }"
-        @click.self="emit('close')"
+        @click.self="closeViewer"
       >
         <div
           class="flex w-full h-full"
@@ -220,7 +218,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                   <button
                     type="button"
                     class="pointer-events-auto flex size-8 items-center justify-center rounded-full text-white backdrop-blur-xl duration-200 bg-black/30 hover:bg-black/40"
-                    @click="emit('close')"
+                    @click="closeViewer"
                   >
                     <Icon name="tabler:x" />
                   </button>
@@ -235,7 +233,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                 :modules="swiperModules"
                 :space-between="0"
                 :slides-per-view="1"
-                :initial-slide="currentIndex"
+                :initial-slide="currentPhotoIndex"
                 :virtual="true"
                 :keyboard="{
                   enabled: true,
@@ -262,31 +260,35 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                     <ProgressiveImage
                       class="h-full w-full object-contain"
                       :loading-indicator-ref="loadingIndicatorRef || null"
-                      :is-current-image="index === currentIndex"
+                      :is-current-image="index === currentPhotoIndex"
                       :src="photo.originalUrl!"
                       :thumbnail-src="photo.thumbnailUrl!"
                       :alt="photo.title || ''"
                       :width="
-                        index === currentIndex
+                        index === currentPhotoIndex
                           ? (currentPhoto?.width ?? undefined)
                           : undefined
                       "
                       :height="
-                        index === currentIndex
+                        index === currentPhotoIndex
                           ? (currentPhoto?.height ?? undefined)
                           : undefined
                       "
                       :enable-pan="
-                        index === currentIndex
+                        index === currentPhotoIndex
                           ? !isMobile || isImageZoomed
                           : true
                       "
                       :enable-zoom="true"
                       :on-zoom-change="
-                        index === currentIndex ? handleZoomChange : undefined
+                        index === currentPhotoIndex
+                          ? handleZoomChange
+                          : undefined
                       "
                       :on-blob-src-change="
-                        index === currentIndex ? handleBlobSrcChange : undefined
+                        index === currentPhotoIndex
+                          ? handleBlobSrcChange
+                          : undefined
                       "
                     />
                   </motion.div>
@@ -296,7 +298,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
               <!-- 自定义导航按钮 (桌面端) -->
               <template v-if="!isMobile">
                 <button
-                  v-if="currentIndex > 0"
+                  v-if="currentPhotoIndex > 0"
                   type="button"
                   class="absolute top-1/2 left-4 z-20 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-white opacity-0 backdrop-blur-sm duration-200 group-hover:opacity-100 bg-black/30 hover:bg-black/40"
                   @click="handlePrevious"
@@ -308,7 +310,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                 </button>
 
                 <button
-                  v-if="currentIndex < photos.length - 1"
+                  v-if="currentPhotoIndex < photos.length - 1"
                   type="button"
                   class="absolute top-1/2 right-4 z-20 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-white opacity-0 backdrop-blur-sm duration-200 group-hover:opacity-100 bg-black/30 hover:bg-black/40"
                   @click="handleNext"
@@ -324,9 +326,9 @@ const swiperModules = [Navigation, Keyboard, Virtual]
             <!-- 缩略图导航 -->
             <Suspense>
               <GalleryThumbnail
-                :current-index="currentIndex"
+                :current-index="currentPhotoIndex"
                 :photos="photos"
-                @index-change="(index: number) => emit('indexChange', index)"
+                @index-change="currentPhotoIndex = $event"
               />
             </Suspense>
           </div>

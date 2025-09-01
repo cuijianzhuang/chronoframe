@@ -8,6 +8,9 @@ const props = withDefaults(defineProps<Props>(), {
   columns: 'auto',
 })
 
+const router = useRouter()
+const { openViewer } = useViewerState()
+
 // Constants
 const FIRST_SCREEN_ITEMS_COUNT = 30
 const COLUMN_GAP = 4
@@ -49,11 +52,12 @@ const photoStats = computed(() => {
   const photosWithExif = props.photos?.filter((p) => p.exif).length || 0
 
   // Get date range of all photos
-  const allDates = props.photos
-    ?.map((p) => p?.dateTaken)
-    .filter((date): date is string => Boolean(date))
-    .map((date) => new Date(date))
-    .sort((a, b) => a.getTime() - b.getTime()) || []
+  const allDates =
+    props.photos
+      ?.map((p) => p?.dateTaken)
+      .filter((date): date is string => Boolean(date))
+      .map((date) => new Date(date))
+      .sort((a, b) => a.getTime() - b.getTime()) || []
 
   const dateRange =
     allDates.length > 0
@@ -196,8 +200,10 @@ onMounted(() => {
   })
 })
 
-const viewerIndex = ref(0)
-const isViewerOpen = ref(false)
+const handleOpenViewer = (index: number) => {
+  openViewer(index)
+  // router.replace(`/${props.photos[index]?.id}`)
+}
 </script>
 
 <template>
@@ -249,23 +255,10 @@ const isViewerOpen = ref(false)
           :hasAnimated
           :first-screen-items="FIRST_SCREEN_ITEMS_COUNT"
           @visibility-change="handleVisibilityChange"
-          @open-viewer="
-            (idx) => {
-              viewerIndex = idx
-              isViewerOpen = true
-            }
-          "
+          @open-viewer="handleOpenViewer($event)"
         />
       </div>
     </div>
-
-    <PhotoViewer
-      :photos="photos"
-      :current-index="viewerIndex"
-      :is-open="isViewerOpen"
-      @close="isViewerOpen = false"
-      @index-change="viewerIndex = $event"
-    />
   </div>
 </template>
 

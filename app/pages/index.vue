@@ -1,12 +1,28 @@
 <script lang="ts" setup>
 const { data } = useFetch('/api/photos')
 
+const route = useRoute()
+const router = useRouter()
+const { openViewer } = useViewerState()
+
 useHead({
   title: 'Gallery',
   titleTemplate: (title) => `${title} - TimoYin's mems`,
 })
 
 const photos = computed(() => (data.value as Photo[]) || [])
+
+// watch(
+//   () => route.params.photoId,
+//   (newPhotoId) => {
+//     if (newPhotoId) {
+//       const photo = photos.value.find((p) => p.id === newPhotoId)
+//       if (photo) {
+//         openViewer(photos.value.indexOf(photo))
+//       }
+//     }
+//   },
+// )
 </script>
 
 <template>
@@ -16,6 +32,7 @@ const photos = computed(() => (data.value as Photo[]) || [])
         :photos="photos"
         columns="auto"
       />
+      <PhotoViewer :photos />
       <template #fallback>
         <div
           class="fixed inset-0 flex flex-col gap-4 items-center justify-center"
