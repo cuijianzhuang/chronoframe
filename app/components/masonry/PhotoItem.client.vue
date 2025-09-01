@@ -32,7 +32,7 @@ const aspectRatio = computed(() => {
   if (props.photo.aspectRatio) {
     return props.photo.aspectRatio
   }
-  
+
   // Priority 2: Calculate from width and height if available
   if (props.photo.width && props.photo.height) {
     return props.photo.height / props.photo.width
@@ -202,7 +202,7 @@ onUnmounted(() => {
       <!-- Container with fixed aspect ratio -->
       <div
         class="w-full relative"
-        :style="{ aspectRatio: `1 / ${aspectRatio}` }"
+        :style="{ aspectRatio }"
       >
         <!-- Thumbhash placeholder -->
         <div
