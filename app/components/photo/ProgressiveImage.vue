@@ -79,7 +79,12 @@ watch(
       // 当图片不再是当前图片时，中断加载
       loaderManagerRef.value?.cleanup()
       loaderManagerRef.value = null
-    } else if (isCurrent && !wasCurrent && !highResLoaded.value && !hasError.value) {
+    } else if (
+      isCurrent &&
+      !wasCurrent &&
+      !highResLoaded.value &&
+      !hasError.value
+    ) {
       // 当图片变为当前图片且尚未加载高分辨率图片时，触发加载
       loadImage()
     }
@@ -159,14 +164,9 @@ onUnmounted(() => {
       :min-scale="1"
       :max-scale="5"
       :wheel="{ step: 0.2, wheelDisabled: false, touchPadDisabled: false }"
-      :pinch="{ step: 0.2, disabled: !enableZoom }"
-      :double-click="{
-        step: 0.7,
-        disabled: !enableZoom,
-        mode: 'toggle',
-        animationTime: 300,
-      }"
-      :panning="{ disabled: !enablePan, velocityDisabled: false }"
+      :pinch="{ step: 0.2 }"
+      :double-click="{ mode: 'toggle', step: 2.4, animationTime: 400 }"
+      :panning="{ velocityDisabled: false }"
       @zoom-change="handleZoomChange"
       @loading-state-change="handleWebGLStateChange"
     />

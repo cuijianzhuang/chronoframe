@@ -75,6 +75,9 @@ export class WebGLImageViewerEngine {
   private lastMousePos: Point | null = null
   private touchState: TouchState | null = null
   private lastClickTime = 0
+  private lastTouchTime = 0
+  private lastTouchPosition: Point | null = null
+  private hasMoved = false
 
   // WebGL 对象
   private positionBuffer: WebGLBuffer | null = null
@@ -670,8 +673,9 @@ export class WebGLImageViewerEngine {
     if (!this.isDragging || !this.lastMousePos || this.config.panningDisabled)
       return
 
-    const deltaX = event.clientX - this.lastMousePos.x
-    const deltaY = event.clientY - this.lastMousePos.y
+    const dpr = window.devicePixelRatio || 1
+    const deltaX = (event.clientX - this.lastMousePos.x) * dpr
+    const deltaY = (event.clientY - this.lastMousePos.y) * dpr
 
     this.transform.translateX += deltaX
     this.transform.translateY += deltaY
@@ -717,8 +721,9 @@ export class WebGLImageViewerEngine {
     event.preventDefault()
 
     const rect = this.canvas.getBoundingClientRect()
-    const centerX = event.clientX - rect.left
-    const centerY = event.clientY - rect.top
+    const dpr = window.devicePixelRatio || 1
+    const centerX = (event.clientX - rect.left) * dpr
+    const centerY = (event.clientY - rect.top) * dpr
 
     const scaleFactor =
       event.deltaY < 0 ? 1 + this.config.wheelStep : 1 - this.config.wheelStep
@@ -732,8 +737,9 @@ export class WebGLImageViewerEngine {
     if (now - this.lastClickTime < EVENT_CONFIG.DOUBLE_CLICK_DELAY) {
       // 双击
       const rect = this.canvas.getBoundingClientRect()
-      const centerX = event.clientX - rect.left
-      const centerY = event.clientY - rect.top
+      const dpr = window.devicePixelRatio || 1
+      const centerX = (event.clientX - rect.left) * dpr
+      const centerY = (event.clientY - rect.top) * dpr
 
       if (this.config.doubleClickMode === 'toggle') {
         const isZoomedIn = this.transform.scale > this.initialScale * 1.1
@@ -756,7 +762,9 @@ export class WebGLImageViewerEngine {
     const touches = getTouchPoints(event.touches)
 
     if (touches.length === 1 && touches[0]) {
-      // 单指拖拽
+      // 单指操作
+      this.hasMoved = false // 重置移动标志
+      
       if (!this.config.panningDisabled) {
         this.isDragging = true
         this.lastMousePos = touches[0]
@@ -788,8 +796,14 @@ export class WebGLImageViewerEngine {
       touches[0]
     ) {
       // 单指拖拽
-      const deltaX = touches[0].x - this.lastMousePos.x
-      const deltaY = touches[0].y - this.lastMousePos.y
+      const dpr = window.devicePixelRatio || 1
+      const deltaX = (touches[0].x - this.lastMousePos.x) * dpr
+      const deltaY = (touches[0].y - this.lastMousePos.y) * dpr
+
+      // 设置移动标志（检测是否超过最小移动距离）
+      if (Math.abs(deltaX) > 5 * dpr || Math.abs(deltaY) > 5 * dpr) {
+        this.hasMoved = true
+      }
 
       this.transform.translateX += deltaX
       this.transform.translateY += deltaY
@@ -817,18 +831,78 @@ export class WebGLImageViewerEngine {
 
       const scaleFactor = distance / this.touchState.lastDistance
       const rect = this.canvas.getBoundingClientRect()
+      const dpr = window.devicePixelRatio || 1
 
-      this.zoomAtPoint(center.x - rect.left, center.y - rect.top, scaleFactor)
+      // 转换为画布坐标系（考虑设备像素比）
+      const canvasX = (center.x - rect.left) * dpr
+      const canvasY = (center.y - rect.top) * dpr
+
+      this.zoomAtPoint(canvasX, canvasY, scaleFactor)
 
       this.touchState.lastDistance = distance
       this.touchState.lastCenter = center
     }
   }
 
-  private handleTouchEnd(): void {
+  private handleTouchEnd(event: TouchEvent): void {
+    const now = Date.now()
+    
+    // 只有在单指触摸且没有移动的情况下才处理双击
+    if (event.touches.length === 0 && this.lastMousePos && !this.hasMoved && !this.config.doubleClickDisabled) {
+      const currentTouchPosition = this.lastMousePos
+      
+      // 检查是否为双击
+      if (
+        this.lastTouchTime > 0 &&
+        now - this.lastTouchTime < EVENT_CONFIG.DOUBLE_CLICK_DELAY &&
+        this.lastTouchPosition &&
+        this.isNearPosition(currentTouchPosition, this.lastTouchPosition, 50)
+      ) {
+        // 双击逻辑
+        const rect = this.canvas.getBoundingClientRect()
+        const dpr = window.devicePixelRatio || 1
+        
+        // 转换为画布坐标系（考虑设备像素比）
+        const centerX = (currentTouchPosition.x - rect.left) * dpr
+        const centerY = (currentTouchPosition.y - rect.top) * dpr
+
+        if (this.config.doubleClickMode === 'toggle') {
+          const isZoomedIn = this.transform.scale > this.initialScale * 1.1
+          if (isZoomedIn) {
+            this.resetView()
+          } else {
+            this.zoomAtPoint(centerX, centerY, this.config.doubleClickStep, true)
+          }
+        } else {
+          this.zoomAtPoint(centerX, centerY, this.config.doubleClickStep, true)
+        }
+
+        // 重置双击状态，防止连续触发
+        this.lastTouchTime = 0
+        this.lastTouchPosition = null
+      } else {
+        // 记录这次触摸，为下次双击检测做准备
+        this.lastTouchTime = now
+        this.lastTouchPosition = currentTouchPosition
+      }
+    } else {
+      // 如果有移动或多指触摸，重置双击状态
+      this.lastTouchTime = 0
+      this.lastTouchPosition = null
+    }
+
+    // 清理拖拽状态
     this.isDragging = false
     this.lastMousePos = null
     this.touchState = null
+    this.hasMoved = false
+  }
+
+  private isNearPosition(pos1: Point, pos2: Point, threshold: number): boolean {
+    const distance = Math.sqrt(
+      Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2)
+    )
+    return distance <= threshold
   }
 
   // WebGL 上下文事件处理
@@ -870,16 +944,18 @@ export class WebGLImageViewerEngine {
   // 公共方法
   public zoomIn(animate = false): void {
     const rect = this.canvas.getBoundingClientRect()
-    const centerX = rect.width / 2
-    const centerY = rect.height / 2
+    const dpr = window.devicePixelRatio || 1
+    const centerX = (rect.width / 2) * dpr
+    const centerY = (rect.height / 2) * dpr
 
     this.zoomAtPoint(centerX, centerY, 1 + this.config.wheelStep, animate)
   }
 
   public zoomOut(animate = false): void {
     const rect = this.canvas.getBoundingClientRect()
-    const centerX = rect.width / 2
-    const centerY = rect.height / 2
+    const dpr = window.devicePixelRatio || 1
+    const centerX = (rect.width / 2) * dpr
+    const centerY = (rect.height / 2) * dpr
 
     this.zoomAtPoint(centerX, centerY, 1 - this.config.wheelStep, animate)
   }
@@ -887,8 +963,48 @@ export class WebGLImageViewerEngine {
   public resetView(): void {
     if (!this.image) return
 
-    this.centerImage()
-    this.animateTo(this.transform)
+    // 计算目标变换（重置状态），但不直接应用到当前变换
+    const targetTransform = this.calculateCenterTransform()
+    
+    // 使用动画过渡到目标状态
+    this.animateTo(targetTransform)
+  }
+
+  private calculateCenterTransform(): Transform {
+    if (!this.image || this.image.width <= 0 || this.image.height <= 0) {
+      return { ...this.transform }
+    }
+
+    const canvasAspect = this.canvas.width / this.canvas.height
+    const imageAspect = this.image.width / this.image.height
+
+    // 避免除零错误
+    if (this.canvas.width <= 0 || this.canvas.height <= 0) {
+      return { ...this.transform }
+    }
+
+    // 计算适合屏幕的初始缩放值
+    let initialScale: number
+    if (imageAspect > canvasAspect) {
+      initialScale = this.canvas.width / this.image.width
+    } else {
+      initialScale = this.canvas.height / this.image.height
+    }
+
+    // 设置初始缩放（这是相对缩放的基准）
+    this.initialScale = initialScale
+
+    // 基于相对缩放限制计算实际缩放值
+    const actualScale = this.clampScale(initialScale)
+
+    const scaledWidth = this.image.width * actualScale
+    const scaledHeight = this.image.height * actualScale
+
+    return {
+      scale: actualScale,
+      translateX: (this.canvas.width - scaledWidth) / 2,
+      translateY: (this.canvas.height - scaledHeight) / 2,
+    }
   }
 
   public getScale(): number {
@@ -1106,6 +1222,9 @@ export class WebGLImageViewerEngine {
     this.isDragging = false
     this.lastMousePos = null
     this.touchState = null
+    this.lastTouchTime = 0
+    this.lastTouchPosition = null
+    this.hasMoved = false
     this.image = null
 
     // 清理回调
