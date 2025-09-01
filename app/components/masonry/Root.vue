@@ -8,7 +8,6 @@ const props = withDefaults(defineProps<Props>(), {
   columns: 'auto',
 })
 
-const router = useRouter()
 const { openViewer } = useViewerState()
 
 // Constants

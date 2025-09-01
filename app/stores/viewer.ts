@@ -7,6 +7,10 @@ export const useViewerState = defineStore('photo-viewer-state', () => {
     isViewerOpen.value = true
   }
 
+  const switchToIndex = (index: number) => {
+    currentPhotoIndex.value = index
+  }
+
   const closeViewer = () => {
     isViewerOpen.value = false
   }
@@ -15,6 +19,7 @@ export const useViewerState = defineStore('photo-viewer-state', () => {
     currentPhotoIndex,
     isViewerOpen,
     openViewer,
+    switchToIndex,
     closeViewer,
   }
 })

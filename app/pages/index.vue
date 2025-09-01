@@ -1,50 +1,24 @@
 <script lang="ts" setup>
-const { data } = useFetch('/api/photos')
-
-const route = useRoute()
-const router = useRouter()
-const { openViewer } = useViewerState()
+const { switchToIndex, closeViewer } = useViewerState()
+const { currentPhotoIndex, isViewerOpen } = storeToRefs(useViewerState())
 
 useHead({
   title: 'Gallery',
   titleTemplate: (title) => `${title} - TimoYin's mems`,
 })
 
+const { data } = useFetch('/api/photos')
 const photos = computed(() => (data.value as Photo[]) || [])
-
-// watch(
-//   () => route.params.photoId,
-//   (newPhotoId) => {
-//     if (newPhotoId) {
-//       const photo = photos.value.find((p) => p.id === newPhotoId)
-//       if (photo) {
-//         openViewer(photos.value.indexOf(photo))
-//       }
-//     }
-//   },
-// )
 </script>
 
 <template>
-  <div class="h-svh px-1">
-    <ClientOnly>
-      <MasonryRoot
-        :photos="photos"
-        columns="auto"
-      />
-      <PhotoViewer :photos />
-      <template #fallback>
-        <div
-          class="fixed inset-0 flex flex-col gap-4 items-center justify-center"
-        >
-          <LoaderAvatar />
-          <span class="loading-scan-wrapper">
-            <span class="text-base font-medium loading-scan-text">LOADING</span>
-          </span>
-        </div>
-      </template>
-    </ClientOnly>
-  </div>
+  <PhotoViewer
+    :photos="photos"
+    :current-index="currentPhotoIndex"
+    :is-open="isViewerOpen"
+    @close="closeViewer"
+    @index-change="switchToIndex"
+  />
 </template>
 
 <style scoped>
