@@ -1,6 +1,7 @@
 import path from 'path'
 import {
   preprocessImage,
+  preprocessImageWithJpegUpload,
   processImageMetadataAndSharp,
 } from '../image/processor'
 import { generateThumbnailAndHash } from '../image/thumbnail'
@@ -10,6 +11,7 @@ import { compressUint8Array } from '~~/shared/utils/u8array'
 import { StorageObject } from '../storage'
 import { extractExifData, extractPhotoInfo } from '../image/exif'
 import { extractLocationFromGPS, parseGPSCoordinates } from '../location/geocoding'
+import { findLivePhotoVideoForImage } from '../video/livephoto'
 
 const generatePhotoId = (s3key: string) => {
   return path.basename(s3key, path.extname(s3key)).replace(/ /g, '_')
@@ -53,7 +55,7 @@ async function processPhotoInternal(
     const imageBuffers = await new Promise<any>((resolve, reject) => {
       setImmediate(async () => {
         try {
-          const result = await preprocessImage(s3key)
+          const result = await preprocessImageWithJpegUpload(s3key)
           resolve(result)
         } catch (error) {
           reject(error)
@@ -129,6 +131,28 @@ async function processPhotoInternal(
       }
     }
 
+    // 检查是否有对应的 LivePhoto 视频文件
+    let livePhotoInfo = null
+    const livePhotoVideo = await new Promise<any>((resolve, reject) => {
+      setImmediate(async () => {
+        try {
+          const result = await findLivePhotoVideoForImage(s3key)
+          resolve(result)
+        } catch (error) {
+          reject(error)
+        }
+      })
+    })
+
+    if (livePhotoVideo) {
+      livePhotoInfo = {
+        isLivePhoto: 1,
+        livePhotoVideoUrl: storageProvider.getPublicUrl(livePhotoVideo.videoKey),
+        livePhotoVideoKey: livePhotoVideo.videoKey,
+      }
+      log.info(`LivePhoto video found for ${s3key}: ${livePhotoVideo.videoKey}`)
+    }
+
     const thumbnailObject = await new Promise<any>((resolve, reject) => {
       setImmediate(async () => {
         try {
@@ -157,7 +181,9 @@ async function processPhotoInternal(
       fileSize: storageObject.size || null,
       lastModified:
         storageObject.lastModified?.toISOString() || new Date().toISOString(),
-      originalUrl: storageProvider.getPublicUrl(s3key),
+      originalUrl: imageBuffers.jpegKey 
+        ? storageProvider.getPublicUrl(imageBuffers.jpegKey)  // 使用 JPEG 版本作为 originalUrl
+        : storageProvider.getPublicUrl(s3key),
       thumbnailUrl: storageProvider.getPublicUrl(thumbnailObject.key),
       thumbnailHash: thumbnailHash ? compressUint8Array(thumbnailHash) : null,
       exif: exifData,
@@ -167,6 +193,10 @@ async function processPhotoInternal(
       country: locationInfo?.country || null,
       city: locationInfo?.city || null,
       locationName: locationInfo?.locationName || null,
+      // LivePhoto 相关字段
+      isLivePhoto: livePhotoInfo?.isLivePhoto || 0,
+      livePhotoVideoUrl: livePhotoInfo?.livePhotoVideoUrl || null,
+      livePhotoVideoKey: livePhotoInfo?.livePhotoVideoKey || null,
     }
 
     log.info(`Async processing completed for ${s3key}`)

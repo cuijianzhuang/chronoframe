@@ -197,6 +197,34 @@ const totalRowsCount = computed((): number => {
   return table.value?.tableApi?.getFilteredRowModel().rows.length || 0
 })
 
+// 计算 LivePhoto 统计
+const livePhotoStats = computed(() => {
+  if (!data.value) return { total: 0, livePhotos: 0, staticPhotos: 0 }
+  
+  const total = data.value.length
+  const livePhotos = data.value.filter((photo: Photo) => photo.isLivePhoto).length
+  const staticPhotos = total - livePhotos
+  
+  return { total, livePhotos, staticPhotos }
+})
+
+// 照片过滤器
+const photoFilter = ref<'all' | 'livephoto' | 'static'>('all')
+
+// 过滤后的数据
+const filteredData = computed(() => {
+  if (!data.value) return []
+  
+  switch (photoFilter.value) {
+    case 'livephoto':
+      return data.value.filter((photo: Photo) => photo.isLivePhoto)
+    case 'static':
+      return data.value.filter((photo: Photo) => !photo.isLivePhoto)
+    default:
+      return data.value
+  }
+})
+
 // 状态检查间隔
 let statusInterval: NodeJS.Timeout | null = null
 
@@ -227,6 +255,32 @@ const columns: TableColumn<Photo>[] = [
   {
     accessorKey: 'title',
     header: '照片标题',
+  },
+  {
+    accessorKey: 'isLivePhoto',
+    header: 'Live Photo',
+    cell: ({ row }) => {
+      const isLivePhoto = row.original.isLivePhoto
+      return h('div', { class: 'flex items-center gap-2' }, [
+        isLivePhoto 
+          ? h('div', { class: 'flex items-center gap-1' }, [
+              h('div', { 
+                class: 'size-2 bg-blue-500 rounded-full animate-pulse' 
+              }),
+              h('span', { 
+                class: 'text-blue-600 dark:text-blue-400 text-xs font-medium' 
+              }, 'Live Photo')
+            ])
+          : h('span', { 
+              class: 'text-gray-400 text-xs' 
+            }, '静态照片')
+      ])
+    },
+    sortingFn: (rowA, rowB) => {
+      const valueA = rowA.original.isLivePhoto ? 1 : 0
+      const valueB = rowB.original.isLivePhoto ? 1 : 0
+      return valueB - valueA // LivePhoto 优先排序
+    }
   },
   {
     accessorKey: 'lastModified',
@@ -286,13 +340,24 @@ const checkProcessingStatus = async () => {
 // 文件验证函数
 const validateFile = (file: File): { valid: boolean; error?: string } => {
   // 检查文件类型
-  // const allowedTypes = ['image/jpeg', 'image/png', 'image/heic', 'image/heif']
-  // if (!allowedTypes.includes(file.type)) {
-  //   return {
-  //     valid: false,
-  //     error: `不支持的文件格式: ${file.type}。请选择 JPEG、PNG 或 HEIC 格式的图片。`
-  //   }
-  // }
+  const allowedTypes = [
+    'image/jpeg', 
+    'image/png', 
+    'image/heic', 
+    'image/heif',
+    'video/quicktime', // MOV 文件
+    'video/mp4'        // MP4 文件（备用）
+  ]
+  
+  const isValidImageType = allowedTypes.includes(file.type)
+  const isValidVideoExtension = file.name.toLowerCase().endsWith('.mov')
+  
+  if (!isValidImageType && !isValidVideoExtension) {
+    return {
+      valid: false,
+      error: `不支持的文件格式: ${file.type}。请选择 JPEG、PNG、HEIC 格式的图片或 MOV 格式的 LivePhoto 视频。`
+    }
+  }
 
   // 检查文件大小 (128MB 限制)
   const maxSize = 128 * 1024 * 1024 // 128MB
@@ -326,10 +391,11 @@ const handleUpload = async () => {
     }
 
     const fileName = file.name
+    const isVideoFile = fileName.toLowerCase().endsWith('.mov')
     processingFiles.value.add(fileName)
 
     toast.add({
-      title: '开始上传照片',
+      title: isVideoFile ? '开始上传 LivePhoto 视频' : '开始上传照片',
       description: `正在上传 ${fileName} 到云存储...`,
       color: 'info',
     })
@@ -367,6 +433,90 @@ const handleDelete = async (photoId: string) => {
     method: 'DELETE',
   })
   refresh()
+}
+
+// LivePhoto 相关操作
+const handleViewLivePhoto = async (photoId: string) => {
+  try {
+    const livePhotoInfo = await $fetch(`/api/photos/${photoId}/livephoto`)
+    
+    if (livePhotoInfo.isLivePhoto && livePhotoInfo.livePhotoVideoUrl) {
+      // 设置模态框数据
+      selectedLivePhoto.value = {
+        id: livePhotoInfo.id,
+        title: livePhotoInfo.title,
+        originalUrl: livePhotoInfo.originalUrl || '',
+        videoUrl: livePhotoInfo.livePhotoVideoUrl
+      }
+      isLivePhotoModalOpen.value = true
+    } else {
+      toast.add({
+        title: '不是 LivePhoto',
+        description: '该照片不包含 LivePhoto 视频',
+        color: 'warning',
+      })
+    }
+  } catch (error) {
+    console.error('获取 LivePhoto 信息失败:', error)
+    toast.add({
+      title: '操作失败',
+      description: '无法获取 LivePhoto 信息',
+      color: 'error',
+    })
+  }
+}
+
+// LivePhoto 模态框相关状态
+const isLivePhotoModalOpen = ref(false)
+const selectedLivePhoto = ref<{
+  id: string
+  title: string | null
+  originalUrl: string
+  videoUrl: string
+} | null>(null)
+
+// 打开链接的辅助函数
+const openInNewTab = (url: string) => {
+  if (typeof window !== 'undefined') {
+    window.open(url, '_blank')
+  }
+}
+
+const handleUpdateLivePhoto = async (photoId: string) => {
+  try {
+    const updateToast = toast.add({
+      title: '正在检查 LivePhoto',
+      description: '正在检查是否有对应的视频文件...',
+      color: 'info',
+    })
+
+    const result = await $fetch('/api/photos/livephoto-manage', {
+      method: 'POST',
+      body: {
+        action: 'update-photo',
+        photoId: photoId,
+      },
+    }) as any
+
+    const isSuccess = 'success' in result && result.success
+    
+    toast.update(updateToast.id, {
+      title: isSuccess ? 'LivePhoto 更新成功' : 'LivePhoto 更新失败',
+      description: result.message,
+      color: isSuccess ? 'success' : 'warning',
+    })
+
+    if (isSuccess) {
+      await refresh()
+    }
+  } catch (error: any) {
+    console.error('LivePhoto 更新失败:', error)
+    toast.add({
+      title: 'LivePhoto 更新失败',
+      description: error.message || '更新过程中发生错误',
+      color: 'error',
+    })
+  }
 }
 
 // 批量删除功能
@@ -417,6 +567,44 @@ const handleBatchDelete = async () => {
       color: 'error',
     })
     console.error('批量删除错误:', error)
+  }
+}
+
+// 批量检测 LivePhoto 功能
+const handleBatchDetectLivePhoto = async () => {
+  try {
+    const detectToast = toast.add({
+      title: '正在批量检测 LivePhoto',
+      description: '正在检查所有照片的 LivePhoto 状态...',
+      color: 'info',
+    })
+
+    const result = await $fetch('/api/photos/livephoto-detect', {
+      method: 'POST',
+      body: {
+        action: 'batch-detect',
+      },
+    }) as any
+
+    const foundCount = result.results?.found || 0
+    const totalCount = result.results?.total || 0
+
+    toast.update(detectToast.id, {
+      title: 'LivePhoto 检测完成',
+      description: `检测了 ${totalCount} 张照片，发现 ${foundCount} 个潜在的 LivePhoto`,
+      color: foundCount > 0 ? 'success' : 'info',
+    })
+
+    if (foundCount > 0) {
+      await refresh()
+    }
+  } catch (error: any) {
+    console.error('批量检测 LivePhoto 失败:', error)
+    toast.add({
+      title: '批量检测失败',
+      description: error.message || '检测过程中发生错误',
+      color: 'error',
+    })
   }
 }
 
@@ -532,10 +720,10 @@ onUnmounted(() => {
       <UFileUpload
         v-model="selectedFiles"
         label="选择照片"
-        description="支持 JPEG、PNG、HEIC 格式，最大 256MB"
+        description="支持 JPEG、PNG、HEIC 格式照片，以及 MOV 格式 LivePhoto 视频，最大 256MB"
         layout="list"
         size="xl"
-        accept="image/jpeg,image/png,image/heic,image/heif"
+        accept="image/jpeg,image/png,image/heic,image/heif,video/quicktime,.mov"
         multiple
       />
       <UButton
@@ -548,6 +736,81 @@ onUnmounted(() => {
       >
         上传照片
       </UButton>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg">
+      <div class="flex items-center gap-2">
+        <UIcon
+          name="tabler:photo"
+          class="text-gray-500"
+        />
+        <span class="font-medium text-gray-700 dark:text-gray-300">
+          照片管理
+        </span>
+        <div class="flex items-center gap-2">
+          <UBadge
+            v-if="livePhotoStats.total > 0"
+            variant="soft"
+            color="info"
+          >
+            {{ livePhotoStats.total }} 张照片
+          </UBadge>
+          <UBadge
+            v-if="livePhotoStats.livePhotos > 0"
+            variant="soft"
+            color="success"
+          >
+            {{ livePhotoStats.livePhotos }} Live Photo
+          </UBadge>
+          <UBadge
+            v-if="livePhotoStats.staticPhotos > 0"
+            variant="soft"
+            color="neutral"
+          >
+            {{ livePhotoStats.staticPhotos }} 静态照片
+          </UBadge>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <!-- 过滤器 -->
+        <USelectMenu
+          v-model="photoFilter"
+          class="w-48"
+          :items="[
+            { label: '全部照片', value: 'all', icon: 'tabler:photo-scan' },
+            { label: 'Live Photo', value: 'livephoto', icon: 'tabler:live-photo' },
+            { label: '静态照片', value: 'static', icon: 'tabler:photo' }
+          ]"
+          value-key="value"
+          label-key="label"
+          size="sm"
+        >
+        </USelectMenu>
+
+        <!-- LivePhoto 批量检测按钮 -->
+        <UButton
+          variant="soft"
+          color="info"
+          size="sm"
+          icon="tabler:scan"
+          @click="handleBatchDetectLivePhoto"
+        >
+          批量检测 LivePhoto
+        </UButton>
+        
+        <!-- 刷新按钮 -->
+        <UButton
+          variant="ghost"
+          color="neutral"
+          size="sm"
+          icon="tabler:refresh"
+          @click="() => refresh()"
+        >
+          刷新
+        </UButton>
+      </div>
     </div>
 
     <!-- 批量操作栏 -->
@@ -591,7 +854,7 @@ onUnmounted(() => {
       <UTable
         ref="table"
         v-model:row-selection="rowSelection"
-        :data="data as Photo[]"
+        :data="filteredData as Photo[]"
         :columns="columns"
         :loading="status === 'pending'"
         sticky
@@ -602,14 +865,42 @@ onUnmounted(() => {
         }"
       >
         <template #actions-cell="{ row }">
-          <UButton
-            size="sm"
-            variant="soft"
-            color="error"
-            @click="handleDelete(row.original.id)"
-          >
-            删除
-          </UButton>
+          <div class="flex items-center gap-2">
+            <!-- LivePhoto 相关操作 -->
+            <template v-if="row.original.isLivePhoto">
+              <UButton
+                size="sm"
+                variant="soft"
+                color="info"
+                icon="tabler:live-photo"
+                @click="handleViewLivePhoto(row.original.id)"
+              >
+                Live Photo 预览
+              </UButton>
+            </template>
+            <template v-else>
+              <UButton
+                size="sm"
+                variant="ghost"
+                color="neutral"
+                icon="tabler:refresh"
+                @click="handleUpdateLivePhoto(row.original.id)"
+              >
+                检测 LivePhoto
+              </UButton>
+            </template>
+
+            <!-- 删除按钮 -->
+            <UButton
+              size="sm"
+              variant="soft"
+              color="error"
+              icon="tabler:trash"
+              @click="handleDelete(row.original.id)"
+            >
+              删除
+            </UButton>
+          </div>
         </template>
       </UTable>
 
@@ -620,6 +911,81 @@ onUnmounted(() => {
         {{ selectedRowsCount }} / {{ totalRowsCount }} 行已选择
       </div>
     </div>
+
+    <!-- LivePhoto 预览模态框 -->
+    <UModal v-model:open="isLivePhotoModalOpen">
+      <template #content>
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold">
+              Live Photo: {{ selectedLivePhoto?.title || 'Untitled' }}
+            </h3>
+            <UButton
+              variant="ghost"
+              color="neutral"
+              size="sm"
+              icon="tabler:x"
+              @click="isLivePhotoModalOpen = false"
+            />
+          </div>
+
+          <div v-if="selectedLivePhoto" class="space-y-4">
+            <!-- 静态图片预览 -->
+            <div class="space-y-2">
+              <h4 class="font-medium text-sm text-gray-600 dark:text-gray-400">
+                静态图片
+              </h4>
+              <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 flex justify-center">
+                <img
+                  :src="selectedLivePhoto.originalUrl"
+                  :alt="selectedLivePhoto.title || 'Live Photo'"
+                  class="max-h-64 object-contain rounded"
+                />
+              </div>
+            </div>
+
+            <!-- 视频预览 -->
+            <div class="space-y-2">
+              <h4 class="font-medium text-sm text-gray-600 dark:text-gray-400">
+                Live Photo 视频
+              </h4>
+              <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 flex justify-center">
+                <video
+                  :src="selectedLivePhoto.videoUrl"
+                  controls
+                  autoplay
+                  loop
+                  muted
+                  class="max-h-64 object-contain rounded"
+                >
+                  您的浏览器不支持视频播放
+                </video>
+              </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="flex justify-end gap-2 pt-4 border-t">
+              <UButton
+                variant="ghost"
+                color="neutral"
+                icon="tabler:external-link"
+                @click="() => { if (selectedLivePhoto) openInNewTab(selectedLivePhoto.videoUrl) }"
+              >
+                在新窗口打开视频
+              </UButton>
+              <UButton
+                variant="soft"
+                color="info"
+                icon="tabler:download"
+                @click="() => { if (selectedLivePhoto) openInNewTab(selectedLivePhoto.videoUrl) }"
+              >
+                下载视频
+              </UButton>
+            </div>
+          </div>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>
 

@@ -15,6 +15,13 @@
       "when": 1756737014171,
       "tag": "0001_narrow_spot",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1756831944824,
+      "tag": "0002_faulty_tyrannus",
+      "breakpoints": true
     }
   ]
 }

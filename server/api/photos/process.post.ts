@@ -1,5 +1,6 @@
 import { execPhotoPipelineAsync } from '~~/server/services/photo/pipeline-async'
 import { useStorageProvider } from '~~/server/utils/useStorageProvider'
+import { isLivePhotoVideo, processLivePhotoVideo } from '~~/server/services/video/livephoto'
 
 export default eventHandler(async (event) => {
   await requireUserSession(event)
@@ -32,7 +33,22 @@ export default eventHandler(async (event) => {
       lastModified: new Date(),
     }
 
-    logger.chrono.info('Starting photo processing for', fileKey)
+    logger.chrono.info('Starting file processing for', fileKey)
+
+    // 检查是否为 LivePhoto 视频文件
+    if (fileName && isLivePhotoVideo(fileName, fileSize || fileBuffer.length)) {
+      logger.chrono.info('LivePhoto video detected:', fileName)
+      
+      // 异步处理 LivePhoto 视频
+      processLivePhotoVideoInBackground(fileKey, fileSize || fileBuffer.length)
+      
+      return {
+        message: 'LivePhoto video processing started',
+        fileKey,
+        status: 'processing',
+        type: 'livephoto-video'
+      }
+    }
 
     // 异步处理照片
     processPhotoInBackground(fileKey, originalObject, fileName)
@@ -72,5 +88,22 @@ async function processPhotoInBackground(s3key: string, originalObject: any, orig
     logger.chrono.success('Background photo processing completed for', photo.title || photo.storageKey)
   } catch (error) {
     logger.chrono.error('Background photo processing error for', s3key, error)
+  }
+}
+
+// LivePhoto 视频后台处理函数
+async function processLivePhotoVideoInBackground(videoKey: string, videoSize: number) {
+  try {
+    logger.chrono.info('Starting background LivePhoto video processing for', videoKey)
+    
+    const success = await processLivePhotoVideo(videoKey, videoSize)
+    
+    if (success) {
+      logger.chrono.success('LivePhoto video processing completed for', videoKey)
+    } else {
+      logger.chrono.warn('LivePhoto video processing failed - no matching photo found for', videoKey)
+    }
+  } catch (error) {
+    logger.chrono.error('LivePhoto video processing error for', videoKey, error)
   }
 }
