@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatCameraInfo } from '~/utils/camera'
+import { motion, useDomRef } from 'motion-v'
 
 interface Props {
   photo: Photo
@@ -21,12 +22,24 @@ const ITEM_GAP = 4
 const isLoading = ref(true)
 const photoRef = ref<HTMLElement>()
 const mainImageRef = ref<HTMLImageElement>()
+const videoRef = useDomRef()
 const isVisible = ref(false)
 const containerWidth = ref(0)
+
+// LivePhoto related state
+const isHovering = ref(false)
+const isVideoPlaying = ref(false)
+const isVideoLoaded = ref(false)
+const videoBlob = ref<Blob | null>(null)
+const videoBlobUrl = ref<string | null>(null)
+const { convertMovToMp4, getProcessingState } = useLivePhotoProcessor()
 
 // Observers
 const resizeObserverRef = ref<ResizeObserver | null>(null)
 const intersectionObserverRef = ref<IntersectionObserver | null>(null)
+
+// LivePhoto processing state
+const processingState = getProcessingState(props.photo.id)
 
 // Computed
 const aspectRatio = computed(() => {
@@ -49,6 +62,14 @@ const containerHeight = computed(() => {
   return Math.round(currentWidth * aspectRatio.value)
 })
 
+// Show info overlay only when not playing video or video has finished
+const shouldShowInfoOverlay = computed(() => {
+  if (!props.photo.isLivePhoto) return true
+  if (!isHovering.value) return true
+  if (isVideoPlaying.value) return false
+  return isVideoLoaded.value
+})
+
 // Methods
 const handleImageLoad = (event: Event) => {
   isLoading.value = false
@@ -63,6 +84,77 @@ const handleImageError = () => {
 const checkImageLoaded = (img: HTMLImageElement) => {
   if (img.complete && img.naturalHeight !== 0) {
     isLoading.value = false
+  }
+}
+
+// LivePhoto video handling
+const handleMouseEnter = async () => {
+  if (!props.photo.isLivePhoto || !props.photo.livePhotoVideoUrl) return
+  
+  isHovering.value = true
+  
+  // Only start video processing if we have the blob ready
+  if (videoBlob.value && videoBlobUrl.value) {
+    playLivePhotoVideo()
+  }
+}
+
+const handleMouseLeave = () => {
+  isHovering.value = false
+  if (videoRef.value && !videoRef.value.paused) {
+    videoRef.value.pause()
+    videoRef.value.currentTime = 0
+  }
+  
+  // Use a slight delay for smoother transition when mouse leaves
+  setTimeout(() => {
+    if (!isHovering.value) { // Check again to avoid conflicts if mouse re-enters quickly
+      isVideoPlaying.value = false
+    }
+  }, 150)
+}
+
+const playLivePhotoVideo = () => {
+  if (!videoRef.value || !videoBlobUrl.value) return
+  
+  videoRef.value.currentTime = 0
+  
+  // Start the crossfade transition by setting video playing state first
+  isVideoPlaying.value = true
+  
+  // Then play the video after a small delay to ensure smooth transition
+  nextTick(() => {
+    videoRef.value?.play().catch((error: any) => {
+      console.warn('Failed to play LivePhoto video:', error)
+      isVideoPlaying.value = false
+    })
+  })
+}
+
+const handleVideoEnded = () => {
+  // Add a small delay before hiding video to make the transition smoother
+  setTimeout(() => {
+    isVideoPlaying.value = false
+  }, 100)
+}
+
+// Process LivePhoto when it becomes visible
+const processLivePhotoWhenVisible = async () => {
+  if (!props.photo.isLivePhoto || !props.photo.livePhotoVideoUrl || !isVisible.value) return
+  
+  try {
+    const blob = await convertMovToMp4(props.photo.livePhotoVideoUrl, props.photo.id)
+    if (blob) {
+      videoBlob.value = blob
+      // Clean up previous blob URL
+      if (videoBlobUrl.value) {
+        URL.revokeObjectURL(videoBlobUrl.value)
+      }
+      videoBlobUrl.value = URL.createObjectURL(blob)
+      isVideoLoaded.value = true
+    }
+  } catch (error) {
+    console.error('Failed to process LivePhoto:', error)
   }
 }
 
@@ -160,6 +252,13 @@ onMounted(() => {
                 isVisible: newVisibility,
                 date: props.photo.dateTaken || new Date().toISOString(),
               })
+              
+              // Process LivePhoto when it becomes visible
+              if (newVisibility) {
+                nextTick(() => {
+                  processLivePhotoWhenVisible()
+                })
+              }
             }
           })
         },
@@ -188,6 +287,11 @@ onUnmounted(() => {
   if (intersectionObserverRef.value) {
     intersectionObserverRef.value.disconnect()
   }
+  
+  // Clean up video blob URL
+  if (videoBlobUrl.value) {
+    URL.revokeObjectURL(videoBlobUrl.value)
+  }
 })
 </script>
 
@@ -199,6 +303,8 @@ onUnmounted(() => {
       marginBottom: `${ITEM_GAP}px`,
     }"
     @click="emit('openViewer', props.index)"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
   >
     <div class="relative group overflow-hidden transition-all duration-300">
       <!-- Container with fixed aspect ratio -->
@@ -224,16 +330,45 @@ onUnmounted(() => {
           class="absolute inset-0 w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse"
         />
 
-        <!-- Main image -->
-        <img
+        <!-- Main image with motion transition -->
+        <motion.img
           ref="mainImageRef"
           v-show="!isLoading"
           :src="photo.thumbnailUrl || ''"
           :alt="photo.title || photo.description || 'Photo'"
           class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          loading="lazy"
+          :initial="{ opacity: 1 }"
+          :animate="{ 
+            opacity: (!isVideoPlaying || !photo.isLivePhoto) ? 1 : 0 
+          }"
+          :transition="{ 
+            duration: 0.4, 
+            ease: [0.25, 0.1, 0.25, 1] // Custom cubic-bezier for smooth fade
+          }"
           @load="handleImageLoad"
           @error="handleImageError"
-          loading="lazy"
+        />
+
+        <!-- LivePhoto video with motion transition -->
+        <motion.video
+          v-if="photo.isLivePhoto && videoBlobUrl"
+          ref="videoRef"
+          :src="videoBlobUrl"
+          class="absolute inset-0 w-full h-full object-cover"
+          muted
+          playsinline
+          preload="metadata"
+          :initial="{ opacity: 0 }"
+          :animate="{ 
+            opacity: isVideoPlaying ? 1 : 0 
+          }"
+          :transition="{ 
+            duration: 0.4, 
+            ease: [0.25, 0.1, 0.25, 1],
+            delay: isVideoPlaying ? 0.1 : 0 // Slight delay when fading in video
+          }"
+          @ended="handleVideoEnded"
         />
       </div>
 
@@ -242,9 +377,51 @@ onUnmounted(() => {
         class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"
       />
 
+      <!-- Live Photo indicator -->
+      <motion.div
+        v-if="photo.isLivePhoto"
+        class="absolute top-2 left-2 backdrop-blur-md text-white rounded-full pl-1 pr-1.5 py-1 text-[13px] font-bold flex items-center gap-0.5 leading-0"
+        :animate="{
+          backgroundColor: isVideoPlaying ? 'rgba(0, 0, 0, 0.6)' : 'rgba(0, 0, 0, 0.3)',
+          scale: isVideoPlaying ? 1.05 : 1
+        }"
+        :transition="{
+          duration: 0.3,
+          ease: 'easeInOut'
+        }"
+      >
+        <Icon
+          name="tabler:live-photo"
+          class="size-[17px]"
+          :class="{ 'text-yellow-300': isVideoPlaying }"
+        />
+        <span :class="{ 'text-yellow-300': isVideoPlaying }">实况</span>
+        
+        <!-- Processing progress indicator -->
+        <div
+          v-if="processingState?.isProcessing"
+          class="ml-1 flex items-center gap-1"
+        >
+          <div class="size-2 bg-white/70 rounded-full animate-pulse" />
+          <span class="text-[11px] text-white/80">
+            {{ Math.round(processingState.progress || 0) }}%
+          </span>
+        </div>
+      </motion.div>
+
       <!-- Photo info overlay (bottom) -->
-      <div
-        class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300"
+      <motion.div
+        v-show="shouldShowInfoOverlay"
+        class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3"
+        :initial="{ y: '100%', opacity: 0 }"
+        :animate="{
+          y: isHovering && shouldShowInfoOverlay ? 0 : '100%',
+          opacity: isHovering && shouldShowInfoOverlay ? 1 : 0
+        }"
+        :transition="{
+          duration: 0.3,
+          ease: [0.25, 0.1, 0.25, 1]
+        }"
       >
         <div class="text-white flex flex-col gap-1">
           <div class="flex flex-col">
@@ -341,7 +518,7 @@ onUnmounted(() => {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   </div>
 </template>
