@@ -32,7 +32,7 @@ export interface ImageLoaderCacheResult {
 const normalImageCache: LRUCache<string, ImageLoaderCacheResult> = new LRUCache<
   string,
   ImageLoaderCacheResult
->(10, (v, k, reason) => {
+>(6, (v, k, reason) => {
   try {
     URL.revokeObjectURL(v.blobSrc)
     console.log(`已释放 Blob URL - ${k} (${reason})`)
