@@ -89,9 +89,9 @@ const checkImageLoaded = (img: HTMLImageElement) => {
 
 // LivePhoto video handling
 const handleMouseEnter = async () => {
-  if (!props.photo.isLivePhoto || !props.photo.livePhotoVideoUrl) return
-  
   isHovering.value = true
+  
+  if (!props.photo.isLivePhoto || !props.photo.livePhotoVideoUrl) return
   
   // Only start video processing if we have the blob ready
   if (videoBlob.value && videoBlobUrl.value) {
