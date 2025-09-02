@@ -390,6 +390,7 @@ onUnmounted(() => {
           ease: 'easeInOut'
         }"
       >
+        <!-- TODO: Apple style loading -->
         <Icon
           name="tabler:live-photo"
           class="size-[17px]"
@@ -402,7 +403,7 @@ onUnmounted(() => {
           v-if="processingState?.isProcessing"
           class="ml-1 flex items-center gap-1"
         >
-          <div class="size-2 bg-white/70 rounded-full animate-pulse" />
+          <div class="size-1 bg-white/70 rounded-full animate-pulse" />
           <span class="text-[11px] text-white/80">
             {{ Math.round(processingState.progress || 0) }}%
           </span>

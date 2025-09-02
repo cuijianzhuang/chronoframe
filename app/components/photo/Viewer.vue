@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { motion, AnimatePresence } from 'motion-v'
+import { motion, AnimatePresence, useDomRef } from 'motion-v'
 import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Navigation, Keyboard, Virtual } from 'swiper/modules'
 import type { Swiper as SwiperType } from 'swiper'
@@ -38,9 +38,28 @@ const zoomLevel = ref(0)
 const showZoomLevel = ref(false)
 const zoomLevelTimer = ref<NodeJS.Timeout | null>(null)
 
+// LivePhoto state
+const isLivePhotoHovering = ref(false)
+const isLivePhotoPlaying = ref(false)
+const isLivePhotoTouching = ref(false)
+const livePhotoVideoBlob = ref<Blob | null>(null)
+const livePhotoVideoBlobUrl = ref<string | null>(null)
+const livePhotoVideoRef = useDomRef()
+const longPressTimer = ref<NodeJS.Timeout | null>(null)
+
+// Import LivePhoto processor
+const { convertMovToMp4, getProcessingState } = useLivePhotoProcessor()
+
 // Computed
 const currentPhoto = computed(() => props.photos[props.currentIndex])
 const isMobile = useMediaQuery('(max-width: 768px)')
+
+// LivePhoto processing state
+const livePhotoProcessingState = computed(() => {
+  return currentPhoto.value
+    ? getProcessingState(currentPhoto.value.id)
+    : ref(null)
+})
 
 // 当 PhotoViewer 关闭时重置状态
 watch(
@@ -52,6 +71,21 @@ watch(
       currentBlobSrc.value = null
       zoomLevel.value = 0
       showZoomLevel.value = false
+
+      // Reset LivePhoto state
+      isLivePhotoHovering.value = false
+      isLivePhotoPlaying.value = false
+      isLivePhotoTouching.value = false
+      if (longPressTimer.value) {
+        clearTimeout(longPressTimer.value)
+        longPressTimer.value = null
+      }
+      if (livePhotoVideoBlobUrl.value) {
+        URL.revokeObjectURL(livePhotoVideoBlobUrl.value)
+        livePhotoVideoBlobUrl.value = null
+      }
+      livePhotoVideoBlob.value = null
+
       if (zoomLevelTimer.value) {
         clearTimeout(zoomLevelTimer.value)
         zoomLevelTimer.value = null
@@ -60,16 +94,11 @@ watch(
       document.body.style.overflow = ''
     } else {
       document.body.style.overflow = 'hidden'
+      // Process current LivePhoto when viewer opens
+      nextTick(() => {
+        processCurrentLivePhoto()
+      })
     }
-    // if (isOpen && currentPhoto.value) {
-    //   useHead({
-    //     title: currentPhoto.value.title,
-    //   })
-    // } else {
-    //   useHead({
-    //     title: 'Gallery',
-    //   })
-    // }
   },
   { immediate: true },
 )
@@ -84,6 +113,20 @@ watch(
     // 切换图片时重置缩放状态
     isImageZoomed.value = false
     zoomLevel.value = 0
+
+    // Reset LivePhoto state when switching photos
+    isLivePhotoPlaying.value = false
+    isLivePhotoHovering.value = false
+    isLivePhotoTouching.value = false
+    if (longPressTimer.value) {
+      clearTimeout(longPressTimer.value)
+      longPressTimer.value = null
+    }
+
+    // Process new current LivePhoto
+    nextTick(() => {
+      processCurrentLivePhoto()
+    })
   },
 )
 
@@ -152,6 +195,106 @@ const handleImageLoaded = () => {
   }, 2000)
 }
 
+// LivePhoto processing and playback functions
+const processCurrentLivePhoto = async () => {
+  const photo = currentPhoto.value
+  if (!photo || !photo.isLivePhoto || !photo.livePhotoVideoUrl) return
+
+  try {
+    const blob = await convertMovToMp4(photo.livePhotoVideoUrl, photo.id)
+    if (blob) {
+      livePhotoVideoBlob.value = blob
+      // Clean up previous blob URL
+      if (livePhotoVideoBlobUrl.value) {
+        URL.revokeObjectURL(livePhotoVideoBlobUrl.value)
+      }
+      livePhotoVideoBlobUrl.value = URL.createObjectURL(blob)
+    }
+  } catch (error) {
+    console.error('Failed to process LivePhoto in viewer:', error)
+  }
+}
+
+const playLivePhotoVideo = () => {
+  if (!livePhotoVideoRef.value || !livePhotoVideoBlobUrl.value) return
+
+  livePhotoVideoRef.value.currentTime = 0
+  isLivePhotoPlaying.value = true
+
+  livePhotoVideoRef.value?.play().catch((error: any) => {
+    console.warn('Failed to play LivePhoto video in viewer:', error)
+    isLivePhotoPlaying.value = false
+  })
+}
+
+const stopLivePhotoVideo = () => {
+  if (livePhotoVideoRef.value && !livePhotoVideoRef.value.paused) {
+    livePhotoVideoRef.value?.pause()
+    livePhotoVideoRef.value.currentTime = 0
+  }
+  isLivePhotoPlaying.value = false
+}
+
+const handleLivePhotoMouseEnter = () => {
+  if (
+    !isMobile.value &&
+    currentPhoto.value?.isLivePhoto &&
+    livePhotoVideoBlobUrl.value
+  ) {
+    isLivePhotoHovering.value = true
+    playLivePhotoVideo()
+  }
+}
+
+const handleLivePhotoMouseLeave = () => {
+  if (!isMobile.value) {
+    isLivePhotoHovering.value = false
+    stopLivePhotoVideo()
+  }
+}
+
+const handleLivePhotoTouchStart = (event: TouchEvent) => {
+  if (
+    isMobile.value &&
+    currentPhoto.value?.isLivePhoto &&
+    livePhotoVideoBlobUrl.value
+  ) {
+    // Only handle single finger touch to avoid conflicts with pinch-to-zoom
+    if (event.touches.length === 1) {
+      isLivePhotoTouching.value = true
+
+      // Set a 500ms timer before starting playback
+      longPressTimer.value = setTimeout(() => {
+        if (isLivePhotoTouching.value) {
+          playLivePhotoVideo()
+        }
+      }, 350)
+    }
+  }
+}
+
+const handleLivePhotoTouchEnd = () => {
+  if (isMobile.value) {
+    isLivePhotoTouching.value = false
+
+    // Clear the long press timer
+    if (longPressTimer.value) {
+      clearTimeout(longPressTimer.value)
+      longPressTimer.value = null
+    }
+
+    // Stop video playback
+    stopLivePhotoVideo()
+  }
+}
+
+const handleLivePhotoVideoEnded = () => {
+  // Video ended naturally, keep it visible but reset to beginning
+  if (livePhotoVideoRef.value) {
+    livePhotoVideoRef.value.currentTime = 0
+  }
+}
+
 defineShortcuts({
   escape: () => {
     emit('close')
@@ -163,6 +306,17 @@ onUnmounted(() => {
   if (zoomLevelTimer.value) {
     clearTimeout(zoomLevelTimer.value)
     zoomLevelTimer.value = null
+  }
+
+  if (longPressTimer.value) {
+    clearTimeout(longPressTimer.value)
+    longPressTimer.value = null
+  }
+
+  // Clean up LivePhoto blob URL
+  if (livePhotoVideoBlobUrl.value) {
+    URL.revokeObjectURL(livePhotoVideoBlobUrl.value)
+    livePhotoVideoBlobUrl.value = null
   }
 })
 
@@ -236,6 +390,45 @@ const swiperModules = [Navigation, Keyboard, Virtual]
               >
                 <!-- 左侧工具按钮 -->
                 <div class="flex items-center gap-2">
+                  <!-- LivePhoto 标志 -->
+                  <div
+                    v-if="currentPhoto?.isLivePhoto"
+                    class="pointer-events-auto backdrop-blur-md bg-black/40 text-white rounded-full pl-1 pr-1.5 py-1 text-[13px] font-bold flex items-center gap-0.5 leading-0 select-none"
+                    :class="isMobile ? 'cursor-default' : 'cursor-pointer'"
+                    @mouseenter="handleLivePhotoMouseEnter"
+                    @mouseleave="handleLivePhotoMouseLeave"
+                  >
+                    <!-- TODO: Apple style loading -->
+                    <Icon
+                      name="tabler:live-photo"
+                      class="size-[17px]"
+                      :class="{ 'text-yellow-300': isLivePhotoPlaying }"
+                    />
+                    <span :class="{ 'text-yellow-300': isLivePhotoPlaying }">
+                      实况
+                    </span>
+
+                    <!-- Processing progress indicator -->
+                    <div
+                      v-if="livePhotoProcessingState?.value?.isProcessing"
+                      class="ml-1 flex items-center gap-1"
+                    >
+                      <div
+                        class="size-1 bg-white/70 rounded-full animate-pulse"
+                      />
+                      <span class="text-[11px] text-white/80">
+                        {{
+                          Math.round(
+                            livePhotoProcessingState.value.progress || 0,
+                          )
+                        }}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 右侧按钮组 -->
+                <div class="flex items-center gap-2">
                   <!-- 信息按钮 - 在移动设备上显示 -->
                   <button
                     v-if="isMobile"
@@ -250,10 +443,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                   >
                     <Icon name="tabler:info-circle" />
                   </button>
-                </div>
 
-                <!-- 右侧按钮组 -->
-                <div class="flex items-center gap-2">
                   <!-- 关闭按钮 -->
                   <button
                     type="button"
@@ -296,9 +486,17 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                     :exit="{ opacity: 0, scale: 0.95 }"
                     :transition="{ type: 'spring', duration: 0.4, bounce: 0 }"
                     class="relative flex h-full w-full items-center justify-center"
+                    @touchstart="handleLivePhotoTouchStart"
+                    @touchend="handleLivePhotoTouchEnd"
+                    @touchcancel="handleLivePhotoTouchEnd"
                   >
+                    <!-- Main Image -->
                     <ProgressiveImage
-                      class="h-full w-full object-contain"
+                      class="h-full w-full object-contain transition-opacity duration-400"
+                      :class="{
+                        'opacity-0':
+                          isLivePhotoPlaying && currentPhoto?.isLivePhoto,
+                      }"
                       :loading-indicator-ref="loadingIndicatorRef || null"
                       :is-current-image="index === currentIndex"
                       :src="photo.originalUrl!"
@@ -329,6 +527,39 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                       :on-image-loaded="
                         index === currentIndex ? handleImageLoaded : undefined
                       "
+                      :is-live-photo="photo.isLivePhoto === 1"
+                      :live-photo-video-url="
+                        photo.livePhotoVideoUrl || undefined
+                      "
+                    />
+
+                    <!-- LivePhoto Video -->
+                    <motion.video
+                      v-if="
+                        photo.isLivePhoto &&
+                        index === currentIndex &&
+                        livePhotoVideoBlobUrl
+                      "
+                      :ref="
+                        (el) => {
+                          if (index === currentIndex) livePhotoVideoRef = el
+                        }
+                      "
+                      :src="livePhotoVideoBlobUrl"
+                      class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                      muted
+                      playsinline
+                      preload="metadata"
+                      :initial="{ opacity: 0 }"
+                      :animate="{
+                        opacity: isLivePhotoPlaying ? 1 : 0,
+                      }"
+                      :transition="{
+                        duration: 0.4,
+                        ease: [0.25, 0.1, 0.25, 1],
+                        delay: isLivePhotoPlaying ? 0.1 : 0,
+                      }"
+                      @ended="handleLivePhotoVideoEnded"
                     />
 
                     <!-- 缩放倍率提示 -->
@@ -350,16 +581,26 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                     <!-- 操作提示 -->
                     <AnimatePresence>
                       <motion.div
-                        v-if="!isImageZoomed"
+                        v-if="!isImageZoomed && !isLivePhotoPlaying"
                         :initial="{ opacity: 0, scale: 0.95 }"
                         :animate="{ opacity: 0.6, scale: 1 }"
                         :exit="{ opacity: 0, scale: 0.95 }"
                         :transition="{ duration: 0.2 }"
                         class="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 bg-black/50 rounded-lg border border-white/10 px-2 py-1 shadow-2xl text-white text-xs font-bold"
                       >
-                        {{
-                          isMobile ? '双击或捏合缩放' : '双击或用鼠标滚轮缩放'
-                        }}
+                        <span v-if="currentPhoto?.isLivePhoto && isMobile">
+                          长按播放实况照片 · 双击或捏合缩放
+                        </span>
+                        <span
+                          v-else-if="currentPhoto?.isLivePhoto && !isMobile"
+                        >
+                          悬停左上角实况标志播放 · 双击或鼠标滚轮缩放
+                        </span>
+                        <span v-else>
+                          {{
+                            isMobile ? '双击或捏合缩放' : '双击或用鼠标滚轮缩放'
+                          }}
+                        </span>
                       </motion.div>
                     </AnimatePresence>
                   </motion.div>
