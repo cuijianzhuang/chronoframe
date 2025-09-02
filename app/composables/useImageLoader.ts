@@ -12,7 +12,8 @@ export const useImageLoader = (
   updateBlobSrc?: (blobSrc: string | null) => void,
   updateHighResLoaded?: (highResLoaded: boolean) => void,
   updateError?: (error: boolean) => void,
-  updateHighResImageRendered?: (isRendered: boolean) => void
+  updateHighResImageRendered?: (isRendered: boolean) => void,
+  onImageLoaded?: () => void
 ) => {
   if (highResLoaded || !isCurrentImage || error) return null
 
@@ -38,6 +39,7 @@ export const useImageLoader = (
 
       updateBlobSrc?.(loadResult.blobSrc)
       updateHighResLoaded?.(true)
+      onImageLoaded?.() // 通知图片加载完成
     } catch (err) {
       updateError?.(true)
       loadingIndicatorRef?.updateLoadingState({

@@ -16,8 +16,9 @@ interface Props {
   loadingIndicatorRef: LoadingIndicatorRef | null
   onProgress?: (progress: number) => void
   onError?: () => void
-  onZoomChange?: (isZoomed: boolean) => void
+  onZoomChange?: (isZoomed: boolean, level?: number) => void
   onBlobSrcChange?: (blobSrc: string | null) => void
+  onImageLoaded?: () => void
   isLivePhoto?: boolean
   livePhotoVideoUrl?: string
   isHDR?: boolean
@@ -68,6 +69,7 @@ const loadImage = () => {
     (loaded) => (highResLoaded.value = loaded),
     (error) => (hasError.value = error),
     (rendered) => (highResRendered.value = rendered),
+    props.onImageLoaded,
   )
 }
 
@@ -125,7 +127,7 @@ const handleWebGLStateChange = useWebGLWorkState(props.loadingIndicatorRef)
 const handleZoomChange = (originalScale: number, relativeScale: number) => {
   const isZoomed = relativeScale > 1.1 // 认为缩放超过 1.1 倍算作缩放状态
   if (props.onZoomChange) {
-    props.onZoomChange(isZoomed)
+    props.onZoomChange(isZoomed, Math.round(originalScale * 10) / 10) // 传递绝对倍率并保留一位小数
   }
 }
 
@@ -162,7 +164,7 @@ onUnmounted(() => {
       :limit-to-bounds="true"
       :smooth="true"
       :min-scale="1"
-      :max-scale="5"
+      :max-scale="12"
       :wheel="{ step: 0.2, wheelDisabled: false, touchPadDisabled: false }"
       :pinch="{ step: 0.2 }"
       :double-click="{ mode: 'toggle', step: 2.4, animationTime: 400 }"

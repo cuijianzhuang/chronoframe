@@ -34,6 +34,9 @@ const loadingIndicatorRef = ref<LoadingIndicatorRef>()
 const isImageZoomed = ref(false)
 const showExifPanel = ref(false)
 const currentBlobSrc = ref<string | null>(null)
+const zoomLevel = ref(0)
+const showZoomLevel = ref(false)
+const zoomLevelTimer = ref<NodeJS.Timeout | null>(null)
 
 // Computed
 const currentPhoto = computed(() => props.photos[props.currentIndex])
@@ -47,6 +50,12 @@ watch(
       isImageZoomed.value = false
       showExifPanel.value = false
       currentBlobSrc.value = null
+      zoomLevel.value = 0
+      showZoomLevel.value = false
+      if (zoomLevelTimer.value) {
+        clearTimeout(zoomLevelTimer.value)
+        zoomLevelTimer.value = null
+      }
       // TODO: 实现自定义的 ScrollArea 后移除
       document.body.style.overflow = ''
     } else {
@@ -75,6 +84,7 @@ watch(
     }
     // 切换图片时重置缩放状态
     isImageZoomed.value = false
+    zoomLevel.value = 0
   },
 )
 
@@ -111,18 +121,50 @@ const handleSlideChange = (swiper: SwiperType) => {
 }
 
 // Handle image events
-const handleZoomChange = (isZoomed: boolean) => {
+const handleZoomChange = (isZoomed: boolean, level?: number) => {
   isImageZoomed.value = isZoomed
+  if (level !== undefined) {
+    zoomLevel.value = level
+    // 缩放变化时显示缩放倍率 2 秒
+    showZoomLevel.value = true
+    if (zoomLevelTimer.value) {
+      clearTimeout(zoomLevelTimer.value)
+    }
+    zoomLevelTimer.value = setTimeout(() => {
+      showZoomLevel.value = false
+      zoomLevelTimer.value = null
+    }, 2000)
+  }
 }
 
 const handleBlobSrcChange = (blobSrc: string | null) => {
   currentBlobSrc.value = blobSrc
 }
 
+const handleImageLoaded = () => {
+  // 图片加载完成时显示缩放倍率 2 秒
+  showZoomLevel.value = true
+  if (zoomLevelTimer.value) {
+    clearTimeout(zoomLevelTimer.value)
+  }
+  zoomLevelTimer.value = setTimeout(() => {
+    showZoomLevel.value = false
+    zoomLevelTimer.value = null
+  }, 2000)
+}
+
 defineShortcuts({
   escape: () => {
     emit('close')
   },
+})
+
+// 清理定时器
+onUnmounted(() => {
+  if (zoomLevelTimer.value) {
+    clearTimeout(zoomLevelTimer.value)
+    zoomLevelTimer.value = null
+  }
 })
 
 // Swiper modules
@@ -285,7 +327,42 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                       :on-blob-src-change="
                         index === currentIndex ? handleBlobSrcChange : undefined
                       "
+                      :on-image-loaded="
+                        index === currentIndex ? handleImageLoaded : undefined
+                      "
                     />
+
+                    <!-- 缩放倍率提示 -->
+                    <AnimatePresence>
+                      <motion.div
+                        v-if="showZoomLevel && zoomLevel > 0"
+                        :initial="{ opacity: 0, y: 10 }"
+                        :animate="{ opacity: 1, y: 0 }"
+                        :exit="{ opacity: 0, y: 10 }"
+                        :transition="{ duration: 0.2 }"
+                        class="absolute bottom-4 left-4 z-20 bg-black/40 backdrop-blur-3xl rounded-xl border border-white/10 px-4 py-2 shadow-2xl"
+                      >
+                        <span class="text-white font-medium"
+                          >{{ zoomLevel }}x</span
+                        >
+                      </motion.div>
+                    </AnimatePresence>
+
+                    <!-- 操作提示 -->
+                    <AnimatePresence>
+                      <motion.div
+                        v-if="!isImageZoomed"
+                        :initial="{ opacity: 0, scale: 0.95 }"
+                        :animate="{ opacity: 0.6, scale: 1 }"
+                        :exit="{ opacity: 0, scale: 0.95 }"
+                        :transition="{ duration: 0.2 }"
+                        class="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 bg-black/50 rounded-lg border border-white/10 px-2 py-1 shadow-2xl text-white text-xs font-bold"
+                      >
+                        {{
+                          isMobile ? '双击或捏合缩放' : '双击或用鼠标滚轮缩放'
+                        }}
+                      </motion.div>
+                    </AnimatePresence>
                   </motion.div>
                 </SwiperSlide>
               </Swiper>
