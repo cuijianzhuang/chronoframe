@@ -61,16 +61,15 @@ watch(
     } else {
       document.body.style.overflow = 'hidden'
     }
-
-    if (isOpen && currentPhoto.value) {
-      useHead({
-        title: currentPhoto.value.title,
-      })
-    } else {
-      useHead({
-        title: 'Gallery',
-      })
-    }
+    // if (isOpen && currentPhoto.value) {
+    //   useHead({
+    //     title: currentPhoto.value.title,
+    //   })
+    // } else {
+    //   useHead({
+    //     title: 'Gallery',
+    //   })
+    // }
   },
   { immediate: true },
 )

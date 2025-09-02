@@ -9,7 +9,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const dayjs = useDayjs()
-const { openViewer } = useViewerState()
+const router = useRouter()
 
 // Constants
 const FIRST_SCREEN_ITEMS_COUNT = 30
@@ -107,7 +107,7 @@ const updateDateRange = () => {
   }
 
   const visiblePhotosArray = Array.from(visiblePhotos.value)
-  
+
   // Calculate visible dates
   const visibleDates = visiblePhotosArray
     .map((index) => props.photos[index]?.dateTaken)
@@ -119,9 +119,9 @@ const updateDateRange = () => {
   const cities = visiblePhotosArray
     .map((index) => props.photos[index]?.city)
     .filter((city): city is string => Boolean(city))
-  
+
   const uniqueCities = [...new Set(cities)]
-  
+
   if (uniqueCities.length === 0) {
     visibleCities.value = undefined
   } else if (uniqueCities.length === 1) {
@@ -196,8 +196,7 @@ onMounted(() => {
 })
 
 const handleOpenViewer = (index: number) => {
-  openViewer(index)
-  // router.replace(`/${props.photos[index]?.id}`)
+  router.push(`/${props.photos[index]?.id}`)
 }
 </script>
 
