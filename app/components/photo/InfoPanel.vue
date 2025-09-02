@@ -59,37 +59,40 @@ const formatExposureTime = (
 const formatGPSCoordinates = (latitude: number, longitude: number): string => {
   const latDirection = latitude >= 0 ? 'N' : 'S'
   const lngDirection = longitude >= 0 ? 'E' : 'W'
-  
+
   const latDegrees = Math.abs(latitude)
   const lngDegrees = Math.abs(longitude)
-  
+
   const latDeg = Math.floor(latDegrees)
   const latMin = Math.floor((latDegrees - latDeg) * 60)
   const latSec = ((latDegrees - latDeg) * 60 - latMin) * 60
-  
+
   const lngDeg = Math.floor(lngDegrees)
   const lngMin = Math.floor((lngDegrees - lngDeg) * 60)
   const lngSec = ((lngDegrees - lngDeg) * 60 - lngMin) * 60
-  
+
   return `${latDeg}°${latMin}'${latSec.toFixed(2)}"${latDirection}, ${lngDeg}°${lngMin}'${lngSec.toFixed(2)}"${lngDirection}`
 }
 
 // 格式化GPS坐标为两行显示
-const formatGPSCoordinatesMultiLine = (latitude: number, longitude: number): string => {
+const formatGPSCoordinatesMultiLine = (
+  latitude: number,
+  longitude: number,
+): string => {
   const latDirection = latitude >= 0 ? 'N' : 'S'
   const lngDirection = longitude >= 0 ? 'E' : 'W'
-  
+
   const latDegrees = Math.abs(latitude)
   const lngDegrees = Math.abs(longitude)
-  
+
   const latDeg = Math.floor(latDegrees)
   const latMin = Math.floor((latDegrees - latDeg) * 60)
   const latSec = ((latDegrees - latDeg) * 60 - latMin) * 60
-  
+
   const lngDeg = Math.floor(lngDegrees)
   const lngMin = Math.floor((lngDegrees - lngDeg) * 60)
   const lngSec = ((lngDegrees - lngDeg) * 60 - lngMin) * 60
-  
+
   return `${latDeg}°${latMin}'${latSec.toFixed(2)}"${latDirection}\n${lngDeg}°${lngMin}'${lngSec.toFixed(2)}"${lngDirection}`
 }
 
@@ -101,7 +104,7 @@ const gpsCoordinates = computed(() => {
       longitude: props.currentPhoto.longitude,
     }
   }
-  
+
   // 如果数据库中没有，尝试从EXIF数据中获取
   if (!props.exifData) return null
   const { GPSLatitude, GPSLongitude } = props.exifData
@@ -204,7 +207,10 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.currentPhoto.latitude && props.currentPhoto.longitude
           ? {
               label: '坐标',
-              value: formatGPSCoordinatesMultiLine(props.currentPhoto.latitude, props.currentPhoto.longitude),
+              value: formatGPSCoordinatesMultiLine(
+                props.currentPhoto.latitude,
+                props.currentPhoto.longitude,
+              ),
               icon: 'tabler:gps',
             }
           : null,
@@ -257,14 +263,20 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.exifData?.Make && props.exifData?.Model
           ? {
               label: '相机',
-              value: formatCameraInfo(props.exifData.Make, props.exifData.Model),
+              value: formatCameraInfo(
+                props.exifData.Make,
+                props.exifData.Model,
+              ),
               icon: 'tabler:camera',
             }
           : null,
         props.exifData?.LensModel
           ? {
               label: '镜头',
-              value: formatLensInfo(props.exifData.LensMake, props.exifData.LensModel),
+              value: formatLensInfo(
+                props.exifData.LensMake,
+                props.exifData.LensModel,
+              ),
               icon: 'tabler:focus',
             }
           : null,
@@ -475,7 +487,7 @@ const isMobile = useMediaQuery('(max-width: 768px)')
 
       <PhotoMiniMap
         v-if="gpsCoordinates"
-        :photo-id="currentPhoto.id"
+        :photo="currentPhoto"
         :latitude="gpsCoordinates?.latitude"
         :longitude="gpsCoordinates?.longitude"
       />

@@ -2,10 +2,12 @@
 import { motion } from 'motion-v'
 
 const props = defineProps<{
-  photoId: string
+  photo: Photo
   latitude: number
   longitude: number
 }>()
+
+const MAPID = 'minimap-info-panel'
 
 const loaded = ref(false)
 const isAnimating = ref(false)
@@ -48,6 +50,31 @@ const moveMapTo = (newLat: number, newLng: number) => {
 
 watch([() => props.latitude, () => props.longitude], ([newLat, newLng]) => {
   moveMapTo(newLat, newLng)
+  if (mapInstance.value) {
+    // 根据拍摄时间决定四种 lightPreset: dawn / day / dusk / night
+    const photoDate = new Date(props.photo.dateTaken || 0)
+    const hours = photoDate.getHours()
+    if (hours >= 5 && hours < 7) {
+      mapInstance.value.setConfigProperty('basemap', 'lightPreset', 'dawn')
+    } else if (hours >= 7 && hours < 17) {
+      mapInstance.value.setConfigProperty('basemap', 'lightPreset', 'day')
+    } else if (hours >= 17 && hours < 21) {
+      mapInstance.value.setConfigProperty('basemap', 'lightPreset', 'dusk')
+    } else {
+      mapInstance.value.setConfigProperty('basemap', 'lightPreset', 'night')
+    }
+  }
+})
+
+onUnmounted(() => {
+  if (animationTimer) {
+    clearTimeout(animationTimer)
+    animationTimer = null
+  }
+  if (mapInstance.value) {
+    mapInstance.value.remove()
+    mapInstance.value = null
+  }
 })
 </script>
 
@@ -55,13 +82,20 @@ watch([() => props.latitude, () => props.longitude], ([newLat, newLng]) => {
   <div
     class="relative w-full h-44 overflow-hidden rounded-lg border border-white/10 dark:border-white/10"
   >
+    <!-- mapbox://styles/hoshinosuzumi/cmev0eujf01dw01pje3g9cmlg -->
     <MapboxMap
       class="w-full h-full relative overflow-hidden"
-      :map-id="`minimap-info-panel`"
+      :map-id="MAPID"
       :options="{
-        style: 'mapbox://styles/hoshinosuzumi/cmev0eujf01dw01pje3g9cmlg',
+        style: 'mapbox://styles/mapbox/standard',
         zoom: 12,
+        config: {
+          basemap: {
+            colorThemes: 'faded'
+          }
+        },
         interactive: false,
+        language: 'zh-Hans'
       }"
       @load="onMapLoad"
     >
