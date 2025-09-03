@@ -224,6 +224,11 @@ const playLivePhotoVideo = () => {
   livePhotoVideoRef.value.currentTime = 0
   isLivePhotoPlaying.value = true
 
+  // Provide haptic feedback on mobile when starting playback
+  if (isMobile.value && 'vibrate' in navigator) {
+    navigator.vibrate(50) // Short vibration for start
+  }
+
   livePhotoVideoRef.value?.play().catch((error: any) => {
     console.warn('Failed to play LivePhoto video in viewer:', error)
     isLivePhotoPlaying.value = false
@@ -231,9 +236,16 @@ const playLivePhotoVideo = () => {
 }
 
 const stopLivePhotoVideo = () => {
+  const wasPlaying = isLivePhotoPlaying.value
+
   if (livePhotoVideoRef.value && !livePhotoVideoRef.value.paused) {
     livePhotoVideoRef.value?.pause()
     livePhotoVideoRef.value.currentTime = 0
+
+    // Provide haptic feedback on mobile when manually stopping playback
+    if (isMobile.value && wasPlaying && 'vibrate' in navigator) {
+      navigator.vibrate(25) // Very short vibration for manual stop
+    }
   }
   isLivePhotoPlaying.value = false
 }
@@ -263,7 +275,7 @@ const handleLivePhotoTouchStart = (event: TouchEvent) => {
     livePhotoVideoBlobUrl.value
   ) {
     touchCount.value = event.touches.length
-    
+
     // Only handle single finger touch to avoid conflicts with pinch-to-zoom
     if (event.touches.length === 1) {
       // Prevent browser's default long-press actions (context menu, image save dialog, etc.)
@@ -273,7 +285,11 @@ const handleLivePhotoTouchStart = (event: TouchEvent) => {
       // Set a 500ms timer before starting playback
       longPressTimer.value = setTimeout(() => {
         // Double check: only play if still single touch and touching
-        if (isLivePhotoTouching.value && touchCount.value === 1 && !isImageZoomed.value) {
+        if (
+          isLivePhotoTouching.value &&
+          touchCount.value === 1 &&
+          !isImageZoomed.value
+        ) {
           playLivePhotoVideo()
         }
       }, 350)
@@ -300,17 +316,17 @@ const handleLivePhotoTouchEnd = () => {
 const handleLivePhotoTouchMove = (event: TouchEvent) => {
   if (isMobile.value && isLivePhotoTouching.value) {
     touchCount.value = event.touches.length
-    
+
     // If user adds more fingers (pinch-to-zoom), cancel LivePhoto playback
     if (event.touches.length > 1) {
       isLivePhotoTouching.value = false
-      
+
       // Clear the long press timer
       if (longPressTimer.value) {
         clearTimeout(longPressTimer.value)
         longPressTimer.value = null
       }
-      
+
       // Stop video playback
       stopLivePhotoVideo()
     }
@@ -318,6 +334,11 @@ const handleLivePhotoTouchMove = (event: TouchEvent) => {
 }
 
 const handleLivePhotoVideoEnded = () => {
+  // Provide haptic feedback on mobile when ending playback
+  if (isMobile.value && 'vibrate' in navigator) {
+    navigator.vibrate(30) // Shorter vibration for end
+  }
+
   // Video ended naturally, keep it visible but reset to beginning
   if (livePhotoVideoRef.value) {
     livePhotoVideoRef.value.currentTime = 0
@@ -515,7 +536,12 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                     :exit="{ opacity: 0, scale: 0.95 }"
                     :transition="{ type: 'spring', duration: 0.4, bounce: 0 }"
                     class="relative flex h-full w-full items-center justify-center"
-                    style="user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;"
+                    style="
+                      user-select: none;
+                      -webkit-user-select: none;
+                      -webkit-touch-callout: none;
+                      -webkit-tap-highlight-color: transparent;
+                    "
                     @touchstart="handleLivePhotoTouchStart"
                     @touchmove="handleLivePhotoTouchMove"
                     @touchend="handleLivePhotoTouchEnd"

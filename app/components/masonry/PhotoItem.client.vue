@@ -15,6 +15,8 @@ const emit = defineEmits<{
   openViewer: [number]
 }>()
 
+const toast = useToast()
+
 // Constants
 const ITEM_GAP = 4
 
@@ -38,6 +40,7 @@ const { convertMovToMp4, getProcessingState } = useLivePhotoProcessor()
 const isTouching = ref(false)
 const touchCount = ref(0)
 const longPressTimer = ref<NodeJS.Timeout | null>(null)
+const initialTouchPos = ref<{ x: number; y: number } | null>(null)
 const isMobile = useMediaQuery('(max-width: 768px)')
 
 // Observers
@@ -71,13 +74,13 @@ const containerHeight = computed(() => {
 // Show info overlay only when not playing video or video has finished
 const shouldShowInfoOverlay = computed(() => {
   if (!props.photo.isLivePhoto) return true
-  
+
   // On mobile, don't show overlay when touching or playing video
   if (isMobile.value) {
     if (isTouching.value || isVideoPlaying.value) return false
     return true
   }
-  
+
   // On desktop, show overlay when hovering but not playing video
   if (!isHovering.value) return true
   if (isVideoPlaying.value) return false
@@ -105,11 +108,11 @@ const checkImageLoaded = (img: HTMLImageElement) => {
 const handleMouseEnter = async () => {
   // Skip mouse events on mobile devices
   if (isMobile.value) return
-  
+
   isHovering.value = true
-  
+
   if (!props.photo.isLivePhoto || !props.photo.livePhotoVideoUrl) return
-  
+
   // Only start video processing if we have the blob ready
   if (videoBlob.value && videoBlobUrl.value) {
     playLivePhotoVideo()
@@ -119,16 +122,17 @@ const handleMouseEnter = async () => {
 const handleMouseLeave = () => {
   // Skip mouse events on mobile devices
   if (isMobile.value) return
-  
+
   isHovering.value = false
   if (videoRef.value && !videoRef.value.paused) {
     videoRef.value.pause()
     videoRef.value.currentTime = 0
   }
-  
+
   // Use a slight delay for smoother transition when mouse leaves
   setTimeout(() => {
-    if (!isHovering.value && !isTouching.value) { // Also check touching state
+    if (!isHovering.value && !isTouching.value) {
+      // Also check touching state
       isVideoPlaying.value = false
     }
   }, 150)
@@ -136,12 +140,17 @@ const handleMouseLeave = () => {
 
 const playLivePhotoVideo = () => {
   if (!videoRef.value || !videoBlobUrl.value) return
-  
+
   videoRef.value.currentTime = 0
-  
+
   // Start the crossfade transition by setting video playing state first
   isVideoPlaying.value = true
-  
+
+  // Provide haptic feedback on mobile when starting playback
+  if (isMobile.value && 'vibrate' in navigator) {
+    navigator.vibrate(50) // Short vibration for start
+  }
+
   // Then play the video after a small delay to ensure smooth transition
   nextTick(() => {
     videoRef.value?.play().catch((error: any) => {
@@ -152,6 +161,11 @@ const playLivePhotoVideo = () => {
 }
 
 const handleVideoEnded = () => {
+  // Provide haptic feedback on mobile when ending playback
+  if (isMobile.value && 'vibrate' in navigator) {
+    navigator.vibrate(30) // Shorter vibration for end
+  }
+
   // Add a small delay before hiding video to make the transition smoother
   setTimeout(() => {
     isVideoPlaying.value = false
@@ -161,58 +175,82 @@ const handleVideoEnded = () => {
 // Mobile touch handlers for LivePhoto
 const handleTouchStart = (event: TouchEvent) => {
   if (!isMobile.value || !props.photo.isLivePhoto || !videoBlobUrl.value) return
-  
+
   touchCount.value = event.touches.length
-  
+
   // Only handle single finger touch to avoid conflicts with pinch-to-zoom and scrolling
   if (event.touches.length === 1) {
-    // Prevent default behavior to avoid conflicts
-    event.preventDefault()
-    isTouching.value = true
-    
-    // Set a timer for long press (350ms)
-    longPressTimer.value = setTimeout(() => {
-      // Double check: only play if still single touch and touching
-      if (isTouching.value && touchCount.value === 1) {
-        playLivePhotoVideo()
-      }
-    }, 350)
+    const touch = event.touches[0]
+    if (touch) {
+      initialTouchPos.value = { x: touch.clientX, y: touch.clientY }
+      isTouching.value = true
+
+      // Set a timer for long press (350ms)
+      longPressTimer.value = setTimeout(() => {
+        // Double check: only play if still single touch and touching
+        if (isTouching.value && touchCount.value === 1) {
+          playLivePhotoVideo()
+        }
+      }, 350)
+    }
   }
 }
 
 const handleTouchMove = (event: TouchEvent) => {
-  if (!isMobile.value || !isTouching.value) return
-  
+  if (!isMobile.value || !isTouching.value || !initialTouchPos.value) return
+
   touchCount.value = event.touches.length
-  
-  // If user adds more fingers or moves too much, cancel LivePhoto playback
+
+  // If user adds more fingers, cancel LivePhoto playback
   if (event.touches.length > 1) {
     cancelLivePhotoTouch()
+    return
+  }
+
+  // Check if user is moving finger significantly (scrolling intent)
+  const touch = event.touches[0]
+  if (touch) {
+    const deltaX = Math.abs(touch.clientX - initialTouchPos.value.x)
+    const deltaY = Math.abs(touch.clientY - initialTouchPos.value.y)
+    const threshold = 10 // pixels
+
+    // If movement exceeds threshold, cancel LivePhoto and allow scrolling
+    if (deltaX > threshold || deltaY > threshold) {
+      cancelLivePhotoTouch()
+    }
   }
 }
 
 const handleTouchEnd = () => {
   if (!isMobile.value) return
-  
+
   cancelLivePhotoTouch()
 }
 
 const cancelLivePhotoTouch = () => {
+  const wasPlaying = isVideoPlaying.value
+
   touchCount.value = 0
   isTouching.value = false
-  
+  initialTouchPos.value = null
+
   // Clear the long press timer
   if (longPressTimer.value) {
     clearTimeout(longPressTimer.value)
     longPressTimer.value = null
   }
-  
+
   // Stop video playback
   if (videoRef.value && !videoRef.value.paused) {
     videoRef.value.pause()
     videoRef.value.currentTime = 0
+
+    // Provide haptic feedback on mobile when manually stopping playback
+    if (isMobile.value && wasPlaying && 'vibrate' in navigator) {
+      navigator.vibrate(25) // Very short vibration for manual stop
+    }
   }
-  
+
   // Use a slight delay for smoother transition
   setTimeout(() => {
     if (!isTouching.value && !isHovering.value) {
@@ -221,12 +259,34 @@ const cancelLivePhotoTouch = () => {
   }, 150)
 }
 
+// Handle click events - prevent opening viewer when video is playing
+const handleClick = (event: Event) => {
+  // On mobile, if video is playing or user is touching, don't open the viewer
+  if (isMobile.value && (isVideoPlaying.value || isTouching.value)) {
+    event.preventDefault()
+    event.stopPropagation()
+    return
+  }
+
+  // On desktop, always allow opening the viewer
+  // Otherwise, open the viewer
+  emit('openViewer', props.index)
+}
+
 // Process LivePhoto when it becomes visible
 const processLivePhotoWhenVisible = async () => {
-  if (!props.photo.isLivePhoto || !props.photo.livePhotoVideoUrl || !isVisible.value) return
-  
+  if (
+    !props.photo.isLivePhoto ||
+    !props.photo.livePhotoVideoUrl ||
+    !isVisible.value
+  )
+    return
+
   try {
-    const blob = await convertMovToMp4(props.photo.livePhotoVideoUrl, props.photo.id)
+    const blob = await convertMovToMp4(
+      props.photo.livePhotoVideoUrl,
+      props.photo.id,
+    )
     if (blob) {
       videoBlob.value = blob
       // Clean up previous blob URL
@@ -335,7 +395,7 @@ onMounted(() => {
                 isVisible: newVisibility,
                 date: props.photo.dateTaken || new Date().toISOString(),
               })
-              
+
               // Process LivePhoto when it becomes visible
               if (newVisibility) {
                 nextTick(() => {
@@ -370,13 +430,13 @@ onUnmounted(() => {
   if (intersectionObserverRef.value) {
     intersectionObserverRef.value.disconnect()
   }
-  
+
   // Clean up touch timer
   if (longPressTimer.value) {
     clearTimeout(longPressTimer.value)
     longPressTimer.value = null
   }
-  
+
   // Clean up video blob URL
   if (videoBlobUrl.value) {
     URL.revokeObjectURL(videoBlobUrl.value)
@@ -390,19 +450,14 @@ onUnmounted(() => {
     class="inline-block w-full align-top break-inside-avoid transition-all duration-300 cursor-pointer select-none"
     :style="{
       marginBottom: `${ITEM_GAP}px`,
-      userSelect: 'none',
-      WebkitUserSelect: 'none',
-      WebkitTouchCallout: 'none',
-      WebkitTapHighlightColor: 'transparent',
     }"
-    @click="emit('openViewer', props.index)"
+    @click="handleClick"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
     @touchstart="handleTouchStart"
     @touchmove="handleTouchMove"
     @touchend="handleTouchEnd"
     @touchcancel="handleTouchEnd"
-    @contextmenu.prevent=""
   >
     <div class="relative group overflow-hidden transition-all duration-300">
       <!-- Container with fixed aspect ratio -->
@@ -437,15 +492,16 @@ onUnmounted(() => {
           class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
           :initial="{ opacity: 1 }"
-          :animate="{ 
-            opacity: (!isVideoPlaying || !photo.isLivePhoto) ? 1 : 0 
+          :animate="{
+            opacity: !isVideoPlaying || !photo.isLivePhoto ? 1 : 0,
           }"
-          :transition="{ 
-            duration: 0.4, 
-            ease: [0.25, 0.1, 0.25, 1] // Custom cubic-bezier for smooth fade
+          :transition="{
+            duration: 0.4,
+            ease: [0.25, 0.1, 0.25, 1], // Custom cubic-bezier for smooth fade
           }"
           @load="handleImageLoad"
           @error="handleImageError"
+          @contextmenu.prevent=""
         />
 
         <!-- LivePhoto video with motion transition -->
@@ -453,18 +509,19 @@ onUnmounted(() => {
           v-if="photo.isLivePhoto && videoBlobUrl"
           ref="videoRef"
           :src="videoBlobUrl"
-          class="absolute inset-0 w-full h-full object-cover select-none"
+          class="absolute inset-0 w-full h-full object-cover"
+          :class="{ 'select-none pointer-events-none': isVideoPlaying }"
           muted
           playsinline
           preload="metadata"
           :initial="{ opacity: 0 }"
-          :animate="{ 
-            opacity: isVideoPlaying ? 1 : 0 
+          :animate="{
+            opacity: isVideoPlaying ? 1 : 0,
           }"
-          :transition="{ 
-            duration: 0.4, 
+          :transition="{
+            duration: 0.4,
             ease: [0.25, 0.1, 0.25, 1],
-            delay: isVideoPlaying ? 0.1 : 0 // Slight delay when fading in video
+            delay: isVideoPlaying ? 0.1 : 0, // Slight delay when fading in video
           }"
           @ended="handleVideoEnded"
           @contextmenu.prevent=""
@@ -481,12 +538,14 @@ onUnmounted(() => {
         v-if="photo.isLivePhoto"
         class="absolute top-2 left-2 backdrop-blur-md text-white rounded-full pl-1 pr-1.5 py-1 text-[13px] font-bold flex items-center gap-0.5 leading-0"
         :animate="{
-          backgroundColor: isVideoPlaying ? 'rgba(0, 0, 0, 0.6)' : 'rgba(0, 0, 0, 0.3)',
-          scale: isVideoPlaying ? 1.05 : 1
+          backgroundColor: isVideoPlaying
+            ? 'rgba(0, 0, 0, 0.6)'
+            : 'rgba(0, 0, 0, 0.3)',
+          scale: isVideoPlaying ? 1.05 : 1,
         }"
         :transition="{
           duration: 0.3,
-          ease: 'easeInOut'
+          ease: 'easeInOut',
         }"
       >
         <!-- TODO: Apple style loading -->
@@ -496,7 +555,7 @@ onUnmounted(() => {
           :class="{ 'text-yellow-300': isVideoPlaying }"
         />
         <span :class="{ 'text-yellow-300': isVideoPlaying }">实况</span>
-        
+
         <!-- Processing progress indicator -->
         <div
           v-if="processingState?.isProcessing"
@@ -516,11 +575,11 @@ onUnmounted(() => {
         :initial="{ y: '100%', opacity: 0 }"
         :animate="{
           y: shouldShowInfoOverlay && isHovering && !isMobile ? 0 : '100%',
-          opacity: shouldShowInfoOverlay && isHovering && !isMobile ? 1 : 0
+          opacity: shouldShowInfoOverlay && isHovering && !isMobile ? 1 : 0,
         }"
         :transition="{
           duration: 0.3,
-          ease: [0.25, 0.1, 0.25, 1]
+          ease: [0.25, 0.1, 0.25, 1],
         }"
       >
         <div class="text-white flex flex-col gap-1">
