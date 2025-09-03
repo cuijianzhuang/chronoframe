@@ -42,6 +42,7 @@ const zoomLevelTimer = ref<NodeJS.Timeout | null>(null)
 const isLivePhotoHovering = ref(false)
 const isLivePhotoPlaying = ref(false)
 const isLivePhotoTouching = ref(false)
+const touchCount = ref(0)
 const livePhotoVideoBlob = ref<Blob | null>(null)
 const livePhotoVideoBlobUrl = ref<string | null>(null)
 const livePhotoVideoRef = useDomRef()
@@ -76,6 +77,7 @@ watch(
       isLivePhotoHovering.value = false
       isLivePhotoPlaying.value = false
       isLivePhotoTouching.value = false
+      touchCount.value = 0
       if (longPressTimer.value) {
         clearTimeout(longPressTimer.value)
         longPressTimer.value = null
@@ -118,6 +120,7 @@ watch(
     isLivePhotoPlaying.value = false
     isLivePhotoHovering.value = false
     isLivePhotoTouching.value = false
+    touchCount.value = 0
     if (longPressTimer.value) {
       clearTimeout(longPressTimer.value)
       longPressTimer.value = null
@@ -259,13 +262,18 @@ const handleLivePhotoTouchStart = (event: TouchEvent) => {
     currentPhoto.value?.isLivePhoto &&
     livePhotoVideoBlobUrl.value
   ) {
+    touchCount.value = event.touches.length
+    
     // Only handle single finger touch to avoid conflicts with pinch-to-zoom
     if (event.touches.length === 1) {
+      // Prevent browser's default long-press actions (context menu, image save dialog, etc.)
+      event.preventDefault()
       isLivePhotoTouching.value = true
 
       // Set a 500ms timer before starting playback
       longPressTimer.value = setTimeout(() => {
-        if (isLivePhotoTouching.value) {
+        // Double check: only play if still single touch and touching
+        if (isLivePhotoTouching.value && touchCount.value === 1 && !isImageZoomed.value) {
           playLivePhotoVideo()
         }
       }, 350)
@@ -275,6 +283,7 @@ const handleLivePhotoTouchStart = (event: TouchEvent) => {
 
 const handleLivePhotoTouchEnd = () => {
   if (isMobile.value) {
+    touchCount.value = 0
     isLivePhotoTouching.value = false
 
     // Clear the long press timer
@@ -285,6 +294,26 @@ const handleLivePhotoTouchEnd = () => {
 
     // Stop video playback
     stopLivePhotoVideo()
+  }
+}
+
+const handleLivePhotoTouchMove = (event: TouchEvent) => {
+  if (isMobile.value && isLivePhotoTouching.value) {
+    touchCount.value = event.touches.length
+    
+    // If user adds more fingers (pinch-to-zoom), cancel LivePhoto playback
+    if (event.touches.length > 1) {
+      isLivePhotoTouching.value = false
+      
+      // Clear the long press timer
+      if (longPressTimer.value) {
+        clearTimeout(longPressTimer.value)
+        longPressTimer.value = null
+      }
+      
+      // Stop video playback
+      stopLivePhotoVideo()
+    }
   }
 }
 
@@ -486,9 +515,12 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                     :exit="{ opacity: 0, scale: 0.95 }"
                     :transition="{ type: 'spring', duration: 0.4, bounce: 0 }"
                     class="relative flex h-full w-full items-center justify-center"
+                    style="user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;"
                     @touchstart="handleLivePhotoTouchStart"
+                    @touchmove="handleLivePhotoTouchMove"
                     @touchend="handleLivePhotoTouchEnd"
                     @touchcancel="handleLivePhotoTouchEnd"
+                    @contextmenu.prevent=""
                   >
                     <!-- Main Image -->
                     <ProgressiveImage
@@ -546,7 +578,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                         }
                       "
                       :src="livePhotoVideoBlobUrl"
-                      class="absolute inset-0 w-full h-full object-contain pointer-events-none"
+                      class="absolute inset-0 w-full h-full object-contain pointer-events-none select-none touch-none"
                       muted
                       playsinline
                       preload="metadata"
@@ -560,6 +592,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                         delay: isLivePhotoPlaying ? 0.1 : 0,
                       }"
                       @ended="handleLivePhotoVideoEnded"
+                      @contextmenu.prevent=""
                     />
 
                     <!-- 缩放倍率提示 -->
