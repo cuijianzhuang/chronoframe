@@ -34,6 +34,12 @@ const videoBlob = ref<Blob | null>(null)
 const videoBlobUrl = ref<string | null>(null)
 const { convertMovToMp4, getProcessingState } = useLivePhotoProcessor()
 
+// Mobile touch state for LivePhoto
+const isTouching = ref(false)
+const touchCount = ref(0)
+const longPressTimer = ref<NodeJS.Timeout | null>(null)
+const isMobile = useMediaQuery('(max-width: 768px)')
+
 // Observers
 const resizeObserverRef = ref<ResizeObserver | null>(null)
 const intersectionObserverRef = ref<IntersectionObserver | null>(null)
@@ -65,6 +71,14 @@ const containerHeight = computed(() => {
 // Show info overlay only when not playing video or video has finished
 const shouldShowInfoOverlay = computed(() => {
   if (!props.photo.isLivePhoto) return true
+  
+  // On mobile, don't show overlay when touching or playing video
+  if (isMobile.value) {
+    if (isTouching.value || isVideoPlaying.value) return false
+    return true
+  }
+  
+  // On desktop, show overlay when hovering but not playing video
   if (!isHovering.value) return true
   if (isVideoPlaying.value) return false
   return isVideoLoaded.value
@@ -89,6 +103,9 @@ const checkImageLoaded = (img: HTMLImageElement) => {
 
 // LivePhoto video handling
 const handleMouseEnter = async () => {
+  // Skip mouse events on mobile devices
+  if (isMobile.value) return
+  
   isHovering.value = true
   
   if (!props.photo.isLivePhoto || !props.photo.livePhotoVideoUrl) return
@@ -100,6 +117,9 @@ const handleMouseEnter = async () => {
 }
 
 const handleMouseLeave = () => {
+  // Skip mouse events on mobile devices
+  if (isMobile.value) return
+  
   isHovering.value = false
   if (videoRef.value && !videoRef.value.paused) {
     videoRef.value.pause()
@@ -108,7 +128,7 @@ const handleMouseLeave = () => {
   
   // Use a slight delay for smoother transition when mouse leaves
   setTimeout(() => {
-    if (!isHovering.value) { // Check again to avoid conflicts if mouse re-enters quickly
+    if (!isHovering.value && !isTouching.value) { // Also check touching state
       isVideoPlaying.value = false
     }
   }, 150)
@@ -136,6 +156,69 @@ const handleVideoEnded = () => {
   setTimeout(() => {
     isVideoPlaying.value = false
   }, 100)
+}
+
+// Mobile touch handlers for LivePhoto
+const handleTouchStart = (event: TouchEvent) => {
+  if (!isMobile.value || !props.photo.isLivePhoto || !videoBlobUrl.value) return
+  
+  touchCount.value = event.touches.length
+  
+  // Only handle single finger touch to avoid conflicts with pinch-to-zoom and scrolling
+  if (event.touches.length === 1) {
+    // Prevent default behavior to avoid conflicts
+    event.preventDefault()
+    isTouching.value = true
+    
+    // Set a timer for long press (350ms)
+    longPressTimer.value = setTimeout(() => {
+      // Double check: only play if still single touch and touching
+      if (isTouching.value && touchCount.value === 1) {
+        playLivePhotoVideo()
+      }
+    }, 350)
+  }
+}
+
+const handleTouchMove = (event: TouchEvent) => {
+  if (!isMobile.value || !isTouching.value) return
+  
+  touchCount.value = event.touches.length
+  
+  // If user adds more fingers or moves too much, cancel LivePhoto playback
+  if (event.touches.length > 1) {
+    cancelLivePhotoTouch()
+  }
+}
+
+const handleTouchEnd = () => {
+  if (!isMobile.value) return
+  
+  cancelLivePhotoTouch()
+}
+
+const cancelLivePhotoTouch = () => {
+  touchCount.value = 0
+  isTouching.value = false
+  
+  // Clear the long press timer
+  if (longPressTimer.value) {
+    clearTimeout(longPressTimer.value)
+    longPressTimer.value = null
+  }
+  
+  // Stop video playback
+  if (videoRef.value && !videoRef.value.paused) {
+    videoRef.value.pause()
+    videoRef.value.currentTime = 0
+  }
+  
+  // Use a slight delay for smoother transition
+  setTimeout(() => {
+    if (!isTouching.value && !isHovering.value) {
+      isVideoPlaying.value = false
+    }
+  }, 150)
 }
 
 // Process LivePhoto when it becomes visible
@@ -288,6 +371,12 @@ onUnmounted(() => {
     intersectionObserverRef.value.disconnect()
   }
   
+  // Clean up touch timer
+  if (longPressTimer.value) {
+    clearTimeout(longPressTimer.value)
+    longPressTimer.value = null
+  }
+  
   // Clean up video blob URL
   if (videoBlobUrl.value) {
     URL.revokeObjectURL(videoBlobUrl.value)
@@ -301,10 +390,19 @@ onUnmounted(() => {
     class="inline-block w-full align-top break-inside-avoid transition-all duration-300 cursor-pointer select-none"
     :style="{
       marginBottom: `${ITEM_GAP}px`,
+      userSelect: 'none',
+      WebkitUserSelect: 'none',
+      WebkitTouchCallout: 'none',
+      WebkitTapHighlightColor: 'transparent',
     }"
     @click="emit('openViewer', props.index)"
     @mouseenter="handleMouseEnter"
     @mouseleave="handleMouseLeave"
+    @touchstart="handleTouchStart"
+    @touchmove="handleTouchMove"
+    @touchend="handleTouchEnd"
+    @touchcancel="handleTouchEnd"
+    @contextmenu.prevent=""
   >
     <div class="relative group overflow-hidden transition-all duration-300">
       <!-- Container with fixed aspect ratio -->
@@ -355,7 +453,7 @@ onUnmounted(() => {
           v-if="photo.isLivePhoto && videoBlobUrl"
           ref="videoRef"
           :src="videoBlobUrl"
-          class="absolute inset-0 w-full h-full object-cover"
+          class="absolute inset-0 w-full h-full object-cover select-none"
           muted
           playsinline
           preload="metadata"
@@ -369,6 +467,7 @@ onUnmounted(() => {
             delay: isVideoPlaying ? 0.1 : 0 // Slight delay when fading in video
           }"
           @ended="handleVideoEnded"
+          @contextmenu.prevent=""
         />
       </div>
 
@@ -416,8 +515,8 @@ onUnmounted(() => {
         class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3"
         :initial="{ y: '100%', opacity: 0 }"
         :animate="{
-          y: isHovering && shouldShowInfoOverlay ? 0 : '100%',
-          opacity: isHovering && shouldShowInfoOverlay ? 1 : 0
+          y: shouldShowInfoOverlay && isHovering && !isMobile ? 0 : '100%',
+          opacity: shouldShowInfoOverlay && isHovering && !isMobile ? 1 : 0
         }"
         :transition="{
           duration: 0.3,
