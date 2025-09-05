@@ -170,7 +170,11 @@ export const extractPhotoInfo = (
 
   const dirPath = path.dirname(s3key)
   if (exifData?.Subject || exifData?.Keywords) {
-    tags = [...(exifData.Subject || []), ...(exifData.Keywords || [])]
+    tags = [
+      ...new Set([...(exifData.Subject || []), ...(exifData.Keywords || [])]),
+    ]
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0)
   } else if (dirPath && dirPath !== '.' && dirPath !== '/') {
     let relativePath = dirPath
     relativePath = dirPath.slice('/photos'.length)
