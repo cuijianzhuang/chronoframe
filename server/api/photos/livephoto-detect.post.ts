@@ -4,7 +4,7 @@ export default eventHandler(async (event) => {
   await requireUserSession(event)
   
   const body = await readBody(event)
-  const { action } = body
+  const { action, photoIds } = body
   
   if (!action) {
     throw createError({
@@ -17,7 +17,7 @@ export default eventHandler(async (event) => {
     switch (action) {
       case 'batch-detect':
         // 批量检测现有照片的 LivePhoto 视频
-        const results = await batchTestLivePhotoDetection()
+        const results = await batchTestLivePhotoDetection(photoIds)
         return {
           message: 'Batch LivePhoto detection completed',
           results

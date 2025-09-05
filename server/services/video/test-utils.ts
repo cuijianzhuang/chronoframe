@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, and, inArray } from 'drizzle-orm'
 import { findLivePhotoVideoForImage } from '../video/livephoto'
 
 /**
@@ -39,15 +39,30 @@ export const testLivePhotoDetection = async (imageKey: string) => {
 /**
  * 批量测试现有照片的 LivePhoto 检测
  */
-export const batchTestLivePhotoDetection = async () => {
+export const batchTestLivePhotoDetection = async (photoIds?: string[]) => {
   const db = useDB()
   
   try {
-    // 获取所有还不是 LivePhoto 的照片
-    const photos = await db
-      .select()
-      .from(tables.photos)
-      .where(eq(tables.photos.isLivePhoto, 0))
+    let photos
+    
+    if (photoIds && Array.isArray(photoIds) && photoIds.length > 0) {
+      // 只处理指定的照片
+      photos = await db
+        .select()
+        .from(tables.photos)
+        .where(
+          and(
+            eq(tables.photos.isLivePhoto, 0),
+            inArray(tables.photos.id, photoIds)
+          )
+        )
+    } else {
+      // 获取所有还不是 LivePhoto 的照片
+      photos = await db
+        .select()
+        .from(tables.photos)
+        .where(eq(tables.photos.isLivePhoto, 0))
+    }
     
     logger.chrono.info(`Testing ${photos.length} photos for LivePhoto detection`)
     
@@ -70,6 +85,7 @@ export const batchTestLivePhotoDetection = async () => {
     
     return {
       total: photos.length,
+      processed: photos.length,
       found: foundCount,
       results: results.filter(r => r.found) // 只返回找到的
     }

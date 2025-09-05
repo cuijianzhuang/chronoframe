@@ -2,6 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 import type { Photo } from '~~/server/utils/db'
 import { h, resolveComponent } from 'vue'
+import { Icon, UBadge } from '#components'
 
 const UCheckbox = resolveComponent('UCheckbox')
 
@@ -249,12 +250,40 @@ const columns: TableColumn<Photo>[] = [
       }),
   },
   {
+    accessorKey: 'thumbnailUrl',
+    header: '缩略图',
+    cell: ({ row }) => {
+      const url = row.original.thumbnailUrl
+      return h('img', {
+        src: url,
+        alt: row.original.title || 'Photo Thumbnail',
+        class: 'size-16 min-w-[100px] object-cover rounded-md shadow',
+        onClick: () => openInNewTab(url || row.original.originalUrl || ''),
+        style: { cursor: url ? 'pointer' : 'default' },
+      })
+    },
+  },
+  {
     accessorKey: 'id',
     header: 'Photo ID',
   },
   {
     accessorKey: 'title',
     header: '照片标题',
+  },
+  {
+    accessorKey: 'tags',
+    header: '关键词',
+    cell: ({ row }) => {
+      const tags = row.original.tags
+      return h('div', { class: 'flex items-center gap-1' }, [
+        tags?.map(tag => h(UBadge, {
+          size: 'sm',
+          variant: 'soft',
+          color: 'neutral'
+        }, () => tag)) || h('span', { class: 'text-neutral-400 text-xs' }, '无标签')
+      ])
+    },
   },
   {
     accessorKey: 'isLivePhoto',
@@ -264,16 +293,17 @@ const columns: TableColumn<Photo>[] = [
       return h('div', { class: 'flex items-center gap-2' }, [
         isLivePhoto 
           ? h('div', { class: 'flex items-center gap-1' }, [
-              h('div', { 
-                class: 'size-2 bg-blue-500 rounded-full animate-pulse' 
+              h(Icon , {
+                name: 'tabler:live-photo',
+                class: 'size-4 text-yellow-600 dark:text-yellow-400',
               }),
               h('span', { 
-                class: 'text-blue-600 dark:text-blue-400 text-xs font-medium' 
-              }, 'Live Photo')
+                class: 'text-yellow-600 dark:text-yellow-400 text-xs font-medium' 
+              }, '实况')
             ])
           : h('span', { 
-              class: 'text-gray-400 text-xs' 
-            }, '静态照片')
+              class: 'text-neutral-400 text-xs' 
+            }, '一般照片')
       ])
     },
     sortingFn: (rowA, rowB) => {
@@ -283,8 +313,20 @@ const columns: TableColumn<Photo>[] = [
     }
   },
   {
+    accessorKey: 'dateTaken',
+    header: '拍摄日期',
+    cell: (info) => {
+      const date = info.getValue() as string
+      return h('span', {class: 'font-mono text-xs'}, date ? dayjs(date).format('YYYY-MM-DD HH:mm:ss') : '未知')
+    }
+  },
+  {
     accessorKey: 'lastModified',
-    header: '最后修改',
+    header: '最后更新',
+    cell: (info) => {
+      const date = info.getValue() as string
+      return h('span', {class: 'font-mono text-xs'}, date ? dayjs(date).format('YYYY-MM-DD HH:mm:ss') : '未知')
+    }
   },
   {
     accessorKey: 'fileSize',
@@ -570,39 +612,147 @@ const handleBatchDelete = async () => {
   }
 }
 
-// 批量检测 LivePhoto 功能
+// 批量检测 LivePhoto 功能（只对选中的照片）
 const handleBatchDetectLivePhoto = async () => {
+  const selectedRowModel = table.value?.tableApi?.getFilteredSelectedRowModel()
+  const selectedPhotos =
+    selectedRowModel?.rows.map((row: any) => row.original) || []
+
+  if (selectedPhotos.length === 0) {
+    toast.add({
+      title: '请选择照片',
+      description: '请至少选择一张照片进行 LivePhoto 检测',
+      color: 'warning',
+    })
+    return
+  }
+
   try {
     const detectToast = toast.add({
-      title: '正在批量检测 LivePhoto',
-      description: '正在检查所有照片的 LivePhoto 状态...',
+      title: '正在检测 LivePhoto',
+      description: `正在检查所选 ${selectedPhotos.length} 张照片的 LivePhoto 状态...`,
       color: 'info',
     })
 
+    const photoIds = selectedPhotos.map((photo: any) => photo.id)
+    
     const result = await $fetch('/api/photos/livephoto-detect', {
       method: 'POST',
       body: {
         action: 'batch-detect',
+        photoIds: photoIds, // 传递选中的照片ID列表
       },
     }) as any
 
     const foundCount = result.results?.found || 0
-    const totalCount = result.results?.total || 0
+    const processedCount = result.results?.processed || 0
 
     toast.update(detectToast.id, {
       title: 'LivePhoto 检测完成',
-      description: `检测了 ${totalCount} 张照片，发现 ${foundCount} 个潜在的 LivePhoto`,
+      description: `检测了 ${processedCount} 张照片，发现 ${foundCount} 个潜在的 LivePhoto`,
       color: foundCount > 0 ? 'success' : 'info',
     })
 
     if (foundCount > 0) {
       await refresh()
     }
+
+    // 清空选中状态
+    rowSelection.value = {}
   } catch (error: any) {
     console.error('批量检测 LivePhoto 失败:', error)
     toast.add({
       title: '批量检测失败',
       description: error.message || '检测过程中发生错误',
+      color: 'error',
+    })
+  }
+}
+
+// 批量重新索引 EXIF 功能（只对选中的照片）
+const handleBatchReindexExif = async () => {
+  const selectedRowModel = table.value?.tableApi?.getFilteredSelectedRowModel()
+  const selectedPhotos =
+    selectedRowModel?.rows.map((row: any) => row.original) || []
+
+  if (selectedPhotos.length === 0) {
+    toast.add({
+      title: '请选择照片',
+      description: '请至少选择一张照片进行 EXIF 重新索引',
+      color: 'warning',
+    })
+    return
+  }
+
+  try {
+    const reindexToast = toast.add({
+      title: '正在重新索引 EXIF',
+      description: `正在重新提取所选 ${selectedPhotos.length} 张照片的 EXIF 数据...`,
+      color: 'info',
+    })
+
+    const photoIds = selectedPhotos.map((photo: any) => photo.id)
+
+    const result = await $fetch('/api/photos/reindex-exif', {
+      method: 'POST',
+      body: {
+        action: 'batch-reindex',
+        photoIds: photoIds, // 传递选中的照片ID列表
+      },
+    }) as any
+
+    const processedCount = result.results?.processed || 0
+    const updatedCount = result.results?.updated || 0
+
+    toast.update(reindexToast.id, {
+      title: 'EXIF 重新索引完成',
+      description: `处理了 ${processedCount} 张照片，更新了 ${updatedCount} 张照片的 EXIF 数据`,
+      color: 'success',
+    })
+
+    await refresh()
+
+    // 清空选中状态
+    rowSelection.value = {}
+  } catch (error: any) {
+    console.error('批量重新索引 EXIF 失败:', error)
+    toast.add({
+      title: 'EXIF 重新索引失败',
+      description: error.message || '重新索引过程中发生错误',
+      color: 'error',
+    })
+  }
+}
+
+// 单个照片重新索引 EXIF 功能
+const handleReindexSingleExif = async (photoId: string) => {
+  try {
+    const reindexToast = toast.add({
+      title: '正在重新索引 EXIF',
+      description: '正在重新提取照片的 EXIF 数据...',
+      color: 'info',
+    })
+
+    const result = await $fetch('/api/photos/reindex-exif', {
+      method: 'POST',
+      body: {
+        action: 'single-reindex',
+        photoId: photoId,
+      },
+    }) as any
+
+    toast.update(reindexToast.id, {
+      title: 'EXIF 重新索引完成',
+      description: result.message || '照片 EXIF 数据已更新',
+      color: 'success',
+    })
+
+    await refresh()
+  } catch (error: any) {
+    console.error('重新索引 EXIF 失败:', error)
+    toast.add({
+      title: 'EXIF 重新索引失败',
+      description: error.message || '重新索引过程中发生错误',
       color: 'error',
     })
   }
@@ -617,7 +767,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 h-full p-4">
+  <div class="flex flex-col gap-3 sm:gap-4 h-full p-3 sm:p-4">
     <!-- 上传进度显示 -->
     <div
       v-if="uploadingFiles.size > 0"
@@ -628,10 +778,10 @@ onUnmounted(() => {
         <div
           v-for="[fileId, uploadingFile] of uploadingFiles"
           :key="fileId"
-          class="p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg"
+          class="p-3 sm:p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg"
         >
-          <div class="flex items-center justify-between mb-2">
-            <span class="font-medium">{{ uploadingFile.fileName }}</span>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 mb-2">
+            <span class="font-medium text-sm sm:text-base truncate">{{ uploadingFile.fileName }}</span>
             <div class="flex items-center gap-2">
               <!-- 状态指示器 -->
               <UBadge
@@ -645,6 +795,7 @@ onUnmounted(() => {
                         : 'warning'
                 "
                 variant="soft"
+                size="sm"
               >
                 {{
                   uploadingFile.status === 'preparing'
@@ -670,7 +821,8 @@ onUnmounted(() => {
                 icon="tabler:file-x"
                 @click="uploadingFile.abortUpload?.()"
               >
-                中止上传
+                <span class="hidden sm:inline">中止上传</span>
+                <span class="sm:hidden">中止</span>
               </UButton>
             </div>
           </div>
@@ -684,10 +836,10 @@ onUnmounted(() => {
             class="mb-2"
           >
             <div
-              class="flex justify-between text-sm text-neutral-600 dark:text-neutral-400 mb-1"
+              class="flex justify-between text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mb-1"
             >
               <span>{{ uploadingFile.progress }}%</span>
-              <span v-if="uploadingFile.uploadProgress?.speedText">
+              <span v-if="uploadingFile.uploadProgress?.speedText" class="hidden sm:inline">
                 {{ uploadingFile.uploadProgress.speedText }}
               </span>
             </div>
@@ -699,7 +851,7 @@ onUnmounted(() => {
               v-if="uploadingFile.uploadProgress?.timeRemainingText"
               class="text-xs text-neutral-500 mt-1"
             >
-              ETA: {{ uploadingFile.uploadProgress.timeRemainingText }}
+              <span class="hidden sm:inline">ETA: </span>{{ uploadingFile.uploadProgress.timeRemainingText }}
             </div>
           </div>
 
@@ -727,7 +879,7 @@ onUnmounted(() => {
         multiple
       />
       <UButton
-        class="absolute top-3.5 right-3.5"
+        class="absolute top-3.5 right-3.5 hidden sm:flex"
         variant="soft"
         size="lg"
         icon="tabler:upload"
@@ -736,39 +888,47 @@ onUnmounted(() => {
       >
         上传照片
       </UButton>
+      <!-- 移动端上传按钮 -->
+      <UButton
+        v-if="selectedFiles.length > 0"
+        class="mt-3 w-full sm:hidden"
+        variant="soft"
+        size="lg"
+        icon="tabler:upload"
+        @click="handleUpload"
+      >
+        上传 {{ selectedFiles.length }} 张照片
+      </UButton>
     </div>
 
     <!-- 工具栏 -->
-    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg">
+    <div class="flex flex-row sm:items-center justify-between gap-3 sm:gap-0 p-3 sm:p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg">
       <div class="flex items-center gap-2">
         <UIcon
           name="tabler:photo"
           class="text-gray-500"
         />
-        <span class="font-medium text-gray-700 dark:text-gray-300">
+        <span class="font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
           照片管理
         </span>
-        <div class="flex items-center gap-2">
-          <UBadge
-            v-if="livePhotoStats.total > 0"
-            variant="soft"
-            color="info"
-          >
-            {{ livePhotoStats.total }} 张照片
-          </UBadge>
-          <UBadge
-            v-if="livePhotoStats.livePhotos > 0"
-            variant="soft"
-            color="success"
-          >
-            {{ livePhotoStats.livePhotos }} Live Photo
-          </UBadge>
+        <div class="flex items-center gap-1 sm:gap-2">
           <UBadge
             v-if="livePhotoStats.staticPhotos > 0"
             variant="soft"
             color="neutral"
+            size="sm"
           >
-            {{ livePhotoStats.staticPhotos }} 静态照片
+            <span class="hidden sm:inline">{{ livePhotoStats.staticPhotos }} 照片</span>
+            <span class="sm:hidden">{{ livePhotoStats.staticPhotos }}P</span>
+          </UBadge>
+          <UBadge
+            v-if="livePhotoStats.livePhotos > 0"
+            variant="soft"
+            color="warning"
+            size="sm"
+          >
+            <span class="hidden sm:inline">{{ livePhotoStats.livePhotos }} Live Photo</span>
+            <span class="sm:hidden">{{ livePhotoStats.livePhotos }}LP</span>
           </UBadge>
         </div>
       </div>
@@ -777,7 +937,7 @@ onUnmounted(() => {
         <!-- 过滤器 -->
         <USelectMenu
           v-model="photoFilter"
-          class="w-48"
+          class="w-full sm:w-48"
           :items="[
             { label: '全部照片', value: 'all', icon: 'tabler:photo-scan' },
             { label: 'Live Photo', value: 'livephoto', icon: 'tabler:live-photo' },
@@ -788,27 +948,16 @@ onUnmounted(() => {
           size="sm"
         >
         </USelectMenu>
-
-        <!-- LivePhoto 批量检测按钮 -->
+        
+        <!-- 刷新按钮 -->
         <UButton
           variant="soft"
           color="info"
           size="sm"
-          icon="tabler:scan"
-          @click="handleBatchDetectLivePhoto"
-        >
-          批量检测 LivePhoto
-        </UButton>
-        
-        <!-- 刷新按钮 -->
-        <UButton
-          variant="ghost"
-          color="neutral"
-          size="sm"
           icon="tabler:refresh"
           @click="() => refresh()"
         >
-          刷新
+          <span class="hidden sm:inline">刷新</span>
         </UButton>
       </div>
     </div>
@@ -816,7 +965,7 @@ onUnmounted(() => {
     <!-- 批量操作栏 -->
     <div
       v-if="selectedRowsCount > 0"
-      class="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg"
+      class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 p-3 sm:p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg"
     >
       <div class="flex items-center gap-2">
         <UIcon
@@ -824,25 +973,54 @@ onUnmounted(() => {
           class="text-blue-500"
         />
         <span class="font-medium text-blue-700 dark:text-blue-300">
-          已选择 {{ selectedRowsCount }} 张照片
+          <span class="hidden sm:inline">已选择</span> {{ selectedRowsCount }} <span class="hidden sm:inline">张照片</span>
         </span>
-      </div>
-      <div class="flex items-center gap-2">
         <UButton
           variant="ghost"
           size="sm"
           @click="rowSelection = {}"
         >
-          取消选择
+          <span class="hidden sm:inline">取消选择</span>
+          <span class="sm:hidden">取消</span>
         </UButton>
+      </div>
+      <div class="flex flex-wrap sm:flex-nowrap items-center gap-1 sm:gap-2">
+        <!-- 重新索引 EXIF 按钮 -->
+        <UButton
+          variant="soft"
+          color="success"
+          size="sm"
+          icon="tabler:refresh"
+          @click="handleBatchReindexExif"
+          class="flex-1 sm:flex-none"
+        >
+          <span class="hidden sm:inline">重新索引 EXIF</span>
+          <span class="sm:hidden">索引</span>
+        </UButton>
+
+        <!-- 实况配对按钮 -->
+        <UButton
+          variant="soft"
+          color="info"
+          size="sm"
+          icon="tabler:live-photo"
+          @click="handleBatchDetectLivePhoto"
+          class="flex-1 sm:flex-none"
+        >
+          <span class="hidden sm:inline">实况配对</span>
+          <span class="sm:hidden">配对</span>
+        </UButton>
+        
         <UButton
           color="error"
           variant="soft"
           size="sm"
           icon="tabler:trash"
           @click="handleBatchDelete"
+          class="flex-1 sm:flex-none"
         >
-          批量删除
+          <span class="hidden sm:inline">批量删除</span>
+          <span class="sm:hidden">删除</span>
         </UButton>
       </div>
     </div>
@@ -858,48 +1036,55 @@ onUnmounted(() => {
         :columns="columns"
         :loading="status === 'pending'"
         sticky
-        class="h-[600px]"
+        class="h-[400px] sm:h-[600px]"
         :ui="{
           separator:
             'bg-(--ui-color-neutral-200) dark:bg-(--ui-color-neutral-700)',
         }"
       >
         <template #actions-cell="{ row }">
-          <div class="flex items-center gap-2">
-            <!-- LivePhoto 相关操作 -->
-            <template v-if="row.original.isLivePhoto">
-              <UButton
-                size="sm"
-                variant="soft"
-                color="info"
-                icon="tabler:live-photo"
-                @click="handleViewLivePhoto(row.original.id)"
-              >
-                Live Photo 预览
-              </UButton>
-            </template>
-            <template v-else>
-              <UButton
-                size="sm"
-                variant="ghost"
-                color="neutral"
-                icon="tabler:refresh"
-                @click="handleUpdateLivePhoto(row.original.id)"
-              >
-                检测 LivePhoto
-              </UButton>
-            </template>
-
-            <!-- 删除按钮 -->
-            <UButton
+          <div class="flex justify-end">
+            <UDropdownMenu
               size="sm"
-              variant="soft"
-              color="error"
-              icon="tabler:trash"
-              @click="handleDelete(row.original.id)"
+              :content="{
+                align: 'end'
+              }"
+              :items="[
+                [
+                  {
+                    color: row.original.isLivePhoto ? 'warning' : 'info',
+                    label: row.original.isLivePhoto ? '实况预览' : '实况配对',
+                    icon: row.original.isLivePhoto ? 'tabler:live-photo' : 'tabler:refresh',
+                    onSelect() {
+                      row.original.isLivePhoto 
+                        ? handleViewLivePhoto(row.original.id)
+                        : handleUpdateLivePhoto(row.original.id)
+                    }
+                  },
+                  {
+                    color: 'success',
+                    label: '重新索引 EXIF',
+                    icon: 'tabler:refresh',
+                    onSelect: () => handleReindexSingleExif(row.original.id)
+                  }
+                ],
+                [
+                  {
+                    color: 'error',
+                    label: '删除',
+                    icon: 'tabler:trash',
+                    onSelect: () => handleDelete(row.original.id)
+                  }
+                ]
+              ]"
             >
-              删除
-            </UButton>
+              <UButton
+                variant="outline"
+                color="neutral"
+                size="sm"
+                icon="tabler:dots-vertical"
+              />
+            </UDropdownMenu>
           </div>
         </template>
       </UTable>
