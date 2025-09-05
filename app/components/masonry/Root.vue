@@ -15,6 +15,7 @@ const router = useRouter()
 const FIRST_SCREEN_ITEMS_COUNT = 30
 const COLUMN_GAP = 4
 const AUTO_COLUMN_WIDTH = 280
+const MAX_COLUMN_COUNT = 7
 const MIN_COLUMN_COUNT = 2
 
 // Reactive state
@@ -38,7 +39,7 @@ const columnCount = computed(() => {
     if (!containerWidth.value) return MIN_COLUMN_COUNT
 
     const availableWidth = containerWidth.value - (isMobile.value ? 16 : 32)
-    const maxColumns = isMobile.value ? 2 : 6
+    const maxColumns = isMobile.value ? 2 : MAX_COLUMN_COUNT
     const calculatedColumns = Math.floor(
       (availableWidth + COLUMN_GAP) / (AUTO_COLUMN_WIDTH + COLUMN_GAP),
     )
