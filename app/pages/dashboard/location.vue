@@ -222,6 +222,7 @@ const formatPercentage = (value: string) => {
 
           <div class="flex gap-3">
             <UButton
+              size="sm"
               icon="i-tabler-refresh"
               :loading="isReindexing"
               :disabled="
@@ -229,10 +230,11 @@ const formatPercentage = (value: string) => {
               "
               @click="startReindex(false)"
             >
-              重新索引缺失的位置信息
+              索引缺少的城市信息
             </UButton>
 
             <UButton
+              size="sm"
               icon="i-tabler-reload"
               variant="outline"
               :loading="isReindexing"
@@ -241,7 +243,7 @@ const formatPercentage = (value: string) => {
               "
               @click="startReindex(true)"
             >
-              强制重新索引所有
+              重建位置信息
             </UButton>
           </div>
         </div>
