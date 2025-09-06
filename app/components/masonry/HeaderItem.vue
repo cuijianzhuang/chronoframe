@@ -64,6 +64,14 @@ const handleOpenLogin = () => {
               {{ stats?.total }} 张照片
             </p>
             <p class="font-[Pacifico]">Mems rest within the lens.</p>
+            <UButton
+              variant="ghost"
+              color="neutral"
+              icon="tabler:map-pin-2"
+              label="探索地图"
+              size="sm"
+              to="/explore"
+            />
           </div>
           <div
             v-if="loggedIn"
