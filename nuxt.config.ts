@@ -6,6 +6,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   modules: [
+    'reka-ui/nuxt',
     '@nuxt/ui',
     '@nuxt/eslint',
     '@nuxt/fonts',

@@ -1,4 +1,5 @@
 {
+  "eslint.useFlatConfig": true,
   "files.associations": {
     "*.css": "tailwindcss"
   },
@@ -14,6 +15,5 @@
       "ui:\\s*{([^)]*)\\s*}",
       "(?:'|\"|`)([^']*)(?:'|\"|`)"
     ]
-  ],
-  "eslint.useFlatConfig": true
+  ]
 }

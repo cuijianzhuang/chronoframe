@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 definePageMeta({
+  layout: 'masonry',
   // 固定 key 防止路径参数变化时创建新的实例
   key: 'photo-viewer-route',
 })
