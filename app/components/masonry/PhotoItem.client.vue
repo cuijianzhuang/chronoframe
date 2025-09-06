@@ -640,10 +640,10 @@ onUnmounted(() => {
             >
               <div
                 v-if="photo.exif.FocalLengthIn35mmFormat"
-                class="flex items-center gap-1"
+                class="flex items-center gap-0.5"
               >
                 <Icon
-                  name="streamline:image-accessories-lenses-photos-camera-shutter-picture-photography-pictures-photo-lens"
+                  name="streamline:image-accessories-lenses-photos-camera-shutter-picture-photography-pictures-photo-lens" class="-mt-0.5"
                 />
                 <span class="text-xs font-medium">
                   {{ photo.exif.FocalLengthIn35mmFormat }}
@@ -651,18 +651,18 @@ onUnmounted(() => {
               </div>
               <div
                 v-if="photo.exif.FNumber"
-                class="flex items-center gap-1"
+                class="flex items-center gap-0.5"
               >
-                <Icon name="tabler:aperture" />
+                <Icon name="tabler:aperture" class="-mt-0.5" />
                 <span class="text-xs font-medium">
                   f/{{ photo.exif.FNumber }}
                 </span>
               </div>
               <div
                 v-if="photo.exif.ExposureTime"
-                class="flex items-center gap-1"
+                class="flex items-center gap-0.5"
               >
-                <Icon name="material-symbols:shutter-speed" />
+                <Icon name="material-symbols:shutter-speed" class="-mt-0.5" />
                 <span class="text-xs font-medium">
                   {{ formatExposureTime(photo.exif.ExposureTime) }}
                 </span>
@@ -671,7 +671,7 @@ onUnmounted(() => {
                 v-if="photo.exif.ISO"
                 class="flex items-center gap-0.5"
               >
-                <Icon name="carbon:iso-outline" />
+                <Icon name="carbon:iso-outline" class="-mt-0.5" />
                 <span class="text-xs font-medium">{{ photo.exif.ISO }}</span>
               </div>
             </div>

@@ -509,13 +509,15 @@ const isMobile = useMediaQuery('(max-width: 768px)')
           标签
         </h4>
         <div class="flex flex-wrap gap-1">
-          <span
+          <UBadge
             v-for="tag in currentPhoto.tags"
             :key="tag"
-            class="px-2 py-1 text-xs bg-white/10 text-white rounded-full"
-          >
-            {{ tag }}
-          </span>
+            :label="tag"
+            variant="soft"
+            size="sm"
+            color="neutral"
+            class="bg-white/10 text-white"
+          />
         </div>
       </div>
       <PhotoKVRenderer
