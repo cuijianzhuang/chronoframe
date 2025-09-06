@@ -11,8 +11,7 @@ const router = useRouter()
 const { switchToIndex, closeViewer, openViewer } = useViewerState()
 const { currentPhotoIndex, isViewerOpen } = storeToRefs(useViewerState())
 
-const { data } = useFetch('/api/photos')
-const photos = computed(() => (data.value as Photo[]) || [])
+const { photos } = usePhotos()
 
 const slug = computed(() => (route.params.slug as string[]) || [])
 const photoId = computed(() => slug.value[0] || null)

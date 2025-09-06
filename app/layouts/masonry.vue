@@ -3,8 +3,7 @@ useHead({
   title: 'Gallery',
 })
 
-const { data } = useFetch('/api/photos')
-const photos = computed(() => (data.value as Photo[]) || [])
+const { photos } = usePhotos()
 </script>
 
 <template>
