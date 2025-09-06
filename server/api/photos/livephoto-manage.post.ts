@@ -1,14 +1,17 @@
-import { processSpecificLivePhotoVideo, scanAndProcessExistingLivePhotos } from '~~/server/services/video/scanner'
+import {
+  processSpecificLivePhotoVideo,
+  scanAndProcessExistingLivePhotos,
+} from '~~/server/services/video/scanner'
 import { eq } from 'drizzle-orm'
 import { findLivePhotoVideoForImage } from '~~/server/services/video/livephoto'
 import { getStorageManager } from '~~/server/plugins/storage'
 
 export default eventHandler(async (event) => {
   await requireUserSession(event)
-  
+
   const body = await readBody(event)
   const { action, videoKey, photoId } = body
-  
+
   if (!action) {
     throw createError({
       statusCode: 400,
@@ -18,32 +21,34 @@ export default eventHandler(async (event) => {
 
   try {
     switch (action) {
-      case 'scan':
-        // 扫描现有文件
+      case 'scan': { // 扫描现有文件
         const scanResults = await scanAndProcessExistingLivePhotos()
         return {
           message: 'Scan completed',
-          results: scanResults
+          results: scanResults,
         }
-        
-      case 'process':
-        // 处理特定文件
+      }
+
+      case 'process': { // 处理特定文件
         if (!videoKey) {
           throw createError({
             statusCode: 400,
             statusMessage: 'videoKey is required for process action',
           })
         }
-        
+
         const success = await processSpecificLivePhotoVideo(videoKey)
         return {
-          message: success ? 'LivePhoto processed successfully' : 'Failed to process LivePhoto',
+          message: success
+            ? 'LivePhoto processed successfully'
+            : 'Failed to process LivePhoto',
           success,
-          videoKey
+          videoKey,
         }
+      }
 
-      case 'update-photo':
-        // 为特定照片检查和更新 LivePhoto 状态
+      case 'update-photo': // 为特定照片检查和更新 LivePhoto 状态
+      {
         if (!photoId) {
           throw createError({
             statusCode: 400,
@@ -66,16 +71,20 @@ export default eventHandler(async (event) => {
         }
 
         const photo = photos[0]
-        const livePhotoVideo = await findLivePhotoVideoForImage(photo.storageKey!)
+        const livePhotoVideo = await findLivePhotoVideoForImage(
+          photo.storageKey!,
+        )
 
         if (livePhotoVideo) {
           const storageProvider = getStorageManager().getProvider()
-          
+
           await db
             .update(tables.photos)
             .set({
               isLivePhoto: 1,
-              livePhotoVideoUrl: storageProvider.getPublicUrl(livePhotoVideo.videoKey),
+              livePhotoVideoUrl: storageProvider.getPublicUrl(
+                livePhotoVideo.videoKey,
+              ),
               livePhotoVideoKey: livePhotoVideo.videoKey,
             })
             .where(eq(tables.photos.id, photoId))
@@ -84,20 +93,22 @@ export default eventHandler(async (event) => {
             message: 'Photo updated to LivePhoto successfully',
             success: true,
             photoId,
-            videoKey: livePhotoVideo.videoKey
+            videoKey: livePhotoVideo.videoKey,
           }
         } else {
           return {
             message: 'No matching video found for this photo',
             success: false,
-            photoId
+            photoId,
           }
         }
-        
+      }
+
       default:
         throw createError({
           statusCode: 400,
-          statusMessage: 'Invalid action. Use "scan", "process", or "update-photo"',
+          statusMessage:
+            'Invalid action. Use "scan", "process", or "update-photo"',
         })
     }
   } catch (error) {

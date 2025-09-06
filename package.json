@@ -16,6 +16,8 @@
     "build:deps": "pnpm --filter @chronoframe/webgl-image build",
     "dev": "pnpm dev:deps",
     "dev:deps": "concurrently \"pnpm --filter @chronoframe/webgl-image dev\" \"wait-on packages/webgl-image/dist && nuxt dev\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
@@ -39,7 +41,6 @@
     "db0": "^0.3.2",
     "drizzle-orm": "^0.44.4",
     "es-toolkit": "^1.39.10",
-    "exifr": "^7.1.3",
     "exiftool-vendored": "^30.3.0",
     "file-type": "^21.0.0",
     "heic-convert": "^2.1.0",

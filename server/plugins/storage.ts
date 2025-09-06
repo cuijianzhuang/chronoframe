@@ -1,8 +1,5 @@
-import {
-  S3StorageProvider,
-  StorageConfig,
-  StorageManager,
-} from '../services/storage'
+import type { StorageConfig } from '../services/storage'
+import { StorageManager } from '../services/storage'
 
 // 全局 storageManager 实例，可以在非请求上下文中使用
 let globalStorageManager: StorageManager
@@ -31,13 +28,15 @@ export default nitroPlugin(async (nitroApp) => {
     r2: {
       provider: 'hub-r2',
       prefix: 'photos/',
-      cdnUrl: import.meta.dev ? 'http://localhost:3000/image/' : 'https://cdn-dev.lens.bh8.ga/',
+      cdnUrl: import.meta.dev
+        ? 'http://localhost:3000/image/'
+        : 'https://cdn-dev.lens.bh8.ga/',
       maxKeys: 100,
     },
   }
 
   const storageManager = new StorageManager(devConfigs.s3, logger.storage)
-  
+
   // 设置全局实例
   globalStorageManager = storageManager
 

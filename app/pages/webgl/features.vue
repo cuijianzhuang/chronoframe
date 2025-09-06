@@ -193,32 +193,32 @@ const handleLoadingStateChange = (loading: boolean) => {
 
       <div class="button-group">
         <button
-          @click="handleZoomIn"
           class="btn"
+          @click="handleZoomIn"
         >
           放大 (无动画)
         </button>
         <button
-          @click="handleZoomInAnimated"
           class="btn"
+          @click="handleZoomInAnimated"
         >
           放大 (动画)
         </button>
         <button
-          @click="handleZoomOut"
           class="btn"
+          @click="handleZoomOut"
         >
           缩小 (无动画)
         </button>
         <button
-          @click="handleZoomOutAnimated"
           class="btn"
+          @click="handleZoomOutAnimated"
         >
           缩小 (动画)
         </button>
         <button
-          @click="handleReset"
           class="btn"
+          @click="handleReset"
         >
           重置
         </button>

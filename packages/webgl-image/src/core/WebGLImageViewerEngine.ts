@@ -2,7 +2,6 @@ import type {
   EngineConfig,
   Transform,
   Animation,
-  Bounds,
   DebugInfo,
   Point,
   TouchState,
@@ -25,34 +24,6 @@ import {
   loadImage,
 } from './utils'
 import { createProgram } from '../shaders'
-
-// 瓦片系统配置
-const TILE_SIZE = 512
-const MAX_TILES_PER_FRAME = 4
-const TILE_CACHE_SIZE = 32
-
-// 瓦片信息接口
-interface TileInfo {
-  x: number
-  y: number
-  lodLevel: number
-  texture: WebGLTexture | null
-  lastUsed: number
-  isLoading: boolean
-  priority: number
-}
-
-// 瓦片键值
-type TileKey = string
-
-// 简化的 LOD 级别
-const SIMPLE_LOD_LEVELS = [
-  { scale: 0.25 },
-  { scale: 0.5 },
-  { scale: 1 },
-  { scale: 2 },
-  { scale: 4 },
-] as const
 
 export class WebGLImageViewerEngine {
   private canvas: HTMLCanvasElement
@@ -107,21 +78,10 @@ export class WebGLImageViewerEngine {
   ) => void
   private onTransformChange?: (transform: Transform) => void
 
-  // 瓦片系统和质量管理
-  private currentLOD = 1 // 默认使用正常质量
-  private lodTextures = new Map<number, WebGLTexture>()
-  private tileCache = new Map<TileKey, TileInfo>()
-  private loadingTiles = new Map<TileKey, { priority: number }>()
-  private pendingTileRequests: Array<{ key: TileKey; priority: number }> = []
-  private currentVisibleTiles = new Set<TileKey>()
-  private lastViewportHash = ''
+  // 质量管理
   private currentQuality: 'high' | 'medium' | 'low' | 'unknown' = 'unknown'
   private isLoadingTexture = false
   private currentLoadingState: LoadingState = LoadingState.IDLE
-
-  // Worker 支持
-  private worker: Worker | null = null
-  private textureWorkerInitialized = false
 
   constructor(canvas: HTMLCanvasElement, config: Partial<EngineConfig> = {}) {
     this.canvas = canvas
@@ -158,7 +118,6 @@ export class WebGLImageViewerEngine {
     this.setupWebGL()
     this.setupEventListeners()
     this.setupResizeObserver()
-    this.initWorker()
     this.resize()
   }
 
@@ -275,11 +234,6 @@ export class WebGLImageViewerEngine {
     this.resizeObserver.observe(this.canvas)
   }
 
-  private initWorker(): void {
-    // 简化的 Worker 初始化，暂时不使用 Worker
-    this.textureWorkerInitialized = true
-  }
-
   private notifyLoadingStateChange(
     isLoading: boolean,
     state?: LoadingState,
@@ -290,52 +244,6 @@ export class WebGLImageViewerEngine {
       this.currentLoadingState = state
     }
     this.onLoadingStateChange?.(isLoading, state, quality)
-  }
-
-  private selectOptimalLOD(): number {
-    if (!this.image) return 1
-
-    const requiredScale = this.transform.scale * (window.devicePixelRatio || 1)
-
-    // 寻找最佳的 LOD 级别
-    for (const [i, lodLevel] of SIMPLE_LOD_LEVELS.entries()) {
-      if (lodLevel.scale >= requiredScale) {
-        return i
-      }
-    }
-
-    // 如果没有找到，返回最高质量的 LOD
-    return SIMPLE_LOD_LEVELS.length - 1
-  }
-
-  private createWebGLTexture(
-    source: HTMLCanvasElement | HTMLImageElement | ImageBitmap,
-  ): WebGLTexture | null {
-    const { gl } = this
-
-    const texture = gl.createTexture()
-    if (!texture) return null
-
-    gl.bindTexture(gl.TEXTURE_2D, texture)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source)
-
-    return texture
-  }
-
-  private cleanupLODTextures(): void {
-    for (const texture of this.lodTextures.values()) {
-      this.gl.deleteTexture(texture)
-    }
-    this.lodTextures.clear()
-  }
-
-  private getTileKey(x: number, y: number, lodLevel: number): TileKey {
-    return `${x}-${y}-${lodLevel}`
   }
 
   public async loadImage(src: string): Promise<void> {
@@ -485,23 +393,6 @@ export class WebGLImageViewerEngine {
         maxTranslateY,
       )
     }
-  }
-
-  private getFitToScreenScale(): number {
-    if (!this.image) return 1
-
-    const canvasAspect = this.canvas.width / this.canvas.height
-    const imageAspect = this.image.width / this.image.height
-
-    let scale: number
-    if (imageAspect > canvasAspect) {
-      scale = this.canvas.width / this.image.width
-    } else {
-      scale = this.canvas.height / this.image.height
-    }
-
-    // 使用相对缩放约束
-    return this.clampScale(scale)
   }
 
   /**
@@ -764,7 +655,7 @@ export class WebGLImageViewerEngine {
     if (touches.length === 1 && touches[0]) {
       // 单指操作
       this.hasMoved = false // 重置移动标志
-      
+
       if (!this.config.panningDisabled) {
         this.isDragging = true
         this.lastMousePos = touches[0]
@@ -846,11 +737,16 @@ export class WebGLImageViewerEngine {
 
   private handleTouchEnd(event: TouchEvent): void {
     const now = Date.now()
-    
+
     // 只有在单指触摸且没有移动的情况下才处理双击
-    if (event.touches.length === 0 && this.lastMousePos && !this.hasMoved && !this.config.doubleClickDisabled) {
+    if (
+      event.touches.length === 0 &&
+      this.lastMousePos &&
+      !this.hasMoved &&
+      !this.config.doubleClickDisabled
+    ) {
       const currentTouchPosition = this.lastMousePos
-      
+
       // 检查是否为双击
       if (
         this.lastTouchTime > 0 &&
@@ -861,7 +757,7 @@ export class WebGLImageViewerEngine {
         // 双击逻辑
         const rect = this.canvas.getBoundingClientRect()
         const dpr = window.devicePixelRatio || 1
-        
+
         // 转换为画布坐标系（考虑设备像素比）
         const centerX = (currentTouchPosition.x - rect.left) * dpr
         const centerY = (currentTouchPosition.y - rect.top) * dpr
@@ -871,7 +767,12 @@ export class WebGLImageViewerEngine {
           if (isZoomedIn) {
             this.resetView()
           } else {
-            this.zoomAtPoint(centerX, centerY, this.config.doubleClickStep, true)
+            this.zoomAtPoint(
+              centerX,
+              centerY,
+              this.config.doubleClickStep,
+              true,
+            )
           }
         } else {
           this.zoomAtPoint(centerX, centerY, this.config.doubleClickStep, true)
@@ -900,7 +801,7 @@ export class WebGLImageViewerEngine {
 
   private isNearPosition(pos1: Point, pos2: Point, threshold: number): boolean {
     const distance = Math.sqrt(
-      Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2)
+      Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2),
     )
     return distance <= threshold
   }
@@ -965,7 +866,7 @@ export class WebGLImageViewerEngine {
 
     // 计算目标变换（重置状态），但不直接应用到当前变换
     const targetTransform = this.calculateCenterTransform()
-    
+
     // 使用动画过渡到目标状态
     this.animateTo(targetTransform)
   }

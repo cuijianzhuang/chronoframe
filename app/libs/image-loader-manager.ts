@@ -55,7 +55,7 @@ export class ImageLoaderManager {
       if (!fileType.mime.startsWith('image/')) return false
 
       return true
-    } catch (err) {
+    } catch {
       return false
     }
   }
@@ -155,7 +155,7 @@ export class ImageLoaderManager {
     }
     const url = URL.createObjectURL(blob)
     const result: ImageLoaderCacheResult = {
-      blobSrc: originalUrl,
+      blobSrc: url,
       originalSize: blob.size,
       format: blob.type,
     }

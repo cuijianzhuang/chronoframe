@@ -1,11 +1,12 @@
 import path from 'node:path'
 import { mkdir, unlink, writeFile } from 'node:fs/promises'
-import sharp, { Metadata } from 'sharp'
+import type { Metadata } from 'sharp'
+import sharp from 'sharp'
 import type { NeededExif, PhotoInfo } from '../../../shared/types/photo'
-import exifr from 'exifr'
-import { exiftool, ExifDateTime, Tags } from 'exiftool-vendored'
+import type { ExifDateTime, Tags } from 'exiftool-vendored'
+import { exiftool } from 'exiftool-vendored'
 import { noop } from 'es-toolkit'
-import { Logger } from '~~/server/utils/logger'
+import type { Logger } from '~~/server/utils/logger'
 
 const neededKeys: Array<keyof Tags | (string & {})> = [
   'Title',
@@ -211,6 +212,7 @@ export const extractPhotoInfo = (
 
   const viewsMatch = fileName.match(/(\d+)views?/i)
   if (viewsMatch) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     views = Number.parseInt(viewsMatch[1])
   }
 

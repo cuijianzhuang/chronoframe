@@ -41,7 +41,7 @@ export default defineOAuthGitHubEventHandler({
     }
     return sendRedirect(event, '/')
   },
-  onError(event) {
+  onError(_event) {
     throw createError({
       statusCode: 401,
       statusMessage: 'Authentication failed',

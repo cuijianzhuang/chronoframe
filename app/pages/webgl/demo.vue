@@ -85,20 +85,20 @@ const handleLoadingStateChange = (
 
         <div class="controls">
           <button
-            @click="zoomIn"
             class="control-btn"
+            @click="zoomIn"
           >
             放大
           </button>
           <button
-            @click="zoomOut"
             class="control-btn"
+            @click="zoomOut"
           >
             缩小
           </button>
           <button
-            @click="resetView"
             class="control-btn"
+            @click="resetView"
           >
             重置
           </button>

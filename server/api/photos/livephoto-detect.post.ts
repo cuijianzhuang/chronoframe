@@ -2,10 +2,10 @@ import { batchTestLivePhotoDetection } from '~~/server/services/video/test-utils
 
 export default eventHandler(async (event) => {
   await requireUserSession(event)
-  
+
   const body = await readBody(event)
   const { action, photoIds } = body
-  
+
   if (!action) {
     throw createError({
       statusCode: 400,
@@ -15,14 +15,15 @@ export default eventHandler(async (event) => {
 
   try {
     switch (action) {
-      case 'batch-detect':
-        // 批量检测现有照片的 LivePhoto 视频
+      case 'batch-detect': // 批量检测现有照片的 LivePhoto 视频
+      {
         const results = await batchTestLivePhotoDetection(photoIds)
         return {
           message: 'Batch LivePhoto detection completed',
-          results
+          results,
         }
-        
+      }
+
       default:
         throw createError({
           statusCode: 400,

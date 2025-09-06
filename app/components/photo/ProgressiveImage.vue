@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { WebGLImageViewer } from '@chronoframe/webgl-image'
 import type { LoadingIndicatorRef } from './LoadingIndicator.vue'
-import { ImageLoaderManager } from '~/libs/image-loader-manager'
+import type { ImageLoaderManager } from '~/libs/image-loader-manager'
 
 interface Props {
   src: string
@@ -28,9 +28,21 @@ const props = withDefaults(defineProps<Props>(), {
   enablePan: true,
   enableZoom: true,
   isCurrentImage: true,
+  thumbnailSrc: '',
+  alt: 'Image',
+  width: undefined,
+  height: undefined,
+  className: '',
+  onProgress: undefined,
+  onError: undefined,
+  onZoomChange: undefined,
+  onBlobSrcChange: undefined,
+  onImageLoaded: undefined,
+  isLivePhoto: false,
+  livePhotoVideoUrl: '',
+  isHDR: false,
 })
 
-const imageRef = ref<HTMLImageElement>()
 const containerRef = ref<HTMLDivElement>()
 
 // state

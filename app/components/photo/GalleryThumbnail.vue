@@ -118,7 +118,7 @@ onMounted(() => {
 })
 
 // 响应式监听
-watch(() => props.currentIndex, (newIndex, oldIndex) => {
+watch(() => props.currentIndex, (_newIndex, _oldIndex) => {
   scrollToActiveThumbnail()
   // 这里不需要再次 emit，因为索引变化是由外部传入的
   // 只需要确保滚动位置正确即可
@@ -159,7 +159,7 @@ watch(isSmallScreen, scrollToActiveThumbnail)
         }"
         @click="onThumbnailClick(photo.index)"
       >
-        <Thumbhash
+        <ThumbHash
           v-if="photo.thumbnailHash"
           :thumbhash="photo.thumbnailHash"
           class="absolute inset-0 w-full h-full"

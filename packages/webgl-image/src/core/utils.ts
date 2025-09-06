@@ -84,7 +84,7 @@ export function debounce<T extends (...args: any[]) => any>(
   return (...args: Parameters<T>) => {
     clearTimeout(timeoutId)
     timeoutId = setTimeout(
-      () => func.apply(null, args),
+      () => func(...args),
       delay,
     ) as unknown as number
   }
@@ -102,7 +102,7 @@ export function throttle<T extends (...args: any[]) => any>(
     const now = Date.now()
     if (now - lastCall >= delay) {
       lastCall = now
-      func.apply(null, args)
+      func(...args)
     }
   }
 }

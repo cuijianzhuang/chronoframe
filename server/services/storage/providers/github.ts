@@ -1,4 +1,6 @@
-import { StorageObject, StorageProvider } from '../interfaces'
+// TODO: Implement GitHub storage provider and remove below line
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import type { StorageObject, StorageProvider } from '../interfaces'
 
 export class GitHubStorageProvider implements StorageProvider {
   create(key: string, data: Buffer): Promise<StorageObject> {

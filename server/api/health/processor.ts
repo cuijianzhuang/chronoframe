@@ -1,4 +1,4 @@
-export default eventHandler(async (event) => {
+export default eventHandler(async (_event) => {
   // 简单的处理器状态检查
   const status = {
     mode: 'background-processing',

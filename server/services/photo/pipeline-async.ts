@@ -1,16 +1,18 @@
 import path from 'path'
 import {
-  preprocessImage,
   preprocessImageWithJpegUpload,
   processImageMetadataAndSharp,
 } from '../image/processor'
 import { generateThumbnailAndHash } from '../image/thumbnail'
-import { Photo } from '~~/server/utils/db'
+import type { Photo } from '~~/server/utils/db'
 import { getStorageManager } from '~~/server/plugins/storage'
 import { compressUint8Array } from '~~/shared/utils/u8array'
-import { StorageObject } from '../storage'
+import type { StorageObject } from '../storage'
 import { extractExifData, extractPhotoInfo } from '../image/exif'
-import { extractLocationFromGPS, parseGPSCoordinates } from '../location/geocoding'
+import {
+  extractLocationFromGPS,
+  parseGPSCoordinates,
+} from '../location/geocoding'
 import { findLivePhotoVideoForImage } from '../video/livephoto'
 
 const generatePhotoId = (s3key: string) => {
@@ -87,23 +89,29 @@ async function processPhotoInternal(
       return null
     }
 
-    const { sharpInst, imageBuffer, metadata } = processedData
+    const { imageBuffer, metadata } = processedData
 
-    const { thumbnailBuffer, thumbnailHash } = await new Promise<any>((resolve, reject) => {
-      setImmediate(async () => {
-        try {
-          const result = await generateThumbnailAndHash(imageBuffer)
-          resolve(result)
-        } catch (error) {
-          reject(error)
-        }
-      })
-    })
+    const { thumbnailBuffer, thumbnailHash } = await new Promise<any>(
+      (resolve, reject) => {
+        setImmediate(async () => {
+          try {
+            const result = await generateThumbnailAndHash(imageBuffer)
+            resolve(result)
+          } catch (error) {
+            reject(error)
+          }
+        })
+      },
+    )
 
     const exifData = await new Promise<any>((resolve, reject) => {
       setImmediate(async () => {
         try {
-          const result = await extractExifData(imageBuffer, imageBuffers.raw, log)
+          const result = await extractExifData(
+            imageBuffer,
+            imageBuffers.raw,
+            log,
+          )
           resolve(result)
         } catch (error) {
           reject(error)
@@ -147,7 +155,9 @@ async function processPhotoInternal(
     if (livePhotoVideo) {
       livePhotoInfo = {
         isLivePhoto: 1,
-        livePhotoVideoUrl: storageProvider.getPublicUrl(livePhotoVideo.videoKey),
+        livePhotoVideoUrl: storageProvider.getPublicUrl(
+          livePhotoVideo.videoKey,
+        ),
         livePhotoVideoKey: livePhotoVideo.videoKey,
       }
       log.info(`LivePhoto video found for ${s3key}: ${livePhotoVideo.videoKey}`)
@@ -159,7 +169,7 @@ async function processPhotoInternal(
           const result = await storageProvider.create(
             `thumbnails/${photoId}.webp`,
             thumbnailBuffer,
-            'image/webp'
+            'image/webp',
           )
           resolve(result)
         } catch (error) {
@@ -181,8 +191,8 @@ async function processPhotoInternal(
       fileSize: storageObject.size || null,
       lastModified:
         storageObject.lastModified?.toISOString() || new Date().toISOString(),
-      originalUrl: imageBuffers.jpegKey 
-        ? storageProvider.getPublicUrl(imageBuffers.jpegKey)  // 使用 JPEG 版本作为 originalUrl
+      originalUrl: imageBuffers.jpegKey
+        ? storageProvider.getPublicUrl(imageBuffers.jpegKey) // 使用 JPEG 版本作为 originalUrl
         : storageProvider.getPublicUrl(s3key),
       thumbnailUrl: storageProvider.getPublicUrl(thumbnailObject.key),
       thumbnailHash: thumbnailHash ? compressUint8Array(thumbnailHash) : null,
@@ -201,7 +211,6 @@ async function processPhotoInternal(
 
     log.info(`Async processing completed for ${s3key}`)
     return result
-
   } catch (err) {
     log.error(`Photo pipeline failed for ${s3key}`, err)
     return null
@@ -213,10 +222,11 @@ async function processPhotoInternal(
  */
 export const execBatchPhotoPipelineAsync = async (
   photos: Array<{ s3key: string; storageObject: StorageObject }>,
-  maxConcurrent = 3
+  maxConcurrent = 3,
 ): Promise<Array<{ s3key: string; photo: Photo | null; error?: string }>> => {
-  const results: Array<{ s3key: string; photo: Photo | null; error?: string }> = []
-  
+  const results: Array<{ s3key: string; photo: Photo | null; error?: string }> =
+    []
+
   // 分批处理以限制并发数
   for (let i = 0; i < photos.length; i += maxConcurrent) {
     const batch = photos.slice(i, i + maxConcurrent)
@@ -226,22 +236,24 @@ export const execBatchPhotoPipelineAsync = async (
         return {
           s3key,
           photo,
-          error: photo ? undefined : 'Processing failed'
+          error: photo ? undefined : 'Processing failed',
         }
       } catch (error) {
         return {
           s3key,
           photo: null,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         }
       }
     })
 
     const batchResults = await Promise.all(batchPromises)
     results.push(...batchResults)
-    
-    logger.image.info(`Processed async batch ${Math.floor(i / maxConcurrent) + 1} of ${Math.ceil(photos.length / maxConcurrent)}`)
+
+    logger.image.info(
+      `Processed async batch ${Math.floor(i / maxConcurrent) + 1} of ${Math.ceil(photos.length / maxConcurrent)}`,
+    )
   }
-  
+
   return results
 }

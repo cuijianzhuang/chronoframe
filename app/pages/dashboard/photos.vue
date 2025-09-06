@@ -316,14 +316,17 @@ const columns: TableColumn<Photo>[] = [
     accessorKey: 'location',
     header: '位置',
     cell: ({ row }) => {
-      if (!row.original.exif?.GPSLongitude && !row.original.exif?.GPSLatitude) {
-        return h('span', { class: 'text-neutral-400 text-xs' }, '无 GPS 信息')
-      }
-      const location = `${row.original.city || ''}, ${row.original.country || ''}`.trim()
-      return location 
-        ? h('span', { class: 'text-xs' }, location) 
-        : h('span', { class: 'text-neutral-400 text-xs' }, '未知')
-    }
+  const { exif, city, country } = row.original
+  
+  if (!exif?.GPSLongitude && !exif?.GPSLatitude) {
+    return h('span', { class: 'text-neutral-400 text-xs' }, '无 GPS 信息')
+  }
+  
+  const location = [city, country].filter(Boolean).join(', ')
+  return h('span', { 
+    class: location ? 'text-xs' : 'text-neutral-400 text-xs' 
+  }, location || '未知')
+}
   },
   {
     accessorKey: 'dateTaken',
@@ -1003,8 +1006,8 @@ onUnmounted(() => {
           color="success"
           size="sm"
           icon="tabler:refresh"
-          @click="handleBatchReindexExif"
           class="flex-1 sm:flex-none"
+          @click="handleBatchReindexExif"
         >
           <span class="hidden sm:inline">重新索引 EXIF</span>
           <span class="sm:hidden">索引</span>
@@ -1016,8 +1019,8 @@ onUnmounted(() => {
           color="info"
           size="sm"
           icon="tabler:live-photo"
-          @click="handleBatchDetectLivePhoto"
           class="flex-1 sm:flex-none"
+          @click="handleBatchDetectLivePhoto"
         >
           <span class="hidden sm:inline">实况配对</span>
           <span class="sm:hidden">配对</span>
@@ -1028,8 +1031,8 @@ onUnmounted(() => {
           variant="soft"
           size="sm"
           icon="tabler:trash"
-          @click="handleBatchDelete"
           class="flex-1 sm:flex-none"
+          @click="handleBatchDelete"
         >
           <span class="hidden sm:inline">批量删除</span>
           <span class="sm:hidden">删除</span>

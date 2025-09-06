@@ -1,4 +1,3 @@
-import sharp from 'sharp'
 import { execPhotoPipelineAsync } from '~~/server/services/photo/pipeline-async'
 import { useStorageProvider } from '~~/server/utils/useStorageProvider'
 
@@ -23,7 +22,7 @@ export default eventHandler(async (event) => {
   )
 
   // 立即返回响应，不等待处理完成
-  const processingPromise = processPhotoInBackground(originalObject.key, originalObject)
+  processPhotoInBackground(originalObject.key, originalObject)
 
   // 返回处理中的响应
   return {

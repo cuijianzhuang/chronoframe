@@ -15,8 +15,6 @@ const emit = defineEmits<{
   openViewer: [number]
 }>()
 
-const toast = useToast()
-
 // Constants
 const ITEM_GAP = 4
 
@@ -66,11 +64,6 @@ const aspectRatio = computed(() => {
   return 1.2
 })
 
-const containerHeight = computed(() => {
-  const currentWidth = containerWidth.value || 280
-  return Math.round(currentWidth * aspectRatio.value)
-})
-
 // Show info overlay only when not playing video or video has finished
 const shouldShowInfoOverlay = computed(() => {
   if (!props.photo.isLivePhoto) return true
@@ -88,7 +81,7 @@ const shouldShowInfoOverlay = computed(() => {
 })
 
 // Methods
-const handleImageLoad = (event: Event) => {
+const handleImageLoad = (_event: Event) => {
   isLoading.value = false
 }
 
@@ -465,12 +458,12 @@ onUnmounted(() => {
         class="w-full relative"
         :style="{ aspectRatio }"
       >
-        <!-- Thumbhash placeholder -->
+        <!-- ThumbHash placeholder -->
         <div
           v-if="isLoading && photo.thumbnailHash"
           class="absolute inset-0 w-full h-full"
         >
-          <Thumbhash
+          <ThumbHash
             :thumbhash="photo.thumbnailHash"
             class="w-full h-full object-cover scale-110"
             :alt="photo.title || 'Photo placeholder'"
@@ -485,8 +478,8 @@ onUnmounted(() => {
 
         <!-- Main image with motion transition -->
         <motion.img
-          ref="mainImageRef"
           v-show="!isLoading"
+          ref="mainImageRef"
           :src="photo.thumbnailUrl || ''"
           :alt="photo.title || photo.description || 'Photo'"
           class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"

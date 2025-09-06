@@ -11,6 +11,7 @@ export default withNuxt({
     '@stylistic/arrow-parens': 'off',
     '@stylistic/operator-linebreak': 'off',
     '@typescript-eslint/no-empty-object-type': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
   },
   plugins: {
     prettier,

@@ -1,5 +1,5 @@
-import { BlobObject } from '@nuxthub/core'
-import {
+import type { BlobObject } from '@nuxthub/core'
+import type {
   HubR2StorageConfig,
   StorageObject,
   StorageProvider,
@@ -15,7 +15,7 @@ const convertToStorageObject = (blob: BlobObject): StorageObject => {
 }
 
 export class HubR2StorageProvider implements StorageProvider {
-  private config: HubR2StorageConfig
+  config: HubR2StorageConfig
   private logger?: Logger['storage']
 
   constructor(config: HubR2StorageConfig, logger?: Logger['storage']) {
@@ -26,7 +26,7 @@ export class HubR2StorageProvider implements StorageProvider {
   async create(
     key: string,
     fileBuffer: Buffer,
-    contentType?: string,
+    _contentType?: string,
   ): Promise<StorageObject> {
     const file = new File([new Uint8Array(fileBuffer)], key)
 

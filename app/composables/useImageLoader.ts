@@ -40,7 +40,7 @@ export const useImageLoader = (
       updateBlobSrc?.(loadResult.blobSrc)
       updateHighResLoaded?.(true)
       onImageLoaded?.() // 通知图片加载完成
-    } catch (err) {
+    } catch {
       updateError?.(true)
       loadingIndicatorRef?.updateLoadingState({
         isVisible: true,

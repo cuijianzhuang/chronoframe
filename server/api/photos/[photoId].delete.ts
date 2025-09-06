@@ -32,7 +32,9 @@ export default eventHandler(async (event) => {
       await storageProvider.delete(
         photo.thumbnailUrl?.replace(storageProvider.getPublicUrl(''), '') || '',
       )
-    } catch (_) {}
+    } catch {
+      // ignore error
+    }
   }
 
   useDB().delete(tables.photos).where(eq(tables.photos.id, photoId)).run()

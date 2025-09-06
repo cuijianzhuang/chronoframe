@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { motion, AnimatePresence } from 'motion-v'
+import { computed } from 'vue'
+import { motion } from 'motion-v'
 import type { NeededExif } from '../../../shared/types/photo'
 import type { KVData } from './KVRenderer.vue'
 import { formatCameraInfo, formatLensInfo } from '~/utils/camera'
@@ -53,25 +53,6 @@ const formatExposureTime = (
     const denominator = Math.round(1 / seconds)
     return `1/${denominator}`
   }
-}
-
-// 格式化GPS坐标为标准的N/E格式
-const formatGPSCoordinates = (latitude: number, longitude: number): string => {
-  const latDirection = latitude >= 0 ? 'N' : 'S'
-  const lngDirection = longitude >= 0 ? 'E' : 'W'
-
-  const latDegrees = Math.abs(latitude)
-  const lngDegrees = Math.abs(longitude)
-
-  const latDeg = Math.floor(latDegrees)
-  const latMin = Math.floor((latDegrees - latDeg) * 60)
-  const latSec = ((latDegrees - latDeg) * 60 - latMin) * 60
-
-  const lngDeg = Math.floor(lngDegrees)
-  const lngMin = Math.floor((lngDegrees - lngDeg) * 60)
-  const lngSec = ((lngDegrees - lngDeg) * 60 - lngMin) * 60
-
-  return `${latDeg}°${latMin}'${latSec.toFixed(2)}"${latDirection}, ${lngDeg}°${lngMin}'${lngSec.toFixed(2)}"${lngDirection}`
 }
 
 // 格式化GPS坐标为两行显示
@@ -461,11 +442,11 @@ const isMobile = useMediaQuery('(max-width: 768px)')
       </h3>
       <UButton
         v-if="isMobile && onClose"
-        @click="onClose"
         icon="tabler:x"
         variant="ghost"
         color="neutral"
         size="sm"
+        @click="onClose"
       />
     </div>
 

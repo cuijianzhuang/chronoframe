@@ -7,7 +7,7 @@ import { getStorageManager } from '~~/server/plugins/storage'
  */
 export const processLivePhotoVideo = async (
   videoKey: string,
-  videoSize: number
+  _videoSize: number
 ): Promise<boolean> => {
   const storageProvider = getStorageManager().getProvider()
   const db = useDB()
@@ -110,7 +110,7 @@ export const findLivePhotoVideoForImage = async (
             logger.chrono.warn(`Video file found but doesn't match LivePhoto criteria: ${videoKey} (size: ${videoSize})`)
           }
         }
-      } catch (err) {
+      } catch {
         // 文件不存在，继续检查下一个
         continue
       }

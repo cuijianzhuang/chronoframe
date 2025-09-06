@@ -32,7 +32,8 @@ const getMetadataWithSharp = async (
       return null
     }
 
-    let { width, height, orientation } = metadata
+    const { orientation } = metadata
+    let { width, height } = metadata
 
     if (orientation && [5, 6, 7, 8].includes(orientation)) {
       ;[width, height] = [height, width]
@@ -135,7 +136,9 @@ export const preprocessImageWithJpegUpload = async (
         jpegKey = `${baseName}.jpeg`
 
         // 上传 JPEG 版本到存储
-        jpegStorageKey = (await storageProvider.create(jpegKey, processedBuffer, 'image/jpeg')).key
+        jpegStorageKey = (
+          await storageProvider.create(jpegKey, processedBuffer, 'image/jpeg')
+        ).key
         logger.image.info(`Uploaded JPEG version to: ${jpegKey}`)
       } catch (err) {
         logger.image.error(`HEIC conversion failed: ${s3key}`, err)

@@ -283,7 +283,7 @@ const handleOpenViewer = (index: number) => {
           :key="photo.id || index"
           :photo="photo"
           :index="index"
-          :hasAnimated
+          :has-animated
           :first-screen-items="FIRST_SCREEN_ITEMS_COUNT"
           @visibility-change="handleVisibilityChange"
           @open-viewer="handleOpenViewer($event)"

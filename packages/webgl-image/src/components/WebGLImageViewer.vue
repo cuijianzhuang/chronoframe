@@ -116,7 +116,7 @@ const initEngine = async (): Promise<void> => {
       ) => {
         emit('loadingStateChange', isLoading, state, quality)
       },
-      onTransformChange: (transform) => {
+      onTransformChange: (_transform) => {
         // 在任何变换变化时更新调试信息
         if (config.value.debug) {
           updateDebugInfo()
@@ -214,7 +214,7 @@ watch(
 
 watch(
   config,
-  (newConfig) => {
+  (_newConfig) => {
     if (engine.value) {
       engine.value.destroy()
       initEngine().catch(console.error)

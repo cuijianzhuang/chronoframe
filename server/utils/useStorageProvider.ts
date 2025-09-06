@@ -1,5 +1,5 @@
-import { H3Event, EventHandlerRequest } from 'h3'
-import { StorageProvider } from '../services/storage'
+import type { H3Event, EventHandlerRequest } from 'h3'
+import type { StorageProvider } from '../services/storage'
 
 export const useStorageProvider = (event: H3Event<EventHandlerRequest>) => {
   const storageProvider =

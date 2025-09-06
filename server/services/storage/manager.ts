@@ -1,7 +1,9 @@
-import { S3StorageProvider, StorageConfig, StorageProvider } from '.'
+import type { StorageConfig, StorageProvider } from '.';
+import { S3StorageProvider } from '.'
 import type { Logger } from '../../utils/logger'
 import { HubR2StorageProvider } from './providers/hub-r2'
 
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class StorageProviderFactory {
   static createProvider(
     config: StorageConfig,

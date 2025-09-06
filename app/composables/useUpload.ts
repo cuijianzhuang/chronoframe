@@ -214,7 +214,7 @@ export function useUpload(options: UseUploadOptions = {}) {
               if (responseText) {
                 error += ` - ${responseText}`
               }
-            } catch (e) {
+            } catch {
               // 忽略解析错误
             }
 

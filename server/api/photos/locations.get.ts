@@ -6,7 +6,7 @@ export default eventHandler(async (event) => {
   const query = getQuery(event)
   const { country, city, hasLocation } = query
 
-  let whereConditions = []
+  const whereConditions = []
 
   // 如果指定了只显示有位置信息的照片
   if (hasLocation === 'true') {

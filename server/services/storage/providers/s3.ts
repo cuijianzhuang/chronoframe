@@ -1,14 +1,15 @@
-import {
+import type {
   _Object,
+  S3ClientConfig} from '@aws-sdk/client-s3';
+import {
   DeleteObjectCommand,
   GetObjectCommand,
   ListObjectsCommand,
   PutObjectCommand,
-  S3Client,
-  S3ClientConfig,
+  S3Client
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import {
+import type {
   S3StorageConfig,
   StorageObject,
   StorageProvider,
@@ -141,7 +142,7 @@ export class S3StorageProvider implements StorageProvider {
           reject(err)
         })
       })
-    } catch (_err) {
+    } catch {
       return null
     }
   }

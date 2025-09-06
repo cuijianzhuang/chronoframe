@@ -33,7 +33,7 @@ const handleOpenLogin = () => {
     ></div>
     <div class="flex flex-col items-center py-6 gap-2">
       <AuthState>
-        <template #default="{ loggedIn, user, clear }">
+        <template #default="{ loggedIn, clear }">
           <div class="flex flex-col items-center gap-2">
             <div class="relative mx-auto">
               <div
@@ -66,8 +66,8 @@ const handleOpenLogin = () => {
             <p class="font-[Pacifico]">Mems rest within the lens.</p>
           </div>
           <div
-            class="text-center mt-3"
             v-if="loggedIn"
+            class="text-center mt-3"
           >
             <div class="flex items-center gap-2">
               <UButton

@@ -1,14 +1,13 @@
 import path from 'path'
 import {
-  preprocessImage,
   preprocessImageWithJpegUpload,
   processImageMetadataAndSharp,
 } from '../image/processor'
 import { generateThumbnailAndHash } from '../image/thumbnail'
-import { Photo } from '~~/server/utils/db'
+import type { Photo } from '~~/server/utils/db'
 import { getStorageManager } from '~~/server/plugins/storage'
 import { compressUint8Array } from '~~/shared/utils/u8array'
-import { StorageObject } from '../storage'
+import type { StorageObject } from '../storage'
 import { extractExifData, extractPhotoInfo } from '../image/exif'
 import { findLivePhotoVideoForImage } from '../video/livephoto'
 
@@ -35,7 +34,7 @@ export const execPhotoPipeline = async (
       s3key,
     )
     if (!processedData) return null
-    const { sharpInst, imageBuffer, metadata } = processedData
+    const { imageBuffer, metadata } = processedData
 
     // 3. 生成缩略图和 BlurHash
     const { thumbnailBuffer, thumbnailHash } =
@@ -50,11 +49,13 @@ export const execPhotoPipeline = async (
     // 6. 检查是否有对应的 LivePhoto 视频文件
     const livePhotoVideo = await findLivePhotoVideoForImage(s3key)
     let livePhotoInfo = null
-    
+
     if (livePhotoVideo) {
       livePhotoInfo = {
         isLivePhoto: 1,
-        livePhotoVideoUrl: storageProvider.getPublicUrl(livePhotoVideo.videoKey),
+        livePhotoVideoUrl: storageProvider.getPublicUrl(
+          livePhotoVideo.videoKey,
+        ),
         livePhotoVideoKey: livePhotoVideo.videoKey,
       }
       log.info(`LivePhoto video found for ${s3key}: ${livePhotoVideo.videoKey}`)
@@ -64,7 +65,7 @@ export const execPhotoPipeline = async (
     const thumbnailObject = await storageProvider.create(
       `thumbnails/${photoId}.webp`,
       thumbnailBuffer,
-      'image/webp'
+      'image/webp',
     )
 
     return {
@@ -80,8 +81,8 @@ export const execPhotoPipeline = async (
       fileSize: storageObject.size || null,
       lastModified:
         storageObject.lastModified?.toISOString() || new Date().toISOString(),
-      originalUrl: imageBuffers.jpegKey 
-        ? storageProvider.getPublicUrl(imageBuffers.jpegKey)  // 使用 JPEG 版本作为 originalUrl
+      originalUrl: imageBuffers.jpegKey
+        ? storageProvider.getPublicUrl(imageBuffers.jpegKey) // 使用 JPEG 版本作为 originalUrl
         : storageProvider.getPublicUrl(s3key),
       thumbnailUrl: storageProvider.getPublicUrl(thumbnailObject.key),
       thumbnailHash: thumbnailHash ? compressUint8Array(thumbnailHash) : null,
