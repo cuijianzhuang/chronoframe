@@ -72,7 +72,7 @@ const uploadImage = async (file: File) => {
         fileName: file.name,
         contentType: file.type,
       },
-    })) as { signedUrl: string; fileKey: string; expiresIn: number }
+    }))
 
     uploadingFile.signedUrlResponse = signedUrlResponse
     uploadingFile.status = 'uploading'
@@ -277,11 +277,11 @@ const columns: TableColumn<Photo>[] = [
     cell: ({ row }) => {
       const tags = row.original.tags
       return h('div', { class: 'flex items-center gap-1' }, [
-        tags?.map(tag => h(UBadge, {
+        tags && tags.length ? tags.map(tag => h(UBadge, {
           size: 'sm',
           variant: 'soft',
           color: 'neutral'
-        }, () => tag)) || h('span', { class: 'text-neutral-400 text-xs' }, '无标签')
+        }, () => tag)) : h('span', { class: 'text-neutral-400 text-xs' }, '无标签')
       ])
     },
   },
@@ -310,6 +310,19 @@ const columns: TableColumn<Photo>[] = [
       const valueA = rowA.original.isLivePhoto ? 1 : 0
       const valueB = rowB.original.isLivePhoto ? 1 : 0
       return valueB - valueA // LivePhoto 优先排序
+    }
+  },
+  {
+    accessorKey: 'location',
+    header: '位置',
+    cell: ({ row }) => {
+      if (!row.original.exif?.GPSLongitude && !row.original.exif?.GPSLatitude) {
+        return h('span', { class: 'text-neutral-400 text-xs' }, '无 GPS 信息')
+      }
+      const location = `${row.original.city || ''}, ${row.original.country || ''}`.trim()
+      return location 
+        ? h('span', { class: 'text-xs' }, location) 
+        : h('span', { class: 'text-neutral-400 text-xs' }, '未知')
     }
   },
   {
@@ -973,15 +986,14 @@ onUnmounted(() => {
           class="text-blue-500"
         />
         <span class="font-medium text-blue-700 dark:text-blue-300">
-          <span class="hidden sm:inline">已选择</span> {{ selectedRowsCount }} <span class="hidden sm:inline">张照片</span>
+          <span>已选择</span> {{ selectedRowsCount }} <span>张照片</span>
         </span>
         <UButton
           variant="ghost"
           size="sm"
           @click="rowSelection = {}"
         >
-          <span class="hidden sm:inline">取消选择</span>
-          <span class="sm:hidden">取消</span>
+          <span>取消选择</span>
         </UButton>
       </div>
       <div class="flex flex-wrap sm:flex-nowrap items-center gap-1 sm:gap-2">
@@ -1032,11 +1044,14 @@ onUnmounted(() => {
       <UTable
         ref="table"
         v-model:row-selection="rowSelection"
+        :column-pinning="{
+          right: ['actions']
+        }"
         :data="filteredData as Photo[]"
         :columns="columns"
         :loading="status === 'pending'"
         sticky
-        class="h-[400px] sm:h-[600px]"
+        class="h-[500px] sm:h-[600px]"
         :ui="{
           separator:
             'bg-(--ui-color-neutral-200) dark:bg-(--ui-color-neutral-700)',
