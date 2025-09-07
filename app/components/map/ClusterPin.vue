@@ -40,8 +40,8 @@ const representativePhoto = computed(
 
 <template>
   <MapboxDefaultMarker
-    :key="`cluster-${representativePhoto.id}`"
-    :marker-id="`cluster-${representativePhoto.id}`"
+    :key="`marker-cluster-${representativePhoto.id}`"
+    :marker-id="`marker-cluster-${representativePhoto.id}`"
     :lnglat="props.clusterPoint.geometry.coordinates"
     :options="{}"
   >

@@ -460,7 +460,7 @@ onUnmounted(() => {
       >
         <!-- ThumbHash placeholder -->
         <div
-          v-if="isLoading && photo.thumbnailHash"
+          v-if="photo.thumbnailHash"
           class="absolute inset-0 w-full h-full"
         >
           <ThumbHash

@@ -20,18 +20,18 @@ const emit = defineEmits<{
 }>()
 
 const dayjs = useDayjs()
+const marker = computed(() => props.clusterPoint.properties.marker!)
 
 const onClick = () => {
   emit('click', props.clusterPoint)
 }
-
-const marker = computed(() => props.clusterPoint.properties.marker!)
 </script>
 
 <template>
   <MapboxDefaultMarker
-    :key="`single-${marker.id}`"
-    :marker-id="`single-${marker.id}`"
+    ref="markerRef"
+    :key="`marker-single-${marker.id}`"
+    :marker-id="`marker-single-${marker.id}`"
     :lnglat="props.clusterPoint.geometry.coordinates"
     :options="{}"
   >
@@ -134,7 +134,7 @@ const marker = computed(() => props.clusterPoint.properties.marker!)
                     class="size-5"
                   />
                 </MapGlassButton>
-                
+
                 <!-- Single photo preview -->
                 <div class="relative h-36 overflow-hidden">
                   <ThumbImage
@@ -204,7 +204,9 @@ const marker = computed(() => props.clusterPoint.properties.marker!)
                     </div>
                     <!-- Latlng -->
                     <div
-                      v-if="marker.exif?.GPSLatitude || marker.exif?.GPSLongitude"
+                      v-if="
+                        marker.exif?.GPSLatitude || marker.exif?.GPSLongitude
+                      "
                       class="flex items-center gap-1 text-xs text-muted"
                     >
                       <Icon
