@@ -63,9 +63,9 @@ const onError = () => {
     :style="style"
   >
     <ThumbHash
-      v-if="thumbhash && !isLoaded"
+      v-if="thumbhash"
       :thumbhash="thumbhash"
-      class="absolute inset-0 scale-110 blur-sm"
+      class="absolute inset-0 scale-110 blur-sm -z-10"
     />
 
     <img

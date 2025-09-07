@@ -2,10 +2,11 @@
 import { motion } from 'motion-v'
 import ThumbImage from '../ThumbImage.vue'
 import { twMerge } from 'tailwind-merge'
+import type { ClusterPoint } from '~~/shared/types/map'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
-    photo: Photo
+    clusterPoint: ClusterPoint
     isSelected?: boolean
   }>(),
   {
@@ -14,22 +15,24 @@ withDefaults(
 )
 
 const emit = defineEmits<{
-  click: [photo: Photo]
+  click: [clusterPoint: ClusterPoint]
   close: []
 }>()
 
 const dayjs = useDayjs()
 
-const onClick = (photo: Photo) => {
-  emit('click', photo)
+const onClick = () => {
+  emit('click', props.clusterPoint)
 }
+
+const marker = computed(() => props.clusterPoint.properties.marker!)
 </script>
 
 <template>
   <MapboxDefaultMarker
-    :key="photo.id"
-    :marker-id="`photo-${photo.id}`"
-    :lnglat="[photo.longitude, photo.latitude]"
+    :key="`single-${marker.id}`"
+    :marker-id="`single-${marker.id}`"
+    :lnglat="props.clusterPoint.geometry.coordinates"
     :options="{}"
   >
     <template #marker>
@@ -51,7 +54,7 @@ const onClick = (photo: Photo) => {
               stiffness: 400,
               damping: 30,
             }"
-            @click="onClick(photo)"
+            @click="onClick"
           >
             <div
               v-if="isSelected"
@@ -60,9 +63,9 @@ const onClick = (photo: Photo) => {
 
             <div class="absolute inset-0 overflow-hidden rounded-full">
               <ThumbImage
-                :src="photo.thumbnailUrl!"
-                :alt="photo.title || `照片 ${photo.id}`"
-                :thumbhash="photo.thumbnailHash"
+                :src="marker.thumbnailUrl!"
+                :alt="marker.title || `照片 ${marker.id}`"
+                :thumbhash="marker.thumbnailHash"
                 :threshold="0.1"
                 root-margin="100px"
                 class="h-full w-full object-cover opacity-40"
@@ -72,7 +75,7 @@ const onClick = (photo: Photo) => {
               />
             </div>
 
-            <!-- main -->
+            <!-- Single photo marker -->
             <div
               :class="
                 twMerge(
@@ -131,11 +134,13 @@ const onClick = (photo: Photo) => {
                     class="size-5"
                   />
                 </MapGlassButton>
+                
+                <!-- Single photo preview -->
                 <div class="relative h-36 overflow-hidden">
                   <ThumbImage
-                    :src="photo.thumbnailUrl!"
-                    :alt="photo.title || `照片 ${photo.id}`"
-                    :thumbhash="photo.thumbnailHash"
+                    :src="marker.thumbnailUrl!"
+                    :alt="marker.title || `照片 ${marker.id}`"
+                    :thumbhash="marker.thumbnailHash"
                     :threshold="0.1"
                     root-margin="200px"
                     class="w-full h-full object-cover"
@@ -144,13 +149,13 @@ const onClick = (photo: Photo) => {
                 <div class="relative px-3 py-2 space-y-1">
                   <!-- Header -->
                   <NuxtLink
-                    :to="`/${photo.id}`"
+                    :to="`/${marker.id}`"
                     target="_blank"
                     rel="noopener"
                     class="flex items-center gap-2 text-white group/link"
                   >
                     <h3 class="flex-1 text-lg font-semibold truncate">
-                      {{ photo.title || `照片 ${photo.id}` }}
+                      {{ marker.title || `照片 ${marker.id}` }}
                     </h3>
                     <Icon
                       name="tabler:external-link"
@@ -161,19 +166,19 @@ const onClick = (photo: Photo) => {
                   <!-- Metadata -->
                   <div class="space-y-1">
                     <div
-                      v-if="photo.city || photo.exif?.DateTimeOriginal"
+                      v-if="marker.city || marker.exif?.DateTimeOriginal"
                       class="flex items-center gap-1 text-xs text-muted font-medium mb-2"
                     >
-                      <div v-if="photo.city">
+                      <div v-if="marker.city">
                         <span class="truncate">
-                          {{ photo.city }}
+                          {{ marker.city }}
                         </span>
                       </div>
                       <span>·</span>
-                      <div v-if="photo.exif?.DateTimeOriginal">
+                      <div v-if="marker.exif?.DateTimeOriginal">
                         <span class="truncate">
                           {{
-                            dayjs(photo.exif.DateTimeOriginal).format(
+                            dayjs(marker.exif.DateTimeOriginal).format(
                               'YY年MM月DD日',
                             )
                           }}
@@ -182,7 +187,7 @@ const onClick = (photo: Photo) => {
                     </div>
                     <!-- Camera -->
                     <div
-                      v-if="photo.exif?.Make || photo.exif?.Model"
+                      v-if="marker.exif?.Make || marker.exif?.Model"
                       class="flex items-center gap-1 text-xs text-muted"
                     >
                       <Icon
@@ -191,7 +196,7 @@ const onClick = (photo: Photo) => {
                       />
                       <span class="truncate">
                         {{
-                          [photo.exif?.Make, photo.exif?.Model]
+                          [marker.exif?.Make, marker.exif?.Model]
                             .filter(Boolean)
                             .join(' ')
                         }}
@@ -199,7 +204,7 @@ const onClick = (photo: Photo) => {
                     </div>
                     <!-- Latlng -->
                     <div
-                      v-if="photo.exif?.GPSLatitude || photo.exif?.GPSLongitude"
+                      v-if="marker.exif?.GPSLatitude || marker.exif?.GPSLongitude"
                       class="flex items-center gap-1 text-xs text-muted"
                     >
                       <Icon
@@ -208,20 +213,20 @@ const onClick = (photo: Photo) => {
                       />
                       <span class="truncate font-mono">
                         {{
-                          photo.exif?.GPSLatitude
-                            ? `${Math.abs(Number(photo.exif?.GPSLatitude)).toFixed(4)}°${photo.exif?.GPSLatitudeRef}`
+                          marker.exif?.GPSLatitude
+                            ? `${Math.abs(Number(marker.exif?.GPSLatitude)).toFixed(4)}°${marker.exif?.GPSLatitudeRef}`
                             : '未知'
                         }},
                         {{
-                          photo.exif?.GPSLongitude
-                            ? `${Math.abs(Number(photo.exif?.GPSLongitude)).toFixed(4)}°${photo.exif?.GPSLongitudeRef}`
+                          marker.exif?.GPSLongitude
+                            ? `${Math.abs(Number(marker.exif?.GPSLongitude)).toFixed(4)}°${marker.exif?.GPSLongitudeRef}`
                             : '未知'
                         }}
                       </span>
                     </div>
                     <!-- Altitude -->
                     <div
-                      v-if="photo.exif?.GPSAltitude"
+                      v-if="marker.exif?.GPSAltitude"
                       class="flex items-center gap-1 text-xs text-muted"
                     >
                       <Icon
@@ -230,7 +235,7 @@ const onClick = (photo: Photo) => {
                       />
                       <span class="truncate font-mono">
                         {{
-                          `${photo.exif.GPSAltitudeRef === 'Below Sea Level' ? '-' : ''}${Math.abs(Number(photo.exif.GPSAltitude)).toFixed(1)}m`
+                          `${marker.exif.GPSAltitudeRef === 'Below Sea Level' ? '-' : ''}${Math.abs(Number(marker.exif.GPSAltitude)).toFixed(1)}m`
                         }}
                       </span>
                     </div>

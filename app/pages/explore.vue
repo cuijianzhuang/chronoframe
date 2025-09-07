@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { motion } from 'motion-v'
+import { clusterMarkers, photosToMarkers } from '~/utils/clustering'
 
 useHead({
   title: '地图探索',
@@ -21,10 +22,30 @@ const photosWithLocation = computed(() => {
   )
 })
 
-const currentPhotoId = ref<string | null>(null)
+const currentClusterPointId = ref<string | null>(null)
 const mapInstance = ref<any>(null)
+const currentZoom = ref<number>(4)
 
-watch(currentPhotoId, (newId) => {
+// Convert photos to markers and apply clustering
+const clusteredMarkers = computed(() => {
+  const markers = photosToMarkers(photosWithLocation.value)
+  return clusterMarkers(markers, currentZoom.value)
+})
+
+// Separate clusters and single markers
+const clusterGroups = computed(() => {
+  return clusteredMarkers.value.filter(
+    (point) => point.properties.cluster === true,
+  )
+})
+
+const singleMarkers = computed(() => {
+  return clusteredMarkers.value.filter(
+    (point) => point.properties.cluster !== true,
+  )
+})
+
+watch(currentClusterPointId, (newId) => {
   if (newId) {
     router.replace({ query: { ...route.query, photoId: newId } })
   } else {
@@ -75,35 +96,75 @@ const mapViewState = computed(() => {
   }
 })
 
-const onMarkerPinClick = (photo: Photo) => {
-  if (photo.id === currentPhotoId.value) {
-    currentPhotoId.value = null
+const onMarkerPinClick = (clusterPoint: any) => {
+  // If it's a cluster, zoom to the cluster area
+  if (clusterPoint.properties.cluster === true) {
+    const clusteredPhotos = clusterPoint.properties.clusteredPhotos || []
+    if (clusteredPhotos.length > 0 && mapInstance.value) {
+      // Calculate bounds for all photos in the cluster
+      const lats = clusteredPhotos.map((p: any) => p.latitude)
+      const lngs = clusteredPhotos.map((p: any) => p.longitude)
+
+      const minLat = Math.min(...lats)
+      const maxLat = Math.max(...lats)
+      const minLng = Math.min(...lngs)
+      const maxLng = Math.max(...lngs)
+
+      // Add some padding
+      const padding = 0.001
+
+      mapInstance.value.fitBounds(
+        [
+          [minLng - padding, minLat - padding],
+          [maxLng + padding, maxLat + padding],
+        ],
+        {
+          padding: 50,
+          duration: 1000,
+        },
+      )
+    }
     return
   }
-  currentPhotoId.value = photo.id
+
+  // Handle single photo selection
+  if (clusterPoint.properties.marker?.id === currentClusterPointId.value) {
+    currentClusterPointId.value = null
+    return
+  }
+  currentClusterPointId.value = clusterPoint.properties.marker?.id || null
 }
 
 const onMarkerPinClose = () => {
-  currentPhotoId.value = null
+  currentClusterPointId.value = null
 }
 
 const onMapLoaded = (map: any) => {
   mapInstance.value = map
+
   const { photoId } = route.query
   if (photoId && typeof photoId === 'string') {
     const photo = photosWithLocation.value.find((photo) => photo.id === photoId)
     if (photo && photo.latitude && photo.longitude) {
-      currentPhotoId.value = photoId
+      currentClusterPointId.value = photoId
       nextTick(() => {
         map.flyTo({
           center: [photo.longitude, photo.latitude],
-          zoom: 8,
+          zoom: 15,
           essential: true,
+          duration: 2000,
         })
       })
     }
   }
+
+  currentZoom.value = map.getZoom()
 }
+
+const onMapZoom = useThrottleFn(() => {
+  if (!mapInstance.value) return
+  currentZoom.value = mapInstance.value.getZoom()
+}, 100)
 </script>
 
 <template>
@@ -119,7 +180,7 @@ const onMapLoaded = (map: any) => {
     </MapGlassButton>
 
     <motion.div
-      :initial="{ opacity: 0, scale: 1.1 }"
+      :initial="{ opacity: 0, scale: 1.08 }"
       :animate="{ opacity: 1, scale: 1 }"
       :transition="{ duration: 0.6, delay: 0.1 }"
       class="w-full h-full"
@@ -137,15 +198,32 @@ const onMapLoaded = (map: any) => {
               colorThemes: 'faded',
             },
           },
+          attributionControl: false,
           language: 'zh-Hans',
         }"
         @load="onMapLoaded"
+        @zoom="onMapZoom"
       >
-        <LazyMapMarkerPhotoPin
-          v-for="photo in photosWithLocation"
-          :key="photo.id"
-          :photo="photo"
-          :is-selected="photo.id === currentPhotoId"
+        <!-- Cluster pins -->
+        <LazyMapClusterPin
+          v-for="clusterPoint in clusterGroups"
+          :key="`cluster-${clusterPoint.properties.marker?.id}`"
+          :cluster-point="clusterPoint"
+          :is-selected="
+            clusterPoint.properties.marker?.id === currentClusterPointId
+          "
+          @click="onMarkerPinClick"
+          @close="onMarkerPinClose"
+        />
+
+        <!-- Single photo pins -->
+        <LazyMapSinglePhotoPin
+          v-for="clusterPoint in singleMarkers"
+          :key="`single-${clusterPoint.properties.marker?.id}`"
+          :cluster-point="clusterPoint"
+          :is-selected="
+            clusterPoint.properties.marker?.id === currentClusterPointId
+          "
           @click="onMarkerPinClick"
           @close="onMarkerPinClose"
         />
@@ -154,7 +232,7 @@ const onMapLoaded = (map: any) => {
   </div>
 </template>
 
-<style scoped>
+<style>
 .mapboxgl-ctrl-logo {
   display: none !important;
 }
