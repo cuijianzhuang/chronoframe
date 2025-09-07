@@ -5,10 +5,12 @@ useHead({
   title: '地图探索',
 })
 
+const route = useRoute()
+const router = useRouter()
+
 const MAPID = 'explore-map'
 const { photos } = usePhotos()
 
-// 筛选出有GPS坐标的照片
 const photosWithLocation = computed(() => {
   return photos.value.filter(
     (photo) =>
@@ -17,6 +19,18 @@ const photosWithLocation = computed(() => {
       photo.latitude !== undefined &&
       photo.longitude !== undefined,
   )
+})
+
+const currentPhotoId = ref<string | null>(null)
+const mapInstance = ref<any>(null)
+
+watch(currentPhotoId, (newId) => {
+  if (newId) {
+    router.replace({ query: { ...route.query, photoId: newId } })
+  } else {
+    const { photoId, ...rest } = route.query
+    router.replace({ query: { ...rest } })
+  }
 })
 
 const mapViewState = computed(() => {
@@ -61,14 +75,39 @@ const mapViewState = computed(() => {
   }
 })
 
-onMounted(() => {
-  console.log(`找到 ${photosWithLocation.value.length} 张有位置信息的照片`)
-})
+const onMarkerPinClick = (photo: Photo) => {
+  if (photo.id === currentPhotoId.value) {
+    currentPhotoId.value = null
+    return
+  }
+  currentPhotoId.value = photo.id
+}
+
+const onMarkerPinClose = () => {
+  currentPhotoId.value = null
+}
+
+const onMapLoaded = (map: any) => {
+  mapInstance.value = map
+  const { photoId } = route.query
+  if (photoId && typeof photoId === 'string') {
+    const photo = photosWithLocation.value.find((photo) => photo.id === photoId)
+    if (photo && photo.latitude && photo.longitude) {
+      currentPhotoId.value = photoId
+      nextTick(() => {
+        map.flyTo({
+          center: [photo.longitude, photo.latitude],
+          zoom: 8,
+          essential: true,
+        })
+      })
+    }
+  }
+}
 </script>
 
 <template>
   <div class="w-full h-svh relative overflow-hidden">
-
     <MapGlassButton
       class="absolute top-4 left-4 z-10"
       @click="$router.push('/')"
@@ -82,14 +121,14 @@ onMounted(() => {
     <motion.div
       :initial="{ opacity: 0, scale: 1.1 }"
       :animate="{ opacity: 1, scale: 1 }"
-      :transition="{ duration: 0.6, delay: 1.5 }"
+      :transition="{ duration: 0.6, delay: 0.1 }"
       class="w-full h-full"
     >
       <MapboxMap
         class="w-full h-full"
         :map-id="MAPID"
         :options="{
-          style: 'mapbox://styles/mapbox/standard',
+          style: 'mapbox://styles/hoshinosuzumi/cmev0eujf01dw01pje3g9cmlg',
           zoom: mapViewState.zoom,
           center: [mapViewState.longitude, mapViewState.latitude],
           config: {
@@ -100,62 +139,27 @@ onMounted(() => {
           },
           language: 'zh-Hans',
         }"
+        @load="onMapLoaded"
       >
-        <!-- 为每张有位置信息的照片添加标记 -->
-        <MapboxDefaultMarker
+        <LazyMapMarkerPhotoPin
           v-for="photo in photosWithLocation"
           :key="photo.id"
-          :marker-id="`photo-${photo.id}`"
-          :lnglat="[photo.longitude, photo.latitude]"
-          :options="{}"
-        >
-          <template #marker>
-            <HoverCardRoot>
-              <HoverCardTrigger as-child>
-                <div
-                  class="photo-marker"
-                  :style="{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    backgroundImage: `url(${photo.thumbnailUrl})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    border: '3px solid white',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease',
-                  }"
-                />
-              </HoverCardTrigger>
-              <HoverCardPortal>
-                <HoverCardContent
-                  side="top"
-                  :side-offset="8"
-                  as-child
-                >
-                  <motion.div
-                    class="bg-white rounded-lg shadow-lg p-2 min-w-32 max-w-xs"
-                    :initial="{ opacity: 0, y: 10 }"
-                    :animate="{ opacity: 1, y: 0 }"
-                    :exit="{ opacity: 0, y: 10 }"
-                    :transition="{ duration: 0.2 }"
-                  >
-                    <div class="text-sm font-medium">
-                      {{ photo.title || `照片 ${photo.id}` }}
-                    </div>
-                    <div class="text-xs text-gray-600">
-                      {{ photo.city || photo.country || '未知位置' }}
-                    </div>
-                  </motion.div>
-                </HoverCardContent>
-              </HoverCardPortal>
-            </HoverCardRoot>
-          </template>
-        </MapboxDefaultMarker>
+          :photo="photo"
+          :is-selected="photo.id === currentPhotoId"
+          @click="onMarkerPinClick"
+          @close="onMarkerPinClose"
+        />
       </MapboxMap>
     </motion.div>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.mapboxgl-ctrl-logo {
+  display: none !important;
+}
+
+.mapboxgl-ctrl-attrib {
+  display: none !important;
+}
+</style>

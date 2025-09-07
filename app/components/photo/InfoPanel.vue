@@ -407,6 +407,10 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
 })
 
 const isMobile = useMediaQuery('(max-width: 768px)')
+
+const onMinimapClick = (photoId: string) => {
+  window.open(`/explore?photoId=${photoId}`)
+}
 </script>
 
 <template>
@@ -471,6 +475,8 @@ const isMobile = useMediaQuery('(max-width: 768px)')
         :photo="currentPhoto"
         :latitude="gpsCoordinates?.latitude"
         :longitude="gpsCoordinates?.longitude"
+        class="cursor-pointer"
+        @click="onMinimapClick(currentPhoto.id)"
       />
 
       <!-- EXIF/对象信息渲染器 -->

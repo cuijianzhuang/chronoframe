@@ -25,8 +25,8 @@ withDefaults(
     type="button"
     :class="
       twMerge(
-        $props.class,
         'pointer-events-auto flex size-10 items-center justify-center rounded-xl bg-black/20 text-white backdrop-blur-md border border-white/10 shadow-lg shadow-black/25 overflow-hidden',
+        $props.class,
       )
     "
     @click="$emit('click')"
