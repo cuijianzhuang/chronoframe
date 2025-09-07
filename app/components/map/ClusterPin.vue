@@ -7,11 +7,9 @@ import type { ClusterPoint } from '~~/shared/types/map'
 const props = withDefaults(
   defineProps<{
     clusterPoint: ClusterPoint
-    isSelected?: boolean
     clusterCount?: number
   }>(),
   {
-    isSelected: false,
     clusterCount: 6,
   },
 )
@@ -30,12 +28,19 @@ const onClick = () => {
 const clusteredPhotos = computed(
   () => props.clusterPoint.properties.clusteredPhotos || [],
 )
+
 const pointCount = computed(
   () => props.clusterPoint.properties.point_count || 1,
 )
+
 const representativePhoto = computed(
   () => props.clusterPoint.properties.marker!,
 )
+
+const sizeDelta = computed(() => {
+  const count = pointCount.value
+  return Math.min(64, Math.max(40, 32 + Math.log(count) * 8))
+})
 </script>
 
 <template>
@@ -47,9 +52,8 @@ const representativePhoto = computed(
   >
     <template #marker>
       <HoverCardRoot
-        :open="isSelected || undefined"
-        :open-delay="isSelected ? 0 : 600"
-        :close-delay="isSelected ? Number.MAX_SAFE_INTEGER : 100"
+        :open-delay="300"
+        :close-delay="100"
         @close="$event.preventDefault()"
       >
         <HoverCardTrigger as-child>
@@ -66,11 +70,6 @@ const representativePhoto = computed(
             }"
             @click="onClick"
           >
-            <div
-              v-if="isSelected"
-              class="bg-primary/30 absolute -inset-1 animate-pulse rounded-full"
-            />
-
             <!-- Background image -->
             <div class="absolute inset-0 overflow-hidden rounded-full">
               <ThumbImage
@@ -92,12 +91,14 @@ const representativePhoto = computed(
             <div
               :class="
                 twMerge(
-                  'relative size-12 flex flex-col justify-center items-center rounded-full border shadow-lg hover:shadow-xl backdrop-blur-md',
-                  isSelected
-                    ? 'border-primary/40 bg-primary/90 shadow-primary/50 dark:border-primary/30 dark:bg-primary/80'
-                    : 'border-white/40 bg-white/95 hover:bg-white dark:border-white/20 dark:bg-black/80 dark:hover:bg-black/90',
+                  'relative flex flex-col justify-center items-center rounded-full border shadow-lg hover:shadow-xl',
+                  'border-white/40 bg-white/95 hover:bg-white dark:border-white/20 dark:bg-black/60 dark:hover:bg-black/80',
                 )
               "
+              :style="{
+                width: `${sizeDelta}px`,
+                height: `${sizeDelta}px`,
+              }"
             >
               <div
                 class="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 to-white/10 dark:from-white/20 dark:to-white/5"
@@ -123,16 +124,6 @@ const representativePhoto = computed(
               side="top"
               align="center"
               :side-offset="8"
-              @pointer-down-outside="
-                isSelected ? $event.preventDefault() : undefined
-              "
-              @escape-key-down="
-                isSelected ? $event.preventDefault() : undefined
-              "
-              @focus-outside="isSelected ? $event.preventDefault() : undefined"
-              @interact-outside="
-                isSelected ? $event.preventDefault() : undefined
-              "
             >
               <motion.div
                 class="bg-black/50 backdrop-blur-md border border-neutral-700 rounded-lg shadow-lg w-xs max-w-xs overflow-hidden relative"
@@ -141,17 +132,6 @@ const representativePhoto = computed(
                 :exit="{ opacity: 0, scale: 0.95, y: 4 }"
                 :transition="{ duration: 0.2 }"
               >
-                <MapGlassButton
-                  v-if="isSelected"
-                  class="absolute top-2 right-2 z-10 size-8"
-                  @click="$emit('close')"
-                >
-                  <Icon
-                    name="tabler:x"
-                    class="size-5"
-                  />
-                </MapGlassButton>
-
                 <!-- Cluster preview -->
                 <div class="relative overflow-hidden p-3 space-y-3">
                   <div class="flex items-center justify-between">
