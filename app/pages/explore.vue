@@ -165,6 +165,31 @@ const onMapZoom = useThrottleFn(() => {
   if (!mapInstance.value) return
   currentZoom.value = mapInstance.value.getZoom()
 }, 100)
+
+// Map control functions
+const zoomIn = () => {
+  if (!mapInstance.value) return
+  mapInstance.value.zoomIn({ duration: 300 })
+}
+
+const zoomOut = () => {
+  if (!mapInstance.value) return
+  mapInstance.value.zoomOut({ duration: 300 })
+}
+
+const resetMap = () => {
+  if (!mapInstance.value) return
+  // Clear current selection
+  currentClusterPointId.value = null
+
+  // Reset to initial view state
+  mapInstance.value.flyTo({
+    center: [mapViewState.value.longitude, mapViewState.value.latitude],
+    zoom: mapViewState.value.zoom,
+    essential: true,
+    duration: 1000,
+  })
+}
 </script>
 
 <template>
@@ -178,6 +203,39 @@ const onMapZoom = useThrottleFn(() => {
         class="size-5"
       />
     </MapGlassButton>
+
+    <div class="absolute bottom-4 left-4 z-10 flex flex-col">
+      <!-- Zoom in -->
+      <MapGlassButton
+        class="rounded-b-none border-b-0"
+        @click="zoomIn"
+      >
+        <Icon
+          name="tabler:plus"
+          class="size-5"
+        />
+      </MapGlassButton>
+      <!-- Zoom out -->
+      <MapGlassButton
+        class="rounded-none"
+        @click="zoomOut"
+      >
+        <Icon
+          name="tabler:minus"
+          class="size-5"
+        />
+      </MapGlassButton>
+      <!-- Reset map -->
+      <MapGlassButton
+        class="rounded-t-none border-t-0"
+        @click="resetMap"
+      >
+        <Icon
+          name="tabler:scan-position"
+          class="size-5"
+        />
+      </MapGlassButton>
+    </div>
 
     <motion.div
       :initial="{ opacity: 0, scale: 1.08 }"
