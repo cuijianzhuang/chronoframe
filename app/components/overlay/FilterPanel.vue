@@ -91,24 +91,21 @@ const handleToggleFilter = (type: string, value: string | number) => {
       <!-- 标签面板 -->
       <template #tags>
         <div class="space-y-0.5 max-h-64 overflow-y-auto">
-          <div
-            v-for="tag in availableFilters.tags"
-            :key="tag.label"
-            class="flex items-center justify-between cursor-pointer select-none hover:bg-neutral-400/30 dark:hover:bg-info-800/30 rounded-lg px-2 py-2"
-            :class="
-              isFilterSelected('tags', tag.label)
-                ? 'bg-neutral-400/30 dark:bg-info-800/30'
-                : ''
-            "
-            @click="handleToggleFilter('tags', tag.label)"
-          >
-            <span class="text-sm text-default font-medium truncate">
-              {{ tag.label }}
-            </span>
-            <Icon
-              v-if="isFilterSelected('tags', tag.label)"
-              name="tabler:check"
-              class="size-4 text-green-500"
+          <div class="flex flex-wrap gap-1">
+            <UBadge
+              v-for="tag in availableFilters.tags"
+              :key="tag.label"
+              :label="tag.label"
+              :color="
+                isFilterSelected('tags', tag.label) ? 'info' : 'neutral'
+              "
+              :trailing-icon="
+                isFilterSelected('tags', tag.label) ? 'tabler:check' : ''
+              "
+              variant="soft"
+              class="cursor-pointer select-none transition-colors"
+              :class="`${isFilterSelected('tags', tag.label) ? '' : 'bg-white/10 text-white hover:bg-white/20'}`"
+              @click="handleToggleFilter('tags', tag.label)"
             />
           </div>
           <div
