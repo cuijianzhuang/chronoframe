@@ -65,7 +65,7 @@ const onError = () => {
     <ThumbHash
       v-if="thumbhash"
       :thumbhash="thumbhash"
-      class="absolute inset-0 scale-110 blur-sm -z-10"
+      class="absolute inset-0 scale-110 blur-sm"
     />
 
     <img
@@ -75,7 +75,7 @@ const onError = () => {
       :alt="alt"
       :class="
         twMerge(
-          'w-full h-full object-cover transition-opacity duration-300',
+          'absolute inset-0 w-full h-full object-cover transition-opacity duration-300',
           isLoaded ? 'opacity-100' : 'opacity-0',
         )
       "

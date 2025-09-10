@@ -21,7 +21,6 @@ const ITEM_GAP = 4
 // Reactive state
 const isLoading = ref(true)
 const photoRef = ref<HTMLElement>()
-const mainImageRef = ref<HTMLImageElement>()
 const videoRef = useDomRef()
 const isVisible = ref(false)
 const containerWidth = ref(0)
@@ -81,20 +80,13 @@ const shouldShowInfoOverlay = computed(() => {
 })
 
 // Methods
-const handleImageLoad = (_event: Event) => {
+const handleImageLoad = () => {
   isLoading.value = false
 }
 
 const handleImageError = () => {
   isLoading.value = false
   console.warn(`Failed to load image: ${props.photo.thumbnailUrl}`)
-}
-
-// Check if image is already loaded (cached)
-const checkImageLoaded = (img: HTMLImageElement) => {
-  if (img.complete && img.naturalHeight !== 0) {
-    isLoading.value = false
-  }
 }
 
 // LivePhoto video handling
@@ -407,11 +399,6 @@ onMounted(() => {
       observer.observe(photoRef.value)
       intersectionObserverRef.value = observer
     }
-
-    // Check if main image is already loaded from cache
-    if (mainImageRef.value) {
-      checkImageLoaded(mainImageRef.value)
-    }
   })
 })
 
@@ -459,40 +446,11 @@ onUnmounted(() => {
         class="w-full relative"
         :style="{ aspectRatio }"
       >
-        <!-- ThumbHash placeholder -->
-        <div
-          v-if="photo.thumbnailHash"
-          class="absolute inset-0 w-full h-full"
-        >
-          <ThumbHash
-            :thumbhash="photo.thumbnailHash"
-            class="w-full h-full object-cover scale-110"
-            :alt="photo.title || 'Photo placeholder'"
-          />
-        </div>
-
-        <!-- Loading placeholder (fallback when no thumbhash) -->
-        <div
-          v-if="isLoading && !photo.thumbnailHash"
-          class="absolute inset-0 w-full h-full bg-gray-200 dark:bg-gray-700 animate-pulse"
-        />
-
-        <!-- Main image with motion transition -->
-        <motion.img
-          v-show="!isLoading"
-          ref="mainImageRef"
+        <ThumbImage
           :src="photo.thumbnailUrl || ''"
-          :alt="photo.title || photo.description || 'Photo'"
-          class="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          loading="lazy"
-          :initial="{ opacity: 1 }"
-          :animate="{
-            opacity: !isVideoPlaying || !photo.isLivePhoto ? 1 : 0,
-          }"
-          :transition="{
-            duration: 0.4,
-            ease: [0.25, 0.1, 0.25, 1], // Custom cubic-bezier for smooth fade
-          }"
+          :alt="photo.title || 'Photo thumbnail'"
+          :thumbhash="photo.thumbnailHash || ''"
+          class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           @load="handleImageLoad"
           @error="handleImageError"
         />

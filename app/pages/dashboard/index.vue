@@ -190,9 +190,15 @@ onBeforeUnmount(() => {
           <div
             class="w-12 h-12 bg-neutral-200 dark:bg-neutral-700 rounded flex items-center justify-center relative"
           >
-            <img
+            <!-- <img
               :src="photo.thumbnailUrl || ''"
               alt="Photo thumbnail"
+              class="w-full h-full rounded object-cover"
+            /> -->
+            <ThumbImage
+              :src="photo.thumbnailUrl || ''"
+              :alt="photo.title || 'Photo thumbnail'"
+              :thumbhash="photo.thumbnailHash || ''"
               class="w-full h-full rounded object-cover"
             />
           </div>

@@ -3,6 +3,7 @@ import type { TableColumn } from '@nuxt/ui'
 import type { Photo } from '~~/server/utils/db'
 import { h, resolveComponent } from 'vue'
 import { Icon, UBadge } from '#components'
+import ThumbImage from '~/components/ThumbImage.vue'
 
 const UCheckbox = resolveComponent('UCheckbox')
 
@@ -66,13 +67,13 @@ const uploadImage = async (file: File) => {
   try {
     // 第一步：获取预签名 URL
     uploadingFile.status = 'preparing'
-    const signedUrlResponse = (await $fetch('/api/photos', {
+    const signedUrlResponse = await $fetch('/api/photos', {
       method: 'POST',
       body: {
         fileName: file.name,
         contentType: file.type,
       },
-    }))
+    })
 
     uploadingFile.signedUrlResponse = signedUrlResponse
     uploadingFile.status = 'uploading'
@@ -201,11 +202,13 @@ const totalRowsCount = computed((): number => {
 // 计算 LivePhoto 统计
 const livePhotoStats = computed(() => {
   if (!data.value) return { total: 0, livePhotos: 0, staticPhotos: 0 }
-  
+
   const total = data.value.length
-  const livePhotos = data.value.filter((photo: Photo) => photo.isLivePhoto).length
+  const livePhotos = data.value.filter(
+    (photo: Photo) => photo.isLivePhoto,
+  ).length
   const staticPhotos = total - livePhotos
-  
+
   return { total, livePhotos, staticPhotos }
 })
 
@@ -215,7 +218,7 @@ const photoFilter = ref<'all' | 'livephoto' | 'static'>('all')
 // 过滤后的数据
 const filteredData = computed(() => {
   if (!data.value) return []
-  
+
   switch (photoFilter.value) {
     case 'livephoto':
       return data.value.filter((photo: Photo) => photo.isLivePhoto)
@@ -254,9 +257,10 @@ const columns: TableColumn<Photo>[] = [
     header: '缩略图',
     cell: ({ row }) => {
       const url = row.original.thumbnailUrl
-      return h('img', {
-        src: url,
+      return h(ThumbImage, {
+        src: url || row.original.originalUrl || '',
         alt: row.original.title || 'Photo Thumbnail',
+        thumbhash: row.original.thumbnailHash || '',
         class: 'size-16 min-w-[100px] object-cover rounded-md shadow',
         onClick: () => openInNewTab(url || row.original.originalUrl || ''),
         style: { cursor: url ? 'pointer' : 'default' },
@@ -277,11 +281,19 @@ const columns: TableColumn<Photo>[] = [
     cell: ({ row }) => {
       const tags = row.original.tags
       return h('div', { class: 'flex items-center gap-1' }, [
-        tags && tags.length ? tags.map(tag => h(UBadge, {
-          size: 'sm',
-          variant: 'soft',
-          color: 'neutral'
-        }, () => tag)) : h('span', { class: 'text-neutral-400 text-xs' }, '无标签')
+        tags && tags.length
+          ? tags.map((tag) =>
+              h(
+                UBadge,
+                {
+                  size: 'sm',
+                  variant: 'soft',
+                  color: 'neutral',
+                },
+                () => tag,
+              ),
+            )
+          : h('span', { class: 'text-neutral-400 text-xs' }, '无标签'),
       ])
     },
   },
@@ -291,58 +303,79 @@ const columns: TableColumn<Photo>[] = [
     cell: ({ row }) => {
       const isLivePhoto = row.original.isLivePhoto
       return h('div', { class: 'flex items-center gap-2' }, [
-        isLivePhoto 
+        isLivePhoto
           ? h('div', { class: 'flex items-center gap-1' }, [
-              h(Icon , {
+              h(Icon, {
                 name: 'tabler:live-photo',
                 class: 'size-4 text-yellow-600 dark:text-yellow-400',
               }),
-              h('span', { 
-                class: 'text-yellow-600 dark:text-yellow-400 text-xs font-medium' 
-              }, '实况')
+              h(
+                'span',
+                {
+                  class:
+                    'text-yellow-600 dark:text-yellow-400 text-xs font-medium',
+                },
+                '实况',
+              ),
             ])
-          : h('span', { 
-              class: 'text-neutral-400 text-xs' 
-            }, '一般照片')
+          : h(
+              'span',
+              {
+                class: 'text-neutral-400 text-xs',
+              },
+              '一般照片',
+            ),
       ])
     },
     sortingFn: (rowA, rowB) => {
       const valueA = rowA.original.isLivePhoto ? 1 : 0
       const valueB = rowB.original.isLivePhoto ? 1 : 0
       return valueB - valueA // LivePhoto 优先排序
-    }
+    },
   },
   {
     accessorKey: 'location',
     header: '位置',
     cell: ({ row }) => {
-  const { exif, city, country } = row.original
-  
-  if (!exif?.GPSLongitude && !exif?.GPSLatitude) {
-    return h('span', { class: 'text-neutral-400 text-xs' }, '无 GPS 信息')
-  }
-  
-  const location = [city, country].filter(Boolean).join(', ')
-  return h('span', { 
-    class: location ? 'text-xs' : 'text-neutral-400 text-xs' 
-  }, location || '未知')
-}
+      const { exif, city, country } = row.original
+
+      if (!exif?.GPSLongitude && !exif?.GPSLatitude) {
+        return h('span', { class: 'text-neutral-400 text-xs' }, '无 GPS 信息')
+      }
+
+      const location = [city, country].filter(Boolean).join(', ')
+      return h(
+        'span',
+        {
+          class: location ? 'text-xs' : 'text-neutral-400 text-xs',
+        },
+        location || '未知',
+      )
+    },
   },
   {
     accessorKey: 'dateTaken',
     header: '拍摄日期',
     cell: (info) => {
       const date = info.getValue() as string
-      return h('span', {class: 'font-mono text-xs'}, date ? dayjs(date).format('YYYY-MM-DD HH:mm:ss') : '未知')
-    }
+      return h(
+        'span',
+        { class: 'font-mono text-xs' },
+        date ? dayjs(date).format('YYYY-MM-DD HH:mm:ss') : '未知',
+      )
+    },
   },
   {
     accessorKey: 'lastModified',
     header: '最后更新',
     cell: (info) => {
       const date = info.getValue() as string
-      return h('span', {class: 'font-mono text-xs'}, date ? dayjs(date).format('YYYY-MM-DD HH:mm:ss') : '未知')
-    }
+      return h(
+        'span',
+        { class: 'font-mono text-xs' },
+        date ? dayjs(date).format('YYYY-MM-DD HH:mm:ss') : '未知',
+      )
+    },
   },
   {
     accessorKey: 'fileSize',
@@ -399,21 +432,21 @@ const checkProcessingStatus = async () => {
 const validateFile = (file: File): { valid: boolean; error?: string } => {
   // 检查文件类型
   const allowedTypes = [
-    'image/jpeg', 
-    'image/png', 
-    'image/heic', 
+    'image/jpeg',
+    'image/png',
+    'image/heic',
     'image/heif',
     'video/quicktime', // MOV 文件
-    'video/mp4'        // MP4 文件（备用）
+    'video/mp4', // MP4 文件（备用）
   ]
-  
+
   const isValidImageType = allowedTypes.includes(file.type)
   const isValidVideoExtension = file.name.toLowerCase().endsWith('.mov')
-  
+
   if (!isValidImageType && !isValidVideoExtension) {
     return {
       valid: false,
-      error: `不支持的文件格式: ${file.type}。请选择 JPEG、PNG、HEIC 格式的图片或 MOV 格式的 LivePhoto 视频。`
+      error: `不支持的文件格式: ${file.type}。请选择 JPEG、PNG、HEIC 格式的图片或 MOV 格式的 LivePhoto 视频。`,
     }
   }
 
@@ -497,14 +530,14 @@ const handleDelete = async (photoId: string) => {
 const handleViewLivePhoto = async (photoId: string) => {
   try {
     const livePhotoInfo = await $fetch(`/api/photos/${photoId}/livephoto`)
-    
+
     if (livePhotoInfo.isLivePhoto && livePhotoInfo.livePhotoVideoUrl) {
       // 设置模态框数据
       selectedLivePhoto.value = {
         id: livePhotoInfo.id,
         title: livePhotoInfo.title,
         originalUrl: livePhotoInfo.originalUrl || '',
-        videoUrl: livePhotoInfo.livePhotoVideoUrl
+        videoUrl: livePhotoInfo.livePhotoVideoUrl,
       }
       isLivePhotoModalOpen.value = true
     } else {
@@ -548,16 +581,16 @@ const handleUpdateLivePhoto = async (photoId: string) => {
       color: 'info',
     })
 
-    const result = await $fetch('/api/photos/livephoto-manage', {
+    const result = (await $fetch('/api/photos/livephoto-manage', {
       method: 'POST',
       body: {
         action: 'update-photo',
         photoId: photoId,
       },
-    }) as any
+    })) as any
 
     const isSuccess = 'success' in result && result.success
-    
+
     toast.update(updateToast.id, {
       title: isSuccess ? 'LivePhoto 更新成功' : 'LivePhoto 更新失败',
       description: result.message,
@@ -651,14 +684,14 @@ const handleBatchDetectLivePhoto = async () => {
     })
 
     const photoIds = selectedPhotos.map((photo: any) => photo.id)
-    
-    const result = await $fetch('/api/photos/livephoto-detect', {
+
+    const result = (await $fetch('/api/photos/livephoto-detect', {
       method: 'POST',
       body: {
         action: 'batch-detect',
         photoIds: photoIds, // 传递选中的照片ID列表
       },
-    }) as any
+    })) as any
 
     const foundCount = result.results?.found || 0
     const processedCount = result.results?.processed || 0
@@ -709,13 +742,13 @@ const handleBatchReindexExif = async () => {
 
     const photoIds = selectedPhotos.map((photo: any) => photo.id)
 
-    const result = await $fetch('/api/photos/reindex-exif', {
+    const result = (await $fetch('/api/photos/reindex-exif', {
       method: 'POST',
       body: {
         action: 'batch-reindex',
         photoIds: photoIds, // 传递选中的照片ID列表
       },
-    }) as any
+    })) as any
 
     const processedCount = result.results?.processed || 0
     const updatedCount = result.results?.updated || 0
@@ -749,13 +782,13 @@ const handleReindexSingleExif = async (photoId: string) => {
       color: 'info',
     })
 
-    const result = await $fetch('/api/photos/reindex-exif', {
+    const result = (await $fetch('/api/photos/reindex-exif', {
       method: 'POST',
       body: {
         action: 'single-reindex',
         photoId: photoId,
       },
-    }) as any
+    })) as any
 
     toast.update(reindexToast.id, {
       title: 'EXIF 重新索引完成',
@@ -796,8 +829,12 @@ onUnmounted(() => {
           :key="fileId"
           class="p-3 sm:p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg"
         >
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 mb-2">
-            <span class="font-medium text-sm sm:text-base truncate">{{ uploadingFile.fileName }}</span>
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 mb-2"
+          >
+            <span class="font-medium text-sm sm:text-base truncate">{{
+              uploadingFile.fileName
+            }}</span>
             <div class="flex items-center gap-2">
               <!-- 状态指示器 -->
               <UBadge
@@ -855,7 +892,10 @@ onUnmounted(() => {
               class="flex justify-between text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mb-1"
             >
               <span>{{ uploadingFile.progress }}%</span>
-              <span v-if="uploadingFile.uploadProgress?.speedText" class="hidden sm:inline">
+              <span
+                v-if="uploadingFile.uploadProgress?.speedText"
+                class="hidden sm:inline"
+              >
                 {{ uploadingFile.uploadProgress.speedText }}
               </span>
             </div>
@@ -867,7 +907,8 @@ onUnmounted(() => {
               v-if="uploadingFile.uploadProgress?.timeRemainingText"
               class="text-xs text-neutral-500 mt-1"
             >
-              <span class="hidden sm:inline">ETA: </span>{{ uploadingFile.uploadProgress.timeRemainingText }}
+              <span class="hidden sm:inline">ETA: </span
+              >{{ uploadingFile.uploadProgress.timeRemainingText }}
             </div>
           </div>
 
@@ -918,13 +959,17 @@ onUnmounted(() => {
     </div>
 
     <!-- 工具栏 -->
-    <div class="flex flex-row sm:items-center justify-between gap-3 sm:gap-0 p-3 sm:p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg">
+    <div
+      class="flex flex-row sm:items-center justify-between gap-3 sm:gap-0 p-3 sm:p-4 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg"
+    >
       <div class="flex items-center gap-2">
         <UIcon
           name="tabler:photo"
           class="text-gray-500"
         />
-        <span class="font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
+        <span
+          class="font-medium text-gray-700 dark:text-gray-300 hidden sm:inline"
+        >
           照片管理
         </span>
         <div class="flex items-center gap-1 sm:gap-2">
@@ -934,7 +979,9 @@ onUnmounted(() => {
             color="neutral"
             size="sm"
           >
-            <span class="hidden sm:inline">{{ livePhotoStats.staticPhotos }} 照片</span>
+            <span class="hidden sm:inline"
+              >{{ livePhotoStats.staticPhotos }} 照片</span
+            >
             <span class="sm:hidden">{{ livePhotoStats.staticPhotos }}P</span>
           </UBadge>
           <UBadge
@@ -943,12 +990,14 @@ onUnmounted(() => {
             color="warning"
             size="sm"
           >
-            <span class="hidden sm:inline">{{ livePhotoStats.livePhotos }} Live Photo</span>
+            <span class="hidden sm:inline"
+              >{{ livePhotoStats.livePhotos }} Live Photo</span
+            >
             <span class="sm:hidden">{{ livePhotoStats.livePhotos }}LP</span>
           </UBadge>
         </div>
       </div>
-      
+
       <div class="flex items-center gap-2">
         <!-- 过滤器 -->
         <USelectMenu
@@ -956,15 +1005,19 @@ onUnmounted(() => {
           class="w-full sm:w-48"
           :items="[
             { label: '全部照片', value: 'all', icon: 'tabler:photo-scan' },
-            { label: 'Live Photo', value: 'livephoto', icon: 'tabler:live-photo' },
-            { label: '静态照片', value: 'static', icon: 'tabler:photo' }
+            {
+              label: 'Live Photo',
+              value: 'livephoto',
+              icon: 'tabler:live-photo',
+            },
+            { label: '静态照片', value: 'static', icon: 'tabler:photo' },
           ]"
           value-key="value"
           label-key="label"
           size="sm"
         >
         </USelectMenu>
-        
+
         <!-- 刷新按钮 -->
         <UButton
           variant="soft"
@@ -1025,7 +1078,7 @@ onUnmounted(() => {
           <span class="hidden sm:inline">实况配对</span>
           <span class="sm:hidden">配对</span>
         </UButton>
-        
+
         <UButton
           color="error"
           variant="soft"
@@ -1048,7 +1101,7 @@ onUnmounted(() => {
         ref="table"
         v-model:row-selection="rowSelection"
         :column-pinning="{
-          right: ['actions']
+          right: ['actions'],
         }"
         :data="filteredData as Photo[]"
         :columns="columns"
@@ -1065,35 +1118,37 @@ onUnmounted(() => {
             <UDropdownMenu
               size="sm"
               :content="{
-                align: 'end'
+                align: 'end',
               }"
               :items="[
                 [
                   {
                     color: row.original.isLivePhoto ? 'warning' : 'info',
                     label: row.original.isLivePhoto ? '实况预览' : '实况配对',
-                    icon: row.original.isLivePhoto ? 'tabler:live-photo' : 'tabler:refresh',
+                    icon: row.original.isLivePhoto
+                      ? 'tabler:live-photo'
+                      : 'tabler:refresh',
                     onSelect() {
-                      row.original.isLivePhoto 
+                      row.original.isLivePhoto
                         ? handleViewLivePhoto(row.original.id)
                         : handleUpdateLivePhoto(row.original.id)
-                    }
+                    },
                   },
                   {
                     color: 'success',
                     label: '重新索引 EXIF',
                     icon: 'tabler:refresh',
-                    onSelect: () => handleReindexSingleExif(row.original.id)
-                  }
+                    onSelect: () => handleReindexSingleExif(row.original.id),
+                  },
                 ],
                 [
                   {
                     color: 'error',
                     label: '删除',
                     icon: 'tabler:trash',
-                    onSelect: () => handleDelete(row.original.id)
-                  }
-                ]
+                    onSelect: () => handleDelete(row.original.id),
+                  },
+                ],
               ]"
             >
               <UButton
@@ -1132,13 +1187,18 @@ onUnmounted(() => {
             />
           </div>
 
-          <div v-if="selectedLivePhoto" class="space-y-4">
+          <div
+            v-if="selectedLivePhoto"
+            class="space-y-4"
+          >
             <!-- 静态图片预览 -->
             <div class="space-y-2">
               <h4 class="font-medium text-sm text-gray-600 dark:text-gray-400">
                 静态图片
               </h4>
-              <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 flex justify-center">
+              <div
+                class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 flex justify-center"
+              >
                 <img
                   :src="selectedLivePhoto.originalUrl"
                   :alt="selectedLivePhoto.title || 'Live Photo'"
@@ -1152,7 +1212,9 @@ onUnmounted(() => {
               <h4 class="font-medium text-sm text-gray-600 dark:text-gray-400">
                 Live Photo 视频
               </h4>
-              <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 flex justify-center">
+              <div
+                class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 flex justify-center"
+              >
                 <video
                   :src="selectedLivePhoto.videoUrl"
                   controls
@@ -1172,7 +1234,12 @@ onUnmounted(() => {
                 variant="ghost"
                 color="neutral"
                 icon="tabler:external-link"
-                @click="() => { if (selectedLivePhoto) openInNewTab(selectedLivePhoto.videoUrl) }"
+                @click="
+                  () => {
+                    if (selectedLivePhoto)
+                      openInNewTab(selectedLivePhoto.videoUrl)
+                  }
+                "
               >
                 在新窗口打开视频
               </UButton>
@@ -1180,7 +1247,12 @@ onUnmounted(() => {
                 variant="soft"
                 color="info"
                 icon="tabler:download"
-                @click="() => { if (selectedLivePhoto) openInNewTab(selectedLivePhoto.videoUrl) }"
+                @click="
+                  () => {
+                    if (selectedLivePhoto)
+                      openInNewTab(selectedLivePhoto.videoUrl)
+                  }
+                "
               >
                 下载视频
               </UButton>
