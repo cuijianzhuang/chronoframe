@@ -42,6 +42,7 @@ const zoomLevelTimer = ref<NodeJS.Timeout | null>(null)
 const isLivePhotoHovering = ref(false)
 const isLivePhotoPlaying = ref(false)
 const isLivePhotoTouching = ref(false)
+const isLivePhotoMuted = ref(true)
 const touchCount = ref(0)
 const livePhotoVideoBlob = ref<Blob | null>(null)
 const livePhotoVideoBlobUrl = ref<string | null>(null)
@@ -433,47 +434,37 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                 :animate="{ opacity: 1 }"
                 :exit="{ opacity: 0 }"
                 :transition="{ duration: 0.3 }"
-                class="pointer-events-none absolute z-30 flex items-center justify-between"
+                class="absolute z-30 flex items-center justify-between"
                 :class="
                   isMobile ? 'top-2 right-2 left-2' : 'top-4 right-4 left-4'
                 "
               >
                 <!-- 左侧工具按钮 -->
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1">
                   <!-- LivePhoto 标志 -->
+                  <PhotoLivePhotoIndicator
+                    v-if="currentPhoto?.isLivePhoto"
+                    :class="isMobile ? 'cursor-default' : 'cursor-pointer'"
+                    :photo="currentPhoto"
+                    :is-video-playing="isLivePhotoPlaying"
+                    :processing-state="livePhotoProcessingState?.value || null"
+                    @mouseenter="handleLivePhotoMouseEnter"
+                    @mouseleave="handleLivePhotoMouseLeave"
+                  />
+                  
+                  <!-- 静音图标 -->
                   <div
                     v-if="currentPhoto?.isLivePhoto"
                     class="pointer-events-auto backdrop-blur-md bg-black/40 text-white rounded-full pl-1 pr-1.5 py-1 text-[13px] font-bold flex items-center gap-0.5 leading-0 select-none"
                     :class="isMobile ? 'cursor-default' : 'cursor-pointer'"
-                    @mouseenter="handleLivePhotoMouseEnter"
-                    @mouseleave="handleLivePhotoMouseLeave"
+                    @click="isLivePhotoMuted = !isLivePhotoMuted"
                   >
-                    <!-- TODO: Apple style loading -->
                     <Icon
-                      name="tabler:live-photo"
+                      :name="
+                        isLivePhotoMuted ? 'tabler:volume-off' : 'tabler:volume'
+                      "
                       class="size-[17px]"
-                      :class="{ 'text-yellow-300': isLivePhotoPlaying }"
                     />
-                    <span :class="{ 'text-yellow-300': isLivePhotoPlaying }">
-                      实况
-                    </span>
-
-                    <!-- Processing progress indicator -->
-                    <div
-                      v-if="livePhotoProcessingState?.value?.isProcessing"
-                      class="ml-1 flex items-center gap-1"
-                    >
-                      <div
-                        class="size-1 bg-white/70 rounded-full animate-pulse"
-                      />
-                      <span class="text-[11px] text-white/80">
-                        {{
-                          Math.round(
-                            livePhotoProcessingState.value.progress || 0,
-                          )
-                        }}%
-                      </span>
-                    </div>
                   </div>
                 </div>
 
@@ -605,7 +596,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                       "
                       :src="livePhotoVideoBlobUrl"
                       class="absolute inset-0 w-full h-full object-contain pointer-events-none select-none touch-none"
-                      muted
+                      :muted="isLivePhotoMuted"
                       playsinline
                       preload="metadata"
                       :initial="{ opacity: 0 }"

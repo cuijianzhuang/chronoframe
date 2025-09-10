@@ -527,7 +527,14 @@ onUnmounted(() => {
       />
 
       <!-- Live Photo indicator -->
-      <motion.div
+      <PhotoLivePhotoIndicator
+        v-if="photo.isLivePhoto"
+        class="absolute top-2 left-2"
+        :photo="photo"
+        :is-video-playing="isVideoPlaying"
+        :processing-state="processingState || null"
+      />
+      <!-- <motion.div
         v-if="photo.isLivePhoto"
         class="absolute top-2 left-2 backdrop-blur-md text-white rounded-full pl-1 pr-1.5 py-1 text-[13px] font-bold flex items-center gap-0.5 leading-0"
         :animate="{
@@ -541,7 +548,6 @@ onUnmounted(() => {
           ease: 'easeInOut',
         }"
       >
-        <!-- TODO: Apple style loading -->
         <Icon
           name="tabler:live-photo"
           class="size-[17px]"
@@ -549,7 +555,6 @@ onUnmounted(() => {
         />
         <span :class="{ 'text-yellow-300': isVideoPlaying }">实况</span>
 
-        <!-- Processing progress indicator -->
         <div
           v-if="processingState?.isProcessing"
           class="ml-1 flex items-center gap-1"
@@ -559,7 +564,7 @@ onUnmounted(() => {
             {{ Math.round(processingState.progress || 0) }}%
           </span>
         </div>
-      </motion.div>
+      </motion.div> -->
 
       <!-- Photo info overlay (bottom) -->
       <motion.div
@@ -636,7 +641,8 @@ onUnmounted(() => {
                 class="flex items-center gap-0.5"
               >
                 <Icon
-                  name="streamline:image-accessories-lenses-photos-camera-shutter-picture-photography-pictures-photo-lens" class="-mt-0.5"
+                  name="streamline:image-accessories-lenses-photos-camera-shutter-picture-photography-pictures-photo-lens"
+                  class="-mt-0.5"
                 />
                 <span class="text-xs font-medium">
                   {{ photo.exif.FocalLengthIn35mmFormat }}
@@ -646,7 +652,10 @@ onUnmounted(() => {
                 v-if="photo.exif.FNumber"
                 class="flex items-center gap-0.5"
               >
-                <Icon name="tabler:aperture" class="-mt-0.5" />
+                <Icon
+                  name="tabler:aperture"
+                  class="-mt-0.5"
+                />
                 <span class="text-xs font-medium">
                   f/{{ photo.exif.FNumber }}
                 </span>
@@ -655,7 +664,10 @@ onUnmounted(() => {
                 v-if="photo.exif.ExposureTime"
                 class="flex items-center gap-0.5"
               >
-                <Icon name="material-symbols:shutter-speed" class="-mt-0.5" />
+                <Icon
+                  name="material-symbols:shutter-speed"
+                  class="-mt-0.5"
+                />
                 <span class="text-xs font-medium">
                   {{ formatExposureTime(photo.exif.ExposureTime) }}
                 </span>
@@ -664,7 +676,10 @@ onUnmounted(() => {
                 v-if="photo.exif.ISO"
                 class="flex items-center gap-0.5"
               >
-                <Icon name="carbon:iso-outline" class="-mt-0.5" />
+                <Icon
+                  name="carbon:iso-outline"
+                  class="-mt-0.5"
+                />
                 <span class="text-xs font-medium">{{ photo.exif.ISO }}</span>
               </div>
             </div>
