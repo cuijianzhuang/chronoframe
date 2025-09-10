@@ -263,28 +263,32 @@ const resetMap = () => {
         @zoom="onMapZoom"
       >
         <!-- Cluster pins -->
-        <LazyMapClusterPin
-          v-for="clusterPoint in clusterGroups"
-          :key="`cluster-${clusterPoint.properties.marker?.id}`"
-          :cluster-point="clusterPoint"
-          :is-selected="
-            clusterPoint.properties.marker?.id === currentClusterPointId
-          "
-          @click="onMarkerPinClick"
-          @close="onMarkerPinClose"
-        />
+        <template v-if="!!mapInstance">
+          <LazyMapClusterPin
+            v-for="clusterPoint in clusterGroups"
+            :key="`cluster-${clusterPoint.properties.marker?.id}`"
+            :cluster-point="clusterPoint"
+            :is-selected="
+              clusterPoint.properties.marker?.id === currentClusterPointId
+            "
+            @click="onMarkerPinClick"
+            @close="onMarkerPinClose"
+          />
+        </template>
 
         <!-- Single photo pins -->
-        <LazyMapSinglePhotoPin
-          v-for="clusterPoint in singleMarkers"
-          :key="`single-${clusterPoint.properties.marker?.id}`"
-          :cluster-point="clusterPoint"
-          :is-selected="
-            clusterPoint.properties.marker?.id === currentClusterPointId
-          "
-          @click="onMarkerPinClick"
-          @close="onMarkerPinClose"
-        />
+        <template v-if="!!mapInstance">
+          <LazyMapSinglePhotoPin
+            v-for="clusterPoint in singleMarkers"
+            :key="`single-${clusterPoint.properties.marker?.id}`"
+            :cluster-point="clusterPoint"
+            :is-selected="
+              clusterPoint.properties.marker?.id === currentClusterPointId
+            "
+            @click="onMarkerPinClick"
+            @close="onMarkerPinClose"
+          />
+        </template>
       </MapboxMap>
     </motion.div>
   </div>
