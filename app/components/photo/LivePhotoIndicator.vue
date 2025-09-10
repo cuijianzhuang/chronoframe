@@ -24,23 +24,24 @@ defineProps<{
       ease: 'easeInOut',
     }"
   >
-    <!-- TODO: Apple style loading -->
     <Icon
+      v-if="processingState?.isProcessing"
+      name="tabler:loader"
+      class="size-[17px] animate-spin"
+    />
+    <Icon
+      v-else
       name="tabler:live-photo"
       class="size-[17px]"
     />
     <span>实况</span>
 
-    <!-- Processing progress indicator -->
-    <div
+    <span
       v-if="processingState?.isProcessing"
-      class="ml-1 flex items-center gap-1"
+      class="text-[12px] text-white/80 pl-1"
     >
-      <div class="size-1 bg-white/70 rounded-full animate-pulse" />
-      <span class="text-[10px] text-white/80">
-        {{ Math.round(processingState.progress || 0) }}%
-      </span>
-    </div>
+      {{ Math.round(processingState.progress || 0) }}%
+    </span>
   </motion.div>
 </template>
 
