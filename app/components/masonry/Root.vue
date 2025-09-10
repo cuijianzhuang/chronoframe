@@ -11,6 +11,15 @@ const props = withDefaults(defineProps<Props>(), {
 const dayjs = useDayjs()
 const router = useRouter()
 
+// 使用筛选和排序功能
+const { filteredPhotos, hasActiveFilters } = usePhotoFilters()
+const { sortedPhotos } = usePhotoSort()
+
+// 使用筛选后的照片（已包含排序），或者使用排序后的原始照片
+const displayPhotos = computed(() => {
+  return hasActiveFilters.value ? filteredPhotos.value : sortedPhotos.value
+})
+
 // Constants
 const FIRST_SCREEN_ITEMS_COUNT = 30
 const COLUMN_GAP = 4
@@ -51,13 +60,13 @@ const columnCount = computed(() => {
 })
 
 const photoStats = computed(() => {
-  const totalPhotos = props.photos?.length || 0
-  const photosWithDates = props.photos?.filter((p) => p.dateTaken).length || 0
-  const photosWithTitles = props.photos?.filter((p) => p.title).length || 0
-  const photosWithExif = props.photos?.filter((p) => p.exif).length || 0
+  const totalPhotos = displayPhotos.value?.length || 0
+  const photosWithDates = displayPhotos.value?.filter((p) => p.dateTaken).length || 0
+  const photosWithTitles = displayPhotos.value?.filter((p) => p.title).length || 0
+  const photosWithExif = displayPhotos.value?.filter((p) => p.exif).length || 0
 
   // Get date range of all photos
-  const allDates = props.photos
+  const allDates = displayPhotos.value
     ?.map((p) => p?.dateTaken)
     .filter((date): date is string => Boolean(date))
     .map((date) => dayjs(date).format('YYYY年MM月DD日'))
@@ -111,7 +120,7 @@ const handleVisibilityChange = ({
 const processVisibleLivePhotos = async () => {
   const visiblePhotosArray = Array.from(visiblePhotos.value)
   const livePhotosToProcess = visiblePhotosArray
-    .map(index => props.photos[index])
+    .map(index => displayPhotos.value[index])
     .filter((photo): photo is Photo => 
       photo != null && 
       photo.isLivePhoto === 1 && 
@@ -146,14 +155,14 @@ const updateDateRange = () => {
 
   // Calculate visible dates
   const visibleDates = visiblePhotosArray
-    .map((index) => props.photos[index]?.dateTaken)
+    .map((index) => displayPhotos.value[index]?.dateTaken)
     .filter((date): date is string => Boolean(date))
     .map((date) => dayjs(date))
     .sort((a, b) => (a.isBefore(b) ? -1 : 1))
 
   // Calculate visible cities
   const cities = visiblePhotosArray
-    .map((index) => props.photos[index]?.city)
+    .map((index) => displayPhotos.value[index]?.city)
     .filter((city): city is string => Boolean(city))
 
   const uniqueCities = [...new Set(cities)]
@@ -232,7 +241,7 @@ onMounted(() => {
 })
 
 const handleOpenViewer = (index: number) => {
-  router.push(`/${props.photos[index]?.id}`)
+  router.push(`/${displayPhotos.value[index]?.id}`)
 }
 </script>
 
@@ -279,7 +288,7 @@ const handleOpenViewer = (index: number) => {
 
         <!-- Photo Items -->
         <MasonryItem
-          v-for="(photo, index) in photos"
+          v-for="(photo, index) in displayPhotos"
           :key="photo.id || index"
           :photo="photo"
           :index="index"

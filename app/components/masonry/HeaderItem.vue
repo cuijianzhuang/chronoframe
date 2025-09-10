@@ -16,6 +16,26 @@ const handleOpenLogin = () => {
   window.location.href = '/api/auth/github'
   console.log('Login button clicked')
 }
+
+// 获取筛选状态
+const { hasActiveFilters, selectedCounts } = usePhotoFilters()
+
+// 获取排序状态
+const {
+  currentSortLabel,
+  currentSortIcon,
+  currentSortOption,
+  availableSorts,
+  setSortOption,
+} = usePhotoSort()
+
+// 计算总的筛选项数量
+const totalSelectedFilters = computed(() => {
+  return Object.values(selectedCounts.value).reduce(
+    (total, count) => total + count,
+    0,
+  )
+})
 </script>
 
 <template>
@@ -31,7 +51,7 @@ const handleOpenLogin = () => {
     <div
       class="absolute inset-0 -z-10 bg-white/50 dark:bg-neutral-900/50"
     ></div>
-    <div class="flex flex-col items-center py-6 gap-2">
+    <div class="flex flex-col items-center py-6 pb-3 gap-2">
       <AuthState>
         <template #default="{ loggedIn, clear }">
           <div class="flex flex-col items-center gap-2">
@@ -64,39 +84,115 @@ const handleOpenLogin = () => {
               {{ stats?.total }} 张照片
             </p>
             <p class="font-[Pacifico]">Mems rest within the lens.</p>
-            <UButton
-              variant="ghost"
-              color="neutral"
-              icon="tabler:map-pin-2"
-              label="探索地图"
-              size="sm"
-              to="/explore"
-            />
           </div>
           <div
-            v-if="loggedIn"
-            class="text-center mt-3"
+            class="flex items-center gap-0 p-1 bg-white/30 dark:bg-neutral-900/50 rounded-full"
           >
-            <div class="flex items-center gap-2">
+            <UTooltip text="探索地图">
+              <UButton
+                variant="soft"
+                color="neutral"
+                class="bg-transparent rounded-full cursor-pointer"
+                icon="tabler:map-pin-2"
+                size="sm"
+                to="/explore"
+              />
+            </UTooltip>
+            <UPopover>
+              <UTooltip text="筛选照片">
+                <UChip
+                  inset
+                  size="sm"
+                  color="info"
+                  :show="totalSelectedFilters > 0"
+                >
+                  <UButton
+                    variant="soft"
+                    :color="hasActiveFilters ? 'info' : 'neutral'"
+                    class="bg-transparent rounded-full cursor-pointer relative"
+                    icon="tabler:filter"
+                    size="sm"
+                  />
+                </UChip>
+              </UTooltip>
+
+              <template #content>
+                <UCard variant="glassmorphism">
+                  <OverlayFilterPanel />
+                </UCard>
+              </template>
+            </UPopover>
+            <UPopover>
+              <UTooltip text="照片排序">
+                <UButton
+                  variant="soft"
+                  :color="
+                    currentSortOption?.key === 'dateTaken-desc'
+                      ? 'neutral'
+                      : 'info'
+                  "
+                  class="bg-transparent rounded-full cursor-pointer"
+                  :icon="currentSortIcon"
+                  size="sm"
+                />
+              </UTooltip>
+
+              <template #content>
+                <UCard
+                  variant="glassmorphism"
+                  class="w-3xs"
+                >
+                  <template #header>
+                    <h3 class="font-bold text-sm p-1">排序方式</h3>
+                  </template>
+
+                  <div class="space-y-1">
+                    <UButton
+                      v-for="sort in availableSorts"
+                      :key="sort.key"
+                      :variant="
+                        currentSortLabel === sort.label ? 'soft' : 'ghost'
+                      "
+                      :color="
+                        currentSortLabel === sort.label ? 'info' : 'neutral'
+                      "
+                      :icon="sort.icon"
+                      size="sm"
+                      block
+                      class="justify-start"
+                      @click="setSortOption(sort.key)"
+                    >
+                      {{ sort.label }}
+                    </UButton>
+                  </div>
+                </UCard>
+              </template>
+            </UPopover>
+            <UTooltip
+              v-if="loggedIn"
+              text="仪表盘"
+            >
               <UButton
                 size="sm"
                 color="info"
                 variant="soft"
+                class="bg-transparent rounded-full cursor-pointer"
                 icon="tabler:dashboard"
                 to="/dashboard"
-              >
-                仪表盘
-              </UButton>
+              />
+            </UTooltip>
+            <UTooltip
+              v-if="loggedIn"
+              text="登出"
+            >
               <UButton
                 size="sm"
                 color="error"
                 variant="soft"
+                class="bg-transparent rounded-full cursor-pointer"
                 icon="tabler:logout"
                 @click="clear"
-              >
-                登出
-              </UButton>
-            </div>
+            /></UTooltip>
           </div>
         </template>
       </AuthState>

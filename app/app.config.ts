@@ -9,5 +9,25 @@ export default defineAppConfig({
       warning: 'amber',
       danger: 'rose',
     },
+    popover: {
+      slots: {
+        content:
+          'bg-white/70 dark:bg-neutral-900/50 backdrop-blur-3xl ring-0 shadow-lg border border-neutral-300/50 dark:border-neutral-500/50 rounded-lg',
+      },
+    },
+    card: {
+      slots: {
+        header: 'p-2 sm:p-2 pb-0!',
+        body: 'p-2 sm:p-2',
+        footer: 'p-2 sm:p-2',
+      },
+      variants: {
+        variant: {
+          glassmorphism: {
+            root: 'shadow-lg divide-y-0 divide-neutral-300/50 dark:divide-neutral-500/50',
+          },
+        },
+      },
+    },
   },
 })
