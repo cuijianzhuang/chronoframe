@@ -451,6 +451,7 @@ onUnmounted(() => {
     @touchmove="handleTouchMove"
     @touchend="handleTouchEnd"
     @touchcancel="handleTouchEnd"
+    @contextmenu.prevent=""
   >
     <div class="relative group overflow-hidden transition-all duration-300">
       <!-- Container with fixed aspect ratio -->
@@ -494,7 +495,6 @@ onUnmounted(() => {
           }"
           @load="handleImageLoad"
           @error="handleImageError"
-          @contextmenu.prevent=""
         />
 
         <!-- LivePhoto video with motion transition -->
@@ -517,7 +517,6 @@ onUnmounted(() => {
             delay: isVideoPlaying ? 0.1 : 0, // Slight delay when fading in video
           }"
           @ended="handleVideoEnded"
-          @contextmenu.prevent=""
         />
       </div>
 
@@ -534,37 +533,6 @@ onUnmounted(() => {
         :is-video-playing="isVideoPlaying"
         :processing-state="processingState || null"
       />
-      <!-- <motion.div
-        v-if="photo.isLivePhoto"
-        class="absolute top-2 left-2 backdrop-blur-md text-white rounded-full pl-1 pr-1.5 py-1 text-[13px] font-bold flex items-center gap-0.5 leading-0"
-        :animate="{
-          backgroundColor: isVideoPlaying
-            ? 'rgba(0, 0, 0, 0.6)'
-            : 'rgba(0, 0, 0, 0.3)',
-          scale: isVideoPlaying ? 1.05 : 1,
-        }"
-        :transition="{
-          duration: 0.3,
-          ease: 'easeInOut',
-        }"
-      >
-        <Icon
-          name="tabler:live-photo"
-          class="size-[17px]"
-          :class="{ 'text-yellow-300': isVideoPlaying }"
-        />
-        <span :class="{ 'text-yellow-300': isVideoPlaying }">实况</span>
-
-        <div
-          v-if="processingState?.isProcessing"
-          class="ml-1 flex items-center gap-1"
-        >
-          <div class="size-1 bg-white/70 rounded-full animate-pulse" />
-          <span class="text-[11px] text-white/80">
-            {{ Math.round(processingState.progress || 0) }}%
-          </span>
-        </div>
-      </motion.div> -->
 
       <!-- Photo info overlay (bottom) -->
       <motion.div

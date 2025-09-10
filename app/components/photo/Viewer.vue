@@ -455,7 +455,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                   <!-- 静音图标 -->
                   <div
                     v-if="currentPhoto?.isLivePhoto"
-                    class="pointer-events-auto backdrop-blur-md bg-black/40 text-white rounded-full pl-1 pr-1.5 py-1 text-[13px] font-bold flex items-center gap-0.5 leading-0 select-none"
+                    class="pointer-events-auto backdrop-blur-md bg-black/40 text-white rounded-full p-1 text-[13px] font-bold flex items-center gap-0.5 leading-0 select-none"
                     :class="isMobile ? 'cursor-default' : 'cursor-pointer'"
                     @click="isLivePhotoMuted = !isLivePhotoMuted"
                   >
