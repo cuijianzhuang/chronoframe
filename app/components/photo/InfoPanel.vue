@@ -12,6 +12,7 @@ interface Props {
 }
 
 const dayjs = useDayjs()
+const router = useRouter()
 
 const props = defineProps<Props>()
 
@@ -411,6 +412,13 @@ const isMobile = useMediaQuery('(max-width: 768px)')
 const onMinimapClick = (photoId: string) => {
   window.open(`/explore?photoId=${photoId}`)
 }
+
+const onTagClick = (tag: string) => {
+  router.push({
+    path: '/',
+    query: { tag },
+  })
+}
 </script>
 
 <template>
@@ -503,7 +511,8 @@ const onMinimapClick = (photoId: string) => {
             variant="soft"
             size="sm"
             color="neutral"
-            class="bg-white/10 text-white"
+            class="bg-white/10 text-white cursor-pointer select-none hover:bg-white/20 transition-colors"
+            @click="onTagClick(tag)"
           />
         </div>
       </div>

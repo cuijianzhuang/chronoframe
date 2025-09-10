@@ -16,6 +16,19 @@ const { photos } = usePhotos()
 const slug = computed(() => (route.params.slug as string[]) || [])
 const photoId = computed(() => slug.value[0] || null)
 
+// 处理标签查询参数
+const { clearAllFilters, toggleFilter } = usePhotoFilters()
+
+// 监听路由查询参数中的标签
+watch(() => route.query.tag, (tagParam) => {
+  if (tagParam && typeof tagParam === 'string' && !photoId.value) {
+    clearAllFilters()
+    toggleFilter('tags', tagParam)
+    
+    router.replace('/')
+  }
+}, { immediate: true })
+
 watch(
   [photoId, photos],
   ([currentPhotoId, currentPhotos]) => {
