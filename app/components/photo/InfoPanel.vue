@@ -487,11 +487,25 @@ const onTagClick = (tag: string) => {
         @click="onMinimapClick(currentPhoto.id)"
       />
 
-      <!-- EXIF/对象信息渲染器 -->
       <PhotoKVRenderer
         v-if="formatedExifData.basicInfo"
         :data="formatedExifData.basicInfo"
       />
+
+      <div
+        v-if="currentPhoto.exif?.Rating"
+        class="flex items-center gap-2 justify-between"
+      >
+        <h4 class="text-sm font-medium text-white uppercase tracking-wide">
+          评分
+        </h4>
+
+        <UiRating
+          :model-value="currentPhoto.exif.Rating"
+          readonly
+          size="sm"
+        />
+      </div>
 
       <!-- 标签 -->
       <div

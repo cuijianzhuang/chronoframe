@@ -3,7 +3,7 @@ interface FilterOptions {
   cameras: string[]
   lenses: string[]
   cities: string[]
-  ratings: number[]
+  ratings: number // 改为单个数字，表示最低评分
 }
 
 interface FilterStats {
@@ -20,7 +20,7 @@ const globalFilters = ref<FilterOptions>({
   cameras: [],
   lenses: [],
   cities: [],
-  ratings: []
+  ratings: 0
 })
 
 export function usePhotoFilters() {
@@ -110,7 +110,7 @@ export function usePhotoFilters() {
       cameras: activeFilters.value.cameras.length,
       lenses: activeFilters.value.lenses.length,
       cities: activeFilters.value.cities.length,
-      ratings: activeFilters.value.ratings.length
+      ratings: activeFilters.value.ratings > 0 ? 1 : 0
     }
   })
 
@@ -155,9 +155,9 @@ export function usePhotoFilters() {
       }
 
       // 评分筛选
-      if (activeFilters.value.ratings.length > 0) {
+      if (activeFilters.value.ratings > 0) {
         const photoRating = photo.exif?.Rating || 0
-        if (!activeFilters.value.ratings.includes(photoRating)) {
+        if (photoRating < activeFilters.value.ratings) {
           return false
         }
       }
@@ -185,7 +185,7 @@ export function usePhotoFilters() {
       cameras: [],
       lenses: [],
       cities: [],
-      ratings: []
+      ratings: 0
     }
   }
 
@@ -201,11 +201,13 @@ export function usePhotoFilters() {
 
   // 检查是否有任何筛选项被激活
   const hasActiveFilters = computed(() => {
-    return Object.values(activeFilters.value).some(filters => filters.length > 0)
+    return Object.values(activeFilters.value).some(filters => 
+      Array.isArray(filters) ? filters.length > 0 : filters > 0
+    )
   })
 
   return {
-    activeFilters: readonly(activeFilters),
+    activeFilters: activeFilters,
     availableFilters,
     selectedCounts,
     filteredPhotos,

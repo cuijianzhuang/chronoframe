@@ -8,9 +8,17 @@ const {
   isFilterSelected,
   clearAllFilters,
   hasActiveFilters,
+  activeFilters,
 } = usePhotoFilters()
 
 const currentTab = ref('labels')
+
+const selectedRating = computed({
+  get: () => activeFilters.value.ratings,
+  set: (value: number) => {
+    activeFilters.value.ratings = value
+  },
+})
 
 const tabItems = computed<TabsItem[]>(() => [
   {
@@ -96,9 +104,7 @@ const handleToggleFilter = (type: string, value: string | number) => {
               v-for="tag in availableFilters.tags"
               :key="tag.label"
               :label="tag.label"
-              :color="
-                isFilterSelected('tags', tag.label) ? 'info' : 'neutral'
-              "
+              :color="isFilterSelected('tags', tag.label) ? 'info' : 'neutral'"
               :trailing-icon="
                 isFilterSelected('tags', tag.label) ? 'tabler:check' : ''
               "
@@ -215,32 +221,22 @@ const handleToggleFilter = (type: string, value: string | number) => {
 
       <!-- 评分面板 -->
       <template #ratings>
-        <div class="space-y-0.5 max-h-64 overflow-y-auto">
+        <div
+          class="max-h-64 overflow-y-auto flex flex-col items-center gap-3 py-4"
+        >
+          <UiRating
+            v-model="selectedRating"
+            size="xl"
+            :allow-half="false"
+          />
           <div
-            v-for="rating in availableFilters.ratings"
-            :key="rating.label"
-            class="flex items-center justify-between cursor-pointer select-none hover:bg-neutral-400/30 dark:hover:bg-info-800/30 rounded-lg px-2 py-2"
-            :class="
-              isFilterSelected('ratings', rating.label)
-                ? 'bg-neutral-400/30 dark:bg-info-800/30'
-                : ''
-            "
-            @click="handleToggleFilter('ratings', rating.label)"
+            class="text-xs font-semibold text-neutral-900/90 dark:text-white/90"
           >
-            <span class="text-sm text-default font-medium truncate">
-              {{ rating.label }} 星
-            </span>
-            <Icon
-              v-if="isFilterSelected('ratings', rating.label)"
-              name="tabler:check"
-              class="size-4 text-green-500"
-            />
-          </div>
-          <div
-            v-if="availableFilters.ratings.length === 0"
-            class="text-center text-sm text-neutral-500 dark:text-neutral-400 py-4"
-          >
-            暂无评分信息
+            {{
+              selectedRating
+                ? `展示 ${selectedRating} 星及以上的照片`
+                : '展示所有照片'
+            }}
           </div>
         </div>
       </template>
