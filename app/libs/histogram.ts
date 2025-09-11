@@ -53,6 +53,20 @@ export const calculateHistogramCompressed = (
   }
 }
 
+// ease-out cubic
+const easeOutCubic = (t: number): number => {
+  return 1 - Math.pow(1 - t, 3)
+}
+
+// 存储每个canvas的动画状态
+const canvasAnimationStates = new WeakMap<
+  HTMLCanvasElement,
+  {
+    animationId: number | null
+    isAnimating: boolean
+  }
+>()
+
 export const drawHistogramToCanvas = (
   canvas: HTMLCanvasElement,
   histogram: HistogramDataCompressed,
@@ -81,7 +95,22 @@ export const drawHistogramToCanvas = (
   },
 ) => {
   const ctx = canvas.getContext('2d')
-  if (!ctx) return
+  if (!ctx) {
+    console.error('Failed to get canvas context')
+    return
+  }
+
+  // 获取或创建动画状态
+  let animationState = canvasAnimationStates.get(canvas)
+  if (!animationState) {
+    animationState = { animationId: null, isAnimating: false }
+    canvasAnimationStates.set(canvas, animationState)
+  }
+
+  // 如果正在动画中，先停止
+  if (animationState.isAnimating && animationState.animationId) {
+    clearTimeout(animationState.animationId)
+  }
 
   const canvasRect = canvas.getBoundingClientRect()
   const { width, height } = canvasRect
@@ -92,8 +121,6 @@ export const drawHistogramToCanvas = (
   canvas.style.width = `${width}px`
   canvas.style.height = `${height}px`
 
-  ctx.clearRect(0, 0, width, height)
-
   const maxCount = Math.max(
     ...histogram.red,
     ...histogram.green,
@@ -103,13 +130,22 @@ export const drawHistogramToCanvas = (
 
   if (maxCount === 0) return
 
-  const chartWidth = width - options.padding * 2
-  const chartHeight = height - options.padding * 2
+  // 使用逻辑尺寸进行计算
+  const logicalWidth = width / dpr
+  const logicalHeight = height / dpr
+  const chartWidth = logicalWidth - options.padding * 2
+  const chartHeight = logicalHeight - options.padding * 2
 
-  const drawBars = (data: number[], color: string, opacity: number = 1) => {
+  const drawBars = (
+    data: number[],
+    color: string,
+    opacity: number = 1,
+    progress: number = 1,
+  ) => {
     const barWidth = chartWidth / data.length
     for (let i = 0; i < data.length; i++) {
-      const barHeight = ((data[i] ?? 0) / maxCount) * chartHeight
+      const fullBarHeight = ((data[i] ?? 0) / maxCount) * chartHeight
+      const barHeight = fullBarHeight * progress // Apply animation progress
 
       // Gradient from bar's top to bottom
       const gradient = ctx.createLinearGradient(
@@ -138,31 +174,66 @@ export const drawHistogramToCanvas = (
     ctx.globalAlpha = 1
   }
 
-  ctx.fillStyle = options.colors.background
-  ctx.fillRect(0, 0, width, height)
+  const renderFrame = (progress: number) => {
+    ctx.clearRect(0, 0, logicalWidth, logicalHeight)
 
-  ctx.lineWidth = 0.2
-  ctx.strokeStyle = options.colors.grid
-  for (let i = 1; i <= 3; i++) {
-    ctx.beginPath()
-    ctx.moveTo(options.padding, options.padding + (chartHeight / 4) * i)
-    ctx.lineTo(width - options.padding, options.padding + (chartHeight / 4) * i)
-    ctx.stroke()
+    // 绘制背景
+    ctx.fillStyle = options.colors.background
+    ctx.fillRect(0, 0, logicalWidth, logicalHeight)
+
+    // 绘制网格
+    ctx.lineWidth = 0.2
+    ctx.strokeStyle = options.colors.grid
+    for (let i = 1; i <= 3; i++) {
+      ctx.beginPath()
+      ctx.moveTo(options.padding, options.padding + (chartHeight / 4) * i)
+      ctx.lineTo(
+        logicalWidth - options.padding,
+        options.padding + (chartHeight / 4) * i,
+      )
+      ctx.stroke()
+    }
+
+    // 绘制bars
+    drawBars(histogram.gray, options.colors.gray, 0.4, progress)
+    ctx.globalCompositeOperation = 'screen'
+    drawBars(histogram.red, options.colors.red, 0.8, progress)
+    drawBars(histogram.green, options.colors.green, 0.8, progress)
+    drawBars(histogram.blue, options.colors.blue, 0.8, progress)
+    ctx.globalCompositeOperation = 'source-over'
+
+    // 绘制边框
+    ctx.strokeStyle = options.colors.border
+    ctx.lineWidth = 1
+    ctx.strokeRect(
+      options.padding - 0.5,
+      options.padding - 0.5,
+      chartWidth + 1,
+      chartHeight + 1,
+    )
   }
 
-  drawBars(histogram.gray, options.colors.gray, 0.4)
-  ctx.globalCompositeOperation = 'screen'
-  drawBars(histogram.red, options.colors.red, 0.8)
-  drawBars(histogram.green, options.colors.green, 0.8)
-  drawBars(histogram.blue, options.colors.blue, 0.8)
-  ctx.globalCompositeOperation = 'source-over'
+  // 开始动画
+  animationState.isAnimating = true
+  const startTime = Date.now()
+  const duration = 600
 
-  ctx.strokeStyle = options.colors.border
-  ctx.lineWidth = 1
-  ctx.strokeRect(
-    options.padding - 0.5,
-    options.padding - 0.5,
-    chartWidth + 1,
-    chartHeight + 1,
-  )
+  const animate = () => {
+    const elapsed = Date.now() - startTime
+    const rawProgress = Math.min(elapsed / duration, 1)
+
+    const easedProgress = easeOutCubic(rawProgress)
+
+    renderFrame(easedProgress)
+
+    if (rawProgress < 1) {
+      animationState.animationId = window.setTimeout(animate, 16) // ~60fps
+    } else {
+      animationState.isAnimating = false
+      animationState.animationId = null
+    }
+  }
+
+  renderFrame(0)
+  animate()
 }
