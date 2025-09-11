@@ -19,6 +19,8 @@ const histogramData = ref<HistogramDataCompressed | null>(null)
 
 watchEffect(() => {
   isLoading.value = true
+  isError.value = false
+  histogramData.value = null
 
   const img = new Image()
   img.crossOrigin = 'Anonymous'
@@ -87,7 +89,7 @@ watchEffect(() => {
       >
         <Icon
           name="tabler:alert-triangle"
-          class="text-xl animate-spin"
+          class="text-xl"
         />
         <span class="text-xs font-medium">直方图加载失败</span>
       </div>
