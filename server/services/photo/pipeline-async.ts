@@ -1,4 +1,3 @@
-import path from 'path'
 import {
   preprocessImageWithJpegUpload,
   processImageMetadataAndSharp,
@@ -14,10 +13,7 @@ import {
   parseGPSCoordinates,
 } from '../location/geocoding'
 import { findLivePhotoVideoForImage } from '../video/livephoto'
-
-const generatePhotoId = (s3key: string) => {
-  return path.basename(s3key, path.extname(s3key)).replace(/ /g, '_')
-}
+import { generateSafePhotoId } from '~~/server/utils/file-utils'
 
 /**
  * 异步执行照片处理管道 - 不阻塞主线程
@@ -48,12 +44,12 @@ async function processPhotoInternal(
 ): Promise<Photo | null> {
   const log = logger.image
   const storageProvider = getStorageManager().getProvider()
-  const photoId = generatePhotoId(s3key)
+  const photoId = generateSafePhotoId(s3key)
 
   try {
     log.info(`Starting async processing for ${s3key}`)
 
-    // 使用 Promise 包装每个步骤，确保异步执行
+    // 步骤1: 预处理图片并上传JPEG版本
     const imageBuffers = await new Promise<any>((resolve, reject) => {
       setImmediate(async () => {
         try {
@@ -70,6 +66,7 @@ async function processPhotoInternal(
       return null
     }
 
+    // 步骤2: 处理图片元数据和Sharp处理
     const processedData = await new Promise<any>((resolve, reject) => {
       setImmediate(async () => {
         try {
@@ -91,6 +88,7 @@ async function processPhotoInternal(
 
     const { imageBuffer, metadata } = processedData
 
+    // 步骤3: 生成缩略图和哈希值
     const { thumbnailBuffer, thumbnailHash } = await new Promise<any>(
       (resolve, reject) => {
         setImmediate(async () => {
@@ -104,6 +102,19 @@ async function processPhotoInternal(
       },
     )
 
+    // TODO 步骤4: 直方图和影调分析
+    // const histogramData = await new Promise<any>((resolve, reject) => {
+    //   setImmediate(async () => {
+    //     try {
+    //       const result = await calculateHistogram(processedData.sharpInst)
+    //       resolve(result)
+    //     } catch (error) {
+    //       reject(error)
+    //     }
+    //   })
+    // })
+
+    // 步骤5: 提取EXIF数据
     const exifData = await new Promise<any>((resolve, reject) => {
       setImmediate(async () => {
         try {
@@ -119,9 +130,10 @@ async function processPhotoInternal(
       })
     })
 
+    // 步骤6: 提取照片基本信息
     const photoInfo = extractPhotoInfo(s3key, exifData)
 
-    // 处理地理位置信息
+    // 步骤7: 处理地理位置信息
     let locationInfo = null
     if (exifData) {
       const { latitude, longitude } = parseGPSCoordinates(exifData)
@@ -139,7 +151,7 @@ async function processPhotoInternal(
       }
     }
 
-    // 检查是否有对应的 LivePhoto 视频文件
+    // 步骤8: 配对 LivePhoto 视频文件
     let livePhotoInfo = null
     const livePhotoVideo = await new Promise<any>((resolve, reject) => {
       setImmediate(async () => {
@@ -163,6 +175,7 @@ async function processPhotoInternal(
       log.info(`LivePhoto video found for ${s3key}: ${livePhotoVideo.videoKey}`)
     }
 
+    // 步骤9: 上传缩略图到存储服务
     const thumbnailObject = await new Promise<any>((resolve, reject) => {
       setImmediate(async () => {
         try {
@@ -178,6 +191,7 @@ async function processPhotoInternal(
       })
     })
 
+    // 步骤10: 构建最终的Photo对象
     const result: Photo = {
       id: photoId,
       title: photoInfo.title,
