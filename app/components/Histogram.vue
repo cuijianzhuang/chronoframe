@@ -24,12 +24,11 @@ watchEffect(() => {
 
   const img = new Image()
   img.crossOrigin = 'Anonymous'
-  img.src = props.thumbnailUrl
-
-  img.onerror = () => {
-    isError.value = true
-    isLoading.value = false
-  }
+  img.src =
+    props.thumbnailUrl +
+    (props.thumbnailUrl.includes('?') ? '&' : '?') +
+    't=' +
+    Date.now()
 
   img.onload = () => {
     const canvas = document.createElement('canvas')
@@ -59,6 +58,11 @@ watchEffect(() => {
       isLoading.value = false
     }
   }
+
+  img.onerror = () => {
+    isError.value = true
+    isLoading.value = false
+  }
 })
 
 watchEffect(() => {
@@ -69,11 +73,13 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div :class="twMerge('relative w-full h-32 group overflow-hidden', $props.class)">
+  <div
+    :class="twMerge('relative w-full h-32 group overflow-hidden', $props.class)"
+  >
     <Transition name="fade">
       <div
         v-if="isLoading"
-        class="absolute inset-0 bg-neutral-900/10 flex flex-col gap-2 items-center justify-center rounded-lg backdrop-blur-xl z-10 text-white"
+        class="absolute inset-0 bg-neutral-900/50 flex flex-col gap-2 items-center justify-center rounded-lg backdrop-blur-xl z-10 text-white"
       >
         <Icon
           name="tabler:loader"
@@ -85,7 +91,7 @@ watchEffect(() => {
     <Transition name="fade">
       <div
         v-if="isError"
-        class="absolute inset-0 bg-neutral-900/10 flex flex-col gap-2 items-center justify-center rounded-lg backdrop-blur-xl z-10 text-white"
+        class="absolute inset-0 bg-neutral-900/50 flex flex-col gap-2 items-center justify-center rounded-lg backdrop-blur-xl z-10 text-white"
       >
         <Icon
           name="tabler:alert-triangle"
@@ -94,11 +100,13 @@ watchEffect(() => {
         <span class="text-xs font-medium">直方图加载失败</span>
       </div>
     </Transition>
-    <canvas
-      v-if="histogramData"
-      ref="canvasRef"
-      class="w-full h-full rounded-lg backdrop-blur-xl"
-    />
+    <Transition name="fade">
+      <canvas
+        v-if="histogramData"
+        ref="canvasRef"
+        class="w-full h-full rounded-lg backdrop-blur-xl"
+      />
+    </Transition>
   </div>
 </template>
 
