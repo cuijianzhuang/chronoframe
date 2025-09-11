@@ -520,14 +520,28 @@ const onTagClick = (tag: string) => {
         v-if="formatedExifData.captureParams"
         :data="formatedExifData.captureParams"
       />
+
+      <div class="space-y-2">
+        <h4 class="text-sm font-medium text-white uppercase tracking-wide">
+          直方图
+        </h4>
+
+        <Histogram
+          v-if="currentPhoto.thumbnailUrl"
+          :thumbnail-url="currentPhoto.thumbnailUrl"
+        />
+      </div>
+
       <PhotoKVRenderer
         v-if="formatedExifData.deviceInfo"
         :data="formatedExifData.deviceInfo"
       />
+
       <PhotoKVRenderer
         v-if="formatedExifData.captureMode"
         :data="formatedExifData.captureMode"
       />
+
       <PhotoKVRenderer
         v-if="formatedExifData.technicalParams"
         :data="formatedExifData.technicalParams"
