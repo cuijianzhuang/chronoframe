@@ -21,9 +21,9 @@ import {
   throttle,
   createTransformMatrix,
   getMaxTextureSize,
-  loadImage,
 } from './utils'
 import { createProgram } from '../shaders'
+import ImageDecoderWorkerRaw from '../workers/image-decoder.worker?raw'
 
 export class WebGLImageViewerEngine {
   private canvas: HTMLCanvasElement
@@ -32,6 +32,11 @@ export class WebGLImageViewerEngine {
   private image: HTMLImageElement | null = null
   private texture: WebGLTexture | null = null
   private program: WebGLProgram | null = null
+
+  // Web Workers
+  private worker: Worker | null = null
+  private imageLoadingResolve: (() => void) | null = null
+  private imageLoadingReject: ((error: Error) => void) | null = null
 
   // 变换状态
   private transform: Transform = { scale: 1, translateX: 0, translateY: 0 }
@@ -116,6 +121,7 @@ export class WebGLImageViewerEngine {
 
   private init(): void {
     this.setupWebGL()
+    this.setupWorker()
     this.setupEventListeners()
     this.setupResizeObserver()
     this.resize()
@@ -149,6 +155,72 @@ export class WebGLImageViewerEngine {
     gl.enable(gl.BLEND)
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
     gl.clearColor(0, 0, 0, 0)
+  }
+
+  private setupWorker() {
+    if (typeof Worker === 'undefined') {
+      console.warn('Web Workers not supported, falling back to main thread')
+      return
+    }
+
+    this.worker = new Worker(
+      URL.createObjectURL(new Blob([ImageDecoderWorkerRaw])),
+      {
+        name: 'image-decoder-worker',
+      },
+    )
+
+    this.worker.onmessage = (event: MessageEvent) => {
+      const { type, payload } = event.data
+      switch (type) {
+        case 'loaded':
+          this.handleWorkerImageLoaded(payload)
+          break
+        case 'load-error':
+          this.handleWorkerImageLoadError(payload)
+          break
+      }
+    }
+
+    this.worker.onerror = (error) => {
+      console.error('Worker error:', error)
+    }
+  }
+
+  private handleWorkerImageLoaded(payload: any) {
+    this.emitLoadingStateChange(true, LoadingState.TEXTURE_LOADING)
+    const { imageBitmap } = payload
+
+    try {
+      this.image = imageBitmap
+      this.createTexture(imageBitmap)
+      // imageBitmap.close()
+      this.updatePositionBuffer()
+
+      if (this.config.centerOnInit) {
+        this.centerImage()
+      }
+
+      this.currentQuality = 'high'
+
+      this.emitLoadingStateChange(
+        false,
+        LoadingState.COMPLETE,
+        this.currentQuality,
+      )
+      this.render()
+      if (this.imageLoadingResolve) this.imageLoadingResolve()
+    } catch (err) {
+      console.error('Failed to create texture from ImageBitmap:', err)
+      this.emitLoadingStateChange(false, LoadingState.ERROR)
+      if (this.imageLoadingReject) this.imageLoadingReject(err as Error)
+    }
+  }
+
+  private handleWorkerImageLoadError(error: any) {
+    console.error('Image load error from worker:', error)
+    this.emitLoadingStateChange(false, LoadingState.ERROR)
+    if (this.imageLoadingReject) this.imageLoadingReject(error as Error)
   }
 
   private createBuffers(): void {
@@ -234,7 +306,7 @@ export class WebGLImageViewerEngine {
     this.resizeObserver.observe(this.canvas)
   }
 
-  private notifyLoadingStateChange(
+  private emitLoadingStateChange(
     isLoading: boolean,
     state?: LoadingState,
     quality?: 'high' | 'medium' | 'low' | 'unknown',
@@ -247,35 +319,23 @@ export class WebGLImageViewerEngine {
   }
 
   public async loadImage(src: string): Promise<void> {
-    try {
-      this.notifyLoadingStateChange(true, LoadingState.IMAGE_LOADING)
-      this.image = await loadImage(src)
+    console.log('Post load image:', src)
+    this.emitLoadingStateChange(true, LoadingState.IMAGE_LOADING)
 
-      this.notifyLoadingStateChange(true, LoadingState.TEXTURE_LOADING)
-      this.createTexture()
-      this.updatePositionBuffer()
-
-      if (this.config.centerOnInit) {
-        this.centerImage()
+    return new Promise((resolve, reject) => {
+      this.imageLoadingResolve = resolve
+      this.imageLoadingReject = reject
+      if (this.worker) {
+        this.worker.postMessage({ type: 'load', payload: { src } })
+      } else {
+        reject(new Error('No worker available'))
       }
-
-      this.currentQuality = 'high'
-      this.notifyLoadingStateChange(
-        false,
-        LoadingState.COMPLETE,
-        this.currentQuality,
-      )
-      this.render()
-    } catch (error) {
-      this.notifyLoadingStateChange(false, LoadingState.ERROR)
-      console.error('Failed to load image:', error)
-      throw error
-    }
+    })
   }
 
-  private createTexture(): void {
-    if (!this.image) return
-
+  private createTexture(
+    imageSource: HTMLCanvasElement | HTMLImageElement | ImageBitmap,
+  ): WebGLTexture | null {
     const { gl } = this
 
     // 清理旧纹理
@@ -299,8 +359,10 @@ export class WebGLImageViewerEngine {
       gl.RGBA,
       gl.RGBA,
       gl.UNSIGNED_BYTE,
-      this.image,
+      imageSource,
     )
+
+    return this.texture
   }
 
   private resize(): void {
@@ -417,7 +479,7 @@ export class WebGLImageViewerEngine {
   }
 
   private render(): void {
-    if (!this.program || !this.texture || !this.image) return
+    if (!this.program || !this.texture) return
 
     const { gl } = this
 
@@ -833,7 +895,7 @@ export class WebGLImageViewerEngine {
 
       // 如果有图像，重新加载
       if (this.image) {
-        this.createTexture()
+        this.createTexture(this.image)
         this.updatePositionBuffer()
         this.render()
       }
@@ -1131,5 +1193,11 @@ export class WebGLImageViewerEngine {
     // 清理回调
     this.onZoomChange = undefined
     this.onImageCopied = undefined
+
+    // 终止 worker
+    if (this.worker) {
+      this.worker.terminate()
+      this.worker = null
+    }
   }
 }
