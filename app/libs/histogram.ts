@@ -130,9 +130,8 @@ export const drawHistogramToCanvas = (
 
   if (maxCount === 0) return
 
-  // 使用逻辑尺寸进行计算
-  const logicalWidth = width / dpr
-  const logicalHeight = height / dpr
+  const logicalWidth = width
+  const logicalHeight = height
   const chartWidth = logicalWidth - options.padding * 2
   const chartHeight = logicalHeight - options.padding * 2
 
