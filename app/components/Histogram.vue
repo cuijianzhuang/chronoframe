@@ -23,12 +23,11 @@ watchEffect(() => {
   histogramData.value = null
 
   const img = new Image()
-  img.crossOrigin = 'Anonymous'
-  img.src =
-    props.thumbnailUrl +
-    (props.thumbnailUrl.includes('?') ? '&' : '?') +
-    't=' +
-    Date.now()
+  img.crossOrigin = 'anonymous'
+  
+  const url = new URL(props.thumbnailUrl)
+  url.searchParams.set('_cors', Date.now().toString())
+  img.src = url.toString()
 
   img.onload = () => {
     const canvas = document.createElement('canvas')
