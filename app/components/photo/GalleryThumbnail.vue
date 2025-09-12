@@ -23,20 +23,22 @@ const isSmallScreen = useMediaQuery('(max-width: 768px)')
 const THUMBNAIL_CONFIG = {
   size: { sm: 48, lg: 64 },
   gap: { sm: 8, lg: 12 },
-  padding: { sm: 12, lg: 16 }
+  padding: { sm: 12, lg: 16 },
 } as const
 
 // 计算当前设备的样式配置
-const currentThumbnailSize = computed(() => 
-  isSmallScreen.value ? THUMBNAIL_CONFIG.size.sm : THUMBNAIL_CONFIG.size.lg
+const currentThumbnailSize = computed(() =>
+  isSmallScreen.value ? THUMBNAIL_CONFIG.size.sm : THUMBNAIL_CONFIG.size.lg,
 )
 
-const currentGapSize = computed(() => 
-  isSmallScreen.value ? THUMBNAIL_CONFIG.gap.sm : THUMBNAIL_CONFIG.gap.lg
+const currentGapSize = computed(() =>
+  isSmallScreen.value ? THUMBNAIL_CONFIG.gap.sm : THUMBNAIL_CONFIG.gap.lg,
 )
 
-const currentPaddingSize = computed(() => 
-  isSmallScreen.value ? THUMBNAIL_CONFIG.padding.sm : THUMBNAIL_CONFIG.padding.lg
+const currentPaddingSize = computed(() =>
+  isSmallScreen.value
+    ? THUMBNAIL_CONFIG.padding.sm
+    : THUMBNAIL_CONFIG.padding.lg,
 )
 
 // 处理缩略图列表
@@ -44,7 +46,7 @@ const thumbnailList = computed(() => {
   return props.photos.map((photo, index) => ({
     ...photo,
     index,
-    isActive: index === props.currentIndex
+    isActive: index === props.currentIndex,
   }))
 })
 
@@ -65,16 +67,18 @@ const updateContainerSize = () => {
 // 滚动到指定的缩略图位置
 const scrollToActiveThumbnail = async () => {
   if (!galleryScrollContainer.value) return
-  
+
   await nextTick()
-  
+
   const containerWidth = containerClientWidth.value
   const thumbnailSize = currentThumbnailSize.value
   const gapSize = currentGapSize.value
-  
-  const thumbnailLeftPosition = props.currentIndex * thumbnailSize + gapSize * props.currentIndex
-  const targetScrollLeft = thumbnailLeftPosition - containerWidth / 2 + thumbnailSize / 2
-  
+
+  const thumbnailLeftPosition =
+    props.currentIndex * thumbnailSize + gapSize * props.currentIndex
+  const targetScrollLeft =
+    thumbnailLeftPosition - containerWidth / 2 + thumbnailSize / 2
+
   galleryScrollContainer.value.scrollTo({
     left: targetScrollLeft,
     behavior: 'smooth',
@@ -84,30 +88,32 @@ const scrollToActiveThumbnail = async () => {
 // 处理滚轮横向滚动
 const onScrollWheel = (event: WheelEvent) => {
   if (!galleryScrollContainer.value) return
-  
+
   // 阻止默认垂直滚动
   event.preventDefault()
-  
+
   // 优先使用触控板横向滚动，否则将垂直滚动转为横向
-  const deltaAmount = Math.abs(event.deltaX) > Math.abs(event.deltaY) 
-    ? event.deltaX 
-    : event.deltaY
-    
+  const deltaAmount =
+    Math.abs(event.deltaX) > Math.abs(event.deltaY)
+      ? event.deltaX
+      : event.deltaY
+
   galleryScrollContainer.value.scrollLeft += deltaAmount
 }
 
-// 生命周期管理
 onMounted(() => {
   updateContainerSize()
-  
+
   // 观察容器尺寸变化
   if (galleryScrollContainer.value) {
     const sizeObserver = new ResizeObserver(updateContainerSize)
     sizeObserver.observe(galleryScrollContainer.value)
-    
+
     // 绑定滚轮事件
-    galleryScrollContainer.value.addEventListener('wheel', onScrollWheel, { passive: false })
-    
+    galleryScrollContainer.value.addEventListener('wheel', onScrollWheel, {
+      passive: false,
+    })
+
     onUnmounted(() => {
       sizeObserver.disconnect()
       if (galleryScrollContainer.value) {
@@ -115,14 +121,21 @@ onMounted(() => {
       }
     })
   }
+
+  setTimeout(() => {
+    scrollToActiveThumbnail()
+  }, 500)
 })
 
-// 响应式监听
-watch(() => props.currentIndex, (_newIndex, _oldIndex) => {
-  scrollToActiveThumbnail()
-  // 这里不需要再次 emit，因为索引变化是由外部传入的
-  // 只需要确保滚动位置正确即可
-}, { immediate: true })
+watch(
+  () => props.currentIndex,
+  (_newIndex, _oldIndex) => {
+    scrollToActiveThumbnail()
+    // 这里不需要再次 emit，因为索引变化是由外部传入的
+    // 只需要确保滚动位置正确即可
+  },
+  { immediate: true },
+)
 
 watch(isSmallScreen, scrollToActiveThumbnail)
 </script>
