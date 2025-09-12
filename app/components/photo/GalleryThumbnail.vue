@@ -17,7 +17,7 @@ const galleryScrollContainer = ref<HTMLDivElement>()
 const containerClientWidth = ref(0)
 
 // 响应式断点
-const isSmallScreen = useMediaQuery('(max-width: 768px)')
+const isMobile = useMediaQuery('(max-width: 768px)')
 
 // 缩略图配置
 const THUMBNAIL_CONFIG = {
@@ -28,15 +28,15 @@ const THUMBNAIL_CONFIG = {
 
 // 计算当前设备的样式配置
 const currentThumbnailSize = computed(() =>
-  isSmallScreen.value ? THUMBNAIL_CONFIG.size.sm : THUMBNAIL_CONFIG.size.lg,
+  isMobile.value ? THUMBNAIL_CONFIG.size.sm : THUMBNAIL_CONFIG.size.lg,
 )
 
 const currentGapSize = computed(() =>
-  isSmallScreen.value ? THUMBNAIL_CONFIG.gap.sm : THUMBNAIL_CONFIG.gap.lg,
+  isMobile.value ? THUMBNAIL_CONFIG.gap.sm : THUMBNAIL_CONFIG.gap.lg,
 )
 
 const currentPaddingSize = computed(() =>
-  isSmallScreen.value
+  isMobile.value
     ? THUMBNAIL_CONFIG.padding.sm
     : THUMBNAIL_CONFIG.padding.lg,
 )
@@ -137,7 +137,7 @@ watch(
   { immediate: true },
 )
 
-watch(isSmallScreen, scrollToActiveThumbnail)
+watch(isMobile, scrollToActiveThumbnail)
 </script>
 
 <template>

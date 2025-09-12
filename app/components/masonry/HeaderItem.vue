@@ -12,6 +12,17 @@ defineProps<{
   dateRangeText?: string
 }>()
 
+const colorMode = useColorMode()
+
+const isDark = computed({
+  get() {
+    return colorMode.value === 'dark'
+  },
+  set(_isDark) {
+    colorMode.preference = _isDark ? 'dark' : 'light'
+  },
+})
+
 const handleOpenLogin = () => {
   window.location.href = '/api/auth/github'
   console.log('Login button clicked')
@@ -168,6 +179,16 @@ const totalSelectedFilters = computed(() => {
                 </UCard>
               </template>
             </UPopover>
+            <UTooltip text="颜色主题">
+              <UButton
+                variant="soft"
+                color="neutral"
+                class="bg-transparent rounded-full cursor-pointer"
+                :icon="isDark ? 'tabler:sun' : 'tabler:moon'"
+                size="sm"
+                @click="isDark = !isDark"
+              />
+            </UTooltip>
             <UTooltip
               v-if="loggedIn"
               text="仪表盘"
