@@ -20,7 +20,7 @@
     "i18n",
     "i18n/locales"
   ],
-  "i18n-ally.sourceLanguage": "en",
+  "i18n-ally.sourceLanguage": "zh-Hans",
   "i18n-ally.keystyle": "nested",
   "i18n-ally.extract.autoDetect": true,
   "i18n-ally.extract.ignoredByFiles": {
@@ -50,6 +50,7 @@
     "Author;s avatar",
     "Author's avatar",
     "Mems rest within the lens.",
-    "UCheckbox"
+    "UCheckbox",
+    "${title} - TimoYin's mems"
   ]
 }

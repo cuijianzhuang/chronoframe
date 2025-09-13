@@ -144,6 +144,101 @@
     },
     "sensing": {
       "method": "感光方式"
+    },
+    "values": {
+      "exposureProgram": {
+        "manual": "手动",
+        "programAE": "程序自动",
+        "aperturePriority": "光圈优先",
+        "shutterPriority": "快门优先",
+        "creative": "创意程序",
+        "action": "运动程序",
+        "portrait": "人像模式",
+        "landscape": "风景模式",
+        "bulb": "B门"
+      },
+      "exposureMode": {
+        "auto": "自动曝光",
+        "manual": "手动曝光",
+        "autoBracket": "自动包围曝光"
+      },
+      "flash": {
+        "noFlash": "无闪光灯",
+        "didNotFire": "闪光灯未启用",
+        "offDidNotFire": "关闭",
+        "fired": "闪光灯启用",
+        "firedAuto": "闪光灯启用，自动模式",
+        "firedAutoNoReturn": "闪光灯启用，自动模式，未检测到返回光",
+        "firedAutoReturn": "闪光灯启用，自动模式，检测到返回光",
+        "firedCompulsory": "闪光灯启用，强制模式",
+        "firedCompulsoryNoReturn": "闪光灯启用，强制模式，未检测到返回光",
+        "firedCompulsoryReturn": "闪光灯启用，强制模式，检测到返回光",
+        "didNotFireAuto": "闪光灯未启用，自动模式",
+        "didNotFireCompulsory": "闪光灯未启用，强制模式",
+        "noFunction": "无闪光灯功能",
+        "firedRedEye": "闪光灯启用，防红眼模式",
+        "firedRedEyeNoReturn": "闪光灯启用，防红眼模式，未检测到返回光",
+        "firedRedEyeReturn": "闪光灯启用，防红眼模式，检测到返回光"
+      },
+      "flashMeteringMode": {
+        "ttl": "TTL",
+        "average": "平均测光",
+        "matrix": "矩阵测光",
+        "centerWeighted": "中央重点测光",
+        "spot": "点测光",
+        "multiSpot": "多点测光",
+        "other": "其他"
+      },
+      "meteringMode": {
+        "unknown": "未知",
+        "average": "平均测光",
+        "centerWeighted": "中央重点测光",
+        "spot": "点测光",
+        "multiSpot": "多点测光",
+        "multiSegment": "多区域测光",
+        "pattern": "矩阵测光",
+        "partial": "局部测光",
+        "other": "其他"
+      },
+      "whiteBalance": {
+        "auto": "自动白平衡",
+        "manual": "手动白平衡",
+        "daylight": "日光",
+        "cloudy": "阴天",
+        "shade": "阴影",
+        "tungsten": "钨丝灯",
+        "fluorescent": "荧光灯",
+        "flash": "闪光灯",
+        "fineWeather": "晴天",
+        "cloudyWeather": "阴天",
+        "whiteFluorescent": "白色荧光灯",
+        "coolWhiteFluorescent": "冷白色荧光灯",
+        "dayWhiteFluorescent": "日光白色荧光灯",
+        "daylightFluorescent": "日光色荧光灯",
+        "underwater": "水下"
+      },
+      "sceneCaptureType": {
+        "standard": "标准",
+        "landscape": "风景",
+        "portrait": "人像",
+        "night": "夜景",
+        "other": "其他"
+      },
+      "sensingMethod": {
+        "notDefined": "未定义",
+        "oneChipColor": "单芯片彩色传感器",
+        "twoChipColor": "双芯片彩色传感器",
+        "threeChipColor": "三芯片彩色传感器",
+        "colorSequential": "彩色顺序传感器",
+        "trilinear": "三线性传感器",
+        "colorSequentialLinear": "彩色顺序线性传感器"
+      },
+      "colorSpace": {
+        "sRGB": "sRGB",
+        "adobeRGB": "Adobe RGB",
+        "uncalibrated": "未校准",
+        "proPhotoRGB": "ProPhoto RGB"
+      }
     }
   },
   "plural": {
@@ -155,7 +250,7 @@
       "photo": "照片"
     },
     "gallery": "相册",
-    "locations": "位置",
-    "photos": "照片"
+    "locations": "位置管理",
+    "photos": "照片库"
   }
 }

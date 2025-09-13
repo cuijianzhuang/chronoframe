@@ -4,17 +4,17 @@ import { motion } from 'motion-v'
 
 const items = ref<NavigationMenuItem[]>([
   {
-    label: '仪表盘',
+    label: $t('title.dashboard'),
     icon: 'tabler:dashboard',
     to: '/dashboard',
   },
   {
-    label: '照片库',
+    label: $t('title.photos'),
     icon: 'tabler:photo-cog',
     to: '/dashboard/photos',
   },
   {
-    label: '位置管理',
+    label: $t('title.locations'),
     icon: 'tabler:map-pin-cog',
     to: '/dashboard/location',
   },
@@ -23,11 +23,12 @@ const items = ref<NavigationMenuItem[]>([
 const isMobileMenuOpen = ref(false)
 
 useHead({
-  title: "Dashboard",
+  title: $t('title.dashboard'),
   titleTemplate: (title) => `${title} - TimoYin's mems`,
 })
 
 const route = useRoute()
+const config = useRuntimeConfig()
 const { loggedIn, user } = useUserSession()
 
 const isRouteActive = (itemPath: string) => {
@@ -67,7 +68,7 @@ const closeMobileMenu = () => {
             to="/"
             class="text-lg font-medium text-nowrap"
           >
-            TimoYin's mems
+            {{ config.public.APP_TITLE }}
           </NuxtLink>
         </div>
         <UNavigationMenu
@@ -93,7 +94,7 @@ const closeMobileMenu = () => {
               to="/"
               class="text-lg font-medium"
             >
-              TimoYin's mems
+              {{ config.public.APP_TITLE }}
             </NuxtLink>
           </div>
           <UButton

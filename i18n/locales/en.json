@@ -147,6 +147,101 @@
     },
     "sensing": {
       "method": "Sensing Method"
+    },
+    "values": {
+      "exposureProgram": {
+        "manual": "Manual",
+        "programAE": "Program AE",
+        "aperturePriority": "Aperture Priority",
+        "shutterPriority": "Shutter Priority",
+        "creative": "Creative Program",
+        "action": "Action Program",
+        "portrait": "Portrait Mode",
+        "landscape": "Landscape Mode",
+        "bulb": "Bulb"
+      },
+      "exposureMode": {
+        "auto": "Auto Exposure",
+        "manual": "Manual Exposure",
+        "autoBracket": "Auto Exposure Bracketing"
+      },
+      "flash": {
+        "noFlash": "No Flash",
+        "didNotFire": "Flash did not fire",
+        "offDidNotFire": "Off",
+        "fired": "Flash fired",
+        "firedAuto": "Flash fired, auto mode",
+        "firedAutoNoReturn": "Flash fired, auto mode, return light not detected",
+        "firedAutoReturn": "Flash fired, auto mode, return light detected",
+        "firedCompulsory": "Flash fired, compulsory flash mode",
+        "firedCompulsoryNoReturn": "Flash fired, compulsory flash mode, return light not detected",
+        "firedCompulsoryReturn": "Flash fired, compulsory flash mode, return light detected",
+        "didNotFireAuto": "Flash did not fire, auto mode",
+        "didNotFireCompulsory": "Flash did not fire, compulsory flash mode",
+        "noFunction": "No flash function",
+        "firedRedEye": "Flash fired, red-eye reduction mode",
+        "firedRedEyeNoReturn": "Flash fired, red-eye reduction mode, return light not detected",
+        "firedRedEyeReturn": "Flash fired, red-eye reduction mode, return light detected"
+      },
+      "flashMeteringMode": {
+        "ttl": "TTL",
+        "average": "Average",
+        "matrix": "Matrix",
+        "centerWeighted": "Center-weighted",
+        "spot": "Spot",
+        "multiSpot": "Multi-spot",
+        "other": "Other"
+      },
+      "meteringMode": {
+        "unknown": "Unknown",
+        "average": "Average",
+        "centerWeighted": "Center-weighted average",
+        "spot": "Spot",
+        "multiSpot": "Multi-spot",
+        "multiSegment": "Multi-segment",
+        "pattern": "Pattern",
+        "partial": "Partial",
+        "other": "Other"
+      },
+      "whiteBalance": {
+        "auto": "Auto White Balance",
+        "manual": "Manual White Balance",
+        "daylight": "Daylight",
+        "cloudy": "Cloudy",
+        "shade": "Shade",
+        "tungsten": "Tungsten",
+        "fluorescent": "Fluorescent",
+        "flash": "Flash",
+        "fineWeather": "Fine Weather",
+        "cloudyWeather": "Cloudy Weather",
+        "whiteFluorescent": "White Fluorescent",
+        "coolWhiteFluorescent": "Cool White Fluorescent",
+        "dayWhiteFluorescent": "Day White Fluorescent",
+        "daylightFluorescent": "Daylight Fluorescent",
+        "underwater": "Underwater"
+      },
+      "sceneCaptureType": {
+        "standard": "Standard",
+        "landscape": "Landscape",
+        "portrait": "Portrait",
+        "night": "Night Scene",
+        "other": "Other"
+      },
+      "sensingMethod": {
+        "notDefined": "Not defined",
+        "oneChipColor": "One-chip color area sensor",
+        "twoChipColor": "Two-chip color area sensor",
+        "threeChipColor": "Three-chip color area sensor",
+        "colorSequential": "Color sequential area sensor",
+        "trilinear": "Trilinear sensor",
+        "colorSequentialLinear": "Color sequential linear sensor"
+      },
+      "colorSpace": {
+        "sRGB": "sRGB",
+        "adobeRGB": "Adobe RGB",
+        "uncalibrated": "Uncalibrated",
+        "proPhotoRGB": "ProPhoto RGB"
+      }
     }
   },
   "title": {
