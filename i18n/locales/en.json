@@ -1,0 +1,161 @@
+{
+  "plural": {
+    "photo": "no photos | one photo | {count} photos"
+  },
+  "ui": {
+    "action": {
+      "explore": {
+        "tooltip": "Explore Map"
+      },
+      "filter": {
+        "tooltip": "Filter Photos",
+        "title": "Filter Photos",
+        "clearAll": "Clear All",
+        "tabs": {
+          "tags": "Tags",
+          "cameras": "Cameras",
+          "lenses": "Lenses",
+          "cities": "Cities",
+          "ratings": "Ratings"
+        },
+        "empty": {
+          "tags": "No tags",
+          "cameras": "No camera information",
+          "lenses": "No lens information",
+          "cities": "No city information"
+        },
+        "rating": {
+          "showAll": "Show all photos",
+          "showStarsAndAbove": "Show {count} star(s) and above photos"
+        }
+      },
+      "sort": {
+        "tooltip": "Photo Sorting",
+        "title": "Sort By",
+        "options": {
+          "dateTakenDesc": "Date Taken (Newest First)",
+          "dateTakenAsc": "Date Taken (Oldest First)",
+          "fileSizeAsc": "File Size (Ascending)",
+          "fileSizeDesc": "File Size (Descending)",
+          "titleAsc": "Title (Ascending)",
+          "titleDesc": "Title (Descending)"
+        }
+      },
+      "theme": {
+        "tooltip": "Color Theme"
+      },
+      "dashboard": {
+        "tooltip": "Dashboard"
+      },
+      "logout": {
+        "tooltip": "Logout"
+      }
+    },
+    "stats": {
+      "totalPhotosWithRange": "{range}, @:plural.photo total"
+    },
+    "livePhoto": "Live Photo"
+  },
+  "map": {
+    "cluster": {
+      "details": "Click to view details",
+      "nearbyPhotos": "{0} photos nearby"
+    }
+  },
+  "minimap": {
+    "loading": "Loading minimap..."
+  },
+  "viewer": {
+    "hint": {
+      "livePhoto": {
+        "mobile": "Long press to play live photos · Double-click or pinch zoom",
+        "desktop": "Hover play icon · Double-click/scroll zoom"
+      },
+      "mobile": "Double-click or pinch zoom",
+      "desktop": "Double-click or zoom with the mouse wheel"
+    }
+  },
+  "exif": {
+    "sections": {
+      "basic": "Basic information",
+      "deviceInfomation": "Equipment Information",
+      "specification": "Technical parameters",
+      "rating": "Rating",
+      "tags": "Keywords",
+      "histogram": "Histogram",
+      "capture": {},
+      "shooting": {
+        "parameters": "Shooting Parameters",
+        "mode": "Shooting Mode"
+      }
+    },
+    "aperture": "Aperture Value",
+    "dateTaken": {
+      "title": "Shooting Time"
+    },
+    "filename": "Filename",
+    "fileSize": "File Size",
+    "resolution": "Resolution",
+    "pixels": "Pixels",
+    "colorSpace": {
+      "title": "Color Space"
+    },
+    "artist": "Artist",
+    "software": "Software",
+    "tz": "Time Zone",
+    "country": "Country",
+    "city": "City",
+    "gps": {
+      "title": "Coordinate"
+    },
+    "focal": {
+      "length": {
+        "actual": "Focal Length",
+        "equivalent": "35mm Equivalent"
+      },
+      "plane": {
+        "resolution": "Focal Plane Resolution"
+      }
+    },
+    "exposure": {
+      "time": "Exposure Time",
+      "program": "Exposure Program",
+      "mode": "Exposure Mode"
+    },
+    "camera": "Camera",
+    "lens": "Lens",
+    "maxAperture": "Maximum Aperture",
+    "wb": {
+      "title": "White Balance",
+      "shiftAB": "WB Offset(amber-blue)",
+      "shiftGM": "WB Offset(green-magenta)",
+      "bias": "WB Bias",
+      "fineTune": "WB FineTune"
+    },
+    "metering": {
+      "title": "Metering Mode"
+    },
+    "flash": {
+      "title": "Flash",
+      "meteringMode": "Flash Metering Mode"
+    },
+    "scene": {
+      "captureType": "Scene Capture Type"
+    },
+    "brightness": {
+      "value": "Brightness"
+    },
+    "sensing": {
+      "method": "Sensing Method"
+    }
+  },
+  "title": {
+    "gallery": "Gallery",
+    "fallback": {
+      "photo": "Photo"
+    },
+    "dashboard": "Dashboard",
+    "photos": "Photos",
+    "locations": "Locations"
+  }
+}

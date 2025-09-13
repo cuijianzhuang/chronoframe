@@ -257,7 +257,7 @@ const resetMap = () => {
             },
           },
           attributionControl: false,
-          language: 'zh-Hans',
+          language: $i18n.locale,
         }"
         @load="onMapLoaded"
         @zoom="onMapZoom"
@@ -268,9 +268,6 @@ const resetMap = () => {
             v-for="clusterPoint in clusterGroups"
             :key="`cluster-${clusterPoint.properties.marker?.id}`"
             :cluster-point="clusterPoint"
-            :is-selected="
-              clusterPoint.properties.marker?.id === currentClusterPointId
-            "
             @click="onMarkerPinClick"
             @close="onMarkerPinClose"
           />

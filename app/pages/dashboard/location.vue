@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Locations',
+  title: $t('title.locations'),
 })
 
 interface LocationStats {

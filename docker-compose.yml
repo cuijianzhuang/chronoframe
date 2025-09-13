@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   chronoframe:
     build:
@@ -22,8 +20,6 @@ services:
       # - PROVIDER_S3_SECRET_ACCESS_KEY=your-secret-key
       # - PROVIDER_S3_PREFIX=your-prefix
       # - PROVIDER_S3_CDN_URL=your-cdn-url
-      # - CLOUDFLARE_API_TOKEN=your-cloudflare-token
-      # - CLOUDFLARE_D1_UUID=your-d1-uuid
     restart: unless-stopped
     volumes:
       - ./data:/app/.data

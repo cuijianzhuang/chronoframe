@@ -177,11 +177,7 @@ const onClick = () => {
                       <span>·</span>
                       <div v-if="marker.exif?.DateTimeOriginal">
                         <span class="truncate">
-                          {{
-                            dayjs(marker.exif.DateTimeOriginal).format(
-                              'YY年MM月DD日',
-                            )
-                          }}
+                          {{ dayjs(marker.exif.DateTimeOriginal).format('ll') }}
                         </span>
                       </div>
                     </div>

@@ -9,9 +9,10 @@ defineProps<{
       end: string | undefined
     } | null
   }
-  dateRangeText?: string
+  dateRangeText: string
 }>()
 
+const config = useRuntimeConfig()
 const colorMode = useColorMode()
 
 const isDark = computed({
@@ -56,7 +57,7 @@ const totalSelectedFilters = computed(() => {
     <div
       class="absolute inset-0 -z-10 blur-3xl scale-110 bg-cover bg-center opacity-35"
       :style="{
-        backgroundImage: `url(${avatarImage})`,
+        backgroundImage: `url(${config.public.APP_AVATAR_URL || avatarImage})`,
       }"
     ></div>
     <div
@@ -77,29 +78,38 @@ const totalSelectedFilters = computed(() => {
                 :src="avatarImage"
                 class="size-12 rounded-full object-cover"
                 :class="!loggedIn && 'cursor-pointer'"
-                alt="Timothy's Avatar"
+                alt="Author's avatar"
                 @click="!loggedIn && handleOpenLogin()"
               />
             </div>
             <h1
               class="text-2xl font-bold text-neutral-900 dark:text-white/90 mb-2"
             >
-              TimoYin's mems
+              {{ config.public.APP_TITLE }}
             </h1>
           </div>
           <div
             class="text-neutral-600 dark:text-white/30 space-y-1 text-center"
           >
             <p class="text-xs font-medium">
-              <span v-if="dateRangeText">{{ dateRangeText }}, 共</span>
-              {{ stats?.total }} 张照片
+              {{
+                $t('ui.stats.totalPhotosWithRange', {
+                  range: dateRangeText,
+                  count: stats?.total,
+                })
+              }}
             </p>
-            <p class="font-[Pacifico]">Mems rest within the lens.</p>
+            <p
+              v-if="config.public.APP_SLOGAN"
+              class="font-[Pacifico]"
+            >
+              {{ config.public.APP_SLOGAN }}
+            </p>
           </div>
           <div
             class="flex items-center gap-0 p-1 bg-white/30 dark:bg-neutral-900/50 rounded-full"
           >
-            <UTooltip text="探索地图">
+            <UTooltip :text="$t('ui.action.explore.tooltip')">
               <UButton
                 variant="soft"
                 color="neutral"
@@ -110,7 +120,7 @@ const totalSelectedFilters = computed(() => {
               />
             </UTooltip>
             <UPopover>
-              <UTooltip text="筛选照片">
+              <UTooltip :text="$t('ui.action.filter.tooltip')">
                 <UChip
                   inset
                   size="sm"
@@ -134,7 +144,7 @@ const totalSelectedFilters = computed(() => {
               </template>
             </UPopover>
             <UPopover>
-              <UTooltip text="照片排序">
+              <UTooltip :text="$t('ui.action.sort.tooltip')">
                 <UButton
                   variant="soft"
                   :color="
@@ -154,7 +164,9 @@ const totalSelectedFilters = computed(() => {
                   class="w-3xs"
                 >
                   <template #header>
-                    <h3 class="font-bold text-sm p-1">排序方式</h3>
+                    <h3 class="font-bold text-sm p-1">
+                      {{ $t('ui.action.sort.title') }}
+                    </h3>
                   </template>
 
                   <div class="space-y-1">
@@ -162,10 +174,10 @@ const totalSelectedFilters = computed(() => {
                       v-for="sort in availableSorts"
                       :key="sort.key"
                       :variant="
-                        currentSortLabel === sort.label ? 'soft' : 'ghost'
+                        currentSortLabel === sort.labelI18n ? 'soft' : 'ghost'
                       "
                       :color="
-                        currentSortLabel === sort.label ? 'info' : 'neutral'
+                        currentSortLabel === sort.labelI18n ? 'info' : 'neutral'
                       "
                       :icon="sort.icon"
                       size="sm"
@@ -173,13 +185,13 @@ const totalSelectedFilters = computed(() => {
                       class="justify-start"
                       @click="setSortOption(sort.key)"
                     >
-                      {{ sort.label }}
+                      {{ $t(sort.labelI18n) }}
                     </UButton>
                   </div>
                 </UCard>
               </template>
             </UPopover>
-            <UTooltip text="颜色主题">
+            <UTooltip :text="$t('ui.action.theme.tooltip')">
               <UButton
                 variant="soft"
                 color="neutral"
@@ -191,7 +203,7 @@ const totalSelectedFilters = computed(() => {
             </UTooltip>
             <UTooltip
               v-if="loggedIn"
-              text="仪表盘"
+              :text="$t('ui.action.dashboard.tooltip')"
             >
               <UButton
                 size="sm"
@@ -204,7 +216,7 @@ const totalSelectedFilters = computed(() => {
             </UTooltip>
             <UTooltip
               v-if="loggedIn"
-              text="登出"
+              :text="$t('ui.action.logout.tooltip')"
             >
               <UButton
                 size="sm"

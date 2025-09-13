@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Dashboard',
+  title: $t('title.dashboard'),
 })
 
 interface SystemHealth {

@@ -1,0 +1,161 @@
+{
+  "map": {
+    "cluster": {
+      "details": "點擊圖片查看詳情",
+      "nearbyPhotos": "附近有 {0} 張照片"
+    }
+  },
+  "ui": {
+    "livePhoto": "實況",
+    "action": {
+      "dashboard": {
+        "tooltip": "控制台"
+      },
+      "explore": {
+        "tooltip": "探索地圖"
+      },
+      "filter": {
+        "empty": {
+          "cameras": "沒有相機信息",
+          "cities": "沒有城市信息",
+          "lenses": "沒有鏡頭信息",
+          "tags": "沒有標籤"
+        },
+        "rating": {
+          "showAll": "展示所有照片",
+          "showStarsAndAbove": "展示 {count} 星以上的照片"
+        },
+        "tabs": {
+          "cameras": "相機",
+          "cities": "城市",
+          "lenses": "鏡頭",
+          "ratings": "評分",
+          "tags": "標籤"
+        },
+        "title": "篩選照片",
+        "tooltip": "篩選照片",
+        "clearAll": "清除全部"
+      },
+      "logout": {
+        "tooltip": "登出"
+      },
+      "sort": {
+        "options": {
+          "dateTakenAsc": "日期(最旧的在前)",
+          "dateTakenDesc": "日期(最新的在前)",
+          "fileSizeAsc": "文件大小(升序)",
+          "fileSizeDesc": "文件大小(降序)",
+          "titleAsc": "標題(A-Z)",
+          "titleDesc": "標題(Z-A)"
+        },
+        "title": "排序方式",
+        "tooltip": "照片排序"
+      },
+      "theme": {
+        "tooltip": "顏色主題"
+      }
+    },
+    "stats": {
+      "totalPhotosWithRange": "{range}, 共 @:plural.photo"
+    }
+  },
+  "minimap": {
+    "loading": "加載小地圖..."
+  },
+  "viewer": {
+    "hint": {
+      "livePhoto": {
+        "mobile": "長按播放實況照片 · 雙擊或捏合縮放",
+        "desktop": "懸停左上播放 · 雙擊/滾輪縮放"
+      },
+      "mobile": "雙擊或捏合縮放",
+      "desktop": "雙擊或用鼠標滾輪縮放"
+    }
+  },
+  "exif": {
+    "sections": {
+      "basic": "基本信息",
+      "deviceInfomation": "設備信息",
+      "specification": "技術參數",
+      "rating": "評分",
+      "tags": "標籤",
+      "histogram": "直方圖",
+      "capture": {},
+      "shooting": {
+        "parameters": "拍攝參數",
+        "mode": "拍攝模式"
+      }
+    },
+    "aperture": "光圈",
+    "filename": "文件名",
+    "fileSize": "文件大小",
+    "resolution": "分辨率",
+    "pixels": "像素",
+    "dateTaken": {
+      "title": "拍攝時間"
+    },
+    "colorSpace": {
+      "title": "色彩空間"
+    },
+    "artist": "藝術家",
+    "software": "軟體",
+    "tz": "時區",
+    "country": "國家",
+    "city": "城市",
+    "gps": {
+      "title": "坐標"
+    },
+    "focal": {
+      "length": {
+        "actual": "焦距",
+        "equivalent": "35mm 等效"
+      },
+      "plane": {
+        "resolution": "焦平面分辨率"
+      }
+    },
+    "exposure": {
+      "time": "曝光時間",
+      "program": "曝光程序",
+      "mode": "曝光模式"
+    },
+    "camera": "相機",
+    "lens": "鏡頭",
+    "maxAperture": "最大光圈",
+    "wb": {
+      "title": "白平衡",
+      "shiftAB": "白平衡偏移(琥珀-藍)",
+      "shiftGM": "白平衡偏移(綠-品紅)",
+      "bias": "白平衡偏移",
+      "fineTune": "白平衡微調"
+    },
+    "metering": {
+      "title": "測光模式"
+    },
+    "flash": {
+      "title": "閃光燈",
+      "meteringMode": "閃光燈測光模式"
+    },
+    "scene": {
+      "captureType": "場景捕捉類型"
+    },
+    "brightness": {
+      "value": "亮度"
+    },
+    "sensing": {
+      "method": "感光方式"
+    }
+  },
+  "plural": {
+    "photo": "沒有照片 | 一張照片 | {count} 張照片"
+  },
+  "title": {
+    "dashboard": "儀表板",
+    "fallback": {
+      "photo": "照片"
+    },
+    "locations": "位置",
+    "photos": "照片",
+    "gallery": "畫廊"
+  }
+}

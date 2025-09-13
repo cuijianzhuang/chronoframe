@@ -69,7 +69,7 @@ const photoStats = computed(() => {
   const allDates = displayPhotos.value
     ?.map((p) => p?.dateTaken)
     .filter((date): date is string => Boolean(date))
-    .map((date) => dayjs(date).format('YYYY年MM月DD日'))
+    .map((date) => dayjs(date).format('ll'))
     .sort((a, b) => (dayjs(a).isBefore(dayjs(b)) ? 1 : -1))
 
   const dateRange =
@@ -193,16 +193,16 @@ const updateDateRange = () => {
   // Check if dates are the same day
   if (startDate.isSame(endDate, 'day')) {
     // Same day
-    dateRange.value = startDate.format('YYYY年M月D日')
+    dateRange.value = startDate.format('ll')
   } else if (startDate.isSame(endDate, 'month')) {
     // Same month
-    dateRange.value = startDate.format('YYYY年M月')
+    dateRange.value = startDate.format('MMM YYYY')
   } else if (startDate.isSame(endDate, 'year')) {
     // Same year, different months
-    dateRange.value = `${startDate.format('M月')} - ${endDate.format('M月 YYYY')}`
+    dateRange.value = `${startDate.format('MMM')} - ${endDate.format('MMM YYYY')}`
   } else {
     // Different years
-    dateRange.value = `${startDate.format('YYYY年M月')} - ${endDate.format('YYYY年M月')}`
+    dateRange.value = `${startDate.format('ll')} - ${endDate.format('ll')}`
   }
 }
 

@@ -12,7 +12,7 @@ definePageMeta({
 })
 
 useHead({
-  title: 'Photos',
+  title: $t('title.photos'),
 })
 
 const dayjs = useDayjs()

@@ -91,11 +91,11 @@ onUnmounted(() => {
         zoom: 12,
         config: {
           basemap: {
-            colorThemes: 'faded'
-          }
+            colorThemes: 'faded',
+          },
         },
         interactive: false,
-        language: 'zh-Hans'
+        language: $i18n.locale,
       }"
       @load="onMapLoad"
     >
@@ -121,7 +121,9 @@ onUnmounted(() => {
         v-if="!loaded"
         class="absolute inset-0 bg-default/80 flex items-center justify-center backdrop-blur-sm"
       >
-        <p class="text-xs font-medium text-white/60">Loading minimap...</p>
+        <p class="text-xs font-medium text-white/60">
+          {{ $t('minimap.loading') }}
+        </p>
       </div>
     </MapboxMap>
   </div>

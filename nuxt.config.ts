@@ -18,12 +18,18 @@ export default defineNuxtConfig({
     'nuxt-auth-utils',
     '@vueuse/nuxt',
     'dayjs-nuxt',
+    '@nuxtjs/i18n',
     'nuxt-mapbox',
   ],
 
   css: ['~/assets/css/tailwind.css'],
 
   runtimeConfig: {
+    public: {
+      APP_TITLE: 'ChronoFrame',
+      APP_SLOGAN: '',
+      APP_AVATAR_URL: '/avatar.webp',
+    },
     STORAGE_PROVIDER: 's3',
     PROVIDER_S3_ENDPOINT: '',
     PROVIDER_S3_BUCKET: '',
@@ -32,8 +38,6 @@ export default defineNuxtConfig({
     PROVIDER_S3_SECRET_ACCESS_KEY: '',
     PROVIDER_S3_PREFIX: '',
     PROVIDER_S3_CDN_URL: '',
-    CLOUDFLARE_API_TOKEN: '',
-    CLOUDFLARE_D1_UUID: '',
   },
 
   nitro: {
@@ -53,10 +57,18 @@ export default defineNuxtConfig({
   },
 
   dayjs: {
-    locales: ['zh-cn', 'en'],
-    plugins: ['relativeTime', 'utc', 'timezone', 'duration'],
-    defaultLocale: 'zh-cn',
+    locales: ['zh-cn', 'zh-hk', 'en'],
+    plugins: ['relativeTime', 'utc', 'timezone', 'duration', 'localizedFormat'],
     defaultTimezone: 'Asia/Shanghai',
+  },
+
+  i18n: {
+    strategy: 'no_prefix',
+    locales: [
+      { code: 'zh-Hans', name: '简体中文', file: 'zh-Hans.json' },
+      { code: 'zh-Hant', name: '繁体中文', file: 'zh-Hant.json' },
+      { code: 'en', name: 'English', file: 'en.json' },
+    ],
   },
 
   mapbox: {

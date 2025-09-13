@@ -66,7 +66,7 @@ const getStarType = (index: number) => {
       >
         <TablerStar
           v-if="getStarType(i - 1) === 'empty'"
-          class="text-neutral-300"
+          class="text-neutral-500 dark:text-neutral-300"
         />
         <TablerStarFilled
           v-else-if="getStarType(i - 1) === 'filled'"
@@ -87,7 +87,7 @@ const getStarType = (index: number) => {
       >
         <TablerStar
           v-if="getStarType(i - 1) === 'empty'"
-          class="text-neutral-300"
+          class="text-neutral-500 dark:text-neutral-300"
         />
         <TablerStarFilled
           v-else-if="getStarType(i - 1) === 'filled'"

@@ -38,7 +38,7 @@ watch(
       )
       if (foundIndex !== -1) {
         useHead({
-          title: currentPhotos[foundIndex]?.title || 'Photo',
+          title: currentPhotos[foundIndex]?.title || $t('title.fallback.photo'),
         })
         if (!isViewerOpen.value) {
           openViewer(foundIndex)
@@ -49,7 +49,7 @@ watch(
     } else if (!currentPhotoId) {
       closeViewer()
       useHead({
-        title: 'Gallery',
+        title: $t('title.gallery'),
       })
     }
   },

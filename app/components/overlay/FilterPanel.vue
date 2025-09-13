@@ -22,35 +22,35 @@ const selectedRating = computed({
 
 const tabItems = computed<TabsItem[]>(() => [
   {
-    label: '标签',
+    label: $t('ui.action.filter.tabs.tags'),
     value: 'labels',
     badge: selectedCounts.value.tags || undefined,
     icon: 'tabler:tags',
     slot: 'tags',
   },
   {
-    label: '相机',
+    label: $t('ui.action.filter.tabs.cameras'),
     value: 'cameras',
     badge: selectedCounts.value.cameras || undefined,
     icon: 'tabler:camera',
     slot: 'cameras',
   },
   {
-    label: '镜头',
+    label: $t('ui.action.filter.tabs.lenses'),
     value: 'lenses',
     badge: selectedCounts.value.lenses || undefined,
     icon: 'tabler:aperture',
     slot: 'lenses',
   },
   {
-    label: '城市',
+    label: $t('ui.action.filter.tabs.cities'),
     value: 'cities',
     badge: selectedCounts.value.cities || undefined,
     icon: 'tabler:map-pin',
     slot: 'cities',
   },
   {
-    label: '评分',
+    label: $t('ui.action.filter.tabs.ratings'),
     value: 'ratings',
     badge: selectedCounts.value.ratings || undefined,
     icon: 'tabler:star',
@@ -64,10 +64,10 @@ const handleToggleFilter = (type: string, value: string | number) => {
 </script>
 
 <template>
-  <div class="space-y-3 w-[calc(100vw-34px)] sm:w-96">
+  <div class="space-y-3 w-[calc(100vw-34px)] sm:w-md">
     <div class="flex items-center justify-between">
       <h3 class="text-sm font-bold text-neutral-900 dark:text-white p-2 pb-0">
-        筛选照片
+        {{ $t('ui.action.filter.title') }}
       </h3>
       <UButton
         v-if="hasActiveFilters"
@@ -77,7 +77,7 @@ const handleToggleFilter = (type: string, value: string | number) => {
         icon="tabler:filter-x"
         @click="clearAllFilters"
       >
-        清除全部
+        {{ $t('ui.action.filter.clearAll') }}
       </UButton>
     </div>
     <!-- 标签页 -->
@@ -110,7 +110,7 @@ const handleToggleFilter = (type: string, value: string | number) => {
               "
               variant="soft"
               class="cursor-pointer select-none transition-colors"
-              :class="`${isFilterSelected('tags', tag.label) ? '' : 'bg-white/10 text-white hover:bg-white/20'}`"
+              :class="`${isFilterSelected('tags', tag.label) ? '' : 'bg-neutral-800/10 text-neutral-800 hover:bg-neutral-800/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20'}`"
               @click="handleToggleFilter('tags', tag.label)"
             />
           </div>
@@ -118,7 +118,7 @@ const handleToggleFilter = (type: string, value: string | number) => {
             v-if="availableFilters.tags.length === 0"
             class="text-center text-sm text-neutral-500 dark:text-neutral-400 py-4"
           >
-            没有标签
+            {{ $t('ui.action.filter.empty.tags') }}
           </div>
         </div>
       </template>
@@ -150,7 +150,7 @@ const handleToggleFilter = (type: string, value: string | number) => {
             v-if="availableFilters.cameras.length === 0"
             class="text-center text-sm text-neutral-500 dark:text-neutral-400 py-4"
           >
-            没有相机信息
+            {{ $t('ui.action.filter.empty.cameras') }}
           </div>
         </div>
       </template>
@@ -182,7 +182,7 @@ const handleToggleFilter = (type: string, value: string | number) => {
             v-if="availableFilters.lenses.length === 0"
             class="text-center text-sm text-neutral-500 dark:text-neutral-400 py-4"
           >
-            没有镜头信息
+            {{ $t('ui.action.filter.empty.lenses') }}
           </div>
         </div>
       </template>
@@ -214,7 +214,7 @@ const handleToggleFilter = (type: string, value: string | number) => {
             v-if="availableFilters.cities.length === 0"
             class="text-center text-sm text-neutral-500 dark:text-neutral-400 py-4"
           >
-            没有城市信息
+            {{ $t('ui.action.filter.empty.cities') }}
           </div>
         </div>
       </template>
@@ -234,8 +234,11 @@ const handleToggleFilter = (type: string, value: string | number) => {
           >
             {{
               selectedRating
-                ? `展示 ${selectedRating} 星及以上的照片`
-                : '展示所有照片'
+                ? $t(
+                    'ui.action.filter.rating.showStarsAndAbove',
+                    selectedRating,
+                  )
+                : $t('ui.action.filter.rating.showAll')
             }}
           </div>
         </div>

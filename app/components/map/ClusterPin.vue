@@ -136,9 +136,9 @@ const sizeDelta = computed(() => {
                 <div class="relative overflow-hidden p-3 space-y-3">
                   <div class="flex items-center justify-between">
                     <h3 class="text-sm font-semibold">
-                      附近有 {{ clusteredPhotos.length }} 张照片
+                      {{ $t('map.cluster.nearbyPhotos', [clusteredPhotos.length]) }}
                     </h3>
-                    <div class="text-muted text-[10px]">点击图片查看详情</div>
+                    <div class="text-muted text-[10px]">{{ $t('map.cluster.details') }}</div>
                   </div>
                   <!-- Show grid of photos for cluster -->
                   <div class="grid grid-cols-3 gap-2 h-full">
@@ -241,8 +241,8 @@ const sizeDelta = computed(() => {
                               .sort()
                             if (dates.length === 0) return ''
                             if (dates.length === 1)
-                              return dayjs(dates[0]).format('YYYY年MM月DD日')
-                            return `${dayjs(dates[0]).format('YYYY年MM月DD日')} - ${dayjs(dates[dates.length - 1]).format('YYYY年MM月DD日')}`
+                              return dayjs(dates[0]).format('l')
+                            return `${dayjs(dates[0]).format('l')} - ${dayjs(dates[dates.length - 1]).format('l')}`
                           })()
                         }}
                       </span>

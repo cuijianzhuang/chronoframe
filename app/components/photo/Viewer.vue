@@ -639,16 +639,16 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                         class="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 bg-black/50 rounded-lg border border-white/10 px-2 py-1 shadow-2xl text-white text-xs font-bold"
                       >
                         <span v-if="currentPhoto?.isLivePhoto && isMobile">
-                          长按播放实况照片 · 双击或捏合缩放
+                          {{ $t('viewer.hint.livePhoto.mobile') }}
                         </span>
                         <span
                           v-else-if="currentPhoto?.isLivePhoto && !isMobile"
                         >
-                          悬停左上角实况标志播放 · 双击或鼠标滚轮缩放
+                          {{ $t('viewer.hint.livePhoto.desktop') }}
                         </span>
                         <span v-else>
                           {{
-                            isMobile ? '双击或捏合缩放' : '双击或用鼠标滚轮缩放'
+                            isMobile ? $t('viewer.hint.mobile') : $t('viewer.hint.desktop')
                           }}
                         </span>
                       </motion.div>
