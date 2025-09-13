@@ -16,6 +16,7 @@ useHead({
 })
 
 const dayjs = useDayjs()
+const { localizeExif } = useExifLocalization()
 
 const { data, status, refresh } = useFetch('/api/photos')
 
@@ -381,6 +382,11 @@ const columns: TableColumn<Photo>[] = [
     accessorKey: 'fileSize',
     header: '文件大小',
     cell: (info) => formatBytes(info.getValue() as number),
+  },
+  {
+    accessorKey: 'exif.ColorSpace',
+    header: '颜色空间',
+    cell: (info) => localizeExif('ColorSpace', info.getValue() as string),
   },
   {
     accessorKey: 'actions',
