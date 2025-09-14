@@ -69,9 +69,10 @@ export default defineNuxtConfig({
     },
     strategy: 'no_prefix',
     locales: [
-      { code: 'zh-Hans', name: '简体中文', file: 'zh-Hans.json' },
-      { code: 'zh-Hant', name: '繁体中文', file: 'zh-Hant.json' },
-      { code: 'en', name: 'English', file: 'en.json' },
+      { code: 'zh-Hans', name: '简体中文', file: 'zh-Hans.json', language: 'zh' },
+      { code: 'zh-Hant-TW', name: '繁体中文(台湾)', file: 'zh-Hant-TW.json', language: 'zh-TW' },
+      { code: 'zh-Hant-HK', name: '繁体中文(香港)', file: 'zh-Hant-HK.json', language: 'zh-HK' },
+      { code: 'en', name: 'English', file: 'en.json', language: 'en' },
     ],
   },
 

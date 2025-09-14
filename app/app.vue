@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import dayjsLocale_zhCN from 'dayjs/locale/zh-cn'
+import dayjsLocale_zhTW from 'dayjs/locale/zh-tw'
 import dayjsLocale_zhHK from 'dayjs/locale/zh-hk'
 const config = useRuntimeConfig()
 const { locale } = useI18n()
@@ -14,7 +15,8 @@ const photos = computed(() => (data.value as Photo[]) || [])
 
 watchEffect(() => {
   dayjs.locale('zh-Hans', dayjsLocale_zhCN)
-  dayjs.locale('zh-Hant', dayjsLocale_zhHK)
+  dayjs.locale('zh-Hant-TW', dayjsLocale_zhTW)
+  dayjs.locale('zh-Hant-HK', dayjsLocale_zhHK)
   dayjs.locale(locale.value)
 })
 

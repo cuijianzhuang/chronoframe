@@ -1,0 +1,247 @@
+{
+  "map": {
+    "cluster": {
+      "details": "點選圖片查看詳細資訊",
+      "nearbyPhotos": "附近有 {0} 張相片"
+    }
+  },
+  "ui": {
+    "livePhoto": "實況",
+    "action": {
+      "dashboard": {
+        "tooltip": "儀表板"
+      },
+      "explore": {
+        "tooltip": "探索地圖"
+      },
+      "filter": {
+        "empty": {
+          "cameras": "沒有相機資訊",
+          "cities": "沒有城市資訊",
+          "lenses": "沒有鏡頭資訊",
+          "tags": "沒有標籤"
+        },
+        "rating": {
+          "showAll": "顯示所有相片",
+          "showStarsAndAbove": "顯示 {count} 星以上的相片"
+        },
+        "tabs": {
+          "cameras": "相機",
+          "cities": "城市",
+          "lenses": "鏡頭",
+          "ratings": "評分",
+          "tags": "標籤"
+        },
+        "title": "篩選相片",
+        "tooltip": "篩選相片",
+        "clearAll": "清除全部"
+      },
+      "logout": {
+        "tooltip": "登出"
+      },
+      "sort": {
+        "options": {
+          "dateTakenAsc": "日期（最舊的在前）",
+          "dateTakenDesc": "日期（最新的在前）",
+          "fileSizeAsc": "檔案大小（升冪）",
+          "fileSizeDesc": "檔案大小（降冪）",
+          "titleAsc": "標題（A-Z）",
+          "titleDesc": "標題（Z-A）"
+        },
+        "title": "排序方式",
+        "tooltip": "相片排序"
+      },
+      "theme": {
+        "tooltip": "色彩主題"
+      }
+    },
+    "stats": {
+      "totalPhotosWithRange": "{range}，共 @:plural.photo"
+    }
+  },
+  "minimap": {
+    "loading": "正在載入小地圖..."
+  },
+  "viewer": {
+    "hint": {
+      "livePhoto": {
+        "mobile": "長按播放實況照片 · 點兩下或雙指縮放",
+        "desktop": "游標移到左上角播放 · 點兩下／滾輪縮放"
+      },
+      "mobile": "點兩下或雙指縮放",
+      "desktop": "點兩下或使用滑鼠滾輪縮放"
+    }
+  },
+  "exif": {
+    "sections": {
+      "basic": "基本資訊",
+      "deviceInfomation": "裝置資訊",
+      "specification": "技術參數",
+      "rating": "評分",
+      "tags": "標籤",
+      "histogram": "直方圖",
+      "capture": {},
+      "shooting": {
+        "parameters": "拍攝參數",
+        "mode": "拍攝模式"
+      }
+    },
+    "aperture": "光圈",
+    "filename": "檔名",
+    "fileSize": "檔案大小",
+    "resolution": "解析度",
+    "pixels": "像素",
+    "dateTaken": {
+      "title": "拍攝時間"
+    },
+    "colorSpace": {
+      "title": "色彩空間"
+    },
+    "artist": "攝影師",
+    "software": "軟體",
+    "tz": "時區",
+    "country": "國家",
+    "city": "城市",
+    "gps": {
+      "title": "座標"
+    },
+    "focal": {
+      "length": {
+        "actual": "焦距",
+        "equivalent": "35mm 等效"
+      },
+      "plane": {
+        "resolution": "焦平面解析度"
+      }
+    },
+    "exposure": {
+      "time": "曝光時間",
+      "program": "曝光程式",
+      "mode": "曝光模式"
+    },
+    "camera": "相機",
+    "lens": "鏡頭",
+    "maxAperture": "最大光圈",
+    "wb": {
+      "title": "白平衡",
+      "shiftAB": "白平衡偏移（琥珀–藍）",
+      "shiftGM": "白平衡偏移（綠–洋紅）",
+      "bias": "白平衡偏移",
+      "fineTune": "白平衡微調"
+    },
+    "metering": {
+      "title": "測光模式"
+    },
+    "flash": {
+      "title": "閃光燈",
+      "meteringMode": "閃光燈測光模式"
+    },
+    "scene": {
+      "captureType": "場景拍攝類型"
+    },
+    "brightness": {
+      "value": "亮度"
+    },
+    "sensing": {
+      "method": "感光方式"
+    },
+    "values": {
+      "exposureProgram": {
+        "notDefined": "未定義",
+        "manual": "手動",
+        "programAe": "程式自動曝光",
+        "aperturePriorityAe": "光圈先決自動曝光",
+        "shutterSpeedPriorityAe": "快門先決自動曝光",
+        "creativeSlowSpeed": "創意（慢速）",
+        "actionHighSpeed": "動作（高速）",
+        "portrait": "人像",
+        "landscape": "風景",
+        "bulb": "B 快門"
+      },
+      "exposureMode": {
+        "auto": "自動",
+        "manual": "手動",
+        "autoBracket": "自動包圍曝光"
+      },
+      "flash": {
+        "noFlash": "未閃光",
+        "fired": "已閃光",
+        "firedReturnNotDetected": "已閃光，未偵測到回光",
+        "firedReturnDetected": "已閃光，偵測到回光",
+        "onDidNotFire": "開啟，未閃光",
+        "onFired": "開啟，已閃光",
+        "onReturnNotDetected": "開啟，未偵測到回光",
+        "onReturnDetected": "開啟，偵測到回光",
+        "offDidNotFire": "關閉，未閃光",
+        "offDidNotFireReturnNotDetected": "關閉，未閃光，未偵測到回光",
+        "autoDidNotFire": "自動，未閃光",
+        "autoFired": "自動，已閃光",
+        "autoFiredReturnNotDetected": "自動，已閃光，未偵測到回光",
+        "autoFiredReturnDetected": "自動，已閃光，偵測到回光",
+        "noFlashFunction": "無閃光功能",
+        "offNoFlashFunction": "關閉，無閃光功能",
+        "firedRedEyeReduction": "已閃光，防紅眼",
+        "firedRedEyeReductionReturnNotDetected": "已閃光，防紅眼，未偵測到回光",
+        "firedRedEyeReductionReturnDetected": "已閃光，防紅眼，偵測到回光",
+        "onRedEyeReduction": "開啟，防紅眼",
+        "onRedEyeReductionReturnNotDetected": "開啟，防紅眼，未偵測到回光",
+        "onRedEyeReductionReturnDetected": "開啟，防紅眼，偵測到回光",
+        "offRedEyeReduction": "關閉，防紅眼",
+        "autoDidNotFireRedEyeReduction": "自動，未閃光，防紅眼",
+        "autoFiredRedEyeReduction": "自動，已閃光，防紅眼",
+        "autoFiredRedEyeReductionReturnNotDetected": "自動，已閃光，防紅眼，未偵測到回光",
+        "autoFiredRedEyeReductionReturnDetected": "自動，已閃光，防紅眼，偵測到回光"
+      },
+      "meteringMode": {
+        "unknown": "未知",
+        "average": "平均測光",
+        "centerWeightedAverage": "中央重點平均測光",
+        "spot": "點測光",
+        "multiSpot": "多點測光",
+        "multiSegment": "矩陣測光",
+        "partial": "局部測光",
+        "other": "其他"
+      },
+      "whiteBalance": {
+        "auto": "自動",
+        "manual": "手動"
+      },
+      "sceneCaptureType": {
+        "standard": "標準",
+        "landscape": "風景",
+        "portrait": "人像",
+        "night": "夜景",
+        "other": "其他"
+      },
+      "sensingMethod": {
+        "monochromeArea": "單色區域感測器",
+        "oneChipColorArea": "單晶片彩色區域感測器",
+        "twoChipColorArea": "雙晶片彩色區域感測器",
+        "threeChipColorArea": "三晶片彩色區域感測器",
+        "colorSequentialArea": "順序彩色區域感測器",
+        "monochromeLinear": "單色線性感測器",
+        "trilinear": "三線性感測器",
+        "colorSequentialLinear": "順序彩色線性感測器"
+      },
+      "colorSpace": {
+        "srgb": "sRGB",
+        "adobeRgb": "Adobe RGB",
+        "wideGamutRgb": "廣色域 RGB",
+        "iccProfile": "ICC 設定檔",
+        "uncalibrated": "未校正"
+      }
+    }
+  },
+  "plural": {
+    "photo": "沒有相片 | 一張相片 | {count} 張相片"
+  },
+  "title": {
+    "dashboard": "儀表板",
+    "fallback": {
+      "photo": "相片"
+    },
+    "locations": "位置管理",
+    "photos": "相片庫",
+    "gallery": "相片集"
+  }
+}

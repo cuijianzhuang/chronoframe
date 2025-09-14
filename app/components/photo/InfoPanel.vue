@@ -146,7 +146,7 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.exifData?.ColorSpace
           ? {
               label: $t('exif.colorSpace.title'),
-              value: localizeExif('ColorSpace', props.exifData.ColorSpace),
+              value: localizeExif('colorSpace', props.exifData.ColorSpace),
               icon: 'tabler:palette',
             }
           : null,
@@ -294,7 +294,7 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.exifData?.WhiteBalance
           ? {
               label: $t('exif.wb.title'),
-              value: localizeExif('WhiteBalance', props.exifData.WhiteBalance),
+              value: localizeExif('whiteBalance', props.exifData.WhiteBalance),
               icon: 'mdi:white-balance-auto',
             }
           : null,
@@ -329,42 +329,42 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.exifData?.ExposureProgram
           ? {
               label: $t('exif.exposure.program'),
-              value: localizeExif('ExposureProgram', props.exifData.ExposureProgram),
+              value: localizeExif('exposureProgram', props.exifData.ExposureProgram),
               icon: 'tabler:exposure',
             }
           : null,
         props.exifData?.ExposureMode
           ? {
               label: $t('exif.exposure.mode'),
-              value: localizeExif('ExposureMode', props.exifData.ExposureMode),
+              value: localizeExif('exposureMode', props.exifData.ExposureMode),
               icon: 'tabler:exposure-filled',
             }
           : null,
         props.exifData?.MeteringMode
           ? {
               label: $t('exif.metering.title'),
-              value: localizeExif('MeteringMode', props.exifData.MeteringMode),
+              value: localizeExif('meteringMode', props.exifData.MeteringMode),
               icon: 'tabler:focus-auto',
             }
           : null,
         props.exifData?.Flash
           ? {
               label: $t('exif.flash.title'),
-              value: localizeExif('Flash', props.exifData.Flash),
+              value: localizeExif('flash', props.exifData.Flash),
               icon: 'material-symbols:flash-on-rounded',
             }
           : null,
         props.exifData?.FlashMeteringMode
           ? {
               label: $t('exif.flash.meteringMode'),
-              value: localizeExif('FlashMeteringMode', props.exifData.FlashMeteringMode),
+              value: localizeExif('meteringMode', props.exifData.FlashMeteringMode),
               icon: 'material-symbols:flash-on-rounded',
             }
           : null,
         props.exifData?.SceneCaptureType
           ? {
               label: $t('exif.scene.captureType'),
-              value: localizeExif('SceneCaptureType', props.exifData.SceneCaptureType),
+              value: localizeExif('sceneCaptureType', props.exifData.SceneCaptureType),
               icon: 'material-symbols:scene',
             }
           : null,
@@ -387,7 +387,7 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.exifData?.SensingMethod
           ? {
               label: $t('exif.sensing.method'),
-              value: localizeExif('SensingMethod', props.exifData.SensingMethod),
+              value: localizeExif('sensingMethod', props.exifData.SensingMethod),
               icon: 'tabler:photo-sensor',
             }
           : null,

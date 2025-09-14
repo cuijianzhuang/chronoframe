@@ -386,7 +386,7 @@ const columns: TableColumn<Photo>[] = [
   {
     accessorKey: 'exif.ColorSpace',
     header: '颜色空间',
-    cell: (info) => localizeExif('ColorSpace', info.getValue() as string),
+    cell: (info) => localizeExif('colorSpace', info.getValue() as string),
   },
   {
     accessorKey: 'actions',

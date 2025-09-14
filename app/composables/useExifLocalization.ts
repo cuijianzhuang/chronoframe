@@ -1,20 +1,23 @@
-import { localizeExifValue } from '~/utils/exif-localization'
+import { translateExifValue } from '~/utils/exif-localization'
 
 /**
- * EXIF本地化的Composable
+ * EXIF 本地化的 Composable
  * 提供在组件中使用的便捷方法
  */
 export function useExifLocalization() {
   const { $i18n } = useNuxtApp()
 
   /**
-   * 本地化EXIF字段值
-   * @param fieldName EXIF字段名
+   * 本地化 EXIF 字段值
+   * @param category EXIF 字段名
    * @param value 原始值
    * @returns 本地化后的值
    */
-  const localizeExif = (fieldName: string, value: string | number | undefined): string => {
-    return localizeExifValue(fieldName, value, $i18n.t)
+  const localizeExif = (
+    category: ExifCategory,
+    value: string | number | undefined,
+  ): string => {
+    return translateExifValue(category, value, $i18n.t)
   }
 
   return {
