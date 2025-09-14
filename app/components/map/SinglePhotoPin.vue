@@ -8,9 +8,11 @@ const props = withDefaults(
   defineProps<{
     clusterPoint: ClusterPoint
     isSelected?: boolean
+    markerId?: string
   }>(),
   {
     isSelected: false,
+    markerId: undefined,
   },
 )
 
@@ -31,7 +33,7 @@ const onClick = () => {
   <MapboxDefaultMarker
     ref="markerRef"
     :key="`marker-single-${marker.id}`"
-    :marker-id="`marker-single-${marker.id}`"
+    :marker-id="`marker-single-${markerId || marker.id}`"
     :lnglat="props.clusterPoint.geometry.coordinates"
     :options="{}"
   >

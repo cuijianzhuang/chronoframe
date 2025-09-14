@@ -9,7 +9,7 @@ useHead({
 const route = useRoute()
 const router = useRouter()
 
-const MAPID = 'explore-map'
+// const MAPID = 'explore-map'
 const { photos } = usePhotos()
 
 const photosWithLocation = computed(() => {
@@ -146,15 +146,19 @@ const onMapLoaded = (map: any) => {
   if (photoId && typeof photoId === 'string') {
     const photo = photosWithLocation.value.find((photo) => photo.id === photoId)
     if (photo && photo.latitude && photo.longitude) {
-      currentClusterPointId.value = photoId
-      nextTick(() => {
+      setTimeout(() => {
         map.flyTo({
           center: [photo.longitude, photo.latitude],
           zoom: 15,
           essential: true,
           duration: 2000,
         })
-      })
+        setTimeout(() => {
+          nextTick(() => {
+            currentClusterPointId.value = photoId
+          })
+        }, 2000)
+      }, 600)
     }
   }
 
@@ -190,6 +194,17 @@ const resetMap = () => {
     duration: 1000,
   })
 }
+
+const generateRandomKey = () => {
+  return Math.random().toString(36).substring(2, 15)
+}
+
+onBeforeRouteLeave(() => {
+  if (mapInstance.value) {
+    mapInstance.value.remove()
+    mapInstance.value = null
+  }
+})
 </script>
 
 <template>
@@ -243,50 +258,63 @@ const resetMap = () => {
       :transition="{ duration: 0.6, delay: 0.1 }"
       class="w-full h-full"
     >
-      <MapboxMap
-        class="w-full h-full"
-        :map-id="MAPID"
-        :options="{
-          style: 'mapbox://styles/hoshinosuzumi/cmev0eujf01dw01pje3g9cmlg',
-          zoom: mapViewState.zoom,
-          center: [mapViewState.longitude, mapViewState.latitude],
-          config: {
-            basemap: {
-              lightPreset: 'night',
-              colorThemes: 'faded',
+      <ClientOnly>
+        <MapboxMap
+          class="w-full h-full"
+          :map-id="generateRandomKey()"
+          :options="{
+            style: 'mapbox://styles/hoshinosuzumi/cmev0eujf01dw01pje3g9cmlg',
+            zoom: mapViewState.zoom,
+            center: [mapViewState.longitude, mapViewState.latitude],
+            config: {
+              basemap: {
+                lightPreset: 'night',
+                colorThemes: 'faded',
+              },
             },
-          },
-          attributionControl: false,
-          language: $i18n.locale,
-        }"
-        @load="onMapLoaded"
-        @zoom="onMapZoom"
-      >
-        <!-- Cluster pins -->
-        <template v-if="!!mapInstance">
-          <LazyMapClusterPin
-            v-for="clusterPoint in clusterGroups"
-            :key="`cluster-${clusterPoint.properties.marker?.id}`"
-            :cluster-point="clusterPoint"
-            @click="onMarkerPinClick"
-            @close="onMarkerPinClose"
-          />
-        </template>
+            attributionControl: false,
+            language: $i18n.locale,
+          }"
+          @load="onMapLoaded"
+          @zoom="onMapZoom"
+        >
+          <!-- Cluster pins -->
+          <template v-if="!!mapInstance">
+            <MapClusterPin
+              v-for="clusterPoint in clusterGroups"
+              :key="`cluster-${clusterPoint.properties.marker?.id}`"
+              :cluster-point="clusterPoint"
+              :marker-id="generateRandomKey()"
+              @click="onMarkerPinClick"
+              @close="onMarkerPinClose"
+            />
+          </template>
 
-        <!-- Single photo pins -->
-        <template v-if="!!mapInstance">
-          <LazyMapSinglePhotoPin
-            v-for="clusterPoint in singleMarkers"
-            :key="`single-${clusterPoint.properties.marker?.id}`"
-            :cluster-point="clusterPoint"
-            :is-selected="
-              clusterPoint.properties.marker?.id === currentClusterPointId
-            "
-            @click="onMarkerPinClick"
-            @close="onMarkerPinClose"
-          />
+          <!-- Single photo pins -->
+          <template v-if="!!mapInstance">
+            <MapSinglePhotoPin
+              v-for="clusterPoint in singleMarkers"
+              :key="`single-${clusterPoint.properties.marker?.id}`"
+              :cluster-point="clusterPoint"
+              :is-selected="
+                clusterPoint.properties.marker?.id === currentClusterPointId
+              "
+              :marker-id="generateRandomKey()"
+              @click="onMarkerPinClick"
+              @close="onMarkerPinClose"
+            />
+          </template>
+        </MapboxMap>
+
+        <template #fallback>
+          <div class="w-full h-full flex items-center justify-center">
+            <Icon
+              name="tabler:map-pin-off"
+              class="size-10 text-gray-500 animate-pulse"
+            />
+          </div>
         </template>
-      </MapboxMap>
+      </ClientOnly>
     </motion.div>
   </div>
 </template>

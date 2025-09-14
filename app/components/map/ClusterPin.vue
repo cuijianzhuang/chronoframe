@@ -8,9 +8,11 @@ const props = withDefaults(
   defineProps<{
     clusterPoint: ClusterPoint
     clusterCount?: number
+    markerId?: string
   }>(),
   {
     clusterCount: 6,
+    markerId: undefined,
   },
 )
 
@@ -46,7 +48,7 @@ const sizeDelta = computed(() => {
 <template>
   <MapboxDefaultMarker
     :key="`marker-cluster-${representativePhoto.id}`"
-    :marker-id="`marker-cluster-${representativePhoto.id}`"
+    :marker-id="`marker-cluster-${markerId || representativePhoto.id}`"
     :lnglat="props.clusterPoint.geometry.coordinates"
     :options="{}"
   >

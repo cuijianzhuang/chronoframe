@@ -648,7 +648,9 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                         </span>
                         <span v-else>
                           {{
-                            isMobile ? $t('viewer.hint.mobile') : $t('viewer.hint.desktop')
+                            isMobile
+                              ? $t('viewer.hint.mobile')
+                              : $t('viewer.hint.desktop')
                           }}
                         </span>
                       </motion.div>
@@ -686,31 +688,27 @@ const swiperModules = [Navigation, Keyboard, Virtual]
             </div>
 
             <!-- 缩略图导航 -->
-            <Suspense>
-              <GalleryThumbnail
-                :current-index="currentIndex"
-                :photos="photos"
-                @index-change="emit('indexChange', $event)"
-              />
-            </Suspense>
+            <GalleryThumbnail
+              :current-index="currentIndex"
+              :photos="photos"
+              @index-change="emit('indexChange', $event)"
+            />
           </div>
 
           <!-- EXIF 面板 - 在桌面端始终显示，在移动端根据状态显示 -->
-          <Suspense>
-            <AnimatePresence v-if="isMobile">
-              <InfoPanel
-                v-if="showExifPanel && currentPhoto"
-                :current-photo="currentPhoto"
-                :exif-data="currentPhoto?.exif"
-                :on-close="() => (showExifPanel = false)"
-              />
-            </AnimatePresence>
+          <AnimatePresence v-if="isMobile">
             <InfoPanel
-              v-else-if="currentPhoto"
+              v-if="showExifPanel && currentPhoto"
               :current-photo="currentPhoto"
               :exif-data="currentPhoto?.exif"
+              :on-close="() => (showExifPanel = false)"
             />
-          </Suspense>
+          </AnimatePresence>
+          <InfoPanel
+            v-else-if="currentPhoto"
+            :current-photo="currentPhoto"
+            :exif-data="currentPhoto?.exif"
+          />
         </div>
       </motion.div>
     </AnimatePresence>
