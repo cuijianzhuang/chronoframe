@@ -20,14 +20,18 @@ const photoId = computed(() => slug.value[0] || null)
 const { clearAllFilters, toggleFilter } = usePhotoFilters()
 
 // 监听路由查询参数中的标签
-watch(() => route.query.tag, (tagParam) => {
-  if (tagParam && typeof tagParam === 'string' && !photoId.value) {
-    clearAllFilters()
-    toggleFilter('tags', tagParam)
-    
-    router.replace('/')
-  }
-}, { immediate: true })
+watch(
+  () => route.query.tag,
+  (tagParam) => {
+    if (tagParam && typeof tagParam === 'string' && !photoId.value) {
+      clearAllFilters()
+      toggleFilter('tags', tagParam)
+
+      router.replace('/')
+    }
+  },
+  { immediate: true },
+)
 
 watch(
   [photoId, photos],
@@ -68,13 +72,15 @@ const handleClose = () => {
 </script>
 
 <template>
-  <PhotoViewer
-    :photos="photos"
-    :current-index="currentPhotoIndex"
-    :is-open="isViewerOpen"
-    @close="handleClose"
-    @index-change="handleIndexChange"
-  />
+  <ClientOnly>
+    <PhotoViewer
+      :photos="photos"
+      :current-index="currentPhotoIndex"
+      :is-open="isViewerOpen"
+      @close="handleClose"
+      @index-change="handleIndexChange"
+    />
+  </ClientOnly>
 </template>
 
 <style scoped></style>

@@ -78,6 +78,7 @@ export default defineNuxtConfig({
     detectBrowserLanguage: {
       fallbackLocale: 'en',
       useCookie: false,
+      cookieKey: 'chronoframe-locale'
     },
     strategy: 'no_prefix',
     locales: [
