@@ -17,12 +17,29 @@ const isLoading = ref(true)
 const isError = ref(false)
 const histogramData = ref<HistogramDataCompressed | null>(null)
 
+// 跟踪当前加载的缩略图，以便在切换时打断加载
+let currentImage: HTMLImageElement | null = null
+
+// 清理当前正在加载的缩略图
+const cleanup = () => {
+  if (currentImage) {
+    currentImage.onload = null
+    currentImage.onerror = null
+    currentImage.src = '' // 取消缩略图加载
+    currentImage = null
+  }
+}
+
 watchEffect(() => {
   isLoading.value = true
   isError.value = false
   histogramData.value = null
 
+  // 如果有正在加载的缩略图，打断
+  cleanup()
+
   const img = new Image()
+  currentImage = img
   img.crossOrigin = 'anonymous'
   
   const url = new URL(props.thumbnailUrl)
@@ -30,6 +47,11 @@ watchEffect(() => {
   img.src = url.toString()
 
   img.onload = () => {
+    // 检查这是否还是当前的缩略图
+    if (img !== currentImage) {
+      return
+    }
+
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
     if (!ctx) {
@@ -55,12 +77,18 @@ watchEffect(() => {
       console.error('Failed to calculate histogram', e)
     } finally {
       isLoading.value = false
+      currentImage = null
     }
   }
 
   img.onerror = () => {
+    // 检查这是否还是当前的缩略图
+    if (img !== currentImage) {
+      return
+    }
     isError.value = true
     isLoading.value = false
+    currentImage = null
   }
 })
 
@@ -69,6 +97,9 @@ watchEffect(() => {
     drawHistogramToCanvas(canvasRef.value, histogramData.value, props.options)
   }
 })
+
+// 组件卸载时清理正在加载的缩略图
+onUnmounted(cleanup)
 </script>
 
 <template>
