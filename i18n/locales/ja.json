@@ -1,0 +1,248 @@
+{
+  "plural": {
+    "photo": "写真がありません | 写真 {count} 枚"
+  },
+  "ui": {
+    "action": {
+      "explore": {
+        "tooltip": "地図を探索"
+      },
+      "filter": {
+        "tooltip": "写真をフィルター",
+        "title": "写真をフィルター",
+        "clearAll": "すべてクリア",
+        "tabs": {
+          "tags": "タグ",
+          "cameras": "カメラ",
+          "lenses": "レンズ",
+          "cities": "都市",
+          "ratings": "評価"
+        },
+        "empty": {
+          "tags": "タグなし",
+          "cameras": "カメラ情報なし",
+          "lenses": "レンズ情報なし",
+          "cities": "都市情報なし"
+        },
+        "rating": {
+          "showAll": "すべての写真を表示",
+          "showStarsAndAbove": "{count} 星以上の写真を表示"
+        }
+      },
+      "sort": {
+        "tooltip": "写真の並び替え",
+        "title": "並び替え",
+        "options": {
+          "dateTakenDesc": "撮影日（新しい順）",
+          "dateTakenAsc": "撮影日（古い順）",
+          "fileSizeAsc": "ファイルサイズ（昇順）",
+          "fileSizeDesc": "ファイルサイズ（降順）",
+          "titleAsc": "タイトル（昇順）",
+          "titleDesc": "タイトル（降順）"
+        }
+      },
+      "theme": {
+        "tooltip": "カラーテーマ"
+      },
+      "dashboard": {
+        "tooltip": "ダッシュボード"
+      },
+      "logout": {
+        "tooltip": "ログアウト"
+      }
+    },
+    "stats": {
+      "totalPhotosWithRange": "{range}、@:plural.photo 合計"
+    },
+    "livePhoto": "Live Photo"
+  },
+  "map": {
+    "cluster": {
+      "details": "クリックして詳細を見る",
+      "nearbyPhotos": "近くに {0} 枚の写真"
+    }
+  },
+  "minimap": {
+    "loading": "ミニマップを読み込み中..."
+  },
+  "viewer": {
+    "hint": {
+      "livePhoto": {
+        "mobile": "長押しでライブフォトを再生 · ダブルタップまたはピンチでズーム",
+        "desktop": "再生アイコンにホバー · ダブルクリック／スクロールでズーム"
+      },
+      "mobile": "ダブルタップまたはピンチでズーム",
+      "desktop": "ダブルクリックまたはマウスホイールでズーム"
+    }
+  },
+  "exif": {
+    "sections": {
+      "basic": "基本情報",
+      "deviceInfomation": "機材情報",
+      "specification": "技術パラメータ",
+      "rating": "評価",
+      "tags": "キーワード",
+      "histogram": "ヒストグラム",
+      "capture": {},
+      "shooting": {
+        "parameters": "撮影パラメータ",
+        "mode": "撮影モード"
+      }
+    },
+    "aperture": "絞り値",
+    "dateTaken": {
+      "title": "撮影日時"
+    },
+    "filename": "ファイル名",
+    "fileSize": "ファイルサイズ",
+    "resolution": "解像度",
+    "pixels": "画素数",
+    "colorSpace": {
+      "title": "カラースペース"
+    },
+    "artist": "作者",
+    "software": "ソフトウェア",
+    "tz": "タイムゾーン",
+    "country": "国",
+    "city": "都市",
+    "gps": {
+      "title": "座標"
+    },
+    "focal": {
+      "length": {
+        "actual": "焦点距離",
+        "equivalent": "35mm 換算"
+      },
+      "plane": {
+        "resolution": "撮像面解像度"
+      }
+    },
+    "exposure": {
+      "time": "露出時間",
+      "program": "露出プログラム",
+      "mode": "露出モード"
+    },
+    "camera": "カメラ",
+    "lens": "レンズ",
+    "maxAperture": "開放絞り",
+    "wb": {
+      "title": "ホワイトバランス",
+      "shiftAB": "WB シフト（アンバー–ブルー）",
+      "shiftGM": "WB シフト（グリーン–マゼンタ）",
+      "bias": "WB バイアス",
+      "fineTune": "WB 微調整"
+    },
+    "metering": {
+      "title": "測光モード"
+    },
+    "flash": {
+      "title": "フラッシュ",
+      "meteringMode": "フラッシュ測光モード"
+    },
+    "scene": {
+      "captureType": "シーン撮影タイプ"
+    },
+    "brightness": {
+      "value": "輝度"
+    },
+    "sensing": {
+      "method": "センサー方式"
+    },
+    "values": {
+      "exposureProgram": {
+        "notDefined": "未定義",
+        "manual": "マニュアル",
+        "programAe": "プログラム AE",
+        "aperturePriorityAe": "絞り優先 AE",
+        "shutterSpeedPriorityAe": "シャッター優先 AE",
+        "creativeSlowSpeed": "クリエイティブ（低速）",
+        "actionHighSpeed": "アクション（高速）",
+        "portrait": "ポートレート",
+        "landscape": "風景",
+        "bulb": "バルブ"
+      },
+      "exposureMode": {
+        "auto": "オート",
+        "manual": "マニュアル",
+        "autoBracket": "オートブラケット"
+      },
+      "flash": {
+        "noFlash": "発光なし",
+        "fired": "発光",
+        "firedReturnNotDetected": "発光、戻り光なし",
+        "firedReturnDetected": "発光、戻り光あり",
+        "onDidNotFire": "オン、発光なし",
+        "onFired": "オン、発光",
+        "onReturnNotDetected": "オン、戻り光なし",
+        "onReturnDetected": "オン、戻り光あり",
+        "offDidNotFire": "オフ、発光なし",
+        "offDidNotFireReturnNotDetected": "オフ、発光なし、戻り光なし",
+        "autoDidNotFire": "オート、発光なし",
+        "autoFired": "オート、発光",
+        "autoFiredReturnNotDetected": "オート、発光、戻り光なし",
+        "autoFiredReturnDetected": "オート、発光、戻り光あり",
+        "noFlashFunction": "フラッシュ機能なし",
+        "offNoFlashFunction": "オフ、フラッシュ機能なし",
+        "firedRedEyeReduction": "発光、赤目軽減",
+        "firedRedEyeReductionReturnNotDetected": "発光、赤目軽減、戻り光なし",
+        "firedRedEyeReductionReturnDetected": "発光、赤目軽減、戻り光あり",
+        "onRedEyeReduction": "オン、赤目軽減",
+        "onRedEyeReductionReturnNotDetected": "オン、赤目軽減、戻り光なし",
+        "onRedEyeReductionReturnDetected": "オン、赤目軽減、戻り光あり",
+        "offRedEyeReduction": "オフ、赤目軽減",
+        "autoDidNotFireRedEyeReduction": "オート、発光なし、赤目軽減",
+        "autoFiredRedEyeReduction": "オート、発光、赤目軽減",
+        "autoFiredRedEyeReductionReturnNotDetected": "オート、発光、赤目軽減、戻り光なし",
+        "autoFiredRedEyeReductionReturnDetected": "オート、発光、赤目軽減、戻り光あり"
+      },
+      "meteringMode": {
+        "unknown": "不明",
+        "average": "平均測光",
+        "centerWeightedAverage": "中央重点平均測光",
+        "spot": "スポット測光",
+        "multiSpot": "マルチスポット測光",
+        "multiSegment": "分割測光",
+        "partial": "部分測光",
+        "other": "その他"
+      },
+      "whiteBalance": {
+        "auto": "オート",
+        "manual": "マニュアル"
+      },
+      "sceneCaptureType": {
+        "standard": "標準",
+        "landscape": "風景",
+        "portrait": "ポートレート",
+        "night": "夜景",
+        "other": "その他"
+      },
+      "sensingMethod": {
+        "monochromeArea": "モノクロエリア",
+        "oneChipColorArea": "1 チップカラーエリア",
+        "twoChipColorArea": "2 チップカラーエリア",
+        "threeChipColorArea": "3 チップカラーエリア",
+        "colorSequentialArea": "順次カラーエリア",
+        "monochromeLinear": "モノクロリニア",
+        "trilinear": "トリリニア",
+        "colorSequentialLinear": "順次カラーニア"
+      },
+      "colorSpace": {
+        "srgb": "sRGB",
+        "adobeRgb": "Adobe RGB",
+        "wideGamutRgb": "ワイドガマット RGB",
+        "iccProfile": "ICC プロファイル",
+        "uncalibrated": "未調整",
+        "rgb": "RGB"
+      }
+    }
+  },
+  "title": {
+    "gallery": "ギャラリー",
+    "fallback": {
+      "photo": "写真"
+    },
+    "dashboard": "ダッシュボード",
+    "photos": "写真",
+    "locations": "場所"
+  }
+}
