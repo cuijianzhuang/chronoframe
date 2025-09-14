@@ -254,12 +254,13 @@ const processExifData = (exifData: Tags, metadata: Metadata): NeededExif => {
     result[key] = (exifData as any)[key]
   }
 
-  // 如果 EXIF 中没有 ColorSpace，尝试从图片数据中推断
-  if (!result.ColorSpace) {
-    const inferredColorSpace = inferColorSpaceFromMetadata(metadata)
-    if (inferredColorSpace) {
-      result.ColorSpace = inferredColorSpace
-    }
+  // 优先从 metadata 推断颜色空间
+  const inferredColorSpace = inferColorSpaceFromMetadata(metadata)
+  if (inferredColorSpace) {
+    result.ColorSpace = inferredColorSpace
+  } else if (!result.ColorSpace) {
+    // 推断失败且 exif 中也没有 ColorSpace
+    // ignore
   }
 
   return {
