@@ -18,7 +18,7 @@ useHead({
 const dayjs = useDayjs()
 const { localizeExif } = useExifLocalization()
 
-const { data, status, refresh } = useFetch('/api/photos')
+const { photos: data, status, refresh } = usePhotos()
 
 // 当前上传的文件信息
 interface UploadingFile {

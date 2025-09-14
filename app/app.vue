@@ -9,7 +9,7 @@ useHead({
   titleTemplate: (title) => `${title} :: ${config.public.APP_TITLE}`,
 })
 
-const { data } = useFetch('/api/photos')
+const { data, refresh, status } = useFetch('/api/photos')
 const photos = computed(() => (data.value as Photo[]) || [])
 
 watchEffect(() => {
@@ -35,7 +35,11 @@ provide(
 
 <template>
   <UApp>
-    <PhotosProvider :photos="photos">
+    <PhotosProvider
+      :photos="photos"
+      :refresh="refresh"
+      :status="status"
+    >
       <NuxtLayout>
         <NuxtPage />
       </NuxtLayout>
