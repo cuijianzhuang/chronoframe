@@ -91,7 +91,9 @@ const formatExifDate = (date: string | ExifDateTime | undefined) => {
 /**
  * 从 Sharp metadata 中推断颜色空间信息
  */
-const inferColorSpaceFromMetadata = (metadata: Metadata): string | undefined => {
+const inferColorSpaceFromMetadata = (
+  metadata: Metadata,
+): string | undefined => {
   // 优先使用 ICC 配置文件信息
   if (metadata.icc) {
     const colorSpace = parseICCProfile(metadata.icc)
@@ -125,7 +127,7 @@ const inferColorSpaceFromMetadata = (metadata: Metadata): string | undefined => 
 const parseICCProfile = (iccBuffer: Buffer): string | undefined => {
   try {
     const iccString = iccBuffer.toString('latin1')
-    
+
     // 常见的颜色空间标识符
     if (iccString.includes('sRGB') || iccString.includes('IEC61966-2.1')) {
       return 'sRGB'
@@ -151,7 +153,7 @@ const parseICCProfile = (iccBuffer: Buffer): string | undefined => {
     if (iccString.includes('Rec709') || iccString.includes('ITU-R BT.709')) {
       return 'Rec. 709'
     }
-    
+
     // 检查 ICC 配置文件头部的颜色空间签名（偏移量 16-19）
     if (iccBuffer.length >= 20) {
       const colorSpaceSignature = iccBuffer.toString('ascii', 16, 20)
@@ -173,7 +175,7 @@ const parseICCProfile = (iccBuffer: Buffer): string | undefined => {
   } catch {
     // 忽略解析错误，继续尝试其他方法
   }
-  
+
   return undefined
 }
 
@@ -243,7 +245,7 @@ const processExifData = (exifData: Tags, metadata: Metadata): NeededExif => {
     ImageWidth: exifData.ExifImageWidth || metadata.width,
     ImageHeight: exifData.ExifImageHeight || metadata.height,
   }
-  
+
   const result: any = structuredClone(exifData)
   for (const key in result) {
     Reflect.deleteProperty(result, key)
@@ -306,8 +308,12 @@ export const extractExifData = async (
       if (exifData.ColorSpace) {
         logger?.info(`ColorSpace from EXIF: ${result.ColorSpace}`)
       } else {
-        logger?.info(`ColorSpace inferred from image data: ${result.ColorSpace}`)
-        logger?.info(`Image format: ${metadata.format}, Space: ${metadata.space}, Has ICC: ${!!metadata.icc}`)
+        logger?.info(
+          `ColorSpace inferred from image data: ${result.ColorSpace}`,
+        )
+        logger?.info(
+          `Image format: ${metadata.format}, Space: ${metadata.space}, Has ICC: ${!!metadata.icc}`,
+        )
       }
     } else {
       logger?.warn('No ColorSpace information available')
@@ -335,7 +341,14 @@ export const extractPhotoInfo = (
   const dirPath = path.dirname(s3key)
   if (exifData?.Subject || exifData?.Keywords) {
     tags = [
-      ...new Set([...(exifData.Subject || []), ...(exifData.Keywords || [])]),
+      ...new Set([
+        ...(typeof exifData.Subject === 'string'
+          ? [exifData.Subject]
+          : exifData.Subject || []),
+        ...(typeof exifData.Keywords === 'string'
+          ? [exifData.Keywords]
+          : exifData.Keywords || []),
+      ]),
     ]
       .map((tag) => tag.trim())
       .filter((tag) => tag.length > 0)
