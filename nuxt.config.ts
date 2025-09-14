@@ -49,11 +49,23 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    plugins: [tailwindcss() as any],
+    plugins: [tailwindcss()],
+    css: {
+      devSourcemap: true,
+    },
+    build: {
+      sourcemap: false,
+    },
   },
 
   colorMode: {
     preference: 'dark',
+  },
+
+  icon: {
+    clientBundle: {
+      scan: true,
+    },
   },
 
   dayjs: {
