@@ -231,7 +231,8 @@
         "adobeRgb": "Adobe RGB",
         "wideGamutRgb": "Wide Gamut RGB",
         "iccProfile": "ICC Profile",
-        "uncalibrated": "Uncalibrated"
+        "uncalibrated": "Uncalibrated",
+        "rgb": "RGB"
       }
     }
   },

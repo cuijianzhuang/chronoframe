@@ -228,7 +228,8 @@
         "adobeRgb": "Adobe RGB",
         "wideGamutRgb": "广色域 RGB",
         "iccProfile": "ICC 配置文件",
-        "uncalibrated": "未校准"
+        "uncalibrated": "未校准",
+        "rgb": "RGB"
       }
     }
   },
