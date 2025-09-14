@@ -430,6 +430,7 @@ onUnmounted(() => {
     class="inline-block w-full align-top break-inside-avoid transition-all duration-300 cursor-pointer select-none"
     :style="{
       marginBottom: `${ITEM_GAP}px`,
+      transform: 'translateZ(0)',
     }"
     @click="handleClick"
     @mouseenter="handleMouseEnter"

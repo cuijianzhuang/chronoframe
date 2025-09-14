@@ -24,7 +24,7 @@ const displayPhotos = computed(() => {
 const FIRST_SCREEN_ITEMS_COUNT = 30
 const COLUMN_GAP = 4
 const AUTO_COLUMN_WIDTH = 280
-const MAX_COLUMN_COUNT = 7
+const MAX_COLUMN_COUNT = 8
 const MIN_COLUMN_COUNT = 2
 
 // Reactive state
