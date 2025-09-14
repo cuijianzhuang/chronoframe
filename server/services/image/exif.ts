@@ -6,7 +6,6 @@ import type { NeededExif, PhotoInfo } from '../../../shared/types/photo'
 import type { ExifDateTime, Tags } from 'exiftool-vendored'
 import { exiftool } from 'exiftool-vendored'
 import { noop } from 'es-toolkit'
-import type { Logger } from '~~/server/utils/logger'
 
 const neededKeys: Array<keyof Tags | (string & {})> = [
   'Title',
@@ -273,7 +272,7 @@ const processExifData = (exifData: Tags, metadata: Metadata): NeededExif => {
 export const extractExifData = async (
   imageBuffer: Buffer,
   rawImageBuffer?: Buffer,
-  logger?: Logger['image'],
+  logger?: Logger[keyof Logger],
 ): Promise<NeededExif | null> => {
   try {
     let metadata = await sharp(imageBuffer).metadata()
@@ -291,12 +290,9 @@ export const extractExifData = async (
       return null
     }
 
-    // const exifData = await exifr.parse(rawImageBuffer || imageBuffer, true)
-    // return processExifData(exifData, metadata)
-
     logger?.info('Extracting EXIF data using exiftool...')
 
-    const tempDir = path.resolve(process.cwd(), 'exif_workdir')
+    const tempDir = path.resolve(process.cwd(), 'data/.exif_workdir')
     await mkdir(tempDir, { recursive: true })
     const tempImagePath = path.resolve(tempDir, `${crypto.randomUUID()}.jpg`)
 
@@ -306,20 +302,12 @@ export const extractExifData = async (
 
     // 记录颜色空间信息的来源
     if (result.ColorSpace) {
-      if (exifData.ColorSpace) {
-        logger?.info(`ColorSpace from EXIF: ${result.ColorSpace}`)
-      } else {
-        logger?.info(
-          `ColorSpace inferred from image data: ${result.ColorSpace}`,
-        )
-        logger?.info(
-          `Image format: ${metadata.format}, Space: ${metadata.space}, Has ICC: ${!!metadata.icc}`,
-        )
-      }
+      logger?.success(`Inferred ColorSpace: ${result.ColorSpace}`)
     } else {
-      logger?.warn('No ColorSpace information available')
+      logger?.info('ColorSpace could not be determined')
     }
 
+    // 清理临时文件
     await unlink(tempImagePath).catch(noop)
     return result
   } catch (err) {

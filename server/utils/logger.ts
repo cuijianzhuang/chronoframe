@@ -9,13 +9,13 @@ const mConsola = createConsola({
 })
 
 export const logger = {
-  chrono: mConsola.withTag('CHRONO'),
-  storage: mConsola.withTag('STORAGE'),
-  fs: mConsola.withTag('FS'),
-  image: mConsola.withTag('IMG/PHOTO'),
-  location: mConsola.withTag('LOCATION'),
+  chrono: mConsola.withTag('cframe/main'),
+  storage: mConsola.withTag('cframe/storage'),
+  fs: mConsola.withTag('cframe/fs'),
+  image: mConsola.withTag('cframe/image'),
+  location: mConsola.withTag('cframe/location'),
   dynamic: (id: string) => mConsola.withTag(id.toUpperCase()),
 }
 
-export type Logger = typeof logger
+export type Logger = Omit<typeof logger, 'dynamic'>
 export type DynamicLogger = typeof logger.dynamic

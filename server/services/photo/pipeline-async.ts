@@ -93,7 +93,7 @@ async function processPhotoInternal(
       (resolve, reject) => {
         setImmediate(async () => {
           try {
-            const result = await generateThumbnailAndHash(imageBuffer)
+            const result = await generateThumbnailAndHash(imageBuffer, logger.image)
             resolve(result)
           } catch (error) {
             reject(error)
@@ -121,7 +121,7 @@ async function processPhotoInternal(
           const result = await extractExifData(
             imageBuffer,
             imageBuffers.raw,
-            log,
+            logger.image,
           )
           resolve(result)
         } catch (error) {
