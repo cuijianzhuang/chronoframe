@@ -63,6 +63,10 @@ export default defineNuxtConfig({
   },
 
   i18n: {
+    detectBrowserLanguage: {
+      fallbackLocale: 'en',
+      useCookie: false,
+    },
     strategy: 'no_prefix',
     locales: [
       { code: 'zh-Hans', name: '简体中文', file: 'zh-Hans.json' },
