@@ -49,6 +49,9 @@ docker run -d \
   --name chronoframe \
   -p 3000:3000 \
   -v $(pwd)/data:/app/data \
+  -e CFRAME_ADMIN_EMAIL="" \
+  -e CFRAME_ADMIN_NAME="" \
+  -e CFRAME_ADMIN_PASSWORD="" \
   -e NUXT_PUBLIC_APP_TITLE="" \
   -e NUXT_PUBLIC_APP_SLOGAN="" \
   -e NUXT_PUBLIC_APP_AVATAR_URL="" \
@@ -72,6 +75,13 @@ docker run -d \
 创建 `.env` 文件
 
 ```env
+# Admin user email (required)
+CFRAME_ADMIN_EMAIL=
+# Admin user name (default to Chronoframe, optional)
+CFRAME_ADMIN_NAME=
+# Admin user password (default to CF1234@!, optional)
+CFRAME_ADMIN_PASSWORD=
+
 # 应用标题与口号
 NUXT_PUBLIC_APP_TITLE=
 NUXT_PUBLIC_APP_SLOGAN=
@@ -124,6 +134,9 @@ docker-compose up -d
 
 | 环境变量                           | 说明                                     | 默认值      | 必需                                      |
 | :--------------------------------- | :--------------------------------------- | :---------- | :---------------------------------------- |
+| CFRAME_ADMIN_EMAIL                 | 初始管理员用户的邮箱                     | 无          | 是，填写登录使用的 GitHub 账户的邮箱      |
+| CFRAME_ADMIN_NAME                  | 初始管理员用户的用户名                   | Chronoframe | 否                                        |
+| CFRAME_ADMIN_PASSWORD              | 初始管理员用户的密码                     | CF1234@!    | 否                                        |
 | NUXT_PUBLIC_APP_TITLE              | 应用标题                                 | ChronoFrame | 否                                        |
 | NUXT_PUBLIC_APP_SLOGAN             | 应用口号                                 | 无          | 否                                        |
 | NUXT_PUBLIC_APP_AVATAR_URL         | 应用头像 URL                             | 无          | 否                                        |
@@ -176,7 +189,6 @@ cp .env.example .env
 ### 数据库初始化
 
 ```bash
-# 1. 在 /server/database/migrations/0000_curvy_scarlet_witch.sql 中修改初始账号
 # 2. 生成数据库迁移文件(可选)
 pnpm db:generate
 
