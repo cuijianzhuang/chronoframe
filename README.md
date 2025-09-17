@@ -322,6 +322,7 @@ This project is licensed under the MIT License.
   <summary>How is this different from Afilmory?</summary>
   <p>
     Afilmory generates a manifest from photos during local/CI processing and serves them statically. ChronoFrame is a dynamic photo management app, offering online upload, management, and browsing—better for frequently updated galleries.
+    In other words, Afilmory = static; ChronoFrame = dynamic, online upload/manage.
   </p>
 </details>
 
