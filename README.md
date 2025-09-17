@@ -9,40 +9,42 @@
   <img src="https://img.shields.io/badge/WebGL-2.0-FF6600.svg" alt="WebGL">
 </p>
 
-丝滑的照片展示和管理应用，支持多种图片格式和大尺寸图片渲染。
+**Languages:** English | [中文](README_zh.md)
 
-[在线演示: TimoYin's Mems](https://lens.bh8.ga)
+A smooth photo display and management application, supporting multiple image formats and large-size image rendering.
 
-## ✨ 特性
+[Live Demo: TimoYin's Mems](https://lens.bh8.ga)
 
-### 🖼️ 强大的图片管理
+## ✨ Features
 
-- **在线管理照片** - 通过 Web 界面轻松管理和浏览照片
-- **探索地图** - 在地图上浏览照片拍摄位置
-- **智能 EXIF 解析** - 自动提取拍摄时间、地理位置、相机参数等元数据
-- **地理位置识别** - 自动识别(Reverse Geocoding)照片拍摄地点
-- **多格式支持** - 支持 JPEG、PNG、HEIC/HEIF 等主流图片格式
-- **智能缩略图** - 基于 ThumbHash 技术的高效缩略图生成
+### 🖼️ Powerful Photo Management
 
-### 🔧 现代技术栈
+- **Manage photos online** - Easily manage and browse photos via the web interface  
+- **Explore map** - Browse photo locations on a map  
+- **Smart EXIF parsing** - Automatically extracts metadata such as capture time, geolocation, and camera parameters  
+- **Reverse geocoding** - Automatically identifies photo shooting locations  
+- **Multi-format support** - Supports mainstream formats including JPEG, PNG, HEIC/HEIF  
+- **Smart thumbnails** - Efficient thumbnail generation using ThumbHash  
 
-- **Nuxt 4** - 基于最新的 Nuxt 框架，提供 SSR/SSG 支持
-- **TypeScript** - 完整的类型安全保障
-- **TailwindCSS** - 现代化的 CSS 框架
-- **Drizzle ORM** - 类型安全的数据库 ORM
+### 🔧 Modern Tech Stack
 
-### ☁️ 灵活的存储方案
+- **Nuxt 4** - Built on the latest Nuxt framework with SSR/SSG support  
+- **TypeScript** - Full type safety  
+- **TailwindCSS** - Modern CSS framework  
+- **Drizzle ORM** - Type-safe database ORM  
 
-- **多存储后端** - 支持 S3 兼容存储、GitHub(WIP)、本地文件系统(WIP) 等
-- **CDN 加速** - 可配置 CDN 地址加速图片访问
+### ☁️ Flexible Storage Solutions
 
-## 🐳 部署
+- **Multiple storage backends** - Supports S3-compatible storage, GitHub (WIP), and local filesystem (WIP)  
+- **CDN acceleration** - Configurable CDN URL for faster photo delivery  
 
-推荐使用预构建的 docker 镜像部署，[在 ghcr 上查看镜像](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe)
+## 🐳 Deployment
+
+We recommend deploying with the prebuilt Docker image. [View the image on ghcr](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe)
 
 ### Docker
 
-修改命令中的环境变量后运行：
+Run with customized environment variables:
 
 ```bash
 docker run -d \
@@ -72,7 +74,7 @@ docker run -d \
 
 ### Docker Compose
 
-创建 `.env` 文件
+Create a .env file:
 
 ```env
 # Admin user email (required)
@@ -108,7 +110,7 @@ NUXT_OAUTH_GITHUB_CLIENT_SECRET=
 MAPBOX_TOKEN=
 ```
 
-创建 `docker-compose.yml`：
+Create docker-compose.yml:
 
 ```yaml
 services:
@@ -124,158 +126,212 @@ services:
       - .env
 ```
 
-启动：
+Start:
 
 ```bash
 docker-compose up -d
 ```
 
-### 环境变量列表
+### Environment Variables
 
-| 环境变量                           | 说明                                     | 默认值      | 必需                                      |
-| :--------------------------------- | :--------------------------------------- | :---------- | :---------------------------------------- |
-| CFRAME_ADMIN_EMAIL                 | 初始管理员用户的邮箱                     | 无          | 是，填写登录使用的 GitHub 账户的邮箱      |
-| CFRAME_ADMIN_NAME                  | 初始管理员用户的用户名                   | Chronoframe | 否                                        |
-| CFRAME_ADMIN_PASSWORD              | 初始管理员用户的密码                     | CF1234@!    | 否                                        |
-| NUXT_PUBLIC_APP_TITLE              | 应用标题                                 | ChronoFrame | 否                                        |
-| NUXT_PUBLIC_APP_SLOGAN             | 应用口号                                 | 无          | 否                                        |
-| NUXT_PUBLIC_APP_AVATAR_URL         | 应用头像 URL                             | 无          | 否                                        |
-| NUXT_STORAGE_PROVIDER              | 存储提供者，支持 `s3`、`github`、`local` | `s3`        | 是                                        |
-| NUXT_PROVIDER_S3_ENDPOINT          | S3 兼容存储服务的 Endpoint               | 无          | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
-| NUXT_PROVIDER_S3_BUCKET            | S3 存储桶名称                            | chronoframe | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
-| NUXT_PROVIDER_S3_REGION            | S3 存储桶区域                            | auto        | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
-| NUXT_PROVIDER_S3_ACCESS_KEY_ID     | S3 访问密钥 ID                           | 无          | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
-| NUXT_PROVIDER_S3_SECRET_ACCESS_KEY | S3 访问密钥                              | 无          | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
-| NUXT_PROVIDER_S3_PREFIX            | S3 存储前缀                              | photos/     | 否                                        |
-| NUXT_PROVIDER_S3_CDN_URL           | S3 存储的 CDN 地址                       | 无          | 否                                        |
-| NUXT_OAUTH_GITHUB_CLIENT_ID        | GitHub OAuth 应用的 Client ID            | 无          | 是                                        |
-| NUXT_OAUTH_GITHUB_CLIENT_SECRET    | GitHub OAuth 应用的 Client Secret        | 无          | 是                                        |
-| NUXT_SESSION_PASSWORD              | 用于加密会话的密码，32 位随机字符串      | 无          | 是                                        |
-| MAPBOX_TOKEN                       | Mapbox 访问令牌，用于地图服务            | 无          | 是                                        |
+| Variable                           | Description                                     | Default      | Required                                  |
+| :--------------------------------- | :--------------------------------------------- | :---------- | :---------------------------------------- |
+| CFRAME_ADMIN_EMAIL                 | Email of the initial admin user                | None        | Yes, must be the GitHub account email used for login |
+| CFRAME_ADMIN_NAME                  | Username of the initial admin                   | Chronoframe | No                                        |
+| CFRAME_ADMIN_PASSWORD              | Password of the initial admin                   | CF1234@!    | No                                        |
+| NUXT_PUBLIC_APP_TITLE              | Application title                               | ChronoFrame | No                                        |
+| NUXT_PUBLIC_APP_SLOGAN             | Application slogan                               | None        | No                                        |
+| NUXT_PUBLIC_APP_AVATAR_URL         | Application avatar URL                           | None        | No                                        |
+| NUXT_STORAGE_PROVIDER              | Storage provider (s3, github, local)           | s3          | Yes                                      |
+| NUXT_PROVIDER_S3_ENDPOINT          | S3 endpoint                                    | None        | Required if provider is s3                |
+| NUXT_PROVIDER_S3_BUCKET            | S3 bucket name                                 | chronoframe | Required if provider is s3                |
+| NUXT_PROVIDER_S3_REGION            | S3 bucket region                               | auto        | Required if provider is s3                |
+| NUXT_PROVIDER_S3_ACCESS_KEY_ID     | S3 access key ID                               | None        | Required if provider is s3                |
+| NUXT_PROVIDER_S3_SECRET_ACCESS_KEY | S3 secret access key                           | None        | Required if provider is s3                |
+| NUXT_PROVIDER_S3_PREFIX            | S3 object prefix                               | photos/     | No                                        |
+| NUXT_PROVIDER_S3_CDN_URL           | S3 CDN URL                                    | None        | No                                        |
+| NUXT_OAUTH_GITHUB_CLIENT_ID        | GitHub OAuth app Client ID                     | None        | Yes                                      |
+| NUXT_OAUTH_GITHUB_CLIENT_SECRET    | GitHub OAuth app Client Secret                 | None        | Yes                                      |
+| NUXT_SESSION_PASSWORD              | Session encryption password (32 chars)        | None        | Yes                                      |
+| MAPBOX_TOKEN                       | Mapbox access token for map service           | None        | Yes                                      |
 
-## 📸 截图
+## 📸 Screenshots
 
 ![Gallery](./docs/images/screenshot1.png)
 ![Photo Detail](./docs/images/screenshot2.png)
 ![Map Explore](./docs/images/screenshot3.png)
 ![Dashboard](./docs/images/screenshot4.png)
 
-## 🛠️ 开发
+## 🛠️ Development
 
-### 环境要求
+### Requirements
 
 - Node.js 18+
 - pnpm 9.0+
 
-### 安装依赖
+### Install dependencies
 
 ```bash
-# 使用 pnpm (推荐)
+# With pnpm (recommended)
 pnpm install
 
-# 或使用其他包管理器
+# Or with other package managers
 npm install
 yarn install
 ```
 
-### 配置环境变量
-
-复制环境变量模板并根据需要配置：
+### Configure environment variables
 
 ```bash
 cp .env.example .env
 ```
 
-### 数据库初始化
+### Initialize database
 
 ```bash
-# 2. 生成数据库迁移文件(可选)
+# 2. Generate migration files (optional)
 pnpm db:generate
 
-# 3. 执行数据库迁移
+# 3. Run database migrations
 pnpm db:migrate
 ```
 
-### 启动开发服务器
+### Start development server
 
 ```bash
 pnpm dev
 ```
 
-应用将在 `http://localhost:3000` 启动。
+App will start at http://localhost:3000.
 
-### 项目结构
+### Project Structure
 
 ```
 chronoframe/
-├── app/                    # Nuxt 应用
-│   ├── components/         # 组件
-│   ├── pages/              # 页面路由
-│   ├── composables/        # 组合式函数
-│   └── stores/             # Pinia 状态管理
+├── app/                    # Nuxt app
+│   ├── components/         # Components
+│   ├── pages/              # Page routes
+│   ├── composables/        # Composables
+│   └── stores/             # Pinia stores
 ├── packages/
-│   └── webgl-image/        # WebGL 图片查看器
+│   └── webgl-image/        # WebGL image viewer
 ├── server/
-│   ├── api/                # API 路由
-│   ├── database/           # 数据库 schema 和迁移
-│   └── services/           # 业务逻辑服务
-└── shared/                 # 共享类型和工具
+│   ├── api/                # API routes
+│   ├── database/           # DB schema & migrations
+│   └── services/           # Business logic services
+└── shared/                 # Shared types & utils
 ```
 
-### 构建命令
+### Build commands
 
 ```bash
-# 开发模式 (包含依赖包构建)
+# Development (with dependencies build)
 pnpm dev
 
-# 仅构建依赖包
+# Build only dependencies
 pnpm build:deps
 
-# 构建生产版本
+# Production build
 pnpm build
 
-# 数据库操作
-pnpm db:generate    # 生成迁移文件
-pnpm db:migrate     # 执行迁移
+# Database operations
+pnpm db:generate    # Generate migration files
+pnpm db:migrate     # Run migrations
 
-# 预览生产版本
+# Preview production build
 pnpm preview
 ```
 
-## 📖 使用指南
+## 📖 User Guide
 
-### 上传照片
+### Uploading Photos
 
-1. 点击头像跳转到 GitHub 认证登录
-2. 访问仪表板页面 `/dashboard`
-3. 在 `Photos` 页面中选择图片并点击上传（支持批量上传和拖拽上传）
-4. 系统将自动提取 EXIF 信息、生成缩略图并逆编码照片地理位置
+1.	Click avatar to sign in with GitHub OAuth
+2.	Go to the dashboard at /dashboard
+3.	On the Photos page, select and upload images (supports batch & drag-and-drop)
+4.	System will automatically parse EXIF data, generate thumbnails, and perform reverse geocoding
 
-## 🤝 贡献
+## 🤝 Contributing
 
-欢迎贡献代码！请确保：
+Contributions are welcome! Please:
 
-1. Fork 本仓库
-2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
-3. 提交更改 (`git commit -m 'Add some amazing feature'`)
-4. 推送到分支 (`git push origin feature/amazing-feature`)
-5. 开启 Pull Request
+1.	Fork the repo
+2.	Create a feature branch (git checkout -b feature/amazing-feature)
+3.	Commit changes (git commit -m 'Add some amazing feature')
+4.	Push to branch (git push origin feature/amazing-feature)
+5.	Open a Pull Request
 
-### 开发规范
+### Coding Guidelines
 
-- 使用 TypeScript 进行类型安全的开发
-- 遵循 ESLint 和 Prettier 代码规范
-- 更新相关文档
+- Use TypeScript for type safety
+- Follow ESLint and Prettier conventions
+- Update documentation accordingly
 
-## 📄 许可证
+## 📄 License
 
-本项目基于 [MIT 许可证](LICENSE) 开源。
+This project is licensed under the MIT License.
 
-## 👤 作者
+## 👤 Author
 
 **Timothy Yin**
 
 - Email: master@uniiem.com
-- GitHub: [@HoshinoSuzumi](https://github.com/HoshinoSuzumi)
-- Website: [bh8.ga](https://bh8.ga)
-- Gallery: [lens.bh8.ga](https://lens.bh8.ga)
+- GitHub: @HoshinoSuzumi
+- Website: bh8.ga
+- Gallery: lens.bh8.ga
+
+## ❓ FAQ
+
+<details>
+  <summary>How is the admin user created?</summary>
+  <p>
+    On first startup, an admin user is created based on <code>CFRAME_ADMIN_EMAIL</code>, <code>CFRAME_ADMIN_NAME</code>, and <code>CFRAME_ADMIN_PASSWORD</code>. The email must match your GitHub account email used for login.
+  </p>
+</details>
+<details>
+  <summary>Which image formats are supported?</summary>
+  <p>
+    Supported formats: JPEG, PNG, HEIC/HEIF, MOV (for Live Photos).
+  </p>
+</details>
+<details>
+  <summary>Why can’t I use GitHub/Local storage?</summary>
+  <p>
+    Currently only S3-compatible storage is supported. GitHub and local storage support is planned.
+  </p>
+</details>
+<details>
+  <summary>Why is a map service required and how to configure it?</summary>
+  <p>
+    The map is used to browse photo locations and render mini-maps in photo details. Currently Mapbox is used. After registering, <a href="https://console.mapbox.com/account/access-tokens/">get an access token</a> and set it to the <code>MAPBOX_TOKEN</code> variable.
+  </p>
+</details>
+<details>
+  <summary>Why wasn’t my MOV file recognized as a Live Photo?</summary>
+  <p>
+    Ensure the image (.heic) and video (.mov) share the same filename (e.g., <code>IMG_1234.heic</code> and <code>IMG_1234.mov</code>). Upload order does not matter. If not recognized, you can trigger pairing manually from the dashboard.
+  </p>
+</details>
+<details>
+  <summary>How do I import existing photos from storage?</summary>
+  <p>
+    Direct import of existing photos is not yet supported. A directory scanning import feature is planned.
+  </p>
+</details>
+<details>
+  <summary>How is this different from Afilmory?</summary>
+  <p>
+    Afilmory generates a manifest from photos during local/CI processing and serves them statically. ChronoFrame is a dynamic photo management app, offering online upload, management, and browsing—better for frequently updated galleries.
+  </p>
+</details>
+
+  
+## 🙏 Acknowledgements
+
+This project was inspired by [Afilmory](https://github.com/Afilmory/afilmory), another excellent personal gallery project.
+
+Thanks to the following open-source projects and libraries:
+
+- [Nuxt](https://nuxt.com/)
+- [TailwindCSS](https://tailwindcss.com/)
+- [Drizzle ORM](https://orm.drizzle.team/)
