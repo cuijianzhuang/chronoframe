@@ -26,6 +26,9 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
+      mapbox: {
+        accessToken: '',
+      },
       APP_TITLE: 'ChronoFrame',
       APP_SLOGAN: '',
       APP_AVATAR_URL: '/avatar.webp',
@@ -103,9 +106,5 @@ export default defineNuxtConfig({
       { code: 'en', name: 'English', file: 'en.json', language: 'en' },
       { code: 'ja', name: '日本語', file: 'ja.json', language: 'ja' },
     ],
-  },
-
-  mapbox: {
-    accessToken: process.env.MAPBOX_TOKEN || '',
   },
 })
