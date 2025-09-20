@@ -64,9 +64,9 @@ const handleToggleFilter = (type: string, value: string | number) => {
 </script>
 
 <template>
-  <div class="space-y-3 w-[calc(100vw-34px)] sm:w-md">
+  <div class="space-y-1.5 w-[calc(100vw-34px)] sm:w-md">
     <div class="flex items-center justify-between">
-      <h3 class="text-sm font-bold text-neutral-900 dark:text-white p-2 pb-0">
+      <h3 class="text-sm font-bold text-neutral-900 dark:text-white p-2">
         {{ $t('ui.action.filter.title') }}
       </h3>
       <UButton
