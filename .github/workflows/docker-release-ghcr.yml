@@ -39,7 +39,7 @@ jobs:
           echo "All tags:"
           git tag -l --sort=-version:refname
 
-          if [[ "$VERSION" == *"-"* ]]; then
+          if [[ "${{ steps.version.outputs.version }}" == *"-"* ]]; then
             # 当前为预发布版本，取最近的一个版本
             PREVIOUS_TAG=$(git tag -l --sort=-version:refname | sed -n '2p')
           else
@@ -58,11 +58,11 @@ jobs:
           fi
 
           changelog=$(echo "$changelog" | sed 's/^\[log\][[:space:]]*//')
-          
+
           echo "changelog<<EOF" >> $GITHUB_OUTPUT
           echo "$changelog" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-      
+
       - name: 📝 Create Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
