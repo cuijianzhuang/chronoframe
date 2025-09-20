@@ -4,6 +4,7 @@ interface FilterOptions {
   lenses: string[]
   cities: string[]
   ratings: number // 改为单个数字，表示最低评分
+  search: string // 搜索关键词
 }
 
 interface FilterStats {
@@ -20,7 +21,8 @@ const globalFilters = ref<FilterOptions>({
   cameras: [],
   lenses: [],
   cities: [],
-  ratings: 0
+  ratings: 0,
+  search: ''
 })
 
 export function usePhotoFilters() {
@@ -110,7 +112,8 @@ export function usePhotoFilters() {
       cameras: activeFilters.value.cameras.length,
       lenses: activeFilters.value.lenses.length,
       cities: activeFilters.value.cities.length,
-      ratings: activeFilters.value.ratings > 0 ? 1 : 0
+      ratings: activeFilters.value.ratings > 0 ? 1 : 0,
+      search: activeFilters.value.search.length > 0 ? 1 : 0
     }
   })
 
@@ -118,6 +121,28 @@ export function usePhotoFilters() {
   const filteredPhotos = computed(() => {
     // 先获取排序后的照片，再应用筛选
     return sortedPhotos.value.filter(photo => {
+      // 搜索筛选
+      if (activeFilters.value.search) {
+        const searchTerm = activeFilters.value.search.toLowerCase()
+        const searchableFields = [
+          photo.tags?.join(' ') || '',
+          photo.exif?.Make || '',
+          photo.exif?.Model || '',
+          photo.exif?.LensMake || '',
+          photo.exif?.LensModel || '',
+          photo.city || '',
+          photo.country || '',
+          photo.title || '',
+          photo.description || '',
+          photo.storageKey || '',
+          photo.locationName || '',
+        ].join(' ').toLowerCase()
+
+        if (!searchableFields.includes(searchTerm)) {
+          return false
+        }
+      }
+
       // 标签筛选
       if (activeFilters.value.tags.length > 0) {
         const photoTags = photo.tags || []
@@ -185,13 +210,18 @@ export function usePhotoFilters() {
       cameras: [],
       lenses: [],
       cities: [],
-      ratings: 0
+      ratings: 0,
+      search: ''
     }
   }
 
   // 清除指定类型的筛选
   const clearFilterType = (type: keyof FilterOptions) => {
-    activeFilters.value[type] = [] as any
+    if (type === 'ratings' || type === 'search') {
+      (activeFilters.value as any)[type] = type === 'ratings' ? 0 : ''
+    } else {
+      (activeFilters.value as any)[type] = []
+    }
   }
 
   // 检查筛选项是否被选中
@@ -201,9 +231,12 @@ export function usePhotoFilters() {
 
   // 检查是否有任何筛选项被激活
   const hasActiveFilters = computed(() => {
-    return Object.values(activeFilters.value).some(filters => 
-      Array.isArray(filters) ? filters.length > 0 : filters > 0
-    )
+    return activeFilters.value.tags.length > 0 ||
+           activeFilters.value.cameras.length > 0 ||
+           activeFilters.value.lenses.length > 0 ||
+           activeFilters.value.cities.length > 0 ||
+           activeFilters.value.ratings > 0 ||
+           activeFilters.value.search.length > 0
   })
 
   return {

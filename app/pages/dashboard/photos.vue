@@ -19,6 +19,7 @@ const dayjs = useDayjs()
 const { localizeExif } = useExifLocalization()
 
 const { photos: data, status, refresh } = usePhotos()
+const { filteredPhotos, activeFilters } = usePhotoFilters()
 
 // 当前上传的文件信息
 interface UploadingFile {
@@ -202,10 +203,10 @@ const totalRowsCount = computed((): number => {
 
 // 计算 LivePhoto 统计
 const livePhotoStats = computed(() => {
-  if (!data.value) return { total: 0, livePhotos: 0, staticPhotos: 0 }
+  if (!filteredPhotos.value) return { total: 0, livePhotos: 0, staticPhotos: 0 }
 
-  const total = data.value.length
-  const livePhotos = data.value.filter(
+  const total = filteredPhotos.value.length
+  const livePhotos = filteredPhotos.value.filter(
     (photo: Photo) => photo.isLivePhoto,
   ).length
   const staticPhotos = total - livePhotos
@@ -218,15 +219,15 @@ const photoFilter = ref<'all' | 'livephoto' | 'static'>('all')
 
 // 过滤后的数据
 const filteredData = computed(() => {
-  if (!data.value) return []
+  if (!filteredPhotos.value) return []
 
   switch (photoFilter.value) {
     case 'livephoto':
-      return data.value.filter((photo: Photo) => photo.isLivePhoto)
+      return filteredPhotos.value.filter((photo: Photo) => photo.isLivePhoto)
     case 'static':
-      return data.value.filter((photo: Photo) => !photo.isLivePhoto)
+      return filteredPhotos.value.filter((photo: Photo) => !photo.isLivePhoto)
     default:
-      return data.value
+      return filteredPhotos.value
   }
 })
 
@@ -261,6 +262,7 @@ const columns: TableColumn<Photo>[] = [
       return h(ThumbImage, {
         src: url || row.original.originalUrl || '',
         alt: row.original.title || 'Photo Thumbnail',
+        key: row.original.id,
         thumbhash: row.original.thumbnailHash || '',
         class: 'size-16 min-w-[100px] object-cover rounded-md shadow',
         onClick: () => openInNewTab(url || row.original.originalUrl || ''),
@@ -1023,6 +1025,15 @@ onUnmounted(() => {
           size="sm"
         >
         </USelectMenu>
+
+        <!-- 模糊搜索 -->
+        <UInput
+          v-model="activeFilters.search"
+          size="sm"
+          icon="tabler:search"
+          placeholder="搜索照片..."
+          class="w-32"
+        />
 
         <!-- 刷新按钮 -->
         <UButton

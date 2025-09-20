@@ -12,6 +12,14 @@ const {
 } = usePhotoFilters()
 
 const currentTab = ref('labels')
+const isSearchMode = ref(false)
+
+const searchQuery = computed({
+  get: () => activeFilters.value.search,
+  set: (value: string) => {
+    activeFilters.value.search = value
+  },
+})
 
 const selectedRating = computed({
   get: () => activeFilters.value.ratings,
@@ -69,16 +77,48 @@ const handleToggleFilter = (type: string, value: string | number) => {
       <h3 class="text-sm font-bold text-neutral-900 dark:text-white p-2">
         {{ $t('ui.action.filter.title') }}
       </h3>
-      <UButton
-        v-if="hasActiveFilters"
-        size="sm"
-        variant="ghost"
-        color="neutral"
-        icon="tabler:filter-x"
-        @click="clearAllFilters"
-      >
-        {{ $t('ui.action.filter.clearAll') }}
-      </UButton>
+      <div class="flex items-center gap-1">
+        <UButton
+          v-if="hasActiveFilters"
+          size="sm"
+          variant="ghost"
+          color="neutral"
+          icon="tabler:filter-x"
+          @click="() => {
+            clearAllFilters()
+            isSearchMode = false
+            searchQuery = ''
+          }"
+        >
+          {{ $t('ui.action.filter.clearAll') }}
+        </UButton>
+        <!-- 搜索功能 -->
+        <div v-if="isSearchMode" class="flex items-center gap-1">
+          <UInput
+            v-model="searchQuery"
+            size="sm"
+            icon="tabler:search"
+            placeholder="搜索文件名等..."
+            class="w-32"
+            @keydown.escape="isSearchMode = false"
+          />
+          <UButton
+            size="sm"
+            variant="ghost"
+            color="neutral"
+            icon="tabler:x"
+            @click="isSearchMode = false; searchQuery = ''"
+          />
+        </div>
+        <UButton
+          v-else
+          size="sm"
+          variant="ghost"
+          color="neutral"
+          icon="tabler:search"
+          @click="isSearchMode = true"
+        />
+      </div>
     </div>
     <!-- 标签页 -->
     <UTabs
