@@ -45,7 +45,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=${{ steps.version.outputs.version }}
-            type=raw,value=latest
+            type=raw,value=latest,enable=${{ !contains(steps.version.outputs.version, '-') }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -69,6 +69,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Images:**" >> $GITHUB_STEP_SUMMARY
           echo "- \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest\`" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ steps.version.outputs.version }}" != *"-"* ]]; then
+            echo "- \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest\`" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Platforms:** linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
