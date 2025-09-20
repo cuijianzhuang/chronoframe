@@ -37,7 +37,7 @@ const isReindexing = ref(false)
 const reindexResult = ref<ReindexResult | null>(null)
 
 const { data: locationStats, refresh: refreshStats } =
-  await useFetch<LocationStats>('/api/photos/reindex-city', {
+  await useFetch<LocationStats>('/api/photos/locations/geocode', {
     server: false,
   })
 
@@ -57,7 +57,7 @@ const startReindex = async (force = false) => {
   reindexResult.value = null
 
   try {
-    const data = await $fetch<ReindexResult>('/api/photos/reindex-city', {
+    const data = await $fetch<ReindexResult>('/api/photos/locations/geocode', {
       method: 'POST',
       body: { force },
     })

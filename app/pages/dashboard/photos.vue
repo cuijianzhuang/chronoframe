@@ -587,7 +587,7 @@ const handleUpdateLivePhoto = async (photoId: string) => {
       color: 'info',
     })
 
-    const result = (await $fetch('/api/photos/livephoto-manage', {
+    const result = (await $fetch('/api/photos/livephoto/manage', {
       method: 'POST',
       body: {
         action: 'update-photo',
@@ -691,10 +691,10 @@ const handleBatchDetectLivePhoto = async () => {
 
     const photoIds = selectedPhotos.map((photo: any) => photo.id)
 
-    const result = (await $fetch('/api/photos/livephoto-detect', {
+    const result = (await $fetch('/api/photos/livephoto/manage', {
       method: 'POST',
       body: {
-        action: 'batch-detect',
+        action: 'detect',
         photoIds: photoIds, // 传递选中的照片ID列表
       },
     })) as any
@@ -748,7 +748,7 @@ const handleBatchReindexExif = async () => {
 
     const photoIds = selectedPhotos.map((photo: any) => photo.id)
 
-    const result = (await $fetch('/api/photos/reindex-exif', {
+    const result = (await $fetch('/api/photos/exif/reindex', {
       method: 'POST',
       body: {
         action: 'batch-reindex',
@@ -788,7 +788,7 @@ const handleReindexSingleExif = async (photoId: string) => {
       color: 'info',
     })
 
-    const result = (await $fetch('/api/photos/reindex-exif', {
+    const result = (await $fetch('/api/photos/exif/reindex', {
       method: 'POST',
       body: {
         action: 'single-reindex',

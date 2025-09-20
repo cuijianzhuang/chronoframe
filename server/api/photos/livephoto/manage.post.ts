@@ -5,12 +5,13 @@ import {
 import { eq } from 'drizzle-orm'
 import { findLivePhotoVideoForImage } from '~~/server/services/video/livephoto'
 import { getStorageManager } from '~~/server/plugins/storage'
+import { batchTestLivePhotoDetection } from '~~/server/services/video/test-utils'
 
 export default eventHandler(async (event) => {
   await requireUserSession(event)
 
   const body = await readBody(event)
-  const { action, videoKey, photoId } = body
+  const { action, videoKey, photoId, photoIds } = body
 
   if (!action) {
     throw createError({
@@ -26,6 +27,14 @@ export default eventHandler(async (event) => {
         return {
           message: 'Scan completed',
           results: scanResults,
+        }
+      }
+
+      case 'detect': { // 批量检测现有照片的 LivePhoto 视频
+        const results = await batchTestLivePhotoDetection(photoIds)
+        return {
+          message: 'Batch LivePhoto detection completed',
+          results,
         }
       }
 
@@ -108,7 +117,7 @@ export default eventHandler(async (event) => {
         throw createError({
           statusCode: 400,
           statusMessage:
-            'Invalid action. Use "scan", "process", or "update-photo"',
+            'Invalid action. Use "scan", "detect", "process", or "update-photo"',
         })
     }
   } catch (error) {
