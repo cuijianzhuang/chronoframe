@@ -39,7 +39,13 @@ jobs:
           echo "All tags:"
           git tag -l --sort=-version:refname
 
-          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git tag -l --sort=-version:refname | sed -n '2p')
+          if [[ "$VERSION" == *"-"* ]]; then
+            # 当前为预发布版本，取最近的一个版本
+            PREVIOUS_TAG=$(git tag -l --sort=-version:refname | sed -n '2p')
+          else
+            # 当前不为预发布版本，取最近的正式版 tag
+            PREVIOUS_TAG=$(git tag -l --sort=-version:refname | grep -v '-' | sed -n '2p')
+          fi
 
           echo "Previous tag: $PREVIOUS_TAG"
 
