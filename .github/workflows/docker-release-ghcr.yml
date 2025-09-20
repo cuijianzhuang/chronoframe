@@ -28,6 +28,41 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
 
+      - name: 📝 Generate changelog
+        id: changelog
+        run: |
+          echo "Generating changelog..."
+
+          echo "All tags:"
+          git tag -l --sort=-version:refname
+
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git tag -l --sort=-version:refname | sed -n '2p')
+
+          echo "Previous tag: $PREVIOUS_TAG"
+
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "Generating changelog from $PREVIOUS_TAG to current"
+            changelog=$(npx @uniiem/changelogen@latest --from=$PREVIOUS_TAG --no-output --noMerges)
+          else
+            echo "No previous tag found, generating full changelog"
+            changelog=$(npx @uniiem/changelogen@latest --no-output --noMerges)
+          fi
+
+          changelog=$(echo "$changelog" | sed 's/^\[log\][[:space:]]*//')
+          
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$changelog" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: 📝 Create Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
