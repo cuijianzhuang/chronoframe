@@ -57,6 +57,7 @@ docker run -d \
   -e NUXT_PUBLIC_APP_TITLE="" \
   -e NUXT_PUBLIC_APP_SLOGAN="" \
   -e NUXT_PUBLIC_APP_AVATAR_URL="" \
+  -e NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN="" \
   -e NUXT_STORAGE_PROVIDER="s3" \
   -e NUXT_PROVIDER_S3_ENDPOINT="" \
   -e NUXT_PROVIDER_S3_BUCKET="chronoframe" \
@@ -68,7 +69,6 @@ docker run -d \
   -e NUXT_OAUTH_GITHUB_CLIENT_ID="" \
   -e NUXT_OAUTH_GITHUB_CLIENT_SECRET="" \
   -e NUXT_SESSION_PASSWORD="" \
-  -e MAPBOX_TOKEN="" \
   ghcr.io/hoshinosuzumi/chronoframe:latest
 ```
 
@@ -89,8 +89,12 @@ NUXT_PUBLIC_APP_TITLE=
 NUXT_PUBLIC_APP_SLOGAN=
 NUXT_PUBLIC_APP_AVATAR_URL=
 
-# 存储配置（使用 S3）
+# Mapbox Token
+NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
+
+# 存储提供者（s3/github/local）
 NUXT_STORAGE_PROVIDER=s3
+# S3 存储服务配置
 NUXT_PROVIDER_S3_ENDPOINT=
 NUXT_PROVIDER_S3_BUCKET=chronoframe
 NUXT_PROVIDER_S3_REGION=auto
@@ -99,15 +103,13 @@ NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=
 NUXT_PROVIDER_S3_PREFIX=photos/
 NUXT_PROVIDER_S3_CDN_URL=
 
-# 会话密码（必须设置，建议为一个随机长字符串）
+# 会话密码（32 位随机字符串，必须设置）
 NUXT_SESSION_PASSWORD=
 
 # GitHub OAuth
 NUXT_OAUTH_GITHUB_CLIENT_ID=
 NUXT_OAUTH_GITHUB_CLIENT_SECRET=
 
-# Mapbox Token
-MAPBOX_TOKEN=
 ```
 
 创建 `docker-compose.yml`：
@@ -142,6 +144,7 @@ docker-compose up -d
 | NUXT_PUBLIC_APP_TITLE              | 应用标题                                 | ChronoFrame | 否                                        |
 | NUXT_PUBLIC_APP_SLOGAN             | 应用口号                                 | 无          | 否                                        |
 | NUXT_PUBLIC_APP_AVATAR_URL         | 应用头像 URL                             | 无          | 否                                        |
+| NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN    | Mapbox 访问令牌，用于地图服务            | 无          | 是                                        |
 | NUXT_STORAGE_PROVIDER              | 存储提供者，支持 `s3`、`github`、`local` | `s3`        | 是                                        |
 | NUXT_PROVIDER_S3_ENDPOINT          | S3 兼容存储服务的 Endpoint               | 无          | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
 | NUXT_PROVIDER_S3_BUCKET            | S3 存储桶名称                            | chronoframe | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
@@ -153,7 +156,6 @@ docker-compose up -d
 | NUXT_OAUTH_GITHUB_CLIENT_ID        | GitHub OAuth 应用的 Client ID            | 无          | 是                                        |
 | NUXT_OAUTH_GITHUB_CLIENT_SECRET    | GitHub OAuth 应用的 Client Secret        | 无          | 是                                        |
 | NUXT_SESSION_PASSWORD              | 用于加密会话的密码，32 位随机字符串      | 无          | 是                                        |
-| MAPBOX_TOKEN                       | Mapbox 访问令牌，用于地图服务            | 无          | 是                                        |
 
 ## 📸 截图
 

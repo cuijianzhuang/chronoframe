@@ -19,24 +19,24 @@ A smooth photo display and management application, supporting multiple image for
 
 ### 🖼️ Powerful Photo Management
 
-- **Manage photos online** - Easily manage and browse photos via the web interface  
-- **Explore map** - Browse photo locations on a map  
-- **Smart EXIF parsing** - Automatically extracts metadata such as capture time, geolocation, and camera parameters  
-- **Reverse geocoding** - Automatically identifies photo shooting locations  
-- **Multi-format support** - Supports mainstream formats including JPEG, PNG, HEIC/HEIF  
-- **Smart thumbnails** - Efficient thumbnail generation using ThumbHash  
+- **Manage photos online** - Easily manage and browse photos via the web interface
+- **Explore map** - Browse photo locations on a map
+- **Smart EXIF parsing** - Automatically extracts metadata such as capture time, geolocation, and camera parameters
+- **Reverse geocoding** - Automatically identifies photo shooting locations
+- **Multi-format support** - Supports mainstream formats including JPEG, PNG, HEIC/HEIF
+- **Smart thumbnails** - Efficient thumbnail generation using ThumbHash
 
 ### 🔧 Modern Tech Stack
 
-- **Nuxt 4** - Built on the latest Nuxt framework with SSR/SSG support  
-- **TypeScript** - Full type safety  
-- **TailwindCSS** - Modern CSS framework  
-- **Drizzle ORM** - Type-safe database ORM  
+- **Nuxt 4** - Built on the latest Nuxt framework with SSR/SSG support
+- **TypeScript** - Full type safety
+- **TailwindCSS** - Modern CSS framework
+- **Drizzle ORM** - Type-safe database ORM
 
 ### ☁️ Flexible Storage Solutions
 
-- **Multiple storage backends** - Supports S3-compatible storage, GitHub (WIP), and local filesystem (WIP)  
-- **CDN acceleration** - Configurable CDN URL for faster photo delivery  
+- **Multiple storage backends** - Supports S3-compatible storage, GitHub (WIP), and local filesystem (WIP)
+- **CDN acceleration** - Configurable CDN URL for faster photo delivery
 
 ## 🐳 Deployment
 
@@ -57,6 +57,7 @@ docker run -d \
   -e NUXT_PUBLIC_APP_TITLE="" \
   -e NUXT_PUBLIC_APP_SLOGAN="" \
   -e NUXT_PUBLIC_APP_AVATAR_URL="" \
+  -e NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN="" \
   -e NUXT_STORAGE_PROVIDER="s3" \
   -e NUXT_PROVIDER_S3_ENDPOINT="" \
   -e NUXT_PROVIDER_S3_BUCKET="chronoframe" \
@@ -68,7 +69,6 @@ docker run -d \
   -e NUXT_OAUTH_GITHUB_CLIENT_ID="" \
   -e NUXT_OAUTH_GITHUB_CLIENT_SECRET="" \
   -e NUXT_SESSION_PASSWORD="" \
-  -e MAPBOX_TOKEN="" \
   ghcr.io/hoshinosuzumi/chronoframe:latest
 ```
 
@@ -84,13 +84,16 @@ CFRAME_ADMIN_NAME=
 # Admin user password (default to CF1234@!, optional)
 CFRAME_ADMIN_PASSWORD=
 
-# 应用标题与口号
+# App info
 NUXT_PUBLIC_APP_TITLE=
 NUXT_PUBLIC_APP_SLOGAN=
 NUXT_PUBLIC_APP_AVATAR_URL=
+# Mapbox Token
+NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
 
-# 存储配置（使用 S3）
+# Storage provider (s3/github/local)
 NUXT_STORAGE_PROVIDER=s3
+# S3 storage config
 NUXT_PROVIDER_S3_ENDPOINT=
 NUXT_PROVIDER_S3_BUCKET=chronoframe
 NUXT_PROVIDER_S3_REGION=auto
@@ -99,15 +102,13 @@ NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=
 NUXT_PROVIDER_S3_PREFIX=photos/
 NUXT_PROVIDER_S3_CDN_URL=
 
-# 会话密码（必须设置，建议为一个随机长字符串）
+# Session password (32 chars, required)
 NUXT_SESSION_PASSWORD=
 
 # GitHub OAuth
 NUXT_OAUTH_GITHUB_CLIENT_ID=
 NUXT_OAUTH_GITHUB_CLIENT_SECRET=
 
-# Mapbox Token
-MAPBOX_TOKEN=
 ```
 
 Create docker-compose.yml:
@@ -134,26 +135,26 @@ docker-compose up -d
 
 ### Environment Variables
 
-| Variable                           | Description                                     | Default      | Required                                  |
-| :--------------------------------- | :--------------------------------------------- | :---------- | :---------------------------------------- |
-| CFRAME_ADMIN_EMAIL                 | Email of the initial admin user                | None        | Yes, must be the GitHub account email used for login |
-| CFRAME_ADMIN_NAME                  | Username of the initial admin                   | Chronoframe | No                                        |
-| CFRAME_ADMIN_PASSWORD              | Password of the initial admin                   | CF1234@!    | No                                        |
-| NUXT_PUBLIC_APP_TITLE              | Application title                               | ChronoFrame | No                                        |
-| NUXT_PUBLIC_APP_SLOGAN             | Application slogan                               | None        | No                                        |
-| NUXT_PUBLIC_APP_AVATAR_URL         | Application avatar URL                           | None        | No                                        |
-| NUXT_STORAGE_PROVIDER              | Storage provider (s3, github, local)           | s3          | Yes                                      |
-| NUXT_PROVIDER_S3_ENDPOINT          | S3 endpoint                                    | None        | Required if provider is s3                |
-| NUXT_PROVIDER_S3_BUCKET            | S3 bucket name                                 | chronoframe | Required if provider is s3                |
-| NUXT_PROVIDER_S3_REGION            | S3 bucket region                               | auto        | Required if provider is s3                |
-| NUXT_PROVIDER_S3_ACCESS_KEY_ID     | S3 access key ID                               | None        | Required if provider is s3                |
-| NUXT_PROVIDER_S3_SECRET_ACCESS_KEY | S3 secret access key                           | None        | Required if provider is s3                |
-| NUXT_PROVIDER_S3_PREFIX            | S3 object prefix                               | photos/     | No                                        |
-| NUXT_PROVIDER_S3_CDN_URL           | S3 CDN URL                                    | None        | No                                        |
-| NUXT_OAUTH_GITHUB_CLIENT_ID        | GitHub OAuth app Client ID                     | None        | Yes                                      |
-| NUXT_OAUTH_GITHUB_CLIENT_SECRET    | GitHub OAuth app Client Secret                 | None        | Yes                                      |
-| NUXT_SESSION_PASSWORD              | Session encryption password (32 chars)        | None        | Yes                                      |
-| MAPBOX_TOKEN                       | Mapbox access token for map service           | None        | Yes                                      |
+| Variable                           | Description                            | Default     | Required                                             |
+| :--------------------------------- | :------------------------------------- | :---------- | :--------------------------------------------------- |
+| CFRAME_ADMIN_EMAIL                 | Email of the initial admin user        | None        | Yes, must be the GitHub account email used for login |
+| CFRAME_ADMIN_NAME                  | Username of the initial admin          | Chronoframe | No                                                   |
+| CFRAME_ADMIN_PASSWORD              | Password of the initial admin          | CF1234@!    | No                                                   |
+| NUXT_PUBLIC_APP_TITLE              | Application title                      | ChronoFrame | No                                                   |
+| NUXT_PUBLIC_APP_SLOGAN             | Application slogan                     | None        | No                                                   |
+| NUXT_PUBLIC_APP_AVATAR_URL         | Application avatar URL                 | None        | No                                                   |
+| NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN    | Mapbox access token for map service    | None        | Yes                                                  |
+| NUXT_STORAGE_PROVIDER              | Storage provider (s3, github, local)   | s3          | Yes                                                  |
+| NUXT_PROVIDER_S3_ENDPOINT          | S3 endpoint                            | None        | Required if provider is s3                           |
+| NUXT_PROVIDER_S3_BUCKET            | S3 bucket name                         | chronoframe | Required if provider is s3                           |
+| NUXT_PROVIDER_S3_REGION            | S3 bucket region                       | auto        | Required if provider is s3                           |
+| NUXT_PROVIDER_S3_ACCESS_KEY_ID     | S3 access key ID                       | None        | Required if provider is s3                           |
+| NUXT_PROVIDER_S3_SECRET_ACCESS_KEY | S3 secret access key                   | None        | Required if provider is s3                           |
+| NUXT_PROVIDER_S3_PREFIX            | S3 object prefix                       | photos/     | No                                                   |
+| NUXT_PROVIDER_S3_CDN_URL           | S3 CDN URL                             | None        | No                                                   |
+| NUXT_OAUTH_GITHUB_CLIENT_ID        | GitHub OAuth app Client ID             | None        | Yes                                                  |
+| NUXT_OAUTH_GITHUB_CLIENT_SECRET    | GitHub OAuth app Client Secret         | None        | Yes                                                  |
+| NUXT_SESSION_PASSWORD              | Session encryption password (32 chars) | None        | Yes                                                  |
 
 ## 📸 Screenshots
 
@@ -246,20 +247,20 @@ pnpm preview
 
 ### Uploading Photos
 
-1.	Click avatar to sign in with GitHub OAuth
-2.	Go to the dashboard at /dashboard
-3.	On the Photos page, select and upload images (supports batch & drag-and-drop)
-4.	System will automatically parse EXIF data, generate thumbnails, and perform reverse geocoding
+1. Click avatar to sign in with GitHub OAuth
+2. Go to the dashboard at /dashboard
+3. On the Photos page, select and upload images (supports batch & drag-and-drop)
+4. System will automatically parse EXIF data, generate thumbnails, and perform reverse geocoding
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please:
 
-1.	Fork the repo
-2.	Create a feature branch (git checkout -b feature/amazing-feature)
-3.	Commit changes (git commit -m 'Add some amazing feature')
-4.	Push to branch (git push origin feature/amazing-feature)
-5.	Open a Pull Request
+1. Fork the repo
+2. Create a feature branch (git checkout -b feature/amazing-feature)
+3. Commit changes (git commit -m 'Add some amazing feature')
+4. Push to branch (git push origin feature/amazing-feature)
+5. Open a Pull Request
 
 ### Coding Guidelines
 
@@ -326,7 +327,6 @@ This project is licensed under the MIT License.
   </p>
 </details>
 
-  
 ## 🙏 Acknowledgements
 
 This project was inspired by [Afilmory](https://github.com/Afilmory/afilmory), another excellent personal gallery project.
