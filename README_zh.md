@@ -157,6 +157,20 @@ docker-compose up -d
 | NUXT_OAUTH_GITHUB_CLIENT_SECRET    | GitHub OAuth 应用的 Client Secret        | 无          | 是                                        |
 | NUXT_SESSION_PASSWORD              | 用于加密会话的密码，32 位随机字符串      | 无          | 是                                        |
 
+## 📖 使用指南
+
+> 如未配置 `CFRAME_ADMIN_EMAIL` 和 `CFRAME_ADMIN_PASSWORD`，默认账号如下：
+> - 邮箱: `admin@chronoframe.com`
+> - 密码: `CF1234@!`
+
+### 登录到控制台
+1. 点击头像跳转到登录页面，可以使用账号密码或 GitHub 登录
+
+### 上传照片
+1. 访问仪表板页面 `/dashboard`
+2. 在 `Photos` 页面中选择图片并点击上传（支持批量上传和拖拽上传）
+3. 系统将自动提取 EXIF 信息、生成缩略图并逆编码照片地理位置
+
 ## 📸 截图
 
 ![Gallery](./docs/images/screenshot1.png)
@@ -245,15 +259,6 @@ pnpm db:migrate     # 执行迁移
 # 预览生产版本
 pnpm preview
 ```
-
-## 📖 使用指南
-
-### 上传照片
-
-1. 点击头像跳转到 GitHub 认证登录
-2. 访问仪表板页面 `/dashboard`
-3. 在 `Photos` 页面中选择图片并点击上传（支持批量上传和拖拽上传）
-4. 系统将自动提取 EXIF 信息、生成缩略图并逆编码照片地理位置
 
 ## 🤝 贡献
 

@@ -244,5 +244,26 @@
     "dashboard": "Dashboard",
     "photos": "Photos",
     "locations": "Locations"
+  },
+  "auth": {
+    "form": {
+      "errors": {
+        "invalidEmail": "Invalid email address",
+        "invalidPassword": ""
+      },
+      "signin": {
+        "title": "Sign In",
+        "subtitle": "Log in to ChronoFrame"
+      },
+      "action": {
+        "backToHome": "Back to Home",
+        "or": "OR",
+        "continue": "Continue"
+      },
+      "labels": {
+        "email": "Email",
+        "password": "Password"
+      }
+    }
   }
 }

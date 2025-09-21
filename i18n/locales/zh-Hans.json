@@ -244,5 +244,26 @@
     "gallery": "相册",
     "locations": "位置管理",
     "photos": "照片库"
+  },
+  "auth": {
+    "form": {
+      "errors": {
+        "invalidEmail": "无效的电子邮件地址",
+        "invalidPassword": "密码至少需要6个字符"
+      },
+      "action": {
+        "backToHome": "回到首页",
+        "or": "或",
+        "continue": "继续"
+      },
+      "signin": {
+        "title": "登入",
+        "subtitle": "登录到 ChronoFrame"
+      },
+      "labels": {
+        "email": "电子邮箱",
+        "password": "密码"
+      }
+    }
   }
 }

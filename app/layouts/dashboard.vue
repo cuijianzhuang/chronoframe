@@ -28,6 +28,7 @@ useHead({
 })
 
 const route = useRoute()
+const router = useRouter()
 const config = useRuntimeConfig()
 const { loggedIn, user } = useUserSession()
 
@@ -39,7 +40,10 @@ const isRouteActive = (itemPath: string) => {
 }
 
 const handleLogin = () => {
-  window.location.href = '/api/auth/github'
+  router.push({
+    path: '/signin',
+    query: { redirect: route.fullPath },
+  })
 }
 
 const toggleMobileMenu = () => {
@@ -108,53 +112,53 @@ const closeMobileMenu = () => {
         <!-- 移动端下拉菜单 -->
         <AnimatePresence>
           <motion.div
-          v-if="isMobileMenuOpen"
-          :initial="{ opacity: 0, y: -10, height: 0 }"
-          :animate="{ opacity: 1, y: 0, height: 'auto' }"
-          :exit="{ opacity: 0, y: -10, height: 0 }"
-          :transition="{ 
-            duration: 0.3, 
-            ease: 'easeOut',
-            height: { duration: 0.2 }
-          }"
-          class="border-t border-default bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-hidden"
-        >
-          <nav class="py-2">
-            <motion.div
-              v-for="(item, index) in items"
-              :key="index"
-              :initial="{ opacity: 0, x: -20 }"
-              :animate="{ opacity: 1, x: 0 }"
-              :transition="{ 
-                duration: 0.2, 
-                delay: index * 0.06,
-                ease: 'easeOut'
-              }"
-            >
-              <NuxtLink
-                :to="item.to"
-                :class="[
-                  'flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors',
-                  isRouteActive(item.to as string)
-                    ? 'bg-primary/10 text-primary border-r-2 border-primary'
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
-                ]"
-                @click="closeMobileMenu"
+            v-if="isMobileMenuOpen"
+            :initial="{ opacity: 0, y: -10, height: 0 }"
+            :animate="{ opacity: 1, y: 0, height: 'auto' }"
+            :exit="{ opacity: 0, y: -10, height: 0 }"
+            :transition="{
+              duration: 0.3,
+              ease: 'easeOut',
+              height: { duration: 0.2 },
+            }"
+            class="border-t border-default bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-hidden"
+          >
+            <nav class="py-2">
+              <motion.div
+                v-for="(item, index) in items"
+                :key="index"
+                :initial="{ opacity: 0, x: -20 }"
+                :animate="{ opacity: 1, x: 0 }"
+                :transition="{
+                  duration: 0.2,
+                  delay: index * 0.06,
+                  ease: 'easeOut',
+                }"
               >
-                <Icon
-                  :name="item.icon!"
+                <NuxtLink
+                  :to="item.to"
                   :class="[
-                    'size-5',
+                    'flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors',
                     isRouteActive(item.to as string)
-                      ? 'text-primary'
-                      : 'text-gray-500'
+                      ? 'bg-primary/10 text-primary border-r-2 border-primary'
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300',
                   ]"
-                />
-                <span>{{ item.label }}</span>
-              </NuxtLink>
-            </motion.div>
-          </nav>
-        </motion.div>
+                  @click="closeMobileMenu"
+                >
+                  <Icon
+                    :name="item.icon!"
+                    :class="[
+                      'size-5',
+                      isRouteActive(item.to as string)
+                        ? 'text-primary'
+                        : 'text-gray-500',
+                    ]"
+                  />
+                  <span>{{ item.label }}</span>
+                </NuxtLink>
+              </motion.div>
+            </nav>
+          </motion.div>
         </AnimatePresence>
       </div>
     </header>
@@ -176,7 +180,7 @@ const closeMobileMenu = () => {
             : 'Sorry, you do not have access to this page.'
         }}
       </p>
-      <UButton @click="handleLogin">Login with GitHub</UButton>
+      <UButton @click="handleLogin">Sign In</UButton>
     </div>
   </div>
 </template>

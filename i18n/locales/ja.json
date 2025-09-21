@@ -244,5 +244,21 @@
     "dashboard": "ダッシュボード",
     "photos": "写真",
     "locations": "場所"
+  },
+  "auth": {
+    "form": {
+      "signin": {
+        "title": "サインイン",
+        "subtitle": "ChronoFrame にログインします"
+      },
+      "action": {
+        "or": "または",
+        "continue": "続く"
+      },
+      "labels": {
+        "email": "メール",
+        "password": "パスワード"
+      }
+    }
   }
 }

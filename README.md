@@ -156,6 +156,23 @@ docker-compose up -d
 | NUXT_OAUTH_GITHUB_CLIENT_SECRET    | GitHub OAuth app Client Secret         | None        | Yes                                                  |
 | NUXT_SESSION_PASSWORD              | Session encryption password (32 chars) | None        | Yes                                                  |
 
+## 📖 User Guide
+
+> If `CFRAME_ADMIN_EMAIL` and `CFRAME_ADMIN_PASSWORD` are not set, the default admin account is:
+> - Email: `admin@chronoframe.com`
+> - Password: `CF1234@!`
+
+### Logging into the Dashboard
+
+1. Click avatar to sign in with GitHub OAuth or use email/password login
+
+### Uploading Photos
+
+1. Go to the dashboard at /dashboard
+2. On the Photos page, select and upload images (supports batch & drag-and-drop)
+3. System will automatically parse EXIF data, generate thumbnails, and perform reverse geocoding
+
+
 ## 📸 Screenshots
 
 ![Gallery](./docs/images/screenshot1.png)
@@ -242,16 +259,6 @@ pnpm db:migrate     # Run migrations
 # Preview production build
 pnpm preview
 ```
-
-## 📖 User Guide
-
-### Uploading Photos
-
-1. Click avatar to sign in with GitHub OAuth
-2. Go to the dashboard at /dashboard
-3. On the Photos page, select and upload images (supports batch & drag-and-drop)
-4. System will automatically parse EXIF data, generate thumbnails, and perform reverse geocoding
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please:

@@ -1,6 +1,13 @@
+const _accessDeniedError = createError({
+  statusCode: 403,
+  statusMessage:
+    'Access denied. Please contact the administrator to activate your account.',
+})
+
 export default defineOAuthGitHubEventHandler({
   async onSuccess(event, { user }) {
-    const userFromEmail = await useDB()
+    const db = useDB()
+    const userFromEmail = db
       .select()
       .from(tables.users)
       .where(eq(tables.users.email, user.email || ''))
@@ -14,8 +21,7 @@ export default defineOAuthGitHubEventHandler({
 
     if (!userFromEmail) {
       // create a new user without admin permission
-      await useDB()
-        .insert(tables.users)
+      db.insert(tables.users)
         .values({
           username: user.name || '',
           email: user.email || '',
@@ -25,26 +31,19 @@ export default defineOAuthGitHubEventHandler({
         .returning()
         .get()
       // then reject login
-      throw createError({
-        statusCode: 403,
-        statusMessage:
-          'Access denied. Please contact the administrator to activate your account.',
-      })
+      throw _accessDeniedError
     } else if (userFromEmail.isAdmin === 0) {
-      throw createError({
-        statusCode: 403,
-        statusMessage:
-          'Access denied. Please contact the administrator to activate your account.',
-      })
+      throw _accessDeniedError
     } else {
       await setUserSession(event, { user: userFromEmail })
     }
     return sendRedirect(event, '/')
   },
-  onError(_event) {
+  onError(event, error) {
+    logger.chrono.warn('GitHub OAuth login failed', error)
     throw createError({
       statusCode: 401,
-      statusMessage: 'Authentication failed',
+      statusMessage: `Authentication failed: ${error.message || 'Unknown error'}`,
     })
   },
 })

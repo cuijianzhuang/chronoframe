@@ -12,6 +12,7 @@ defineProps<{
   dateRangeText: string
 }>()
 
+const router = useRouter()
 const config = useRuntimeConfig()
 const colorMode = useColorMode()
 
@@ -25,8 +26,7 @@ const isDark = computed({
 })
 
 const handleOpenLogin = () => {
-  window.location.href = '/api/auth/github'
-  console.log('Login button clicked')
+  router.push('/signin')
 }
 
 // 获取筛选状态

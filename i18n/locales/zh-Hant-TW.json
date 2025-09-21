@@ -244,5 +244,21 @@
     "locations": "位置管理",
     "photos": "相片庫",
     "gallery": "相片集"
+  },
+  "auth": {
+    "form": {
+      "signin": {
+        "title": "登入",
+        "subtitle": "登錄到 ChronoFrame"
+      },
+      "action": {
+        "or": "或",
+        "continue": "繼續"
+      },
+      "labels": {
+        "email": "電子郵箱",
+        "password": "密碼"
+      }
+    }
   }
 }
