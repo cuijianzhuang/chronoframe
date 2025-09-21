@@ -49,6 +49,9 @@ export default defineNuxtConfig({
       deployConfig: true,
       nodeCompat: true,
     },
+    experimental: {
+      tasks: true,
+    },
   },
 
   vite: {

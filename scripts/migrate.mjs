@@ -65,7 +65,7 @@ try {
   if (existingUsers.length === 0) {
     console.log('No users found, creating admin user...')
     const hashedPassword = await hashPassword(
-      process.env.CFRAME_ADMIN_PASSWORD || 'admin',
+      process.env.CFRAME_ADMIN_PASSWORD || 'CF1234@!',
     )
 
     await db.insert(usersTable).values({

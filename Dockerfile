@@ -10,14 +10,12 @@ COPY packages/webgl-image/package.json ./packages/webgl-image/
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 
 FROM base AS build
-ARG MAPBOX_TOKEN
 WORKDIR /usr/src/app
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY --from=deps /usr/src/app/packages/webgl-image/node_modules ./packages/webgl-image/node_modules
 COPY . .
-ENV MAPBOX_TOKEN=$MAPBOX_TOKEN
-RUN pnpm run build:deps
-RUN pnpm run build
+RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm run build:deps
+RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm run build
 
 FROM node:22-alpine AS runtime
 RUN apk add --no-cache perl exiftool
@@ -46,4 +44,4 @@ ENV NODE_ENV=production
 ENV NITRO_PORT=3000
 ENV NITRO_HOST=0.0.0.0
 
-CMD ["sh", "-c", "node scripts/migrate.mjs && node .output/server/index.mjs"]
+CMD ["sh", "-c", "node .output/server/index.mjs"]

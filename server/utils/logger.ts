@@ -14,7 +14,7 @@ export const logger = {
   fs: mConsola.withTag('cframe/fs'),
   image: mConsola.withTag('cframe/image'),
   location: mConsola.withTag('cframe/location'),
-  dynamic: (id: string) => mConsola.withTag(id.toUpperCase()),
+  dynamic: (id: string) => mConsola.withTag(`cframe/${id}`),
 }
 
 export type Logger = Omit<typeof logger, 'dynamic'>
