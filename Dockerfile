@@ -21,17 +21,6 @@ FROM node:22-alpine AS runtime
 RUN apk add --no-cache perl exiftool
 WORKDIR /app
 
-# Copy only production package files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages/webgl-image/package.json ./packages/webgl-image/
-
-# Install only production dependencies
-RUN corepack enable && \
-  pnpm install --prod --frozen-lockfile && \
-  pnpm store prune && \
-  rm -rf /root/.npm /root/.pnpm-store /tmp/*
-
-# Copy built application
 COPY --from=build /usr/src/app/.output ./.output
 COPY --from=build /usr/src/app/packages/webgl-image/dist ./packages/webgl-image/dist
 COPY --from=build /usr/src/app/scripts ./scripts
@@ -44,4 +33,4 @@ ENV NODE_ENV=production
 ENV NITRO_PORT=3000
 ENV NITRO_HOST=0.0.0.0
 
-CMD ["sh", "-c", "node .output/server/index.mjs"]
+CMD ["node", ".output/server/index.mjs"]
