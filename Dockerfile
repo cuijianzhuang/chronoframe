@@ -18,7 +18,7 @@ RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm run build:deps
 RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm run build
 
 FROM node:22-alpine AS runtime
-RUN apk add --no-cache perl exiftool
+RUN apk update && apk add --no-cache perl exiftool
 WORKDIR /app
 
 COPY --from=build /usr/src/app/.output ./.output
