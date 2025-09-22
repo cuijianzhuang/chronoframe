@@ -7,6 +7,7 @@ definePageMeta({
 
 const route = useRoute()
 const router = useRouter()
+const config = useRuntimeConfig()
 
 const { switchToIndex, closeViewer, openViewer } = useViewerState()
 const { currentPhotoIndex, isViewerOpen } = storeToRefs(useViewerState())
@@ -15,6 +16,22 @@ const { photos } = usePhotos()
 
 const slug = computed(() => (route.params.slug as string[]) || [])
 const photoId = computed(() => slug.value[0] || null)
+const currentPhoto = computed(() =>
+  photos.value.find((photo) => photo.id === photoId.value),
+)
+
+defineOgImageComponent('Photo', {
+  headline: currentPhoto.value ? 'PHOTO' : 'ChronoFrame',
+  title: currentPhoto.value?.title || config.public.APP_TITLE,
+  description: currentPhoto.value
+    ? currentPhoto.value.description
+    : config.public.APP_SLOGAN,
+  thumbnailJpegUrl:
+    currentPhoto.value && currentPhoto.value.thumbnailKey
+      ? `/thumb/${currentPhoto.value.thumbnailKey}`
+      : undefined,
+  photo: currentPhoto.value || undefined,
+})
 
 // 处理标签查询参数
 const { clearAllFilters, toggleFilter } = usePhotoFilters()

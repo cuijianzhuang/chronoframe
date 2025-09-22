@@ -202,6 +202,7 @@ async function processPhotoInternal(
       height: metadata.height,
       aspectRatio: metadata.width / metadata.height,
       storageKey: s3key,
+      thumbnailKey: thumbnailObject.key,
       fileSize: storageObject.size || null,
       lastModified:
         storageObject.lastModified?.toISOString() || new Date().toISOString(),

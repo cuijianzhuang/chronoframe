@@ -14,7 +14,6 @@ const { photos } = usePhotos()
           :photos="photos"
           columns="auto"
         />
-        <slot />
         <template #fallback>
           <div
             class="fixed inset-0 flex flex-col gap-4 items-center justify-center"
@@ -28,6 +27,7 @@ const { photos } = usePhotos()
           </div>
         </template>
       </ClientOnly>
+      <slot />
     </div>
   </div>
 </template>

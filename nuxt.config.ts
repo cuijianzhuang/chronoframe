@@ -3,7 +3,7 @@ import tailwindcss from '@tailwindcss/vite'
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: false },
+  devtools: { enabled: true },
 
   modules: [
     'reka-ui/nuxt',
@@ -20,6 +20,7 @@ export default defineNuxtConfig({
     'dayjs-nuxt',
     '@nuxtjs/i18n',
     'nuxt-mapbox',
+    'nuxt-og-image',
   ],
 
   css: ['~/assets/css/tailwind.css'],
@@ -74,6 +75,11 @@ export default defineNuxtConfig({
     },
   },
 
+  ogImage: {
+    fonts: ['Rubik:400', 'Rubik:700', 'Noto+Sans+SC:400', 'Noto+Sans+SC:700'],
+    googleFontMirror: true,
+  },
+
   dayjs: {
     locales: ['zh-cn', 'zh-hk', 'en'],
     plugins: ['relativeTime', 'utc', 'timezone', 'duration', 'localizedFormat'],
@@ -84,7 +90,7 @@ export default defineNuxtConfig({
     detectBrowserLanguage: {
       fallbackLocale: 'en',
       useCookie: false,
-      cookieKey: 'chronoframe-locale'
+      cookieKey: 'chronoframe-locale',
     },
     strategy: 'no_prefix',
     locales: [

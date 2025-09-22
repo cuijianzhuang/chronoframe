@@ -22,6 +22,13 @@
       "when": 1756831944824,
       "tag": "0002_faulty_tyrannus",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1758511705153,
+      "tag": "0003_nifty_hellcat",
+      "breakpoints": true
     }
   ]
 }

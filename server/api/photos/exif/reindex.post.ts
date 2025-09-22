@@ -1,5 +1,8 @@
 import { eq, isNotNull, inArray, and } from 'drizzle-orm'
-import { extractExifData, extractPhotoInfo } from '~~/server/services/image/exif'
+import {
+  extractExifData,
+  extractPhotoInfo,
+} from '~~/server/services/image/exif'
 
 export default eventHandler(async (event) => {
   await requireUserSession(event)
@@ -15,7 +18,7 @@ export default eventHandler(async (event) => {
         .from(tables.photos)
         .where(eq(tables.photos.id, photoId))
         .limit(1)
-        .then(rows => rows[0])
+        .then((rows) => rows[0])
 
       if (!photo) {
         throw createError({
@@ -29,7 +32,7 @@ export default eventHandler(async (event) => {
       // 重新提取文件的元数据
       const { storageProvider } = useStorageProvider(event)
       const fileBuffer = await storageProvider.get(photo.storageKey!)
-      
+
       if (!fileBuffer) {
         throw createError({
           statusCode: 404,
@@ -38,7 +41,11 @@ export default eventHandler(async (event) => {
       }
 
       // 提取新的 EXIF 数据
-      const exifData = await extractExifData(fileBuffer, undefined, logger.chrono)
+      const exifData = await extractExifData(
+        fileBuffer,
+        undefined,
+        logger.chrono,
+      )
       const photoInfo = extractPhotoInfo(photo.storageKey!, exifData)
 
       // 更新数据库中的 EXIF 数据
@@ -50,6 +57,7 @@ export default eventHandler(async (event) => {
           dateTaken: photoInfo.dateTaken,
           tags: photoInfo.tags,
           lastModified: new Date().toISOString(),
+          thumbnailKey: `${storageProvider.config?.prefix?.replace(/\/$/, '')}/thumbnails/${photoId}.webp`,
         })
         .where(eq(tables.photos.id, photoId))
 
@@ -76,8 +84,8 @@ export default eventHandler(async (event) => {
           .where(
             and(
               isNotNull(tables.photos.storageKey),
-              inArray(tables.photos.id, photoIds)
-            )
+              inArray(tables.photos.id, photoIds),
+            ),
           )
       } else {
         // 处理所有照片
@@ -102,7 +110,9 @@ export default eventHandler(async (event) => {
         }
       }
 
-      logger.chrono.info(`Starting batch EXIF reindexing for ${photos.length} photos`)
+      logger.chrono.info(
+        `Starting batch EXIF reindexing for ${photos.length} photos`,
+      )
 
       let processed = 0
       let updated = 0
@@ -112,14 +122,14 @@ export default eventHandler(async (event) => {
       for (const photo of photos) {
         try {
           processed++
-          
+
           logger.chrono.info(
-            `Processing photo ${photo.id} (${processed}/${photos.length})`
+            `Processing photo ${photo.id} (${processed}/${photos.length})`,
           )
 
           // 获取文件
           const fileBuffer = await storageProvider.get(photo.storageKey!)
-          
+
           if (!fileBuffer) {
             errors.push({
               photoId: photo.id,
@@ -129,7 +139,11 @@ export default eventHandler(async (event) => {
           }
 
           // 提取元数据和照片信息
-          const exifData = await extractExifData(fileBuffer, undefined, logger.chrono)
+          const exifData = await extractExifData(
+            fileBuffer,
+            undefined,
+            logger.chrono,
+          )
           const photoInfo = extractPhotoInfo(photo.storageKey!, exifData)
 
           // 更新数据库
@@ -141,21 +155,23 @@ export default eventHandler(async (event) => {
               dateTaken: photoInfo.dateTaken,
               tags: photoInfo.tags,
               lastModified: new Date().toISOString(),
+              thumbnailKey: `${storageProvider.config?.prefix?.replace(/\/$/, '')}/thumbnails/${photo.id}.webp`,
             })
             .where(eq(tables.photos.id, photo.id))
 
           updated++
 
           logger.chrono.success(
-            `Updated EXIF for photo ${photo.id} (${updated}/${processed})`
+            `Updated EXIF for photo ${photo.id} (${updated}/${processed})`,
           )
 
           // 添加小延迟以避免过度负载
           if (processed % 10 === 0) {
-            await new Promise(resolve => setTimeout(resolve, 100))
+            await new Promise((resolve) => setTimeout(resolve, 100))
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error'
           logger.chrono.error(`Failed to process photo ${photo.id}:`, error)
           errors.push({
             photoId: photo.id,
@@ -172,15 +188,17 @@ export default eventHandler(async (event) => {
           updated,
           errors: errors.length > 0 ? errors : undefined,
           statistics: {
-            successRate: processed > 0 
-              ? (((processed - errors.length) / processed) * 100).toFixed(1) + '%'
-              : '0%',
+            successRate:
+              processed > 0
+                ? (((processed - errors.length) / processed) * 100).toFixed(1) +
+                  '%'
+                : '0%',
           },
         },
       }
 
       logger.chrono.success(
-        `EXIF batch reindexing completed: ${updated} photos updated out of ${processed} processed`
+        `EXIF batch reindexing completed: ${updated} photos updated out of ${processed} processed`,
       )
 
       return result
