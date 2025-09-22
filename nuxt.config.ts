@@ -46,17 +46,13 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: 'node_server',
-    cloudflare: {
-      deployConfig: true,
-      nodeCompat: true,
-    },
     experimental: {
       tasks: true,
     },
   },
 
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [tailwindcss() as any],
     css: {
       devSourcemap: true,
     },
