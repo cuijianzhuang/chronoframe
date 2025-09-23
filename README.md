@@ -343,3 +343,7 @@ Thanks to the following open-source projects and libraries:
 - [Nuxt](https://nuxt.com/)
 - [TailwindCSS](https://tailwindcss.com/)
 - [Drizzle ORM](https://orm.drizzle.team/)
+
+## ⭐️ Stargazers
+
+[![Stargazers over time](https://starchart.cc/HoshinoSuzumi/chronoframe.svg?variant=adaptive)](https://starchart.cc/HoshinoSuzumi/chronoframe)
