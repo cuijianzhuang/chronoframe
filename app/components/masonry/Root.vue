@@ -21,7 +21,7 @@ const displayPhotos = computed(() => {
 })
 
 // Constants
-const FIRST_SCREEN_ITEMS_COUNT = 30
+const FIRST_SCREEN_ITEMS_COUNT = 42
 const COLUMN_GAP = 4
 const AUTO_COLUMN_WIDTH = 280
 const MAX_COLUMN_COUNT = 8
