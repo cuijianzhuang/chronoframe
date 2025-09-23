@@ -164,7 +164,14 @@ onBeforeUnmount(() => {
       <div class="grid grid-cols-2 gap-4">
         <div>
           <p class="text-sm text-neutral-500 dark:text-neutral-400">应用版本</p>
-          <p class="text-lg font-bold">ChronoFrame dev</p>
+          <NuxtLink
+            class="text-lg font-bold"
+            target="_blank"
+            external
+            :to="`https://github.com/HoshinoSuzumi/chronoframe/releases/tag/v${$config.public.VERSION}`"
+          >
+            v{{ $config.public.VERSION }}
+          </NuxtLink>
         </div>
         <div>
           <p class="text-sm text-neutral-500 dark:text-neutral-400">最后更新</p>
