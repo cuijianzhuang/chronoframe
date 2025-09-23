@@ -75,7 +75,7 @@ const totalSelectedFilters = computed(() => {
                 <Icon name="tabler:star-filled" />
               </div>
               <img
-                :src="avatarImage"
+                :src="config.public.APP_AVATAR_URL || avatarImage"
                 class="size-12 rounded-full object-cover"
                 :class="!loggedIn && 'cursor-pointer'"
                 alt="Author's avatar"

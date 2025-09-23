@@ -1,4 +1,6 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+const config = useRuntimeConfig()
+</script>
 
 <template>
   <div class="relative size-20">
@@ -8,6 +10,13 @@
 
     <div class="absolute inset-1 rounded-full overflow-hidden">
       <img
+        v-if="config.public.APP_AVATAR_URL"
+        class="w-full h-full object-cover"
+        :src="config.public.APP_AVATAR_URL"
+        alt="Loading..."
+      />
+      <img
+        v-else
         class="w-full h-full object-cover"
         src="~/assets/images/avatar.webp"
         alt="Loading..."
