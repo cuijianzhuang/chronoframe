@@ -70,7 +70,7 @@ watch(
     } else if (!currentPhotoId) {
       closeViewer()
       useHead({
-        title: $t('title.gallery'),
+        title: '',
       })
     }
   },

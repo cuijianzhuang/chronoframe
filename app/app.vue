@@ -7,7 +7,8 @@ const { locale } = useI18n()
 const dayjs = useDayjs()
 
 useHead({
-  titleTemplate: (title) => `${title} :: ${config.public.APP_TITLE}`,
+  titleTemplate: (title) =>
+    `${title ? title + ' | ' : ''}${config.public.APP_TITLE}`,
 })
 
 const { data, refresh, status } = useFetch('/api/photos')

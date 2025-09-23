@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 useHead({
-  title: $t('title.gallery'),
+  title: '',
 })
 
 const { photos } = usePhotos()
