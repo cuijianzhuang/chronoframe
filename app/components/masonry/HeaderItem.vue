@@ -91,13 +91,22 @@ const totalSelectedFilters = computed(() => {
           <div
             class="text-neutral-600 dark:text-white/30 space-y-1 text-center"
           >
-            <p class="text-xs font-medium">
+            <p
+              v-if="stats?.total"
+              class="text-xs font-medium"
+            >
               {{
                 $t('ui.stats.totalPhotosWithRange', {
                   range: dateRangeText,
                   count: stats?.total,
                 })
               }}
+            </p>
+            <p
+              v-else
+              class="text-xs font-medium"
+            >
+              {{ $t('ui.stats.noPhotosTip') }}
             </p>
             <p
               v-if="config.public.APP_SLOGAN"

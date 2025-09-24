@@ -52,7 +52,8 @@
       }
     },
     "stats": {
-      "totalPhotosWithRange": "{range}、@:plural.photo 合計"
+      "totalPhotosWithRange": "{range}、@:plural.photo 合計",
+      "noPhotosTip": "まだ写真はありません。アップロードしてください！"
     },
     "livePhoto": "Live Photo"
   },

@@ -56,7 +56,8 @@
       }
     },
     "stats": {
-      "totalPhotosWithRange": "{range}, 共 @:plural.photo"
+      "totalPhotosWithRange": "{range}, 共 @:plural.photo",
+      "noPhotosTip": "还没有照片，快去上传一些吧！"
     }
   },
   "minimap": {
