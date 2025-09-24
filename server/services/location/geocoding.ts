@@ -11,11 +11,99 @@ export interface GeocodingProvider {
 }
 
 /**
+ * Mapbox 地理编码提供者
+ * 高精度商业地理编码服务，支持全球范围和多语言
+ */
+export class MapboxGeocodingProvider implements GeocodingProvider {
+  private accessToken: string
+  private readonly baseUrl = 'https://api.mapbox.com'
+  private lastRequestTime = 0
+  private readonly rateLimitMs = 100 // Mapbox 默认速率限制为 1000/分钟，约60ms间隔
+
+  constructor(accessToken: string) {
+    this.accessToken = accessToken
+  }
+
+  async reverseGeocode(lat: number, lon: number): Promise<LocationInfo | null> {
+    try {
+      // 应用速率限制
+      await this.applyRateLimit()
+
+      const url = new URL('/search/geocode/v6/reverse', this.baseUrl)
+      url.searchParams.set('access_token', this.accessToken)
+      url.searchParams.set('longitude', lon.toString())
+      url.searchParams.set('latitude', lat.toString())
+      url.searchParams.set('types', 'address,place,district,region,country')
+      url.searchParams.set('language', 'zh-Hants')
+
+      logger.location.info(`Mapbox API URL: ${url.toString()}`)
+
+      const response = await fetch(url.toString())
+
+      if (!response.ok) {
+        logger.location.warn(
+          `Mapbox API responded with status ${response.status}`,
+        )
+        return null
+      }
+
+      const data = await response.json()
+
+      if (!data || !data.features || data.features.length === 0) {
+        logger.location.warn('Mapbox API returned no features')
+        return null
+      }
+
+      // 取第一个最相关的结果
+      const feature = data.features[0]
+      const properties = feature.properties || {}
+      const context = properties.context || {}
+
+      // 提取国家信息
+      const country = context.country?.name
+
+      // 提取城市信息（优先级：locality > place > locality > district > region）
+      const city =
+        context.locality?.name ||
+        context.place?.name ||
+        context.locality?.name ||
+        context.district?.name ||
+        context.region?.name
+
+      // 构建位置名称
+      const locationName = properties.place_formatted || properties.name
+
+      return {
+        latitude: lat,
+        longitude: lon,
+        country,
+        city,
+        locationName,
+      }
+    } catch (error) {
+      logger.location.error('Mapbox reverse geocoding failed:', error)
+      return null
+    }
+  }
+
+  private async applyRateLimit(): Promise<void> {
+    const now = Date.now()
+    const timeSinceLastRequest = now - this.lastRequestTime
+
+    if (timeSinceLastRequest < this.rateLimitMs) {
+      const delay = this.rateLimitMs - timeSinceLastRequest
+      await new Promise((resolve) => setTimeout(resolve, delay))
+    }
+
+    this.lastRequestTime = Date.now()
+  }
+}
+
+/**
  * OpenStreetMap Nominatim API 地理编码提供者
  * 免费的地理编码服务，适合开发和小规模使用
- * TODO: 实现 MapBox 逆编码提供者
  */
-class NominatimGeocodingProvider implements GeocodingProvider {
+export class NominatimGeocodingProvider implements GeocodingProvider {
   private readonly baseUrl = 'https://nominatim.openstreetmap.org'
   private readonly userAgent = 'chronoframe/1.0'
   private lastRequestTime = 0
@@ -99,12 +187,26 @@ class NominatimGeocodingProvider implements GeocodingProvider {
 }
 
 /**
- * 从GPS坐标中提取地理位置信息
+ * 创建地理编码提供者实例
+ * TODO: 添加配置项指定提供者
+ * @description 优先使用 Mapbox，如果没有配置则回退到 Nominatim
  */
+function createGeocodingProvider(): GeocodingProvider {
+  const mapboxToken =
+    useRuntimeConfig().public.mapbox.accessToken || process.env.MAPBOX_TOKEN
+
+  if (mapboxToken) {
+    return new MapboxGeocodingProvider(mapboxToken)
+  }
+
+  // 回退到 Nominatim 提供者
+  return new NominatimGeocodingProvider()
+}
+
 export async function extractLocationFromGPS(
   gpsLatitude?: number,
   gpsLongitude?: number,
-  provider: GeocodingProvider = new NominatimGeocodingProvider(),
+  provider?: GeocodingProvider,
 ): Promise<LocationInfo | null> {
   if (!gpsLatitude || !gpsLongitude) {
     return null
@@ -122,8 +224,11 @@ export async function extractLocationFromGPS(
     `Reverse geocoding coordinates: ${gpsLatitude}, ${gpsLongitude}`,
   )
 
+  // 如果没有指定提供者，使用默认提供者
+  const geocodingProvider = provider || createGeocodingProvider()
+
   try {
-    const locationInfo = await provider.reverseGeocode(
+    const locationInfo = await geocodingProvider.reverseGeocode(
       gpsLatitude,
       gpsLongitude,
     )
