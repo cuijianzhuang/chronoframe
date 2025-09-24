@@ -149,7 +149,7 @@ const onMapLoaded = (map: any) => {
       setTimeout(() => {
         map.flyTo({
           center: [photo.longitude, photo.latitude],
-          zoom: 15,
+          zoom: 17,
           essential: true,
           duration: 2000,
         })
