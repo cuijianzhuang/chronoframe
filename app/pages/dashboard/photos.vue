@@ -1181,15 +1181,18 @@ onUnmounted(() => {
               :items="[
                 [
                   {
-                    color: row.original.isLivePhoto ? 'warning' : 'info',
-                    label: row.original.isLivePhoto ? '实况预览' : '重新处理',
-                    icon: row.original.isLivePhoto
-                      ? 'tabler:live-photo'
-                      : 'tabler:refresh',
+                    label: '重新处理',
+                    icon: 'tabler:refresh',
                     onSelect() {
-                      row.original.isLivePhoto
-                        ? handleViewLivePhoto(row.original.id)
-                        : handleReprocessSingle(row.original)
+                      handleReprocessSingle(row.original)
+                    },
+                  },
+                  {
+                    label: '实况预览',
+                    icon: 'tabler:live-photo',
+                    disabled: !row.original.isLivePhoto,
+                    onSelect() {
+                      handleViewLivePhoto(row.original.id)
                     },
                   },
                 ],
