@@ -20,17 +20,17 @@ const items = ref<NavigationMenuItem[]>([
   },
 ])
 
-const isMobileMenuOpen = ref(false)
-
-useHead({
-  title: $t('title.dashboard'),
-  titleTemplate: (title) => `${title} - TimoYin's mems`,
-})
-
 const route = useRoute()
 const router = useRouter()
 const config = useRuntimeConfig()
 const { loggedIn, user } = useUserSession()
+
+useHead({
+  title: $t('title.dashboard'),
+  titleTemplate: (title) => `${title ? title + ' | ' : ''}${config.public.APP_TITLE}`,
+})
+
+const isMobileMenuOpen = ref(false)
 
 const isRouteActive = (itemPath: string) => {
   if (itemPath === '/dashboard') {
