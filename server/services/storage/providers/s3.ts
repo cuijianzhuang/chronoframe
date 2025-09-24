@@ -1,12 +1,10 @@
-import type {
-  _Object,
-  S3ClientConfig} from '@aws-sdk/client-s3';
+import type { _Object, S3ClientConfig } from '@aws-sdk/client-s3'
 import {
   DeleteObjectCommand,
   GetObjectCommand,
   ListObjectsCommand,
   PutObjectCommand,
-  S3Client
+  S3Client,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import type {
@@ -180,6 +178,34 @@ export class S3StorageProvider implements StorageProvider {
       unhoistableHeaders: new Set(['Content-Type']),
     })
     return url
+  }
+
+  async getFileMeta(key: string): Promise<StorageObject | null> {
+    try {
+      const cmd = new GetObjectCommand({
+        Bucket: this.config.bucket,
+        Key: key,
+      })
+
+      const resp = await this.client.send(cmd)
+
+      if (!resp.ETag) {
+        return null
+      }
+
+      return {
+        key,
+        size: resp.ContentLength || 0,
+        lastModified: resp.LastModified,
+        etag: resp.ETag,
+      }
+    } catch (error) {
+      if ((error as any).$metadata?.httpStatusCode === 404) {
+        return null
+      }
+      this.logger?.error(`Failed to get metadata for key: ${key}`, error)
+      throw error
+    }
   }
 
   async listAll(): Promise<StorageObject[]> {

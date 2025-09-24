@@ -13,6 +13,7 @@ export interface GeocodingProvider {
 /**
  * OpenStreetMap Nominatim API 地理编码提供者
  * 免费的地理编码服务，适合开发和小规模使用
+ * TODO: 实现 MapBox 逆编码提供者
  */
 class NominatimGeocodingProvider implements GeocodingProvider {
   private readonly baseUrl = 'https://nominatim.openstreetmap.org'

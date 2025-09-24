@@ -61,6 +61,7 @@ export interface StorageProvider {
     expiresIn?: number,
     options?: UploadOptions,
   ): Promise<string>
+  getFileMeta(key: string): Promise<StorageObject | null>
   listAll(): Promise<StorageObject[]>
   listImages(): Promise<StorageObject[]>
 }

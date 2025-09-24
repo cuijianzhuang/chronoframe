@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm'
 import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core'
 import type { NeededExif } from '~~/shared/types/photo'
 
@@ -38,4 +39,46 @@ export const photos = sqliteTable('photos', {
   isLivePhoto: integer('is_live_photo').default(0).notNull(),
   livePhotoVideoUrl: text('live_photo_video_url'),
   livePhotoVideoKey: text('live_photo_video_key'),
+})
+
+export const pipelineQueue = sqliteTable('pipeline_queue', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  payload: text('payload', { mode: 'json' })
+    .$type<{
+      type: 'photo' | 'live-photo-video'
+      storageKey: string
+    }>()
+    .notNull()
+    .default({
+      type: 'photo',
+      storageKey: '',
+    }),
+  priority: integer('priority').default(0).notNull(),
+  attempts: integer('attempts').default(0).notNull(),
+  maxAttempts: integer('max_attempts').default(3).notNull(),
+  status: text('status', {
+    enum: [
+      'pending', // Waiting to be processed
+      'in-stages', // Currently being processed
+      'completed', // Successfully processed
+      'failed', // Processing failed
+    ],
+  })
+    .notNull()
+    .default('pending'),
+  statusStage: text('status_stage', {
+    enum: [
+      'preprocessing',
+      'metadata',
+      'thumbnail',
+      'exif',
+      'reverse-geocoding',
+      'live-photo',
+    ],
+  }),
+  errorMessage: text('error_message'),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  completedAt: integer('completed_at', { mode: 'timestamp' }),
 })

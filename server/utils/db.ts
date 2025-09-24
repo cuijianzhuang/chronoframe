@@ -15,3 +15,6 @@ export function useDB() {
 
 export type User = typeof schema.users.$inferSelect
 export type Photo = typeof schema.photos.$inferSelect
+
+export type PipelineQueueItem = typeof schema.pipelineQueue.$inferSelect
+export type NewPipelineQueueItem = typeof schema.pipelineQueue.$inferInsert

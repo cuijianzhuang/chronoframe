@@ -29,6 +29,27 @@
       "when": 1758511705153,
       "tag": "0003_nifty_hellcat",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1758650003665,
+      "tag": "0004_absent_lockheed",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1758651965719,
+      "tag": "0005_light_stranger",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1758723057975,
+      "tag": "0006_flaky_the_enforcers",
+      "breakpoints": true
     }
   ]
 }
