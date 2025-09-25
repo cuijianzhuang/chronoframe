@@ -6,7 +6,7 @@ export default <RouterConfig>{
       return savedPosition
     }
 
-    if (from.path === '/' && to.name === 'slug') {
+    if (from.path === '/' || to.name === 'slug') {
       return false
     }
 
