@@ -115,14 +115,14 @@ const totalSelectedFilters = computed(() => {
           <div
             class="flex items-center gap-0 p-1 bg-white/30 dark:bg-neutral-900/50 rounded-full"
           >
-            <UTooltip :text="$t('ui.action.explore.tooltip')">
+            <UTooltip :text="$t('ui.action.globe.tooltip')">
               <UButton
                 variant="soft"
                 color="neutral"
                 class="bg-transparent rounded-full cursor-pointer"
                 icon="tabler:map-pin-2"
                 size="sm"
-                to="/explore"
+                to="/globe"
               />
             </UTooltip>
             <UPopover>

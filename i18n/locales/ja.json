@@ -4,9 +4,6 @@
   },
   "ui": {
     "action": {
-      "explore": {
-        "tooltip": "地図を探索"
-      },
       "filter": {
         "tooltip": "写真をフィルター",
         "title": "写真をフィルター",
@@ -49,6 +46,9 @@
       },
       "logout": {
         "tooltip": "ログアウト"
+      },
+      "globe": {
+        "tooltip": "グローブ"
       }
     },
     "stats": {
@@ -244,7 +244,8 @@
     },
     "dashboard": "ダッシュボード",
     "photos": "写真",
-    "locations": "場所"
+    "locations": "場所",
+    "globe": "写真グローブ"
   },
   "auth": {
     "form": {

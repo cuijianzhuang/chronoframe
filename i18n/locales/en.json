@@ -4,9 +4,6 @@
   },
   "ui": {
     "action": {
-      "explore": {
-        "tooltip": "Explore Map"
-      },
       "filter": {
         "tooltip": "Filter Photos",
         "title": "Filter Photos",
@@ -49,6 +46,9 @@
       },
       "logout": {
         "tooltip": "Logout"
+      },
+      "globe": {
+        "tooltip": "Globe"
       }
     },
     "stats": {
@@ -244,7 +244,8 @@
     },
     "dashboard": "Dashboard",
     "photos": "Photos",
-    "locations": "Locations"
+    "locations": "Locations",
+    "globe": "Photo Globe"
   },
   "auth": {
     "form": {

@@ -409,7 +409,7 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
 const isMobile = useMediaQuery('(max-width: 768px)')
 
 const onMinimapClick = (photoId: string) => {
-  window.open(`/explore?photoId=${photoId}`)
+  window.open(`/globe?photoId=${photoId}`)
 }
 
 const onTagClick = (tag: string) => {

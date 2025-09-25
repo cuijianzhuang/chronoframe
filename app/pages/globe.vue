@@ -3,13 +3,12 @@ import { motion } from 'motion-v'
 import { clusterMarkers, photosToMarkers } from '~/utils/clustering'
 
 useHead({
-  title: '地图探索',
+  title: $t('title.globe'),
 })
 
 const route = useRoute()
 const router = useRouter()
 
-// const MAPID = 'explore-map'
 const { photos } = usePhotos()
 
 const photosWithLocation = computed(() => {

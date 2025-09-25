@@ -11,9 +11,6 @@
       "dashboard": {
         "tooltip": "控制台"
       },
-      "explore": {
-        "tooltip": "探索地图"
-      },
       "filter": {
         "empty": {
           "cameras": "没有相机信息",
@@ -53,6 +50,9 @@
       },
       "theme": {
         "tooltip": "颜色主题"
+      },
+      "globe": {
+        "tooltip": "地球仪"
       }
     },
     "stats": {
@@ -244,7 +244,8 @@
     },
     "gallery": "相册",
     "locations": "位置管理",
-    "photos": "照片库"
+    "photos": "照片库",
+    "globe": "照片地球仪"
   },
   "auth": {
     "form": {
