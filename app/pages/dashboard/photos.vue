@@ -15,6 +15,8 @@ useHead({
   title: $t('title.photos'),
 })
 
+const MAX_FILE_SIZE = 256 // in MB
+
 const dayjs = useDayjs()
 
 const { status, refresh } = usePhotos()
@@ -548,12 +550,11 @@ const validateFile = (file: File): { valid: boolean; error?: string } => {
     }
   }
 
-  // 检查文件大小 (128MB 限制)
-  const maxSize = 128 * 1024 * 1024 // 128MB
+  const maxSize = MAX_FILE_SIZE * 1024 * 1024
   if (file.size > maxSize) {
     return {
       valid: false,
-      error: `文件太大: ${(file.size / 1024 / 1024).toFixed(2)}MB。最大支持 128MB。`,
+      error: `文件太大: ${(file.size / 1024 / 1024).toFixed(2)}MB。最大支持 ${MAX_FILE_SIZE}MB。`,
     }
   }
 
@@ -1025,7 +1026,7 @@ onUnmounted(() => {
       <UFileUpload
         v-model="selectedFiles"
         label="选择照片"
-        description="支持 JPEG、PNG、HEIC 格式照片，以及 MOV 格式 LivePhoto 视频，最大 256MB"
+        :description="`支持 JPEG、PNG、HEIC 格式照片，以及 MOV 格式 LivePhoto 视频，最大 ${MAX_FILE_SIZE}MB`"
         layout="list"
         size="xl"
         accept="image/jpeg,image/png,image/heic,image/heif,video/quicktime,.mov"
