@@ -82,7 +82,7 @@ const sizeDelta = computed(() => {
                 :thumbhash="representativePhoto.thumbnailHash"
                 :threshold="0.1"
                 root-margin="100px"
-                class="h-full w-full object-cover opacity-40"
+                class="h-full w-full object-cover opacity-50"
               />
               <div
                 class="from-blue/60 to-purple/80 dark:from-blue/70 dark:to-purple/90 absolute inset-0 bg-gradient-to-br"
@@ -94,7 +94,7 @@ const sizeDelta = computed(() => {
               :class="
                 twMerge(
                   'relative flex flex-col justify-center items-center rounded-full border shadow-lg hover:shadow-xl',
-                  'border-white/40 bg-white/95 hover:bg-white dark:border-white/20 dark:bg-black/60 dark:hover:bg-black/80',
+                  'border-white/30 bg-black/60 hover:bg-black/80',
                 )
               "
               :style="{
@@ -103,7 +103,7 @@ const sizeDelta = computed(() => {
               }"
             >
               <div
-                class="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 to-white/10 dark:from-white/20 dark:to-white/5"
+                class="absolute inset-0 rounded-full bg-gradient-to-br from-white/10 to-white/5"
               />
 
               <!-- Cluster count -->
@@ -138,9 +138,13 @@ const sizeDelta = computed(() => {
                 <div class="relative overflow-hidden p-3 space-y-3">
                   <div class="flex items-center justify-between">
                     <h3 class="text-sm font-semibold">
-                      {{ $t('map.cluster.nearbyPhotos', [clusteredPhotos.length]) }}
+                      {{
+                        $t('map.cluster.nearbyPhotos', [clusteredPhotos.length])
+                      }}
                     </h3>
-                    <div class="text-muted text-[10px]">{{ $t('map.cluster.details') }}</div>
+                    <div class="text-muted text-[10px]">
+                      {{ $t('map.cluster.details') }}
+                    </div>
                   </div>
                   <!-- Show grid of photos for cluster -->
                   <div class="grid grid-cols-3 gap-2 h-full">

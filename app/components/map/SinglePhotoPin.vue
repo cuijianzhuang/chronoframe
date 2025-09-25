@@ -70,7 +70,7 @@ const onClick = () => {
                 :thumbhash="marker.thumbnailHash"
                 :threshold="0.1"
                 root-margin="100px"
-                class="h-full w-full object-cover opacity-40"
+                class="h-full w-full object-cover opacity-50"
               />
               <div
                 class="from-green/60 to-emerald/80 dark:from-green/70 dark:to-emerald/90 absolute inset-0 bg-gradient-to-br"
@@ -81,15 +81,15 @@ const onClick = () => {
             <div
               :class="
                 twMerge(
-                  'relative size-10 flex justify-center items-center rounded-full border shadow-lg hover:shadow-xl backdrop-blur-md',
+                  'relative size-10 flex justify-center items-center rounded-full border shadow-lg hover:shadow-xl',
                   isSelected
                     ? 'border-primary/40 bg-primary/90 shadow-primary/50 dark:border-primary/30 dark:bg-primary/80'
-                    : 'border-white/40 bg-white/95 hover:bg-white dark:border-white/20 dark:bg-black/80 dark:hover:bg-black/90',
+                    : 'border-white/30 bg-black/80 hover:bg-black/90',
                 )
               "
             >
               <div
-                class="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 to-white/10 dark:from-white/20 dark:to-white/5"
+                class="absolute inset-0 rounded-full bg-gradient-to-br from-white/10 to-white/5"
               />
               <Icon
                 name="tabler:photo"
