@@ -48,9 +48,7 @@ const totalSelectedFilters = computed(() => {
 </script>
 
 <template>
-  <div
-    class="w-full relative overflow-hidden"
-  >
+  <div class="w-full relative overflow-hidden">
     <div
       class="absolute inset-0 -z-10 blur-3xl scale-110 bg-cover bg-center opacity-35"
       :style="{
@@ -60,7 +58,7 @@ const totalSelectedFilters = computed(() => {
     <div
       class="absolute inset-0 -z-10 bg-white/50 dark:bg-neutral-900/50"
     ></div>
-    <div class="flex flex-col items-center py-6 pb-3 gap-2">
+    <div class="flex flex-col items-center py-6 pb-0 gap-2">
       <AuthState>
         <template #default="{ loggedIn, clear }">
           <div class="flex flex-col items-center gap-2">
@@ -235,6 +233,33 @@ const totalSelectedFilters = computed(() => {
           </div>
         </template>
       </AuthState>
+      <div
+        class="w-full px-2 pb-1 pt-1.5 bg-neutral-200/50 dark:bg-neutral-900/50 flex justify-between items-center gap-2"
+      >
+        <div
+          v-if="$config.public.APP_AUTHOR || $config.public.APP_TITLE"
+          class="text-xs text-neutral-500/80 dark:text-neutral-500 font-medium"
+        >
+          © {{ $dayjs().format('YYYY') }} {{ $config.public.APP_AUTHOR || $config.public.APP_TITLE }}
+        </div>
+        <div
+          class="text-xs text-neutral-500/60 dark:text-neutral-500/80 font-medium inline-flex justify-center items-center gap-0.5"
+        >
+          <a
+            href="https://github.com/HoshinoSuzumi/chronoframe"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hover:underline inline-flex items-center gap-0.5"
+          >
+            <Icon
+              name="mdi:github"
+              class="inline-block text-sm -mt-[1px]"
+              mode="svg"
+            />
+            ChronoFrame ({{ $config.public.VERSION }})
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </template>

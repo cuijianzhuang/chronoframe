@@ -34,6 +34,7 @@ export default defineNuxtConfig({
       },
       APP_TITLE: 'ChronoFrame',
       APP_SLOGAN: '',
+      APP_AUTHOR: '',
       APP_AVATAR_URL: '/avatar.webp',
     },
     STORAGE_PROVIDER: 's3',
