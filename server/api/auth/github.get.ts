@@ -35,7 +35,15 @@ export default defineOAuthGitHubEventHandler({
     } else if (userFromEmail.isAdmin === 0) {
       throw _accessDeniedError
     } else {
-      await setUserSession(event, { user: userFromEmail })
+      await setUserSession(
+        event,
+        { user: userFromEmail },
+        {
+          cookie: {
+            secure: !useRuntimeConfig().ALLOW_INSECURE_COOKIE,
+          },
+        },
+      )
     }
     return sendRedirect(event, '/')
   },

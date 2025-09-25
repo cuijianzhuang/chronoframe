@@ -44,6 +44,7 @@ export default defineNuxtConfig({
     PROVIDER_S3_SECRET_ACCESS_KEY: '',
     PROVIDER_S3_PREFIX: '',
     PROVIDER_S3_CDN_URL: '',
+    ALLOW_INSECURE_COOKIE: false,
   },
 
   nitro: {

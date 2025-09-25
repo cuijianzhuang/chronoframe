@@ -29,7 +29,15 @@ export default eventHandler(async (event) => {
     throw _invalidCredentialsError
   }
 
-  await setUserSession(event, { user })
+  await setUserSession(
+    event,
+    { user },
+    {
+      cookie: {
+        secure: !useRuntimeConfig().ALLOW_INSECURE_COOKIE,
+      },
+    },
+  )
 
   return setResponseStatus(event, 201)
 })
