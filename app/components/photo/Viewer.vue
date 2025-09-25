@@ -4,8 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/vue'
 import { Navigation, Keyboard, Virtual } from 'swiper/modules'
 import type { Swiper as SwiperType } from 'swiper'
 
-import 'swiper/css'
-import 'swiper/css/navigation'
+import 'swiper/swiper-bundle.css'
 
 import LoadingIndicator from './LoadingIndicator.vue'
 import ProgressiveImage from './ProgressiveImage.vue'

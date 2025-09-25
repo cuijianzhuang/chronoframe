@@ -58,6 +58,7 @@ const itemVariants = {
 <template>
   <motion.div
     :key="itemKey"
+    :data-photo-id="photo.id"
     :variants="shouldAnimate ? itemVariants : undefined"
     :initial="shouldAnimate ? 'hidden' : 'visible'"
     :animate="'visible'"

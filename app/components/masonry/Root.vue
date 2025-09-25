@@ -20,6 +20,9 @@ const displayPhotos = computed(() => {
   return hasActiveFilters.value ? filteredPhotos.value : sortedPhotos.value
 })
 
+// Viewer state for scroll sync
+const { currentPhotoIndex, isViewerOpen } = storeToRefs(useViewerState())
+
 // Constants
 const FIRST_SCREEN_ITEMS_COUNT = 42
 const COLUMN_GAP = 4
@@ -61,8 +64,10 @@ const columnCount = computed(() => {
 
 const photoStats = computed(() => {
   const totalPhotos = displayPhotos.value?.length || 0
-  const photosWithDates = displayPhotos.value?.filter((p) => p.dateTaken).length || 0
-  const photosWithTitles = displayPhotos.value?.filter((p) => p.title).length || 0
+  const photosWithDates =
+    displayPhotos.value?.filter((p) => p.dateTaken).length || 0
+  const photosWithTitles =
+    displayPhotos.value?.filter((p) => p.title).length || 0
   const photosWithExif = displayPhotos.value?.filter((p) => p.exif).length || 0
 
   // Get date range of all photos
@@ -109,7 +114,7 @@ const handleVisibilityChange = ({
     visiblePhotos.value.delete(index)
   }
   updateDateRange()
-  
+
   // Process LivePhotos for visible photos
   nextTick(() => {
     processVisibleLivePhotos()
@@ -120,26 +125,29 @@ const handleVisibilityChange = ({
 const processVisibleLivePhotos = async () => {
   const visiblePhotosArray = Array.from(visiblePhotos.value)
   const livePhotosToProcess = visiblePhotosArray
-    .map(index => displayPhotos.value[index])
-    .filter((photo): photo is Photo => 
-      photo != null && 
-      photo.isLivePhoto === 1 && 
-      Boolean(photo.livePhotoVideoUrl) &&
-      !processedBatch.value.has(photo.id)
+    .map((index) => displayPhotos.value[index])
+    .filter(
+      (photo): photo is Photo =>
+        photo != null &&
+        photo.isLivePhoto === 1 &&
+        Boolean(photo.livePhotoVideoUrl) &&
+        !processedBatch.value.has(photo.id),
     )
-  
+
   if (livePhotosToProcess.length === 0) return
-  
+
   // Mark as processed to avoid reprocessing
-  livePhotosToProcess.forEach(photo => {
+  livePhotosToProcess.forEach((photo) => {
     processedBatch.value.add(photo.id)
   })
-  
+
   // Start background processing
-  batchProcessLivePhotos(livePhotosToProcess.map(photo => ({
-    id: photo.id,
-    livePhotoVideoUrl: photo.livePhotoVideoUrl!
-  })))
+  batchProcessLivePhotos(
+    livePhotosToProcess.map((photo) => ({
+      id: photo.id,
+      livePhotoVideoUrl: photo.livePhotoVideoUrl!,
+    })),
+  )
 }
 
 const visibleCities = ref<string>()
@@ -233,6 +241,12 @@ onMounted(() => {
   // Set up scroll listener
   window.addEventListener('scroll', handleScroll, { passive: true })
 
+  nextTick(() => {
+    if (currentPhotoIndex.value) {
+      scrollToPhoto(currentPhotoIndex.value)
+    }
+  })
+
   // Cleanup
   onUnmounted(() => {
     resizeObserver.disconnect()
@@ -243,6 +257,45 @@ onMounted(() => {
 const handleOpenViewer = (index: number) => {
   router.push(`/${displayPhotos.value[index]?.id}`)
 }
+
+// 滚动到指定照片的位置
+const scrollToPhoto = (photoIndex: number) => {
+  if (!displayPhotos.value[photoIndex]) return
+
+  const photoId = displayPhotos.value[photoIndex].id
+  const photoElement = document.querySelector(`[data-photo-id="${photoId}"]`)
+
+  if (photoElement) {
+    // 计算滚动位置，让目标图片居中显示
+    const elementRect = photoElement.getBoundingClientRect()
+    const windowHeight = window.innerHeight
+    const currentScrollY = window.pageYOffset
+
+    // 计算目标滚动位置，让图片在视窗中央
+    const targetScrollY =
+      currentScrollY +
+      elementRect.top -
+      windowHeight / 2 +
+      elementRect.height / 2
+
+    // 平滑滚动到目标位置
+    window.scrollTo({
+      top: Math.max(0, targetScrollY),
+      behavior: 'smooth',
+    })
+  }
+}
+
+// 监听照片查看器的索引变化，滚动到对应图片
+watch(currentPhotoIndex, (newIndex) => {
+  // 只在查看器打开时才滚动
+  if (isViewerOpen.value && newIndex >= 0) {
+    // 延迟一下，确保DOM更新完成
+    nextTick(() => {
+      scrollToPhoto(newIndex)
+    })
+  }
+})
 </script>
 
 <template>
