@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { motion, AnimatePresence } from 'motion-v'
 import avatarImage from '~/assets/images/avatar.webp'
 
 defineProps<{
@@ -45,6 +46,8 @@ const totalSelectedFilters = computed(() => {
     0,
   )
 })
+
+const isRepoLinkHovering = ref(false)
 </script>
 
 <template>
@@ -238,25 +241,41 @@ const totalSelectedFilters = computed(() => {
       >
         <div
           v-if="$config.public.APP_AUTHOR || $config.public.APP_TITLE"
-          class="text-xs text-neutral-500/80 dark:text-neutral-500 font-medium"
+          class="text-xs text-neutral-500/80 dark:text-neutral-500 font-medium truncate"
         >
-          © {{ $dayjs().format('YYYY') }} {{ $config.public.APP_AUTHOR || $config.public.APP_TITLE }}
+          © {{ $dayjs().format('YYYY') }}
+          {{ $config.public.APP_AUTHOR || $config.public.APP_TITLE }}
         </div>
         <div
           class="text-xs text-neutral-500/60 dark:text-neutral-500/80 font-medium inline-flex justify-center items-center gap-0.5"
         >
           <a
+            ref="projectLink"
             href="https://github.com/HoshinoSuzumi/chronoframe"
             target="_blank"
             rel="noopener noreferrer"
-            class="hover:underline inline-flex items-center gap-0.5"
+            class="hover:underline inline-flex items-center gap-0.5 group"
+            @mouseenter="isRepoLinkHovering = true"
+            @mouseleave="isRepoLinkHovering = false"
           >
             <Icon
               name="mdi:github"
               class="inline-block text-sm -mt-[1px]"
               mode="svg"
             />
-            ChronoFrame ({{ $config.public.VERSION }})
+            ChronoFrame
+            <AnimatePresence>
+              <motion.span
+                v-if="isRepoLinkHovering"
+                :initial="{ width: 0, opacity: 0 }"
+                :animate="{ width: 'auto', opacity: 1 }"
+                :exit="{ width: 0, opacity: 0 }"
+                :transition="{ duration: 0.3, ease: 'easeInOut' }"
+                style="overflow: hidden; white-space: nowrap"
+              >
+                ({{ $config.public.VERSION }})
+              </motion.span>
+            </AnimatePresence>
           </a>
         </div>
       </div>
