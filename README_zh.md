@@ -56,6 +56,7 @@ docker run -d \
   -e CFRAME_ADMIN_PASSWORD="" \
   -e NUXT_PUBLIC_APP_TITLE="" \
   -e NUXT_PUBLIC_APP_SLOGAN="" \
+  -e NUXT_PUBLIC_APP_AUTHOR="" \
   -e NUXT_PUBLIC_APP_AVATAR_URL="" \
   -e NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN="" \
   -e NUXT_STORAGE_PROVIDER="s3" \
@@ -87,6 +88,7 @@ CFRAME_ADMIN_PASSWORD=
 # 应用标题与口号
 NUXT_PUBLIC_APP_TITLE=
 NUXT_PUBLIC_APP_SLOGAN=
+NUXT_PUBLIC_APP_AUTHOR=
 NUXT_PUBLIC_APP_AVATAR_URL=
 
 # Mapbox Token
@@ -143,6 +145,7 @@ docker-compose up -d
 | CFRAME_ADMIN_PASSWORD              | 初始管理员用户的密码                     | CF1234@!    | 否                                        |
 | NUXT_PUBLIC_APP_TITLE              | 应用标题                                 | ChronoFrame | 否                                        |
 | NUXT_PUBLIC_APP_SLOGAN             | 应用口号                                 | 无          | 否                                        |
+| NUXT_PUBLIC_APP_AUTHOR             | 应用作者                                 | 无          | 否                                        |
 | NUXT_PUBLIC_APP_AVATAR_URL         | 应用头像 URL                             | 无          | 否                                        |
 | NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN    | Mapbox 访问令牌，用于地图服务            | 无          | 是                                        |
 | NUXT_STORAGE_PROVIDER              | 存储提供者，支持 `s3`、`github`、`local` | `s3`        | 是                                        |
@@ -160,13 +163,16 @@ docker-compose up -d
 ## 📖 使用指南
 
 > 如未配置 `CFRAME_ADMIN_EMAIL` 和 `CFRAME_ADMIN_PASSWORD`，默认账号如下：
+>
 > - 邮箱: `admin@chronoframe.com`
 > - 密码: `CF1234@!`
 
 ### 登录到控制台
+
 1. 点击头像跳转到登录页面，可以使用账号密码或 GitHub 登录
 
 ### 上传照片
+
 1. 访问仪表板页面 `/dashboard`
 2. 在 `Photos` 页面中选择图片并点击上传（支持批量上传和拖拽上传）
 3. 系统将自动提取 EXIF 信息、生成缩略图并逆编码照片地理位置

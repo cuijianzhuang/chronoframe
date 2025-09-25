@@ -56,6 +56,7 @@ docker run -d \
   -e CFRAME_ADMIN_PASSWORD="" \
   -e NUXT_PUBLIC_APP_TITLE="" \
   -e NUXT_PUBLIC_APP_SLOGAN="" \
+  -e NUXT_PUBLIC_APP_AUTHOR="" \
   -e NUXT_PUBLIC_APP_AVATAR_URL="" \
   -e NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN="" \
   -e NUXT_STORAGE_PROVIDER="s3" \
@@ -87,6 +88,7 @@ CFRAME_ADMIN_PASSWORD=
 # App info
 NUXT_PUBLIC_APP_TITLE=
 NUXT_PUBLIC_APP_SLOGAN=
+NUXT_PUBLIC_APP_AUTHOR=
 NUXT_PUBLIC_APP_AVATAR_URL=
 # Mapbox Token
 NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
@@ -142,6 +144,7 @@ docker-compose up -d
 | CFRAME_ADMIN_PASSWORD              | Password of the initial admin          | CF1234@!    | No                                                   |
 | NUXT_PUBLIC_APP_TITLE              | Application title                      | ChronoFrame | No                                                   |
 | NUXT_PUBLIC_APP_SLOGAN             | Application slogan                     | None        | No                                                   |
+| NUXT_PUBLIC_APP_AUTHOR             | Application author                     | None        | No                                                   |
 | NUXT_PUBLIC_APP_AVATAR_URL         | Application avatar URL                 | None        | No                                                   |
 | NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN    | Mapbox access token for map service    | None        | Yes                                                  |
 | NUXT_STORAGE_PROVIDER              | Storage provider (s3, github, local)   | s3          | Yes                                                  |
@@ -159,6 +162,7 @@ docker-compose up -d
 ## 📖 User Guide
 
 > If `CFRAME_ADMIN_EMAIL` and `CFRAME_ADMIN_PASSWORD` are not set, the default admin account is:
+>
 > - Email: `admin@chronoframe.com`
 > - Password: `CF1234@!`
 
@@ -171,7 +175,6 @@ docker-compose up -d
 1. Go to the dashboard at /dashboard
 2. On the Photos page, select and upload images (supports batch & drag-and-drop)
 3. System will automatically parse EXIF data, generate thumbnails, and perform reverse geocoding
-
 
 ## 📸 Screenshots
 
@@ -259,6 +262,7 @@ pnpm db:migrate     # Run migrations
 # Preview production build
 pnpm preview
 ```
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please:
