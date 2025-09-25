@@ -15,17 +15,12 @@ const emit = defineEmits<{
   openViewer: [number]
 }>()
 
-// Constants
-const ITEM_GAP = 4
-
-// Reactive state
 const isLoading = ref(true)
 const photoRef = ref<HTMLElement>()
 const videoRef = useDomRef()
 const isVisible = ref(false)
 const containerWidth = ref(0)
 
-// LivePhoto related state
 const isHovering = ref(false)
 const isVideoPlaying = ref(false)
 const isVideoLoaded = ref(false)
@@ -33,21 +28,17 @@ const videoBlob = ref<Blob | null>(null)
 const videoBlobUrl = ref<string | null>(null)
 const { convertMovToMp4, getProcessingState } = useLivePhotoProcessor()
 
-// Mobile touch state for LivePhoto
 const isTouching = ref(false)
 const touchCount = ref(0)
 const longPressTimer = ref<NodeJS.Timeout | null>(null)
 const initialTouchPos = ref<{ x: number; y: number } | null>(null)
 const isMobile = useMediaQuery('(max-width: 768px)')
 
-// Observers
 const resizeObserverRef = ref<ResizeObserver | null>(null)
 const intersectionObserverRef = ref<IntersectionObserver | null>(null)
 
-// LivePhoto processing state
 const processingState = getProcessingState(props.photo.id)
 
-// Computed
 const aspectRatio = computed(() => {
   // Priority 1: Use aspectRatio from photo data if available
   if (props.photo.aspectRatio) {
@@ -427,9 +418,8 @@ onUnmounted(() => {
 <template>
   <div
     ref="photoRef"
-    class="inline-block w-full align-top break-inside-avoid transition-all duration-300 cursor-pointer select-none"
+    class="w-full transition-all duration-300 cursor-pointer select-none"
     :style="{
-      marginBottom: `${ITEM_GAP}px`,
       transform: 'translateZ(0)',
     }"
     @click="handleClick"

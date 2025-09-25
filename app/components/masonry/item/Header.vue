@@ -29,10 +29,8 @@ const handleOpenLogin = () => {
   router.push('/signin')
 }
 
-// 获取筛选状态
 const { hasActiveFilters, selectedCounts } = usePhotoFilters()
 
-// 获取排序状态
 const {
   currentSortLabel,
   currentSortIcon,
@@ -41,7 +39,6 @@ const {
   setSortOption,
 } = usePhotoSort()
 
-// 计算总的筛选项数量
 const totalSelectedFilters = computed(() => {
   return Object.values(selectedCounts.value).reduce(
     (total, count) => total + count,
@@ -52,7 +49,7 @@ const totalSelectedFilters = computed(() => {
 
 <template>
   <div
-    class="inline-block w-full align-top break-inside-avoid mb-[4px] relative overflow-hidden"
+    class="w-full relative overflow-hidden"
   >
     <div
       class="absolute inset-0 -z-10 blur-3xl scale-110 bg-cover bg-center opacity-35"

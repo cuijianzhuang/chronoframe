@@ -11,55 +11,77 @@ const props = withDefaults(defineProps<Props>(), {
 const dayjs = useDayjs()
 const router = useRouter()
 
-// 使用筛选和排序功能
 const { filteredPhotos, hasActiveFilters } = usePhotoFilters()
 const { sortedPhotos } = usePhotoSort()
 
-// 使用筛选后的照片（已包含排序），或者使用排序后的原始照片
 const displayPhotos = computed(() => {
   return hasActiveFilters.value ? filteredPhotos.value : sortedPhotos.value
 })
 
-// Viewer state for scroll sync
 const { currentPhotoIndex, isViewerOpen } = storeToRefs(useViewerState())
 
-// Constants
-const FIRST_SCREEN_ITEMS_COUNT = 42
-const COLUMN_GAP = 4
-const AUTO_COLUMN_WIDTH = 280
-const MAX_COLUMN_COUNT = 8
-const MIN_COLUMN_COUNT = 2
+const FIRST_SCREEN_ITEMS_COUNT = 50
 
-// Reactive state
 const masonryContainer = ref<HTMLElement>()
-const containerWidth = ref(0)
 const hasAnimated = ref(false)
 const showFloatingActions = ref(false)
 const dateRange = ref<string>()
 const visiblePhotos = ref(new Set<number>())
 
-// Composables
 const isMobile = useMediaQuery('(max-width: 768px)')
 const { batchProcessLivePhotos } = useLivePhotoProcessor()
 
-// Track processed photos to avoid reprocessing
 const processedBatch = ref(new Set<string>())
 
-// Computed
-const columnCount = computed(() => {
+const columnWidth = computed(() => {
   if (props.columns === 'auto') {
-    if (!containerWidth.value) return MIN_COLUMN_COUNT
+    return isMobile.value ? 280 : 280
+  }
+  return 280
+})
 
-    const availableWidth = containerWidth.value - (isMobile.value ? 16 : 32)
-    const maxColumns = isMobile.value ? 2 : MAX_COLUMN_COUNT
-    const calculatedColumns = Math.floor(
-      (availableWidth + COLUMN_GAP) / (AUTO_COLUMN_WIDTH + COLUMN_GAP),
-    )
+const maxColumns = computed(() => {
+  if (props.columns !== 'auto') {
+    return props.columns
+  }
+  return isMobile.value ? 2 : 8
+})
 
-    return Math.min(Math.max(calculatedColumns, MIN_COLUMN_COUNT), maxColumns)
+const minColumns = computed(() => {
+  if (props.columns !== 'auto') {
+    return props.columns
+  }
+  return 2
+})
+
+// Prepare items for masonry-wall
+const masonryItems = computed(() => {
+  const items: Array<{
+    id: string
+    type: 'header' | 'photo'
+    photo?: Photo
+    originalIndex?: number
+  }> = []
+
+  // Add header item for non-mobile layout
+  if (!isMobile.value) {
+    items.push({
+      id: 'header',
+      type: 'header',
+    })
   }
 
-  return props.columns
+  // Add photo items
+  displayPhotos.value?.forEach((photo, index) => {
+    items.push({
+      id: photo.id,
+      type: 'photo',
+      photo,
+      originalIndex: index,
+    })
+  })
+
+  return items
 })
 
 const photoStats = computed(() => {
@@ -214,31 +236,12 @@ const updateDateRange = () => {
   }
 }
 
-const updateContainerWidth = () => {
-  if (masonryContainer.value) {
-    containerWidth.value = masonryContainer.value.offsetWidth
-  }
-}
-
 const handleScroll = () => {
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop
   showFloatingActions.value = scrollTop > 500
 }
 
-// Lifecycle
 onMounted(() => {
-  updateContainerWidth()
-
-  // Set up resize observer
-  const resizeObserver = new ResizeObserver(() => {
-    updateContainerWidth()
-  })
-
-  if (masonryContainer.value) {
-    resizeObserver.observe(masonryContainer.value)
-  }
-
-  // Set up scroll listener
   window.addEventListener('scroll', handleScroll, { passive: true })
 
   nextTick(() => {
@@ -249,7 +252,6 @@ onMounted(() => {
 
   // Cleanup
   onUnmounted(() => {
-    resizeObserver.disconnect()
     window.removeEventListener('scroll', handleScroll)
   })
 })
@@ -258,7 +260,6 @@ const handleOpenViewer = (index: number) => {
   router.push(`/${displayPhotos.value[index]?.id}`)
 }
 
-// 滚动到指定照片的位置
 const scrollToPhoto = (photoIndex: number) => {
   if (!displayPhotos.value[photoIndex]) return
 
@@ -266,19 +267,17 @@ const scrollToPhoto = (photoIndex: number) => {
   const photoElement = document.querySelector(`[data-photo-id="${photoId}"]`)
 
   if (photoElement) {
-    // 计算滚动位置，让目标图片居中显示
     const elementRect = photoElement.getBoundingClientRect()
     const windowHeight = window.innerHeight
     const currentScrollY = window.pageYOffset
 
-    // 计算目标滚动位置，让图片在视窗中央
+    // 让图片在视口中央
     const targetScrollY =
       currentScrollY +
       elementRect.top -
       windowHeight / 2 +
       elementRect.height / 2
 
-    // 平滑滚动到目标位置
     window.scrollTo({
       top: Math.max(0, targetScrollY),
       behavior: 'smooth',
@@ -286,11 +285,8 @@ const scrollToPhoto = (photoIndex: number) => {
   }
 }
 
-// 监听照片查看器的索引变化，滚动到对应图片
 watch(currentPhotoIndex, (newIndex) => {
-  // 只在查看器打开时才滚动
   if (isViewerOpen.value && newIndex >= 0) {
-    // 延迟一下，确保DOM更新完成
     nextTick(() => {
       scrollToPhoto(newIndex)
     })
@@ -307,12 +303,12 @@ watch(currentPhotoIndex, (newIndex) => {
       :is-mobile="isMobile"
     />
 
-    <!-- 移动端时 HeaderItem 显示在瀑布流容器外 -->
+    <!-- 移动端时 ItemHeader 显示在瀑布流容器外 -->
     <div
       v-if="isMobile"
       class="px-1 pt-2 pb-1"
     >
-      <MasonryHeaderItem
+      <MasonryItemHeader
         :stats="photoStats"
         :date-range-text
       />
@@ -323,46 +319,45 @@ watch(currentPhotoIndex, (newIndex) => {
       class="lg:px-0 lg:pb-0"
       :class="isMobile ? 'px-1 pb-1' : 'p-1'"
     >
-      <!-- Masonry Grid -->
-      <div
+      <!-- Masonry Wall -->
+      <MasonryWall
         ref="masonryContainer"
-        class="masonry-grid"
-        :style="{
-          columnCount: columnCount,
-          columnGap: `${COLUMN_GAP}px`,
-        }"
+        :items="masonryItems"
+        :column-width="columnWidth"
+        :gap="4"
+        :min-columns="minColumns"
+        :max-columns="maxColumns"
+        :ssr-columns="2"
+        :key-mapper="
+          (_item, _column, _row, index) =>
+            masonryItems[index]?.originalIndex || index
+        "
       >
-        <!-- 非移动端时 HeaderItem 显示在瀑布流内 -->
-        <MasonryHeaderItem
-          v-if="!isMobile"
-          :stats="photoStats"
-          :date-range-text
-        />
+        <template #default="{ item, index }">
+          <!-- 非移动端时 ItemHeader 显示在瀑布流内的第一个位置 -->
+          <MasonryItemHeader
+            v-if="!isMobile && index === 0 && item.type === 'header'"
+            :stats="photoStats"
+            :date-range-text
+          />
 
-        <!-- Photo Items -->
-        <MasonryItem
-          v-for="(photo, index) in displayPhotos"
-          :key="photo.id || index"
-          :photo="photo"
-          :index="index"
-          :has-animated
-          :first-screen-items="FIRST_SCREEN_ITEMS_COUNT"
-          @visibility-change="handleVisibilityChange"
-          @open-viewer="handleOpenViewer($event)"
-        />
-      </div>
+          <!-- Photo Items -->
+          <MasonryItem
+            v-else-if="
+              item.type === 'photo' &&
+              item.photo &&
+              typeof item.originalIndex === 'number'
+            "
+            :key="item.photo.id"
+            :photo="item.photo"
+            :index="item.originalIndex"
+            :has-animated
+            :first-screen-items="FIRST_SCREEN_ITEMS_COUNT"
+            @visibility-change="handleVisibilityChange"
+            @open-viewer="handleOpenViewer($event)"
+          />
+        </template>
+      </MasonryWall>
     </div>
   </div>
 </template>
-
-<style scoped>
-.masonry-container {
-  position: relative;
-  width: 100%;
-}
-
-.masonry-grid {
-  width: 100%;
-  column-fill: balance;
-}
-</style>

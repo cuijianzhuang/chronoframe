@@ -9,7 +9,7 @@ const props = withDefaults(
     firstScreenItems?: number
   }>(),
   {
-    firstScreenItems: 300,
+    firstScreenItems: 30,
   },
 )
 
@@ -62,13 +62,14 @@ const itemVariants = {
     :variants="shouldAnimate ? itemVariants : undefined"
     :initial="shouldAnimate ? 'hidden' : 'visible'"
     :animate="'visible'"
+    class="w-full"
     @animation-complete="
       () => {
         if (shouldAnimate) emit('animationComplete')
       }
     "
   >
-    <MasonryPhotoItem
+    <MasonryItemPhoto
       :photo="photo"
       :index="index"
       @visibility-change="emit('visibility-change', $event)"
