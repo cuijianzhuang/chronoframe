@@ -264,7 +264,7 @@ const handleToggleFilter = (type: string, value: string | number) => {
         <div
           class="max-h-64 overflow-y-auto flex flex-col items-center gap-3 py-4"
         >
-          <UiRating
+          <Rating
             v-model="selectedRating"
             size="xl"
             :allow-half="false"

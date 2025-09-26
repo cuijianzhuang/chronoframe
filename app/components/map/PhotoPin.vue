@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { motion } from 'motion-v'
-import ThumbImage from '../ThumbImage.vue'
+import ThumbImage from '../ui/ThumbImage.vue'
 import { twMerge } from 'tailwind-merge'
 import type { ClusterPoint } from '~~/shared/types/map'
 
@@ -126,16 +126,13 @@ const onClick = () => {
                 :exit="{ opacity: 0, scale: 0.95, y: 4 }"
                 :transition="{ duration: 0.2 }"
               >
-                <MapGlassButton
+                <GlassButton
                   v-if="isSelected"
-                  class="absolute top-2 right-2 z-10 size-8"
+                  class="absolute top-2 right-2 z-10"
+                  size="sm"
+                  icon="tabler:x"
                   @click="$emit('close')"
-                >
-                  <Icon
-                    name="tabler:x"
-                    class="size-5"
-                  />
-                </MapGlassButton>
+                />
 
                 <!-- Single photo preview -->
                 <div class="relative h-36 overflow-hidden">

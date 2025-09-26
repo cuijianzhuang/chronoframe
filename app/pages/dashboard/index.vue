@@ -64,81 +64,34 @@ const chartData = computed(() => {
 
     <!-- 核心指标条 - 横向布局 -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <!-- 照片总数 -->
-      <div
-        class="border bg-gradient-to-r from-blue-50 to-cyan-50 border-cyan-100 dark:from-blue-950 dark:to-cyan-950 dark:border-cyan-900 rounded-lg p-4 text-blue-400 dark:text-white"
-      >
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm opacity-90 font-medium">照片总数</p>
-            <p class="text-lg font-bold">
-              {{ dashboardStats?.photos?.total || 0 }}
-            </p>
-          </div>
-          <UIcon
-            name="i-tabler-photo"
-            class="size-8 opacity-80"
-          />
-        </div>
-      </div>
-
-      <!-- 本月新增 -->
-      <div
-        class="border bg-gradient-to-r from-green-50 to-emerald-50 border-emerald-100 dark:from-green-950 dark:to-emerald-950 dark:border-emerald-900 rounded-lg p-4 text-green-400 dark:text-white"
-      >
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm opacity-90">本月新增</p>
-            <p class="text-lg font-bold">
-              {{ dashboardStats?.photos?.thisMonth || 0 }}
-            </p>
-          </div>
-          <UIcon
-            name="i-tabler-plus"
-            class="w-8 h-8 opacity-80"
-          />
-        </div>
-      </div>
-
-      <!-- 处理中 -->
-      <div
-        class="border bg-gradient-to-r from-purple-50 to-violet-50 border-violet-100 dark:from-purple-950 dark:to-violet-950 dark:border-violet-900 rounded-lg p-4 text-purple-400 dark:text-white"
-      >
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm opacity-90">队列状态</p>
-            <p class="text-lg font-bold">
-              {{
-                (dashboardStats?.workerPool?.activeWorkers || 0) > 0
-                  ? '处理中'
-                  : '空闲'
-              }}
-            </p>
-          </div>
-          <UIcon
-            name="i-tabler-loader"
-            class="w-8 h-8 opacity-80"
-          />
-        </div>
-      </div>
-
-      <!-- 存储使用量 -->
-      <div
-        class="border bg-gradient-to-r from-indigo-50 to-blue-50 border-blue-100 dark:from-indigo-950 dark:to-blue-950 dark:border-blue-900 rounded-lg p-4 text-indigo-400 dark:text-white"
-      >
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm opacity-90">存储使用</p>
-            <p class="text-lg font-bold">
-              {{ formatBytes(dashboardStats?.storage?.totalSize || 0) }}
-            </p>
-          </div>
-          <UIcon
-            name="i-tabler-database"
-            class="w-8 h-8 opacity-80"
-          />
-        </div>
-      </div>
+      <DashboardIndicator
+        title="照片总数"
+        icon="tabler:photo"
+        color="blue"
+        :value="dashboardStats?.photos?.total || 0"
+      />
+      <DashboardIndicator
+        title="本月新增"
+        icon="tabler:photo-plus"
+        color="green"
+        :value="dashboardStats?.photos?.thisMonth || 0"
+      />
+      <DashboardIndicator
+        title="队列状态"
+        icon="tabler:loader"
+        color="purple"
+        :value="
+          (dashboardStats?.workerPool?.activeWorkers || 0) > 0
+            ? '处理中'
+            : '空闲'
+        "
+      />
+      <DashboardIndicator
+        title="存储使用"
+        icon="tabler:database"
+        color="blue"
+        :value="formatBytes(dashboardStats?.storage?.totalSize || 0)"
+      />
     </div>
 
     <!-- 运行信息 -->
@@ -149,7 +102,7 @@ const chartData = computed(() => {
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
-          <p class="text-sm text-neutral-500 dark:text-neutral-400">应用版本</p>
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">运行版本</p>
           <NuxtLink
             class="text-lg font-bold hover:text-primary"
             target="_blank"

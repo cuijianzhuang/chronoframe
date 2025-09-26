@@ -40,7 +40,7 @@ const onAuthSubmit = async (event: any) => {
   <div
     class="w-full min-h-svh flex flex-col items-center justify-center p-4 pb-12"
   >
-    <UiAuthForm
+    <AuthForm
       icon="tabler:photo-circle"
       :title="$t('auth.form.signin.title')"
       :subtitle="$t('auth.form.signin.subtitle')"

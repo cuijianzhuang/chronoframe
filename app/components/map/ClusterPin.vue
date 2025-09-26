@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { motion } from 'motion-v'
-import ThumbImage from '../ThumbImage.vue'
+import ThumbImage from '../ui/ThumbImage.vue'
 import { twMerge } from 'tailwind-merge'
 import type { ClusterPoint } from '~~/shared/types/map'
 
@@ -41,7 +41,7 @@ const representativePhoto = computed(
 
 const sizeDelta = computed(() => {
   const count = pointCount.value
-  return Math.min(64, Math.max(40, 32 + Math.log(count) * 8))
+  return Math.min(64, Math.max(44, 32 + Math.log(count) * 10))
 })
 </script>
 
