@@ -49,7 +49,7 @@ const chartData = computed(() => {
   return {
     labels: dashboardStats.value.trends.map((item) => {
       const date = new Date(item.date || '')
-      return dayjs(date).format("MM-DD")
+      return dayjs(date).format('MM-DD')
     }),
     data: dashboardStats.value.trends.map((item) => item.count),
   }
@@ -224,9 +224,13 @@ const chartData = computed(() => {
               </div>
               <UProgress
                 :model-value="
-                  chartData.data[index] && chartData.data.length
-                    ? (chartData.data[index] / Math.max(...chartData.data) ||
-                        0) * 100
+                  chartData.data[index] &&
+                  chartData.data.length &&
+                  chartData.data.length > 0
+                    ? Math.max(...chartData.data) > 0
+                      ? (chartData.data[index] / Math.max(...chartData.data)) *
+                        100
+                      : 0
                     : 1
                 "
                 color="info"
