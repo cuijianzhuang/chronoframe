@@ -1,4 +1,4 @@
-import { sql, and, gte } from 'drizzle-orm'
+import { sql, gte } from 'drizzle-orm'
 import * as si from 'systeminformation'
 import { readFileSync } from 'node:fs'
 
@@ -141,31 +141,34 @@ export default eventHandler(async (event) => {
     .get()
 
   // 获取最近7天的上传趋势
+  today.setHours(0, 0, 0, 0)
+  const sevenDaysAgo = new Date(today)
+  sevenDaysAgo.setDate(today.getDate() - 6)
+  sevenDaysAgo.setHours(0, 0, 0, 0)
+  const sevenDaysAgoISO = sevenDaysAgo.toISOString()
+
+  // Query counts grouped by date for the last 7 days
+  const rawTrendData = await useDB()
+    .select({
+      date: sql<string>`DATE(${tables.photos.dateTaken})`,
+      count: sql<number>`count(*)`,
+    })
+    .from(tables.photos)
+    .where(gte(tables.photos.dateTaken, sevenDaysAgoISO))
+    .groupBy(sql`DATE(${tables.photos.dateTaken})`)
+    .orderBy(sql`DATE(${tables.photos.dateTaken}) ASC`)
+    .all()
+
+  // Build trendData for each of the last 7 days, filling in zeros if needed
   const trendData = []
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date()
-    date.setDate(date.getDate() - i)
-    date.setHours(0, 0, 0, 0)
-    const dateISO = date.toISOString()
-
-    const nextDate = new Date(date)
-    nextDate.setDate(nextDate.getDate() + 1)
-    const nextDateISO = nextDate.toISOString()
-
-    const dayCount = await useDB()
-      .select({ count: sql<number>`count(*)` })
-      .from(tables.photos)
-      .where(
-        and(
-          gte(tables.photos.dateTaken, dateISO),
-          sql`${tables.photos.dateTaken} < ${nextDateISO}`,
-        ),
-      )
-      .get()
-
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(sevenDaysAgo)
+    date.setDate(sevenDaysAgo.getDate() + i)
+    const dateStr = date.toISOString().split('T')[0]
+    const found = rawTrendData.find((row) => row.date === dateStr)
     trendData.push({
-      date: date.toISOString().split('T')[0],
-      count: dayCount?.count || 0,
+      date: dateStr,
+      count: found ? found.count : 0,
     })
   }
 
