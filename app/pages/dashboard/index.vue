@@ -23,7 +23,7 @@ const refreshData = async () => {
   }
 }
 
-const refreshInterval = setInterval(refreshData, 1500)
+const refreshInterval = setInterval(refreshData, 5000)
 
 onBeforeUnmount(() => {
   clearInterval(refreshInterval)
