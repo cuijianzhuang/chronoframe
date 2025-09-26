@@ -54,7 +54,6 @@ interface UploadingFile {
 
 const uploadingFiles = ref<Map<string, UploadingFile>>(new Map())
 
-// 重写的文件上传和处理函数
 const uploadImage = async (file: File) => {
   const fileName = file.name
   const fileId = `${Date.now()}-${fileName}`
@@ -537,13 +536,15 @@ const validateFile = (file: File): { valid: boolean; error?: string } => {
     'image/heic',
     'image/heif',
     'video/quicktime', // MOV 文件
-    'video/mp4', // MP4 文件（备用）
   ]
 
   const isValidImageType = allowedTypes.includes(file.type)
+  const isValidImageExtension = ['.heic', '.heif'].some((ext) =>
+    file.name.toLowerCase().endsWith(ext),
+  )
   const isValidVideoExtension = file.name.toLowerCase().endsWith('.mov')
 
-  if (!isValidImageType && !isValidVideoExtension) {
+  if (!isValidImageType && !isValidImageExtension && !isValidVideoExtension) {
     return {
       valid: false,
       error: `不支持的文件格式: ${file.type}。请选择 JPEG、PNG、HEIC 格式的图片或 MOV 格式的 LivePhoto 视频。`,
