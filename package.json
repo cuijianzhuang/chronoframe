@@ -1,6 +1,6 @@
 {
   "name": "chronoframe",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "author": {
     "name": "Timothy Yin",
     "email": "master@uniiem.com"
@@ -62,9 +62,11 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.12",
     "thumbhash": "^0.1.1",
+    "tippy.js": "^6.3.7",
     "unstorage": "^1.15.0",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1",
+    "vue3-calendar-heatmap": "^2.0.5",
     "wait-on": "^8.0.4",
     "zod": "^4.1.11"
   },

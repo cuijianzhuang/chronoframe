@@ -27,7 +27,8 @@ const { loggedIn, user } = useUserSession()
 
 useHead({
   title: $t('title.dashboard'),
-  titleTemplate: (title) => `${title ? title + ' | ' : ''}${config.public.APP_TITLE}`,
+  titleTemplate: (title) =>
+    `${title ? title + ' | ' : ''}${config.public.APP_TITLE}`,
 })
 
 const isMobileMenuOpen = ref(false)
@@ -56,7 +57,7 @@ const closeMobileMenu = () => {
 </script>
 
 <template>
-  <div>
+  <div class="container mx-auto">
     <header
       v-if="loggedIn"
       class="w-full px-4 border-b border-default"

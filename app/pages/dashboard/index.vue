@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+import { CalendarHeatmap, type CalendarItem } from 'vue3-calendar-heatmap'
+import 'vue3-calendar-heatmap/dist/style.css'
+
 definePageMeta({
   layout: 'dashboard',
 })
@@ -8,6 +11,7 @@ useHead({
 })
 
 const dayjs = useDayjs()
+const { photos } = usePhotos()
 
 const { data: dashboardStats, refresh: refreshStats } =
   await useFetch('/api/system/stats')
@@ -42,17 +46,28 @@ const systemStatus = computed(() => {
   return 'healthy'
 })
 
-// 趋势图表
-const chartData = computed(() => {
-  if (!dashboardStats.value?.trends) return { labels: [], data: [] }
+const heatmapData = computed(() => {
+  if (!photos.value || photos.value.length === 0) return []
 
-  return {
-    labels: dashboardStats.value.trends.map((item) => {
-      const date = new Date(item.date || '')
-      return dayjs(date).format('MM-DD')
+  // 按日期分组统计照片数量
+  const dateCountMap = new Map<string, number>()
+
+  photos.value.forEach((photo) => {
+    if (photo.dateTaken) {
+      const date = dayjs(photo.dateTaken).format('YYYY-M-D')
+      const currentCount = dateCountMap.get(date) || 0
+      dateCountMap.set(date, currentCount + 1)
+    }
+  })
+
+  const heatmapData = Array.from(dateCountMap.entries()).map(
+    ([date, count]) => ({
+      date,
+      count,
     }),
-    data: dashboardStats.value.trends.map((item) => item.count),
-  }
+  )
+
+  return heatmapData
 })
 </script>
 
@@ -62,7 +77,6 @@ const chartData = computed(() => {
       <h1 class="text-2xl font-bold">仪表板概览</h1>
     </div>
 
-    <!-- 核心指标条 - 横向布局 -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <DashboardIndicator
         title="照片总数"
@@ -141,64 +155,42 @@ const chartData = computed(() => {
     </UCard>
 
     <!-- 详细统计区域 -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <!-- 左侧：照片统计图表 -->
-      <div class="lg:col-span-2">
+    <div class="grid grid-cols-1 lg:grid-cols-3 space-y-4 lg:gap-4">
+      <!-- 左侧 -->
+      <div class="col-span-2">
         <UCard>
-          <template #header>
-            <div class="flex items-center justify-between pb-1.5">
-              <h2 class="text-lg font-semibold">新增照片趋势</h2>
-              <div class="flex gap-2">
-                <UBadge
-                  color="info"
-                  variant="soft"
-                >
-                  本周 {{ dashboardStats?.photos?.thisWeek || 0 }}
-                </UBadge>
-                <UBadge
-                  color="success"
-                  variant="soft"
-                >
-                  本月 {{ dashboardStats?.photos?.thisMonth || 0 }}
-                </UBadge>
+          <ClientOnly>
+            <CalendarHeatmap
+              :values="heatmapData"
+              :end-date="new Date()"
+              :round="3"
+              :no-data-text="'这天没有照片'"
+              :tooltip-formatter="
+                (item: CalendarItem) => {
+                  return `${$dayjs(item.date).format('LL')}拍摄了 ${item.count || 0} 张照片`
+                }
+              "
+              :locale="{
+                less: '更少',
+                more: '更多',
+              }"
+              :dark-mode="$colorMode.value === 'dark'"
+            />
+            <template #placeholder>
+              <div class="flex items-center justify-center h-[164.5px]">
+                <Icon
+                  name="svg-spinners:180-ring-with-bg"
+                  class="size-8 opacity-50"
+                  mode="svg"
+                />
               </div>
-            </div>
-          </template>
-
-          <!-- 简单的趋势展示 -->
-          <div class="space-y-2">
-            <div
-              v-for="(trend, index) in dashboardStats?.trends || []"
-              :key="trend.date"
-              class="flex items-center gap-3"
-            >
-              <div class="text-sm text-neutral-500 dark:text-neutral-400 w-12">
-                {{ chartData.labels[index] }}
-              </div>
-              <UProgress
-                :model-value="
-                  chartData.data[index] &&
-                  chartData.data.length &&
-                  chartData.data.length > 0
-                    ? Math.max(...chartData.data) > 0
-                      ? (chartData.data[index] / Math.max(...chartData.data)) *
-                        100
-                      : 0
-                    : 1
-                "
-                color="info"
-                class="flex-1"
-              />
-              <div class="text-sm font-medium w-8 text-right">
-                {{ trend.count }}
-              </div>
-            </div>
-          </div>
+            </template>
+          </ClientOnly>
         </UCard>
       </div>
 
       <!-- 右侧：系统资源监控 -->
-      <div class="space-y-4">
+      <div class="w-full space-y-4">
         <!-- 内存使用 -->
         <UCard>
           <template #header>
@@ -307,4 +299,17 @@ const chartData = computed(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style>
+.vch__day__label,
+.vch__month__label,
+.vch__legend {
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-500);
+}
+
+.vch__day__label,
+.vch__month__label {
+  font-size: var(--text-xs);
+}
+</style>
