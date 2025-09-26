@@ -72,7 +72,7 @@ const closeMobileMenu = () => {
             to="/"
             class="text-lg font-medium text-nowrap"
           >
-            {{ config.public.APP_TITLE }}
+            {{ config.public.APP_TITLE || $t('title.dashboard') }}
           </NuxtLink>
         </div>
         <UNavigationMenu
@@ -98,7 +98,7 @@ const closeMobileMenu = () => {
               to="/"
               class="text-lg font-medium"
             >
-              {{ config.public.APP_TITLE }}
+              {{ config.public.APP_TITLE || $t('title.dashboard') }}
             </NuxtLink>
           </div>
           <UButton
