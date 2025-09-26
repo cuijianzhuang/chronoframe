@@ -120,14 +120,16 @@ const uploadImage = async (file: File) => {
         uploadingFiles.value = new Map(uploadingFiles.value)
 
         try {
+          // 检查是否为MOV视频文件（通过MIME类型或文件扩展名）
+          const isMovFile = file.type === 'video/quicktime' || 
+                           file.type === 'video/mp4' || 
+                           file.name.toLowerCase().endsWith('.mov')
+          
           const resp = await $fetch('/api/queue/add-task', {
             method: 'POST',
             body: {
               payload: {
-                type:
-                  file.type === 'video/quicktime'
-                    ? 'live-photo-video'
-                    : 'photo',
+                type: isMovFile ? 'live-photo-video' : 'photo',
                 storageKey: signedUrlResponse.fileKey,
               },
               priority: 0,
@@ -569,24 +571,98 @@ const handleUpload = async () => {
     return
   }
 
+  // 显示批量上传进度
+  const uploadToast = toast.add({
+    title: '开始批量上传',
+    description: `正在上传 ${fileList.length} 个文件...`,
+    color: 'info',
+  })
+
+  let successCount = 0
+  let errorCount = 0
+  const errors: string[] = []
+
+  // 先验证所有文件
+  const validFiles: File[] = []
   for (const file of fileList) {
-    // 验证文件
     const validation = validateFile(file)
     if (!validation.valid) {
-      toast.add({
-        title: '文件验证失败',
-        description: validation.error,
-        color: 'error',
-      })
-      continue
+      errors.push(`${file.name}: ${validation.error}`)
+      errorCount++
+    } else {
+      validFiles.push(file)
     }
+  }
 
-    try {
-      await uploadImage(file)
-    } catch (error: any) {
-      // 错误已经在 uploadImage 函数内部处理了
-      console.error('上传错误:', error)
-    }
+  if (validFiles.length === 0) {
+    toast.update(uploadToast.id, {
+      title: '批量上传失败',
+      description: '所有文件验证失败',
+      color: 'error',
+    })
+    selectedFiles.value = []
+    return
+  }
+
+  // 并发上传，但限制并发数量以避免资源竞争
+  const CONCURRENT_LIMIT = 3 // 限制同时上传的文件数量
+  const uploadPromises: Promise<void>[] = []
+  
+  for (let i = 0; i < validFiles.length; i += CONCURRENT_LIMIT) {
+    const batch = validFiles.slice(i, i + CONCURRENT_LIMIT)
+    
+    const batchPromises = batch.map(async (file) => {
+      try {
+        await uploadImage(file)
+        successCount++
+      } catch (error: any) {
+        errorCount++
+        errors.push(`${file.name}: ${error.message || '上传失败'}`)
+        console.error('上传错误:', error)
+      }
+    })
+    
+    uploadPromises.push(...batchPromises)
+    
+    // 等待当前批次完成再处理下一批次
+    await Promise.allSettled(batchPromises)
+    
+    // 更新进度
+    const processed = Math.min(i + CONCURRENT_LIMIT, validFiles.length)
+    toast.update(uploadToast.id, {
+      title: '批量上传进行中',
+      description: `已处理 ${processed}/${validFiles.length} 个文件`,
+      color: 'info',
+    })
+  }
+
+  // 等待所有上传完成
+  await Promise.allSettled(uploadPromises)
+
+  // 显示最终结果
+  if (errorCount === 0) {
+    toast.update(uploadToast.id, {
+      title: '批量上传成功',
+      description: `成功上传 ${successCount} 个文件`,
+      color: 'success',
+    })
+  } else if (successCount === 0) {
+    toast.update(uploadToast.id, {
+      title: '批量上传失败',
+      description: `所有 ${errorCount} 个文件上传失败`,
+      color: 'error',
+    })
+  } else {
+    toast.update(uploadToast.id, {
+      title: '批量上传部分成功',
+      description: `成功: ${successCount}, 失败: ${errorCount}`,
+      color: 'warning',
+    })
+  }
+
+  // 如果有错误，显示详细错误信息
+  if (errors.length > 0) {
+    console.error('批量上传错误详情:', errors)
   }
 
   // 清空选中的文件

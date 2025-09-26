@@ -45,9 +45,9 @@ export class WorkerPool {
 
   constructor(config: Partial<WorkerPoolConfig>, logger?: ConsolaInstance) {
     this.config = {
-      workerCount: 3,
-      intervalMs: 2000,
-      intervalOffset: 500,
+      workerCount: 5, // 增加worker数量以提高并发处理能力
+      intervalMs: 1500, // 减少轮询间隔以提高响应速度
+      intervalOffset: 300, // 减少偏移时间
       enableLoadBalancing: true,
       statsReportInterval: 30000, // 30秒
       ...config,

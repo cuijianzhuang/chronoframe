@@ -25,65 +25,87 @@ export class MapboxGeocodingProvider implements GeocodingProvider {
   }
 
   async reverseGeocode(lat: number, lon: number): Promise<LocationInfo | null> {
-    try {
-      // 应用速率限制
-      await this.applyRateLimit()
+    const maxRetries = 3
+    let lastError: Error | null = null
 
-      const url = new URL('/search/geocode/v6/reverse', this.baseUrl)
-      url.searchParams.set('access_token', this.accessToken)
-      url.searchParams.set('longitude', lon.toString())
-      url.searchParams.set('latitude', lat.toString())
-      url.searchParams.set('types', 'address,place,district,region,country')
-      url.searchParams.set('language', 'zh-Hants')
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        // 应用速率限制
+        await this.applyRateLimit()
 
-      logger.location.info(`Mapbox API URL: ${url.toString()}`)
+        const url = new URL('/search/geocode/v6/reverse', this.baseUrl)
+        url.searchParams.set('access_token', this.accessToken)
+        url.searchParams.set('longitude', lon.toString())
+        url.searchParams.set('latitude', lat.toString())
+        url.searchParams.set('types', 'address,place,district,region,country')
+        url.searchParams.set('language', 'zh-Hants')
 
-      const response = await fetch(url.toString())
+        logger.location.info(`Mapbox API URL (attempt ${attempt}): ${url.toString()}`)
 
-      if (!response.ok) {
-        logger.location.warn(
-          `Mapbox API responded with status ${response.status}`,
-        )
-        return null
+        const response = await Promise.race([
+          fetch(url.toString()),
+          new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Mapbox API timeout')), 10000)
+          )
+        ])
+
+        if (!response.ok) {
+          logger.location.warn(
+            `Mapbox API responded with status ${response.status} (attempt ${attempt})`,
+          )
+          if (attempt < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
+            continue
+          }
+          return null
+        }
+
+        const data = await response.json()
+
+        if (!data || !data.features || data.features.length === 0) {
+          logger.location.warn('Mapbox API returned no features')
+          return null
+        }
+
+        // 取第一个最相关的结果
+        const feature = data.features[0]
+        const properties = feature.properties || {}
+        const context = properties.context || {}
+
+        // 提取国家信息
+        const country = context.country?.name
+
+        // 提取城市信息（优先级：locality > place > locality > district > region）
+        const city =
+          context.locality?.name ||
+          context.place?.name ||
+          context.locality?.name ||
+          context.district?.name ||
+          context.region?.name
+
+        // 构建位置名称
+        const locationName = properties.place_formatted || properties.name
+
+        logger.location.success(`Successfully geocoded location: ${city}, ${country}`)
+        return {
+          latitude: lat,
+          longitude: lon,
+          country,
+          city,
+          locationName,
+        }
+      } catch (error) {
+        lastError = error as Error
+        logger.location.warn(`Mapbox reverse geocoding attempt ${attempt} failed:`, error)
+        
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 2000 * attempt))
+        }
       }
-
-      const data = await response.json()
-
-      if (!data || !data.features || data.features.length === 0) {
-        logger.location.warn('Mapbox API returned no features')
-        return null
-      }
-
-      // 取第一个最相关的结果
-      const feature = data.features[0]
-      const properties = feature.properties || {}
-      const context = properties.context || {}
-
-      // 提取国家信息
-      const country = context.country?.name
-
-      // 提取城市信息（优先级：locality > place > locality > district > region）
-      const city =
-        context.locality?.name ||
-        context.place?.name ||
-        context.locality?.name ||
-        context.district?.name ||
-        context.region?.name
-
-      // 构建位置名称
-      const locationName = properties.place_formatted || properties.name
-
-      return {
-        latitude: lat,
-        longitude: lon,
-        country,
-        city,
-        locationName,
-      }
-    } catch (error) {
-      logger.location.error('Mapbox reverse geocoding failed:', error)
-      return null
     }
+
+    logger.location.error('All Mapbox reverse geocoding attempts failed')
+    return null
   }
 
   private async applyRateLimit(): Promise<void> {

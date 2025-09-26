@@ -7,10 +7,36 @@ export { sql, eq, and, or } from 'drizzle-orm'
 
 export const tables = schema
 
+// 创建单例数据库连接
+let dbInstance: ReturnType<typeof drizzle> | null = null
+let sqliteInstance: Database.Database | null = null
+
 export function useDB() {
-  // return drizzle(hubDatabase(), { schema })
-  const sqlite = new Database('data/app.sqlite3')
-  return drizzle(sqlite, { schema })
+  if (!dbInstance || !sqliteInstance) {
+    // 创建数据库连接，启用WAL模式以提高并发性能
+    sqliteInstance = new Database('data/app.sqlite3', {
+      verbose: process.env.NODE_ENV === 'development' ? console.log : undefined,
+    })
+    
+    // 启用WAL模式以提高并发性能
+    sqliteInstance.pragma('journal_mode = WAL')
+    sqliteInstance.pragma('synchronous = NORMAL')
+    sqliteInstance.pragma('cache_size = 1000')
+    sqliteInstance.pragma('temp_store = MEMORY')
+    
+    dbInstance = drizzle(sqliteInstance, { schema })
+  }
+  
+  return dbInstance
+}
+
+// 优雅关闭数据库连接
+export function closeDB() {
+  if (sqliteInstance) {
+    sqliteInstance.close()
+    sqliteInstance = null
+    dbInstance = null
+  }
 }
 
 export type User = typeof schema.users.$inferSelect

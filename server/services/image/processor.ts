@@ -25,48 +25,95 @@ const isBitmap = (buffer: Buffer) => {
 const getMetadataWithSharp = async (
   sharpInst: sharp.Sharp,
 ): Promise<ImageMeta | null> => {
-  try {
-    const metadata = await sharpInst.metadata()
+  const maxRetries = 3
+  let lastError: Error | null = null
 
-    if (!metadata.height || !metadata.width || !metadata.format) {
-      return null
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      logger.image.info(`Extracting metadata (attempt ${attempt}/${maxRetries})...`)
+      
+      const metadata = await Promise.race([
+        sharpInst.metadata(),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Metadata extraction timeout')), 10000)
+        )
+      ])
+
+      if (!metadata.height || !metadata.width || !metadata.format) {
+        logger.image.warn('Incomplete metadata received:', { 
+          hasHeight: !!metadata.height, 
+          hasWidth: !!metadata.width, 
+          hasFormat: !!metadata.format 
+        })
+        return null
+      }
+
+      const { orientation } = metadata
+      let { width, height } = metadata
+
+      if (orientation && [5, 6, 7, 8].includes(orientation)) {
+        ;[width, height] = [height, width]
+      }
+
+      logger.image.info(`Successfully extracted metadata: ${width}x${height} ${metadata.format}`)
+      return {
+        width: width,
+        height: height,
+        format: metadata.format,
+      }
+    } catch (err) {
+      lastError = err as Error
+      logger.image.warn(`Metadata extraction attempt ${attempt} failed:`, err)
+      
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, 500 * attempt))
+      }
     }
-
-    const { orientation } = metadata
-    let { width, height } = metadata
-
-    if (orientation && [5, 6, 7, 8].includes(orientation)) {
-      ;[width, height] = [height, width]
-    }
-
-    return {
-      width: width,
-      height: height,
-      format: metadata.format,
-    }
-  } catch (err) {
-    logger.image.error('Failed to get image metadata', err)
-    return null
   }
+
+  logger.image.error('All metadata extraction attempts failed')
+  return null
 }
 
 export const convertHeicToJpeg = async (heicBuffer: Buffer) => {
-  try {
-    logger.image.info('Converting HEIC to JPEG...')
+  const maxRetries = 3
+  let lastError: Error | null = null
 
-    const jpegBuffer = await heicConvert({
-      // @ts-expect-error idk why there is a type error here
-      buffer: heicBuffer,
-      format: 'JPEG',
-      quality: 0.95,
-    })
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      logger.image.info(`Converting HEIC to JPEG (attempt ${attempt}/${maxRetries})...`)
 
-    logger.image.info('Successfully converted HEIC to JPEG')
-    return Buffer.from(jpegBuffer)
-  } catch (err) {
-    logger.image.error('Failed to convert HEIC to JPEG', err)
-    throw err
+      // 检查文件大小，如果太大则降低质量
+      const fileSizeMB = heicBuffer.length / (1024 * 1024)
+      const quality = fileSizeMB > 10 ? 0.8 : 0.95
+
+      const jpegBuffer = await Promise.race([
+        heicConvert({
+          // @ts-expect-error idk why there is a type error here
+          buffer: heicBuffer,
+          format: 'JPEG',
+          quality,
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('HEIC conversion timeout')), 30000)
+        )
+      ])
+
+      logger.image.info(`Successfully converted HEIC to JPEG (quality: ${quality})`)
+      return Buffer.from(jpegBuffer as ArrayBuffer)
+    } catch (err) {
+      lastError = err as Error
+      logger.image.warn(`HEIC conversion attempt ${attempt} failed:`, err)
+      
+      if (attempt < maxRetries) {
+        // 等待一段时间后重试
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
+      }
+    }
   }
+
+  logger.image.error('All HEIC conversion attempts failed')
+  throw lastError || new Error('HEIC conversion failed after all retries')
 }
 
 export const convertBitmapToSharpInst = async (bitmapBuffer: Buffer) => {
