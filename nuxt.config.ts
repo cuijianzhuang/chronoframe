@@ -26,6 +26,8 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/tailwind.css'],
 
+  components: [{ path: '~/components/ui', pathPrefix: false }, '~/components'],
+
   runtimeConfig: {
     public: {
       VERSION: pkg.version,

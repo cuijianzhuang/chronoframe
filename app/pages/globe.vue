@@ -208,47 +208,31 @@ onBeforeRouteLeave(() => {
 
 <template>
   <div class="w-full h-svh relative overflow-hidden">
-    <MapGlassButton
+    <GlassButton
       class="absolute top-4 left-4 z-10"
+      icon="tabler:home"
       @click="$router.push('/')"
-    >
-      <Icon
-        name="tabler:home"
-        class="size-5"
-      />
-    </MapGlassButton>
+    />
 
     <div class="absolute bottom-4 left-4 z-10 flex flex-col">
       <!-- Zoom in -->
-      <MapGlassButton
+      <GlassButton
         class="rounded-b-none border-b-0"
+        icon="tabler:plus"
         @click="zoomIn"
-      >
-        <Icon
-          name="tabler:plus"
-          class="size-5"
-        />
-      </MapGlassButton>
+      />
       <!-- Zoom out -->
-      <MapGlassButton
+      <GlassButton
         class="rounded-none"
+        icon="tabler:minus"
         @click="zoomOut"
-      >
-        <Icon
-          name="tabler:minus"
-          class="size-5"
-        />
-      </MapGlassButton>
+      />
       <!-- Reset map -->
-      <MapGlassButton
+      <GlassButton
         class="rounded-t-none border-t-0"
+        icon="tabler:scan-position"
         @click="resetMap"
-      >
-        <Icon
-          name="tabler:scan-position"
-          class="size-5"
-        />
-      </MapGlassButton>
+      />
     </div>
 
     <motion.div
@@ -292,7 +276,7 @@ onBeforeRouteLeave(() => {
 
           <!-- Single photo pins -->
           <template v-if="!!mapInstance">
-            <MapSinglePhotoPin
+            <MapPhotoPin
               v-for="clusterPoint in singleMarkers"
               :key="`single-${clusterPoint.properties.marker?.id}`"
               :cluster-point="clusterPoint"

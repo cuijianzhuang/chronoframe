@@ -3,7 +3,7 @@ import type { TableColumn } from '@nuxt/ui'
 import type { Photo, PipelineQueueItem } from '~~/server/utils/db'
 import { h, resolveComponent } from 'vue'
 import { Icon, UBadge } from '#components'
-import ThumbImage from '~/components/ThumbImage.vue'
+import ThumbImage from '~/components/ui/ThumbImage.vue'
 
 const UCheckbox = resolveComponent('UCheckbox')
 

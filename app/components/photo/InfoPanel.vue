@@ -499,7 +499,7 @@ const onTagClick = (tag: string) => {
           {{ $t('exif.sections.rating') }}
         </h4>
 
-        <UiRating
+        <Rating
           :model-value="currentPhoto.exif.Rating"
           readonly
           size="sm"
