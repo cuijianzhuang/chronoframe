@@ -26,7 +26,7 @@ const isVideoPlaying = ref(false)
 const isVideoLoaded = ref(false)
 const videoBlob = ref<Blob | null>(null)
 const videoBlobUrl = ref<string | null>(null)
-const { convertMovToMp4, getProcessingState } = useLivePhotoProcessor()
+const { convertMovToMp4, getProcessingState, preloadLivePhotosInViewport } = useLivePhotoProcessor()
 
 const isTouching = ref(false)
 const touchCount = ref(0)
@@ -80,7 +80,7 @@ const handleImageError = () => {
   console.warn(`Failed to load image: ${props.photo.thumbnailUrl}`)
 }
 
-// LivePhoto video handling
+// LivePhoto video handling - 优化的交互逻辑
 const handleMouseEnter = async () => {
   // Skip mouse events on mobile devices
   if (isMobile.value) return
@@ -89,9 +89,12 @@ const handleMouseEnter = async () => {
 
   if (!props.photo.isLivePhoto || !props.photo.livePhotoVideoUrl) return
 
-  // Only start video processing if we have the blob ready
-  if (videoBlob.value && videoBlobUrl.value) {
+  // 如果视频已准备好，立即播放
+  if (videoBlob.value && videoBlobUrl.value && isVideoLoaded.value) {
     playLivePhotoVideo()
+  } else if (!processingState.value?.isProcessing) {
+    // 如果视频还未处理，立即开始处理
+    processLivePhotoWhenVisible()
   }
 }
 
@@ -117,9 +120,10 @@ const handleMouseLeave = () => {
 const playLivePhotoVideo = () => {
   if (!videoRef.value || !videoBlobUrl.value) return
 
+  // 确保视频从头开始播放
   videoRef.value.currentTime = 0
 
-  // Start the crossfade transition by setting video playing state first
+  // 优化的播放逻辑：先设置状态，然后播放
   isVideoPlaying.value = true
 
   // Provide haptic feedback on mobile when starting playback
@@ -127,13 +131,27 @@ const playLivePhotoVideo = () => {
     navigator.vibrate(50) // Short vibration for start
   }
 
-  // Then play the video after a small delay to ensure smooth transition
-  nextTick(() => {
-    videoRef.value?.play().catch((error: any) => {
-      console.warn('Failed to play LivePhoto video:', error)
-      isVideoPlaying.value = false
-    })
-  })
+  // 立即尝试播放，使用更好的错误处理
+  const playPromise = videoRef.value.play()
+  
+  if (playPromise !== undefined) {
+    playPromise
+      .then(() => {
+        // 播放成功，确保状态正确
+        if (videoRef.value && !videoRef.value.paused) {
+          isVideoPlaying.value = true
+        }
+      })
+      .catch((error: any) => {
+        console.warn('Failed to play LivePhoto video:', error)
+        isVideoPlaying.value = false
+        
+        // 如果是因为用户交互策略导致的失败，可以尝试重新处理
+        if (error.name === 'NotAllowedError') {
+          console.log('Video play blocked by browser policy')
+        }
+      })
+  }
 }
 
 const handleVideoEnded = () => {
@@ -249,7 +267,7 @@ const handleClick = (event: Event) => {
   emit('openViewer', props.index)
 }
 
-// Process LivePhoto when it becomes visible
+// 智能LivePhoto处理：基于可见性和用户行为
 const processLivePhotoWhenVisible = async () => {
   if (
     !props.photo.isLivePhoto ||
@@ -259,10 +277,12 @@ const processLivePhotoWhenVisible = async () => {
     return
 
   try {
+    // 使用优化的转换函数，支持重试和缓存
     const blob = await convertMovToMp4(
       props.photo.livePhotoVideoUrl,
       props.photo.id,
     )
+    
     if (blob) {
       videoBlob.value = blob
       // Clean up previous blob URL
@@ -271,9 +291,35 @@ const processLivePhotoWhenVisible = async () => {
       }
       videoBlobUrl.value = URL.createObjectURL(blob)
       isVideoLoaded.value = true
+      
+      // 预热视频元素以提高播放性能
+      if (videoRef.value) {
+        videoRef.value.load()
+      }
     }
   } catch (error) {
     console.error('Failed to process LivePhoto:', error)
+    // 错误状态会通过processingState反映出来
+  }
+}
+
+// 预加载附近的LivePhoto（性能优化）
+const preloadNearbyLivePhotos = async () => {
+  if (!isVisible.value) return
+  
+  // 这里可以从父组件接收附近照片的信息
+  // 目前只处理当前照片
+  if (props.photo.isLivePhoto && props.photo.livePhotoVideoUrl) {
+    await preloadLivePhotosInViewport([
+      { 
+        id: props.photo.id, 
+        livePhotoVideoUrl: props.photo.livePhotoVideoUrl,
+        isVisible: isVisible.value 
+      }
+    ], {
+      maxConcurrent: 1,
+      prioritizeVisible: true
+    })
   }
 }
 
