@@ -5,9 +5,9 @@ export default defineNitroPlugin(async (_nitroApp) => {
 
   const workerPool = new WorkerPool(
     {
-      workerCount: 3,
-      intervalMs: 1000,
-      intervalOffset: Math.floor(1000 / 3),
+      workerCount: 5,
+      intervalMs: 1500,
+      intervalOffset: 300,
       enableLoadBalancing: true,
       statsReportInterval: 60000 * 10,
     },

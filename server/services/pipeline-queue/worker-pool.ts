@@ -1,5 +1,7 @@
 import type { ConsolaInstance } from 'consola'
 import { consola } from 'consola'
+import { eq } from 'drizzle-orm'
+import { useDB, tables } from '~~/server/utils/db'
 import { QueueManager } from './manager'
 
 export interface WorkerPoolConfig {
@@ -45,11 +47,11 @@ export class WorkerPool {
 
   constructor(config: Partial<WorkerPoolConfig>, logger?: ConsolaInstance) {
     this.config = {
-      workerCount: 5, // 增加worker数量以提高并发处理能力
-      intervalMs: 1500, // 减少轮询间隔以提高响应速度
-      intervalOffset: 300, // 减少偏移时间
+      workerCount: 3,
+      intervalMs: 2000,
+      intervalOffset: 300,
       enableLoadBalancing: true,
-      statsReportInterval: 30000, // 30秒
+      statsReportInterval: 30000,
       ...config,
     }
     this.logger = logger || consola.withTag('worker-pool')
@@ -67,6 +69,9 @@ export class WorkerPool {
     this.logger.info(
       `Starting WorkerPool with ${this.config.workerCount} workers`,
     )
+
+    // 在启动工作器之前，清理死任务
+    await this.cleanupDeadTasks()
 
     // 创建工作器
     for (let i = 1; i <= this.config.workerCount; i++) {
@@ -239,6 +244,46 @@ export class WorkerPool {
     }
 
     return await this.workers[0].getQueueStats()
+  }
+
+  /**
+   * 清理死任务 - 将 in-stages 状态的任务重置为 pending，并设置高优先级
+   */
+  private async cleanupDeadTasks(): Promise<void> {
+    try {
+      const db = useDB()
+
+      // 查找所有 in-stages 状态的任务（这些可能是死任务）
+      const deadTasks = await db
+        .select()
+        .from(tables.pipelineQueue)
+        .where(eq(tables.pipelineQueue.status, 'in-stages'))
+
+      if (deadTasks.length > 0) {
+        this.logger.warn(
+          `Found ${deadTasks.length} dead tasks in 'in-stages' status, resetting to pending with priority 1`,
+        )
+
+        // 将这些任务重置为 pending 状态，设置优先级为 1，清除状态阶段
+        await db
+          .update(tables.pipelineQueue)
+          .set({
+            status: 'pending',
+            priority: 1,
+            statusStage: null,
+          })
+          .where(eq(tables.pipelineQueue.status, 'in-stages'))
+
+        this.logger.success(
+          `Successfully reset ${deadTasks.length} dead tasks to pending status with priority 1`,
+        )
+      } else {
+        this.logger.info('No dead tasks found in queue')
+      }
+    } catch (error) {
+      this.logger.error('Failed to cleanup dead tasks:', error)
+      // 不抛出错误，允许工作器池继续启动
+    }
   }
 
   /**
