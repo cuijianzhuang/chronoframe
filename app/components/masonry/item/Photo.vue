@@ -26,7 +26,7 @@ const isVideoPlaying = ref(false)
 const isVideoLoaded = ref(false)
 const videoBlob = ref<Blob | null>(null)
 const videoBlobUrl = ref<string | null>(null)
-const { convertMovToMp4, getProcessingState, preloadLivePhotosInViewport } = useLivePhotoProcessor()
+const { convertMovToMp4, getProcessingState } = useLivePhotoProcessor()
 
 const isTouching = ref(false)
 const touchCount = ref(0)
@@ -139,14 +139,14 @@ const playLivePhotoVideo = () => {
   // 延迟播放以确保动画状态已设置
   nextTick(() => {
     if (!videoRef.value || !isVideoPlaying.value) return
-    
+
     // 设置视频播放属性
     videoRef.value.muted = true // 确保静音播放
     videoRef.value.playsInline = true
-    
+
     // 立即尝试播放，使用更好的错误处理
     const playPromise = videoRef.value.play()
-    
+
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
@@ -158,7 +158,7 @@ const playLivePhotoVideo = () => {
         .catch((error: any) => {
           console.warn('Failed to play LivePhoto video:', error)
           isVideoPlaying.value = false
-          
+
           // 如果是因为用户交互策略导致的失败，尝试重新加载
           if (error.name === 'NotAllowedError') {
             console.log('Video play blocked by browser policy, retrying...')
@@ -309,7 +309,7 @@ const processLivePhotoWhenVisible = async () => {
       props.photo.livePhotoVideoUrl,
       props.photo.id,
     )
-    
+
     if (blob) {
       videoBlob.value = blob
       // Clean up previous blob URL
@@ -318,7 +318,7 @@ const processLivePhotoWhenVisible = async () => {
       }
       videoBlobUrl.value = URL.createObjectURL(blob)
       isVideoLoaded.value = true
-      
+
       // 预热视频元素以提高播放性能
       if (videoRef.value) {
         videoRef.value.load()
@@ -327,26 +327,6 @@ const processLivePhotoWhenVisible = async () => {
   } catch (error) {
     console.error('Failed to process LivePhoto:', error)
     // 错误状态会通过processingState反映出来
-  }
-}
-
-// 预加载附近的LivePhoto（性能优化）
-const preloadNearbyLivePhotos = async () => {
-  if (!isVisible.value) return
-  
-  // 这里可以从父组件接收附近照片的信息
-  // 目前只处理当前照片
-  if (props.photo.isLivePhoto && props.photo.livePhotoVideoUrl) {
-    await preloadLivePhotosInViewport([
-      { 
-        id: props.photo.id, 
-        livePhotoVideoUrl: props.photo.livePhotoVideoUrl,
-        isVisible: isVisible.value 
-      }
-    ], {
-      maxConcurrent: 1,
-      prioritizeVisible: true
-    })
   }
 }
 
@@ -529,9 +509,9 @@ onUnmounted(() => {
           muted
           playsinline
           preload="metadata"
-          :initial="{ 
+          :initial="{
             opacity: 0,
-            scale: 1.02
+            scale: 1.02,
           }"
           :animate="{
             opacity: isVideoPlaying ? 1 : 0,
@@ -539,17 +519,21 @@ onUnmounted(() => {
           }"
           :transition="{
             duration: isVideoPlaying ? 0.3 : 0.2,
-            ease: isVideoPlaying ? [0.23, 1, 0.32, 1] : [0.25, 0.46, 0.45, 0.94],
+            ease: isVideoPlaying
+              ? [0.23, 1, 0.32, 1]
+              : [0.25, 0.46, 0.45, 0.94],
             delay: isVideoPlaying ? 0.05 : 0,
           }"
           @ended="handleVideoEnded"
-          @loadeddata="() => {
-            // 视频加载完成后预热
-            if (videoRef && !isVideoPlaying) {
-              videoRef.currentTime = 0.1
-              videoRef.pause()
+          @loadeddata="
+            () => {
+              // 视频加载完成后预热
+              if (videoRef && !isVideoPlaying) {
+                videoRef.currentTime = 0.1
+                videoRef.pause()
+              }
             }
-          }"
+          "
         />
       </div>
 

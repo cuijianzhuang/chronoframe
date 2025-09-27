@@ -3,6 +3,7 @@ import bmp from '@vingle/bmp-js'
 import heicConvert from 'heic-convert'
 import { getStorageManager } from '~~/server/plugins/storage'
 import sharp from 'sharp'
+import { withRetry, RetryPresets, RetryConditions } from '../../utils/retry'
 
 export interface ProcessedImageData {
   sharpInst: sharp.Sharp
@@ -25,19 +26,9 @@ const isBitmap = (buffer: Buffer) => {
 const getMetadataWithSharp = async (
   sharpInst: sharp.Sharp,
 ): Promise<ImageMeta | null> => {
-  const maxRetries = 3
-  let lastError: Error | null = null
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      logger.image.info(`Extracting metadata (attempt ${attempt}/${maxRetries})...`)
-      
-      const metadata = await Promise.race([
-        sharpInst.metadata(),
-        new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Metadata extraction timeout')), 10000)
-        )
-      ])
+  try {
+    return await withRetry(async () => {
+      const metadata = await sharpInst.metadata()
 
       if (!metadata.height || !metadata.width || !metadata.format) {
         logger.image.warn('Incomplete metadata received:', { 
@@ -61,59 +52,42 @@ const getMetadataWithSharp = async (
         height: height,
         format: metadata.format,
       }
-    } catch (err) {
-      lastError = err as Error
-      logger.image.warn(`Metadata extraction attempt ${attempt} failed:`, err)
-      
-      if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 500 * attempt))
-      }
-    }
+    }, {
+      ...RetryPresets.fast,
+      timeout: 10000,
+      retryCondition: RetryConditions.resourceErrors
+    }, logger.image)
+  } catch (error) {
+    logger.image.error('All metadata extraction attempts failed:', error)
+    return null
   }
-
-  logger.image.error('All metadata extraction attempts failed')
-  return null
 }
 
 export const convertHeicToJpeg = async (heicBuffer: Buffer) => {
-  const maxRetries = 3
-  let lastError: Error | null = null
+  return await withRetry(async () => {
+    // 检查文件大小，如果太大则降低质量
+    const fileSizeMB = heicBuffer.length / (1024 * 1024)
+    const quality = fileSizeMB > 10 ? 0.8 : 0.95
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      logger.image.info(`Converting HEIC to JPEG (attempt ${attempt}/${maxRetries})...`)
+    const jpegBuffer = await heicConvert({
+      // @ts-expect-error idk why there is a type error here
+      buffer: heicBuffer,
+      format: 'JPEG',
+      quality,
+    })
 
-      // 检查文件大小，如果太大则降低质量
-      const fileSizeMB = heicBuffer.length / (1024 * 1024)
-      const quality = fileSizeMB > 10 ? 0.8 : 0.95
-
-      const jpegBuffer = await Promise.race([
-        heicConvert({
-          // @ts-expect-error idk why there is a type error here
-          buffer: heicBuffer,
-          format: 'JPEG',
-          quality,
-        }),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('HEIC conversion timeout')), 30000)
-        )
-      ])
-
-      logger.image.info(`Successfully converted HEIC to JPEG (quality: ${quality})`)
-      return Buffer.from(jpegBuffer as ArrayBuffer)
-    } catch (err) {
-      lastError = err as Error
-      logger.image.warn(`HEIC conversion attempt ${attempt} failed:`, err)
-      
-      if (attempt < maxRetries) {
-        // 等待一段时间后重试
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
-      }
+    logger.image.info(`Successfully converted HEIC to JPEG (quality: ${quality})`)
+    return Buffer.from(jpegBuffer as ArrayBuffer)
+  }, {
+    ...RetryPresets.slow, // HEIC 转换是重量级操作
+    timeout: 30000,
+    retryCondition: (error) => {
+      // HEIC 转换错误通常是资源相关的
+      return RetryConditions.resourceErrors(error) || 
+             error.message.includes('memory') ||
+             error.message.includes('timeout')
     }
-  }
-
-  logger.image.error('All HEIC conversion attempts failed')
-  throw lastError || new Error('HEIC conversion failed after all retries')
+  }, logger.image)
 }
 
 export const convertBitmapToSharpInst = async (bitmapBuffer: Buffer) => {

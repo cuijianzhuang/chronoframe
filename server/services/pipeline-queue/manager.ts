@@ -193,7 +193,9 @@ export class QueueManager {
     const shouldRetry = newAttempts < task.maxAttempts
 
     // 计算重试延迟（指数退避）
-    const retryDelay = shouldRetry ? Math.min(1000 * Math.pow(2, newAttempts - 1), 30000) : 0
+    const retryDelay = shouldRetry
+      ? Math.min(1000 * Math.pow(2, newAttempts - 1), 30000)
+      : 0
 
     await db
       .update(tables.pipelineQueue)
@@ -202,19 +204,21 @@ export class QueueManager {
         attempts: newAttempts,
         errorMessage: errorMessage || 'Unknown error',
         // 如果重试，设置延迟重试时间
-        ...(shouldRetry && retryDelay > 0 ? {
-          createdAt: new Date(Date.now() + retryDelay).toISOString()
-        } : {})
+        ...(shouldRetry && retryDelay > 0
+          ? {
+              createdAt: new Date(Date.now() + retryDelay),
+            }
+          : {}),
       })
       .where(eq(tables.pipelineQueue.id, taskId))
 
     if (shouldRetry) {
       this.logger.warn(
-        `Task ${taskId} failed (attempt ${newAttempts}/${task.maxAttempts}), will retry in ${retryDelay}ms: ${errorMessage}`
+        `Task ${taskId} failed (attempt ${newAttempts}/${task.maxAttempts}), will retry in ${retryDelay}ms: ${errorMessage}`,
       )
     } else {
       this.logger.error(
-        `Task ${taskId} failed permanently after ${newAttempts} attempts: ${errorMessage}`
+        `Task ${taskId} failed permanently after ${newAttempts} attempts: ${errorMessage}`,
       )
     }
   }

@@ -121,10 +121,11 @@ const uploadImage = async (file: File) => {
 
         try {
           // 检查是否为MOV视频文件（通过MIME类型或文件扩展名）
-          const isMovFile = file.type === 'video/quicktime' || 
-                           file.type === 'video/mp4' || 
-                           file.name.toLowerCase().endsWith('.mov')
-          
+          const isMovFile =
+            file.type === 'video/quicktime' ||
+            file.type === 'video/mp4' ||
+            file.name.toLowerCase().endsWith('.mov')
+
           const resp = await $fetch('/api/queue/add-task', {
             method: 'POST',
             body: {
@@ -266,10 +267,10 @@ const startTaskStatusCheck = (taskId: number, fileId: string) => {
         await refresh()
 
         // 2秒后从界面移除成功的任务
-        setTimeout(() => {
-          uploadingFiles.value.delete(fileId)
-          uploadingFiles.value = new Map(uploadingFiles.value)
-        }, 2000)
+        // setTimeout(() => {
+        //   uploadingFiles.value.delete(fileId)
+        //   uploadingFiles.value = new Map(uploadingFiles.value)
+        // }, 2000)
       } else if (response.status === 'failed') {
         // 任务失败
         uploadingFile.status = 'error'
@@ -636,10 +637,10 @@ const handleUpload = async () => {
   // 并发上传，但限制并发数量以避免资源竞争
   const CONCURRENT_LIMIT = 3 // 限制同时上传的文件数量
   const uploadPromises: Promise<void>[] = []
-  
+
   for (let i = 0; i < validFiles.length; i += CONCURRENT_LIMIT) {
     const batch = validFiles.slice(i, i + CONCURRENT_LIMIT)
-    
+
     const batchPromises = batch.map(async (file) => {
       try {
         await uploadImage(file)
@@ -650,12 +651,12 @@ const handleUpload = async () => {
         console.error('上传错误:', error)
       }
     })
-    
+
     uploadPromises.push(...batchPromises)
-    
+
     // 等待当前批次完成再处理下一批次
     await Promise.allSettled(batchPromises)
-    
+
     // 更新进度
     const processed = Math.min(i + CONCURRENT_LIMIT, validFiles.length)
     toast.update(uploadToast.id, {

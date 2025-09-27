@@ -1,3 +1,5 @@
+import { withRetry, RetryPresets } from '../../utils/retry'
+
 export interface LocationInfo {
   latitude: number
   longitude: number
@@ -25,11 +27,8 @@ export class MapboxGeocodingProvider implements GeocodingProvider {
   }
 
   async reverseGeocode(lat: number, lon: number): Promise<LocationInfo | null> {
-    const maxRetries = 3
-    let lastError: Error | null = null
-
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
+    try {
+      return await withRetry(async () => {
         // 应用速率限制
         await this.applyRateLimit()
 
@@ -40,24 +39,12 @@ export class MapboxGeocodingProvider implements GeocodingProvider {
         url.searchParams.set('types', 'address,place,district,region,country')
         url.searchParams.set('language', 'zh-Hants')
 
-        logger.location.info(`Mapbox API URL (attempt ${attempt}): ${url.toString()}`)
+        logger.location.info(`Mapbox API URL: ${url.toString()}`)
 
-        const response = await Promise.race([
-          fetch(url.toString()),
-          new Promise<never>((_, reject) => 
-            setTimeout(() => reject(new Error('Mapbox API timeout')), 10000)
-          )
-        ])
+        const response = await fetch(url.toString())
 
         if (!response.ok) {
-          logger.location.warn(
-            `Mapbox API responded with status ${response.status} (attempt ${attempt})`,
-          )
-          if (attempt < maxRetries) {
-            await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
-            continue
-          }
-          return null
+          throw new Error(`Mapbox API error: ${response.status} ${response.statusText}`)
         }
 
         const data = await response.json()
@@ -94,18 +81,15 @@ export class MapboxGeocodingProvider implements GeocodingProvider {
           city,
           locationName,
         }
-      } catch (error) {
-        lastError = error as Error
-        logger.location.warn(`Mapbox reverse geocoding attempt ${attempt} failed:`, error)
-        
-        if (attempt < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, 2000 * attempt))
-        }
-      }
+      }, {
+        ...RetryPresets.network,
+        timeout: 10000,
+        delayStrategy: 'exponential'
+      }, logger.location)
+    } catch (error) {
+      logger.location.error('Mapbox reverse geocoding failed after all retries:', error)
+      return null
     }
-
-    logger.location.error('All Mapbox reverse geocoding attempts failed')
-    return null
   }
 
   private async applyRateLimit(): Promise<void> {
@@ -133,64 +117,66 @@ export class NominatimGeocodingProvider implements GeocodingProvider {
 
   async reverseGeocode(lat: number, lon: number): Promise<LocationInfo | null> {
     try {
-      // 应用速率限制
-      await this.applyRateLimit()
+      return await withRetry(async () => {
+        // 应用速率限制
+        await this.applyRateLimit()
 
-      const url = new URL('/reverse', this.baseUrl)
-      url.searchParams.set('lat', lat.toString())
-      url.searchParams.set('lon', lon.toString())
-      url.searchParams.set('format', 'json')
-      url.searchParams.set('addressdetails', '1')
-      url.searchParams.set('accept-language', 'zh-CN,zh,en')
+        const url = new URL('/reverse', this.baseUrl)
+        url.searchParams.set('lat', lat.toString())
+        url.searchParams.set('lon', lon.toString())
+        url.searchParams.set('format', 'json')
+        url.searchParams.set('addressdetails', '1')
+        url.searchParams.set('accept-language', 'zh-CN,zh,en')
 
-      const response = await fetch(url.toString(), {
-        headers: {
-          'User-Agent': this.userAgent,
-        },
-      })
+        const response = await fetch(url.toString(), {
+          headers: {
+            'User-Agent': this.userAgent,
+          },
+        })
 
-      if (!response.ok) {
-        logger.location.warn(
-          `Nominatim API responded with status ${response.status}`,
-        )
-        return null
-      }
+        if (!response.ok) {
+          throw new Error(`Nominatim API error: ${response.status} ${response.statusText}`)
+        }
 
-      const data = await response.json()
+        const data = await response.json()
 
-      if (!data || data.error) {
-        logger.location.warn('Nominatim API returned error:', data?.error)
-        return null
-      }
+        if (!data || data.error) {
+          throw new Error(`Nominatim API returned error: ${data?.error}`)
+        }
 
-      const address = data.address || {}
+        const address = data.address || {}
 
-      // 提取国家信息
-      const country = address.country || address.country_code?.toUpperCase()
+        // 提取国家信息
+        const country = address.country || address.country_code?.toUpperCase()
 
-      // 提取城市信息（优先级：district > city > town > county > state > village > hamlet）
-      // 适配中国行政区划
-      const city =
-        address.district ||
-        address.city ||
-        address.town ||
-        address.county ||
-        address.state ||
-        address.village ||
-        address.hamlet
+        // 提取城市信息（优先级：district > city > town > county > state > village > hamlet）
+        // 适配中国行政区划
+        const city =
+          address.district ||
+          address.city ||
+          address.town ||
+          address.county ||
+          address.state ||
+          address.village ||
+          address.hamlet
 
-      // 构建位置名称
-      const locationName = data.display_name
+        // 构建位置名称
+        const locationName = data.display_name
 
-      return {
-        latitude: lat,
-        longitude: lon,
-        country,
-        city,
-        locationName,
-      }
+        return {
+          latitude: lat,
+          longitude: lon,
+          country,
+          city,
+          locationName,
+        }
+      }, {
+        ...RetryPresets.network,
+        timeout: 15000, // Nominatim 可能比较慢
+        delayStrategy: 'linear' // 线性退避，避免过快重试
+      }, logger.location)
     } catch (error) {
-      logger.location.error('Reverse geocoding failed:', error)
+      logger.location.error('Nominatim reverse geocoding failed after all retries:', error)
       return null
     }
   }

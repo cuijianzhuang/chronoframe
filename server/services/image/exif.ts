@@ -6,6 +6,7 @@ import type { NeededExif, PhotoInfo } from '../../../shared/types/photo'
 import type { ExifDateTime, Tags } from 'exiftool-vendored'
 import { exiftool } from 'exiftool-vendored'
 import { noop } from 'es-toolkit'
+import { withRetry, RetryPresets, RetryConditions } from '../../utils/retry'
 
 const neededKeys: Array<keyof Tags | (string & {})> = [
   'Title',
@@ -274,84 +275,70 @@ export const extractExifData = async (
   rawImageBuffer?: Buffer,
   logger?: Logger[keyof Logger],
 ): Promise<NeededExif | null> => {
-  const maxRetries = 3
-  let lastError: Error | null = null
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    let tempImagePath: string | null = null
-    
-    try {
-      logger?.info(`Extracting EXIF data (attempt ${attempt}/${maxRetries})...`)
+  try {
+    return await withRetry(async () => {
+      let tempImagePath: string | null = null
       
-      let metadata = await Promise.race([
-        sharp(imageBuffer).metadata(),
-        new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Metadata extraction timeout')), 5000)
-        )
-      ])
+      try {
+        // 提取基础元数据
+        let metadata = await sharp(imageBuffer).metadata()
 
-      if (!metadata.exif && rawImageBuffer) {
-        try {
-          metadata = await Promise.race([
-            sharp(rawImageBuffer).metadata(),
-            new Promise<never>((_, reject) => 
-              setTimeout(() => reject(new Error('Raw metadata extraction timeout')), 5000)
-            )
-          ])
-        } catch (err) {
-          logger?.warn('Error extracting EXIF data from raw image buffer:', err)
+        // 如果主buffer没有EXIF，尝试原始buffer
+        if (!metadata.exif && rawImageBuffer) {
+          try {
+            metadata = await sharp(rawImageBuffer).metadata()
+          } catch (err) {
+            logger?.warn('Error extracting EXIF data from raw image buffer:', err)
+          }
+        }
+
+        if (!metadata.exif) {
+          logger?.warn('No EXIF data found in image metadata')
+          return null
+        }
+
+        logger?.info('Extracting EXIF data using exiftool...')
+
+        // 创建临时工作目录
+        const tempDir = path.resolve(process.cwd(), 'data/.exif_workdir')
+        await mkdir(tempDir, { recursive: true })
+        tempImagePath = path.resolve(tempDir, `${crypto.randomUUID()}.jpg`)
+
+        // 写入临时文件
+        await writeFile(tempImagePath, rawImageBuffer || imageBuffer)
+        
+        // 使用 exiftool 读取详细 EXIF 数据
+        const exifData = await exiftool.read(tempImagePath)
+        const result = processExifData(exifData, metadata)
+
+        // 记录颜色空间信息
+        if (result.ColorSpace) {
+          logger?.success(`Inferred ColorSpace: ${result.ColorSpace}`)
+        } else {
+          logger?.info('ColorSpace could not be determined')
+        }
+
+        return result
+      } finally {
+        // 确保清理临时文件
+        if (tempImagePath) {
+          await unlink(tempImagePath).catch(noop)
         }
       }
-
-      if (!metadata.exif) {
-        logger?.warn('No EXIF data found in image metadata')
-        return null
+    }, {
+      ...RetryPresets.standard,
+      timeout: 15000, // EXIF 处理可能需要更长时间
+      retryCondition: (error) => {
+        // 组合多种重试条件
+        return RetryConditions.fileSystemErrors(error) || 
+               RetryConditions.resourceErrors(error) ||
+               error.message.includes('timeout')
       }
-
-      logger?.info('Extracting EXIF data using exiftool...')
-
-      const tempDir = path.resolve(process.cwd(), 'data/.exif_workdir')
-      await mkdir(tempDir, { recursive: true })
-      tempImagePath = path.resolve(tempDir, `${crypto.randomUUID()}.jpg`)
-
-      await writeFile(tempImagePath, rawImageBuffer || imageBuffer)
-      
-      const exifData = await Promise.race([
-        exiftool.read(tempImagePath),
-        new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('EXIF tool timeout')), 10000)
-        )
-      ])
-      
-      const result = processExifData(exifData, metadata)
-
-      // 记录颜色空间信息的来源
-      if (result.ColorSpace) {
-        logger?.success(`Inferred ColorSpace: ${result.ColorSpace}`)
-      } else {
-        logger?.info('ColorSpace could not be determined')
-      }
-
-      // 清理临时文件
-      await unlink(tempImagePath).catch(noop)
-      return result
-    } catch (err) {
-      lastError = err as Error
-      logger?.warn(`EXIF extraction attempt ${attempt} failed:`, err)
-      
-      // 清理临时文件
-      if (tempImagePath) {
-        await unlink(tempImagePath).catch(noop)
-      }
-      
-      if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt))
-      }
-    }
+    }, logger)
+  } catch (error) {
+    logger?.error('EXIF extraction failed after all retries:', error)
+    return null
   }
-
-  logger?.error('All EXIF extraction attempts failed')
-  return null
 }
 
 export const extractPhotoInfo = (

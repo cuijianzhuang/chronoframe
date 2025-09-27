@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { motion, AnimatePresence } from 'motion-v'
-import { computed, ref, watch } from 'vue'
 
 interface UploadFile {
   file: File
@@ -43,11 +42,13 @@ const stats = computed(() => {
   const files = Array.from(props.uploadingFiles.values())
   return {
     total: files.length,
-    uploading: files.filter(f => f.status === 'uploading').length,
-    processing: files.filter(f => f.status === 'processing').length,
-    completed: files.filter(f => f.status === 'completed').length,
-    error: files.filter(f => f.status === 'error').length,
-    active: files.filter(f => f.status === 'uploading' || f.status === 'processing').length,
+    uploading: files.filter((f) => f.status === 'uploading').length,
+    processing: files.filter((f) => f.status === 'processing').length,
+    completed: files.filter((f) => f.status === 'completed').length,
+    error: files.filter((f) => f.status === 'error').length,
+    active: files.filter(
+      (f) => f.status === 'uploading' || f.status === 'processing',
+    ).length,
   }
 })
 
@@ -55,9 +56,9 @@ const stats = computed(() => {
 const overallProgress = computed(() => {
   const files = Array.from(props.uploadingFiles.values())
   if (files.length === 0) return 0
-  
+
   let totalProgress = 0
-  files.forEach(file => {
+  files.forEach((file) => {
     if (file.status === 'completed') {
       totalProgress += 100
     } else if (file.status === 'uploading' && file.progress !== undefined) {
@@ -66,7 +67,7 @@ const overallProgress = computed(() => {
       totalProgress += 50 // 估算处理进度为50%
     }
   })
-  
+
   return Math.round(totalProgress / files.length)
 })
 
@@ -113,48 +114,61 @@ const clearAllFiles = () => {
       <!-- 头部 -->
       <motion.div
         class="p-4 border-b border-neutral-200 dark:border-neutral-700 cursor-pointer"
+        :while-hover="{ backgroundColor: 'rgba(0,0,0,0.02)' }"
+        :while-tap="{ scale: 0.98 }"
         @click="toggleCollapsed"
-        :whileHover="{ backgroundColor: 'rgba(0,0,0,0.02)' }"
-        :whileTap="{ scale: 0.98 }"
       >
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <!-- 状态指示器 -->
             <motion.div
               class="w-3 h-3 rounded-full"
-            :class="{
-              'bg-blue-500': statusColor === 'primary',
-              'bg-green-500': statusColor === 'success',
-              'bg-red-500': statusColor === 'error',
-              'bg-neutral-400': statusColor === 'neutral'
-            }"
+              :class="{
+                'bg-blue-500': statusColor === 'primary',
+                'bg-green-500': statusColor === 'success',
+                'bg-red-500': statusColor === 'error',
+                'bg-neutral-400': statusColor === 'neutral',
+              }"
               :animate="{
                 scale: stats.active > 0 ? [1, 1.2, 1] : 1,
-                opacity: stats.active > 0 ? [0.7, 1, 0.7] : 1
+                opacity: stats.active > 0 ? [0.7, 1, 0.7] : 1,
               }"
               :transition="{
                 duration: 2,
-                repeat: stats.active > 0 ? Infinity : 0
+                repeat: stats.active > 0 ? Infinity : 0,
               }"
             />
-            
+
             <!-- 标题和统计 -->
             <div>
-              <h3 class="font-semibold text-sm text-neutral-900 dark:text-neutral-100">
+              <h3
+                class="font-semibold text-sm text-neutral-900 dark:text-neutral-100"
+              >
                 文件上传队列
                 <span class="text-neutral-500 dark:text-neutral-400">
                   ({{ stats.total }})
                 </span>
               </h3>
-              
-              <div class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                <span v-if="stats.active > 0" class="text-blue-600 dark:text-blue-400">
+
+              <div
+                class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400 mt-1"
+              >
+                <span
+                  v-if="stats.active > 0"
+                  class="text-blue-600 dark:text-blue-400"
+                >
                   {{ stats.active }} 进行中
                 </span>
-                <span v-if="stats.completed > 0" class="text-green-600 dark:text-green-400">
+                <span
+                  v-if="stats.completed > 0"
+                  class="text-green-600 dark:text-green-400"
+                >
                   {{ stats.completed }} 完成
                 </span>
-                <span v-if="stats.error > 0" class="text-red-600 dark:text-red-400">
+                <span
+                  v-if="stats.error > 0"
+                  class="text-red-600 dark:text-red-400"
+                >
                   {{ stats.error }} 失败
                 </span>
               </div>
@@ -169,7 +183,7 @@ const clearAllFiles = () => {
             >
               {{ overallProgress }}%
             </div>
-            
+
             <!-- 折叠图标 -->
             <motion.div
               :animate="{ rotate: isCollapsed ? 0 : 180 }"
@@ -196,7 +210,6 @@ const clearAllFiles = () => {
           <UProgress
             :model-value="overallProgress"
             :color="statusColor"
-            class="h-1.5"
           />
         </motion.div>
       </motion.div>
@@ -239,7 +252,7 @@ const clearAllFiles = () => {
             <div class="text-xs text-neutral-500 dark:text-neutral-400">
               {{ stats.completed }} 完成, {{ stats.error }} 失败
             </div>
-            
+
             <div class="flex items-center gap-2">
               <UButton
                 v-if="stats.completed > 0"
@@ -250,11 +263,11 @@ const clearAllFiles = () => {
               >
                 清除已完成
               </UButton>
-              
+
               <UButton
                 size="xs"
                 variant="ghost"
-                color="red"
+                color="error"
                 @click="clearAllFiles"
               >
                 清除全部
