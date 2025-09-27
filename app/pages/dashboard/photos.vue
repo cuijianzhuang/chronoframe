@@ -281,12 +281,7 @@ const startTaskStatusCheck = (taskId: number, fileId: string) => {
         clearInterval(intervalId)
         statusIntervals.value.delete(taskId)
 
-        // 显示错误提示
-        toast.add({
-          title: '照片处理失败',
-          description: `照片 ${uploadingFile.fileName} 处理失败: ${response.errorMessage || '未知错误'}`,
-          color: 'error',
-        })
+        // 错误信息已在上传组件中显示，不需要额外通知
         // 失败的任务不自动移除，让用户查看错误信息
       }
     } catch (error) {

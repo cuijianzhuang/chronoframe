@@ -48,15 +48,15 @@ const fileIcon = computed(() => {
 const statusColor = computed(() => {
   switch (props.uploadingFile.status) {
     case 'preparing':
-      return 'blue'
+      return 'primary'
     case 'uploading':
-      return 'blue'
+      return 'primary'
     case 'processing':
-      return 'purple'
+      return 'info'
     case 'completed':
-      return 'green'
+      return 'success'
     case 'error':
-      return 'red'
+      return 'error'
     default:
       return 'neutral'
   }
@@ -145,7 +145,13 @@ const formatBytes = (bytes: number) => {
         >
           <div
             class="w-10 h-10 rounded-lg flex items-center justify-center"
-            :class="`bg-${statusColor}-100 dark:bg-${statusColor}-900/30`"
+            :class="{
+              'bg-blue-100 dark:bg-blue-900/30': statusColor === 'primary',
+              'bg-green-100 dark:bg-green-900/30': statusColor === 'success',
+              'bg-red-100 dark:bg-red-900/30': statusColor === 'error',
+              'bg-blue-100 dark:bg-blue-900/30': statusColor === 'info',
+              'bg-neutral-100 dark:bg-neutral-900/30': statusColor === 'neutral'
+            }"
           >
             <Icon
               :name="fileIcon"
@@ -367,14 +373,50 @@ const formatBytes = (bytes: number) => {
     <AnimatePresence>
       <motion.div
         v-if="uploadingFile.status === 'completed'"
-        :initial="{ opacity: 0, scale: 0.9 }"
-        :animate="{ opacity: 1, scale: 1 }"
-        :exit="{ opacity: 0, scale: 0.9 }"
-        :transition="{ duration: 0.3, delay: 0.1 }"
-        class="mt-3 flex items-center gap-2 text-green-600 dark:text-green-400"
+        :initial="{ opacity: 0, scale: 0.8, y: 10 }"
+        :animate="{ 
+          opacity: 1, 
+          scale: [0.8, 1.1, 1], 
+          y: 0,
+          backgroundColor: ['rgba(34, 197, 94, 0)', 'rgba(34, 197, 94, 0.1)', 'rgba(34, 197, 94, 0)']
+        }"
+        :exit="{ opacity: 0, scale: 0.9, y: -10 }"
+        :transition="{ 
+          duration: 0.6, 
+          ease: 'backOut',
+          backgroundColor: { duration: 1.2, ease: 'easeInOut' }
+        }"
+        class="mt-3 flex items-center gap-2 text-green-600 dark:text-green-400 rounded-lg p-2 -m-2"
       >
-        <Icon name="tabler:check-circle" class="w-4 h-4" />
-        <span class="text-sm font-medium">上传完成</span>
+        <motion.div
+          :animate="{ rotate: [0, 360] }"
+          :transition="{ duration: 0.5, delay: 0.1 }"
+        >
+          <Icon name="tabler:check-circle" class="w-4 h-4" />
+        </motion.div>
+        <span class="text-sm font-medium">处理完成</span>
+        
+        <!-- 庆祝粒子效果 -->
+        <motion.div
+          v-for="i in 3"
+          :key="`particle-${i}`"
+          class="absolute w-1 h-1 bg-green-500 rounded-full pointer-events-none"
+          :style="{
+            left: `${20 + i * 10}px`,
+            top: `${10 + i * 5}px`
+          }"
+          :animate="{
+            y: [-5, -15, -5],
+            x: [0, (i - 2) * 10, 0],
+            opacity: [0, 1, 0],
+            scale: [0, 1.5, 0]
+          }"
+          :transition="{
+            duration: 1,
+            delay: 0.2 + i * 0.1,
+            ease: 'easeOut'
+          }"
+        />
       </motion.div>
     </AnimatePresence>
   </motion.div>

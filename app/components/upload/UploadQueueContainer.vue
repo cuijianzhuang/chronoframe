@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { motion, AnimatePresence } from 'motion-v'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 interface UploadFile {
   file: File
@@ -72,9 +72,9 @@ const overallProgress = computed(() => {
 
 // 计算状态颜色
 const statusColor = computed(() => {
-  if (stats.value.error > 0) return 'red'
-  if (stats.value.active > 0) return 'blue'
-  if (stats.value.completed > 0 && stats.value.active === 0) return 'green'
+  if (stats.value.error > 0) return 'error'
+  if (stats.value.active > 0) return 'primary'
+  if (stats.value.completed > 0 && stats.value.active === 0) return 'success'
   return 'neutral'
 })
 
@@ -93,6 +93,8 @@ const clearCompletedFiles = () => {
 const clearAllFiles = () => {
   emit('clearAll')
 }
+
+// 统一的完成处理逻辑，避免重复通知
 </script>
 
 <template>
@@ -120,12 +122,12 @@ const clearAllFiles = () => {
             <!-- 状态指示器 -->
             <motion.div
               class="w-3 h-3 rounded-full"
-              :class="{
-                'bg-blue-500': statusColor === 'blue',
-                'bg-green-500': statusColor === 'green',
-                'bg-red-500': statusColor === 'red',
-                'bg-neutral-400': statusColor === 'neutral'
-              }"
+            :class="{
+              'bg-blue-500': statusColor === 'primary',
+              'bg-green-500': statusColor === 'success',
+              'bg-red-500': statusColor === 'error',
+              'bg-neutral-400': statusColor === 'neutral'
+            }"
               :animate="{
                 scale: stats.active > 0 ? [1, 1.2, 1] : 1,
                 opacity: stats.active > 0 ? [0.7, 1, 0.7] : 1
