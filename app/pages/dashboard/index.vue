@@ -214,7 +214,10 @@ const yearOptions = computed(() => {
             {{ $t('dashboard.overview.section.runtimeInfo.lastUpdate') }}
           </p>
           <p class="text-lg font-bold">
-            {{ dayjs().format('LLL') }}
+            <ClientOnly>
+              {{ $dayjs().fromNow() }}
+              <template #placeholder>--</template>
+            </ClientOnly>
           </p>
         </div>
       </div>

@@ -87,7 +87,7 @@ const currentScheme = computed(() => colorSchemes[props.color])
         </p>
         <p
           v-if="value"
-          class="text-lg font-bold max-w-1/2 truncate"
+          class="text-lg font-bold max-w-full sm:max-w-1/2 truncate"
         >
           {{ value }}
         </p>
