@@ -23,3 +23,25 @@ reviews:
             resolved: true
   viewer.hint.livePhoto.mobile:
     description: ''
+  common.heatmap.tooltip.data:
+    locales:
+      en:
+        translation_candidate:
+          source: zh-Hans
+          text: '{0}Photos {1}'
+          time: '2025-09-27T09:12:37.598Z'
+      ja:
+        translation_candidate:
+          source: zh-Hans
+          text: '{0}写真{1}'
+          time: '2025-09-27T09:12:37.598Z'
+      zh-Hant-HK:
+        translation_candidate:
+          source: zh-Hans
+          text: '{0}拍攝了 {1} 張照片'
+          time: '2025-09-27T09:12:37.598Z'
+      zh-Hant-TW:
+        translation_candidate:
+          source: zh-Hans
+          text: '{0}拍攝了 {1} 張照片'
+          time: '2025-09-27T09:12:37.598Z'
