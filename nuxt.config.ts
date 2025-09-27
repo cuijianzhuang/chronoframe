@@ -84,7 +84,14 @@ export default defineNuxtConfig({
 
   dayjs: {
     locales: ['zh-cn', 'zh-hk', 'en'],
-    plugins: ['relativeTime', 'utc', 'timezone', 'duration', 'localizedFormat'],
+    plugins: [
+      'relativeTime',
+      'utc',
+      'timezone',
+      'duration',
+      'localizedFormat',
+      'isBetween',
+    ],
     defaultTimezone: 'Asia/Shanghai',
   },
 

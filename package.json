@@ -66,14 +66,15 @@
     "unstorage": "^1.15.0",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1",
-    "vue3-calendar-heatmap": "^2.0.5",
     "wait-on": "^8.0.4",
     "zod": "^4.1.11"
   },
   "packageManager": "pnpm@9.15.3+sha512.1f79bc245a66eb0b07c5d4d83131240774642caaa86ef7d0434ab47c0d16f66b04e21e0c086eb61e62c77efc4d7f7ec071afad3796af64892fae66509173893a",
   "devDependencies": {
     "@iconify-json/carbon": "^1.2.13",
+    "@iconify-json/lucide": "^1.2.68",
     "@iconify-json/material-symbols": "^1.2.33",
+    "@iconify-json/mdi": "^1.2.3",
     "@iconify-json/streamline": "^1.2.5",
     "@iconify-json/tabler": "^1.2.22",
     "@nuxt/eslint": "1.9.0",
@@ -89,6 +90,7 @@
     "eslint-plugin-prettier": "^5.5.4",
     "mapbox-gl": "^3.15.0",
     "prettier": "^3.6.2",
+    "sass-embedded": "^1.93.2",
     "typescript": "^5.0.0"
   },
   "pnpm": {
