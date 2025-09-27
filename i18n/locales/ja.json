@@ -298,5 +298,40 @@
         "noData": "{0}は写真がありません"
       }
     }
+  },
+  "dashboard": {
+    "overview": {
+      "title": "概要",
+      "indicator": {
+        "totalPhotos": "写真の総数",
+        "thisMonth": "今月は新しく",
+        "queueStatus": {
+          "title": "キューステータス",
+          "processing": "処理",
+          "pending": "アイドル"
+        },
+        "storageUsage": "ストレージの使用"
+      },
+      "section": {
+        "runtimeInfo": {
+          "title": "操作情報",
+          "version": "ランニングバージョン",
+          "uptime": "実行時間",
+          "environment": "ランニング環境",
+          "lastUpdate": "最後に更新されました"
+        },
+        "memory": {
+          "title": "メモリの使用"
+        },
+        "queue": {
+          "title": "キューステータス",
+          "activeWorkers": "アクティブワーカー",
+          "totalWorkers": "総 Workers",
+          "totalProcessed": "処理",
+          "totalFailed": "障害カウント",
+          "avgSuccessRate": "成功率"
+        }
+      }
+    }
   }
 }

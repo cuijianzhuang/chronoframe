@@ -128,34 +128,36 @@ const yearOptions = computed(() => {
 <template>
   <div class="flex flex-col gap-6 h-full p-4">
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold">仪表板概览</h1>
+      <h1 class="text-2xl font-bold">
+        {{ $t('dashboard.overview.title') }}
+      </h1>
     </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <DashboardIndicator
-        title="照片总数"
+        :title="$t('dashboard.overview.indicator.totalPhotos')"
         icon="tabler:photo"
         color="blue"
         :value="dashboardStats?.photos?.total || 0"
       />
       <DashboardIndicator
-        title="本月新增"
+        :title="$t('dashboard.overview.indicator.thisMonth')"
         icon="tabler:photo-plus"
         color="green"
         :value="dashboardStats?.photos?.thisMonth || 0"
       />
       <DashboardIndicator
-        title="队列状态"
+        :title="$t('dashboard.overview.indicator.queueStatus.title')"
         icon="tabler:loader"
         color="purple"
         :value="
           (dashboardStats?.workerPool?.activeWorkers || 0) > 0
-            ? '处理中'
-            : '空闲'
+            ? $t('dashboard.overview.indicator.queueStatus.processing')
+            : $t('dashboard.overview.indicator.queueStatus.pending')
         "
       />
       <DashboardIndicator
-        title="存储使用"
+        :title="$t('dashboard.overview.indicator.storageUsage')"
         icon="tabler:database"
         color="blue"
         :value="formatBytes(dashboardStats?.storage?.totalSize || 0)"
@@ -165,12 +167,16 @@ const yearOptions = computed(() => {
     <!-- 运行信息 -->
     <UCard>
       <template #header>
-        <h2 class="text-lg font-semibold pb-1.5">运行信息</h2>
+        <h2 class="text-lg font-semibold pb-1.5">
+          {{ $t('dashboard.overview.section.runtimeInfo.title') }}
+        </h2>
       </template>
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
-          <p class="text-sm text-neutral-500 dark:text-neutral-400">运行版本</p>
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            {{ $t('dashboard.overview.section.runtimeInfo.version') }}
+          </p>
           <NuxtLink
             class="text-lg font-bold hover:text-primary"
             target="_blank"
@@ -181,7 +187,9 @@ const yearOptions = computed(() => {
           </NuxtLink>
         </div>
         <div>
-          <p class="text-sm text-neutral-500 dark:text-neutral-400">运行时间</p>
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            {{ $t('dashboard.overview.section.runtimeInfo.uptime') }}
+          </p>
           <p class="text-lg font-bold">
             {{
               dashboardStats?.uptime
@@ -191,7 +199,9 @@ const yearOptions = computed(() => {
           </p>
         </div>
         <div>
-          <p class="text-sm text-neutral-500 dark:text-neutral-400">运行环境</p>
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            {{ $t('dashboard.overview.section.runtimeInfo.environment') }}
+          </p>
           <UBadge
             :color="dashboardStats?.runningOn === 'docker' ? 'info' : 'success'"
             variant="soft"
@@ -200,9 +210,11 @@ const yearOptions = computed(() => {
           </UBadge>
         </div>
         <div>
-          <p class="text-sm text-neutral-500 dark:text-neutral-400">最后更新</p>
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            {{ $t('dashboard.overview.section.runtimeInfo.lastUpdate') }}
+          </p>
           <p class="text-lg font-bold">
-            {{ new Date().toLocaleDateString('zh-CN') }}
+            {{ dayjs().format('LLL') }}
           </p>
         </div>
       </div>
@@ -296,7 +308,9 @@ const yearOptions = computed(() => {
         <!-- 内存使用 -->
         <UCard>
           <template #header>
-            <h3 class="font-semibold pb-1.5">内存使用率</h3>
+            <h3 class="font-semibold pb-1.5">
+              {{ $t('dashboard.overview.section.memory.title') }}
+            </h3>
           </template>
 
           <div class="space-y-2">
@@ -326,7 +340,7 @@ const yearOptions = computed(() => {
                 {{
                   dashboardStats?.memory
                     ? `${Math.round((dashboardStats.memory.used / 1024 / 1024 / 1024) * 100) / 100}GB / ${Math.round((dashboardStats.memory.total / 1024 / 1024 / 1024) * 100) / 100}GB`
-                    : '系统内存'
+                    : 'memory info not available'
                 }}
               </div>
               <span>
@@ -347,36 +361,48 @@ const yearOptions = computed(() => {
         <!-- 队列详情 -->
         <UCard>
           <template #header>
-            <h3 class="font-semibold pb-1.5">处理队列</h3>
+            <h3 class="font-semibold pb-1.5">
+              {{ $t('dashboard.overview.section.queue.title') }}
+            </h3>
           </template>
 
           <div class="space-y-1">
             <div class="flex justify-between items-center text-sm">
-              <span>活跃 Workers</span>
+              <span>
+                {{ $t('dashboard.overview.section.queue.activeWorkers') }}
+              </span>
               <UBadge variant="soft">
                 {{ dashboardStats?.workerPool?.activeWorkers || 0 }}
               </UBadge>
             </div>
             <div class="flex justify-between items-center text-sm">
-              <span>总 Workers</span>
+              <span>
+                {{ $t('dashboard.overview.section.queue.totalWorkers') }}
+              </span>
               <UBadge variant="soft">
                 {{ dashboardStats?.workerPool?.totalWorkers || 0 }}
               </UBadge>
             </div>
             <div class="flex justify-between items-center text-sm">
-              <span>已处理</span>
+              <span>
+                {{ $t('dashboard.overview.section.queue.totalProcessed') }}
+              </span>
               <UBadge variant="soft">
                 {{ dashboardStats?.workerPool?.totalProcessed || 0 }}
               </UBadge>
             </div>
             <div class="flex justify-between items-center text-sm">
-              <span>出错数</span>
+              <span>
+                {{ $t('dashboard.overview.section.queue.totalFailed') }}
+              </span>
               <UBadge variant="soft">
                 {{ dashboardStats?.workerPool?.totalErrors || 0 }}
               </UBadge>
             </div>
             <div class="flex justify-between items-center text-sm">
-              <span>成功率</span>
+              <span>
+                {{ $t('dashboard.overview.section.queue.avgSuccessRate') }}
+              </span>
               <UBadge
                 :color="
                   (dashboardStats?.workerPool?.averageSuccessRate || 0) > 90
