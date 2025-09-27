@@ -5,7 +5,13 @@ interface UploadFile {
   file: File
   fileName: string
   fileId: string
-  status: 'preparing' | 'uploading' | 'processing' | 'completed' | 'error'
+  status:
+    | 'waiting'
+    | 'preparing'
+    | 'uploading'
+    | 'processing'
+    | 'completed'
+    | 'error'
   stage?: string | null
   progress?: number
   error?: string
@@ -42,12 +48,16 @@ const stats = computed(() => {
   const files = Array.from(props.uploadingFiles.values())
   return {
     total: files.length,
+    waiting: files.filter((f) => f.status === 'waiting').length,
     uploading: files.filter((f) => f.status === 'uploading').length,
     processing: files.filter((f) => f.status === 'processing').length,
     completed: files.filter((f) => f.status === 'completed').length,
     error: files.filter((f) => f.status === 'error').length,
     active: files.filter(
       (f) => f.status === 'uploading' || f.status === 'processing',
+    ).length,
+    pending: files.filter(
+      (f) => f.status === 'waiting' || f.status === 'preparing',
     ).length,
   }
 })
@@ -60,11 +70,20 @@ const overallProgress = computed(() => {
   let totalProgress = 0
   files.forEach((file) => {
     if (file.status === 'completed') {
+      // 完成状态：100%
       totalProgress += 100
     } else if (file.status === 'uploading' && file.progress !== undefined) {
-      totalProgress += file.progress
+      // 上传中：上传进度 * 0.7（上传占总进度的70%）
+      totalProgress += file.progress * 0.7
     } else if (file.status === 'processing') {
-      totalProgress += 50 // 估算处理进度为50%
+      // 处理中：上传完成(70%)
+      totalProgress += 70
+    } else if (file.status === 'preparing') {
+      // 准备中：0%
+      totalProgress += 0
+    } else if (file.status === 'waiting') {
+      // 等待状态：0%
+      totalProgress += 0
     }
   })
 
@@ -101,10 +120,10 @@ const clearAllFiles = () => {
 <template>
   <div
     v-if="uploadingFiles.size > 0"
-    class="fixed bottom-4 right-4 z-50 w-96 max-w-[calc(100vw-2rem)]"
+    class="fixed bottom-2 inset-x-2 sm:inset-x-6 sm:bottom-6 sm:left-auto z-50 min-w-sm"
   >
     <motion.div
-      class="bg-white dark:bg-neutral-900 rounded-xl shadow-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden"
+      class="bg-white dark:bg-neutral-900 rounded-xl shadow-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden"
       :initial="{ opacity: 0, y: 100, scale: 0.9 }"
       :animate="{ opacity: 1, y: 0, scale: 1 }"
       :exit="{ opacity: 0, y: 100, scale: 0.9 }"
@@ -121,21 +140,22 @@ const clearAllFiles = () => {
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
             <!-- 状态指示器 -->
-            <motion.div
-              class="w-3 h-3 rounded-full"
+            <Icon
+              :name="
+                {
+                  primary: 'tabler:upload',
+                  success: 'tabler:circle-check',
+                  error: 'tabler:alert-circle',
+                  neutral: 'tabler:info-circle',
+                }[statusColor]
+              "
+              class="size-5"
               :class="{
-                'bg-blue-500': statusColor === 'primary',
-                'bg-green-500': statusColor === 'success',
-                'bg-red-500': statusColor === 'error',
-                'bg-neutral-400': statusColor === 'neutral',
-              }"
-              :animate="{
-                scale: stats.active > 0 ? [1, 1.2, 1] : 1,
-                opacity: stats.active > 0 ? [0.7, 1, 0.7] : 1,
-              }"
-              :transition="{
-                duration: 2,
-                repeat: stats.active > 0 ? Infinity : 0,
+                'text-blue-600 dark:text-blue-400': statusColor === 'primary',
+                'text-green-600 dark:text-green-400': statusColor === 'success',
+                'text-red-600 dark:text-red-400': statusColor === 'error',
+                'text-neutral-600 dark:text-neutral-400':
+                  statusColor === 'neutral',
               }"
             />
 
@@ -153,6 +173,12 @@ const clearAllFiles = () => {
               <div
                 class="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400 mt-1"
               >
+                <span
+                  v-if="stats.waiting > 0"
+                  class="text-neutral-600 dark:text-neutral-400"
+                >
+                  {{ stats.waiting }} 等待
+                </span>
                 <span
                   v-if="stats.active > 0"
                   class="text-blue-600 dark:text-blue-400"
@@ -191,7 +217,7 @@ const clearAllFiles = () => {
             >
               <Icon
                 name="tabler:chevron-down"
-                class="w-4 h-4 text-neutral-500 dark:text-neutral-400"
+                class="size-5 text-neutral-500 dark:text-neutral-400 block"
               />
             </motion.div>
           </div>
@@ -222,11 +248,11 @@ const clearAllFiles = () => {
           :animate="{ height: 'auto', opacity: 1 }"
           :exit="{ height: 0, opacity: 0 }"
           :transition="{ duration: 0.3, ease: 'easeInOut' }"
-          class="max-h-96 overflow-y-auto"
+          class="max-h-[calc(100vh-25.3rem)] sm:max-h-[600px] overflow-hidden overflow-y-auto filelist-container"
         >
           <div class="p-2 space-y-2">
             <AnimatePresence mode="popLayout">
-              <UploadAnimationCard
+              <UploadQueueItem
                 v-for="[fileId, uploadingFile] in uploadingFiles"
                 :key="fileId"
                 :uploading-file="uploadingFile"
@@ -242,10 +268,11 @@ const clearAllFiles = () => {
       <AnimatePresence>
         <motion.div
           v-if="!isCollapsed && (stats.completed > 0 || stats.error > 0)"
-          :initial="{ opacity: 0, height: 0 }"
-          :animate="{ opacity: 1, height: 'auto' }"
-          :exit="{ opacity: 0, height: 0 }"
+          :initial="{ opacity: 0, scaleY: 0 }"
+          :animate="{ opacity: 1, scaleY: 1 }"
+          :exit="{ opacity: 0, scaleY: 0 }"
           :transition="{ duration: 0.3 }"
+          style="transform-origin: bottom"
           class="p-3 border-t border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50"
         >
           <div class="flex items-center justify-between gap-2">
@@ -282,20 +309,20 @@ const clearAllFiles = () => {
 
 <style scoped>
 /* 滚动条样式 */
-.max-h-96::-webkit-scrollbar {
+.filelist-container::-webkit-scrollbar {
   width: 4px;
 }
 
-.max-h-96::-webkit-scrollbar-track {
+.filelist-container::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.max-h-96::-webkit-scrollbar-thumb {
+.filelist-container::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 2px;
 }
 
-.dark .max-h-96::-webkit-scrollbar-thumb {
+.dark .filelist-container::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.2);
 }
 </style>

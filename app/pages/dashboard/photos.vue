@@ -33,7 +33,13 @@ interface UploadingFile {
   file: File
   fileName: string
   fileId: string
-  status: 'preparing' | 'uploading' | 'processing' | 'completed' | 'error'
+  status:
+    | 'waiting'
+    | 'preparing'
+    | 'uploading'
+    | 'processing'
+    | 'completed'
+    | 'error'
   stage?: PipelineQueueItem['statusStage'] | null
   progress?: number
   error?: string
@@ -54,24 +60,33 @@ interface UploadingFile {
 
 const uploadingFiles = ref<Map<string, UploadingFile>>(new Map())
 
-const uploadImage = async (file: File) => {
+const uploadImage = async (file: File, existingFileId?: string) => {
   const fileName = file.name
-  const fileId = `${Date.now()}-${fileName}`
+  const fileId = existingFileId || `${Date.now()}-${fileName}`
 
   const uploadManager = useUpload({
     timeout: 10 * 60 * 1000, // 10分钟超时
   })
 
-  const uploadingFile: UploadingFile = {
-    file,
-    fileName,
-    fileId,
-    status: 'preparing',
-    canAbort: false,
-    abortUpload: () => uploadManager.abortUpload(),
+  // 获取或创建 uploadingFile
+  let uploadingFile = uploadingFiles.value.get(fileId)
+  if (!uploadingFile) {
+    uploadingFile = {
+      file,
+      fileName,
+      fileId,
+      status: 'preparing',
+      canAbort: false,
+      abortUpload: () => uploadManager.abortUpload(),
+    }
+    uploadingFiles.value.set(fileId, uploadingFile)
+  } else {
+    // 更新现有条目的状态和回调
+    uploadingFile.status = 'preparing'
+    uploadingFile.canAbort = false
+    uploadingFile.abortUpload = () => uploadManager.abortUpload()
+    uploadingFiles.value = new Map(uploadingFiles.value)
   }
-
-  uploadingFiles.value.set(fileId, uploadingFile)
 
   try {
     // 第一步：获取预签名 URL
@@ -601,31 +616,26 @@ const handleUpload = async () => {
     return
   }
 
-  // 显示批量上传进度
-  const uploadToast = toast.add({
-    title: '开始批量上传',
-    description: `正在上传 ${fileList.length} 个文件...`,
-    color: 'info',
-  })
-
-  let successCount = 0
-  let errorCount = 0
   const errors: string[] = []
 
   // 先验证所有文件
   const validFiles: File[] = []
+  const fileIdMapping = new Map<File, string>()
+
   for (const file of fileList) {
     const validation = validateFile(file)
     if (!validation.valid) {
       errors.push(`${file.name}: ${validation.error}`)
-      errorCount++
     } else {
       validFiles.push(file)
+      // 为每个有效文件生成唯一ID
+      const fileId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${file.name}`
+      fileIdMapping.set(file, fileId)
     }
   }
 
   if (validFiles.length === 0) {
-    toast.update(uploadToast.id, {
+    toast.add({
       title: '批量上传失败',
       description: '所有文件验证失败',
       color: 'error',
@@ -634,63 +644,66 @@ const handleUpload = async () => {
     return
   }
 
-  // 并发上传，但限制并发数量以避免资源竞争
+  // 立即为所有有效文件创建队列条目，状态为 waiting
+  for (const file of validFiles) {
+    const fileId = fileIdMapping.get(file)!
+    const uploadingFile: UploadingFile = {
+      file,
+      fileName: file.name,
+      fileId,
+      status: 'waiting',
+      canAbort: false,
+    }
+    uploadingFiles.value.set(fileId, uploadingFile)
+  }
+
+  // 触发队列更新
+  uploadingFiles.value = new Map(uploadingFiles.value)
+
+  // 动态并发上传，始终保持 CONCURRENT_LIMIT 个文件在上传
   const CONCURRENT_LIMIT = 3 // 限制同时上传的文件数量
-  const uploadPromises: Promise<void>[] = []
 
-  for (let i = 0; i < validFiles.length; i += CONCURRENT_LIMIT) {
-    const batch = validFiles.slice(i, i + CONCURRENT_LIMIT)
+  // 创建文件队列
+  const fileQueue = [...validFiles]
+  const activeUploads = new Set<Promise<void>>()
 
-    const batchPromises = batch.map(async (file) => {
-      try {
-        await uploadImage(file)
-        successCount++
-      } catch (error: any) {
-        errorCount++
-        errors.push(`${file.name}: ${error.message || '上传失败'}`)
-        console.error('上传错误:', error)
+  // 启动上传任务的函数
+  const startUpload = async (file: File): Promise<void> => {
+    const fileId = fileIdMapping.get(file)!
+    try {
+      await uploadImage(file, fileId)
+    } catch (error: any) {
+      errors.push(`${file.name}: ${error.message || '上传失败'}`)
+      console.error('上传错误:', error)
+    }
+  }
+
+  // 处理队列的函数
+  const processQueue = async (): Promise<void> => {
+    while (fileQueue.length > 0 || activeUploads.size > 0) {
+      // 如果当前活跃上传数量小于限制，且队列中还有文件，则启动新的上传
+      while (activeUploads.size < CONCURRENT_LIMIT && fileQueue.length > 0) {
+        const file = fileQueue.shift()!
+        const uploadPromise = startUpload(file)
+
+        activeUploads.add(uploadPromise)
+
+        // 当上传完成时，从活跃集合中移除
+        uploadPromise.finally(() => {
+          activeUploads.delete(uploadPromise)
+        })
       }
-    })
 
-    uploadPromises.push(...batchPromises)
-
-    // 等待当前批次完成再处理下一批次
-    await Promise.allSettled(batchPromises)
-
-    // 更新进度
-    const processed = Math.min(i + CONCURRENT_LIMIT, validFiles.length)
-    toast.update(uploadToast.id, {
-      title: '批量上传进行中',
-      description: `已处理 ${processed}/${validFiles.length} 个文件`,
-      color: 'info',
-    })
+      // 如果有活跃的上传，等待至少一个完成
+      if (activeUploads.size > 0) {
+        await Promise.race(activeUploads)
+      }
+    }
   }
 
-  // 等待所有上传完成
-  await Promise.allSettled(uploadPromises)
+  // 开始处理队列
+  await processQueue()
 
-  // 显示最终结果
-  if (errorCount === 0) {
-    toast.update(uploadToast.id, {
-      title: '批量上传成功',
-      description: `成功上传 ${successCount} 个文件`,
-      color: 'success',
-    })
-  } else if (successCount === 0) {
-    toast.update(uploadToast.id, {
-      title: '批量上传失败',
-      description: `所有 ${errorCount} 个文件上传失败`,
-      color: 'error',
-    })
-  } else {
-    toast.update(uploadToast.id, {
-      title: '批量上传部分成功',
-      description: `成功: ${successCount}, 失败: ${errorCount}`,
-      color: 'warning',
-    })
-  }
-
-  // 如果有错误，显示详细错误信息
   if (errors.length > 0) {
     console.error('批量上传错误详情:', errors)
   }
@@ -944,7 +957,7 @@ onUnmounted(() => {
 <template>
   <div class="flex flex-col gap-3 sm:gap-4 h-full p-3 sm:p-4">
     <!-- 上传队列容器 - 使用新的浮动组件 -->
-    <UploadQueueContainer
+    <UploadQueuePanel
       :uploading-files="uploadingFiles"
       @remove-file="removeUploadingFile"
       @clear-completed="clearCompletedUploads"
