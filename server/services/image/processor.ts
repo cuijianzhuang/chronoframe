@@ -3,6 +3,7 @@ import bmp from '@vingle/bmp-js'
 import heicConvert from 'heic-convert'
 import { getStorageManager } from '~~/server/plugins/storage'
 import sharp from 'sharp'
+import { withRetry, RetryPresets, RetryConditions } from '../../utils/retry'
 
 export interface ProcessedImageData {
   sharpInst: sharp.Sharp
@@ -26,47 +27,67 @@ const getMetadataWithSharp = async (
   sharpInst: sharp.Sharp,
 ): Promise<ImageMeta | null> => {
   try {
-    const metadata = await sharpInst.metadata()
+    return await withRetry(async () => {
+      const metadata = await sharpInst.metadata()
 
-    if (!metadata.height || !metadata.width || !metadata.format) {
-      return null
-    }
+      if (!metadata.height || !metadata.width || !metadata.format) {
+        logger.image.warn('Incomplete metadata received:', { 
+          hasHeight: !!metadata.height, 
+          hasWidth: !!metadata.width, 
+          hasFormat: !!metadata.format 
+        })
+        return null
+      }
 
-    const { orientation } = metadata
-    let { width, height } = metadata
+      const { orientation } = metadata
+      let { width, height } = metadata
 
-    if (orientation && [5, 6, 7, 8].includes(orientation)) {
-      ;[width, height] = [height, width]
-    }
+      if (orientation && [5, 6, 7, 8].includes(orientation)) {
+        ;[width, height] = [height, width]
+      }
 
-    return {
-      width: width,
-      height: height,
-      format: metadata.format,
-    }
-  } catch (err) {
-    logger.image.error('Failed to get image metadata', err)
+      logger.image.info(`Successfully extracted metadata: ${width}x${height} ${metadata.format}`)
+      return {
+        width: width,
+        height: height,
+        format: metadata.format,
+      }
+    }, {
+      ...RetryPresets.fast,
+      timeout: 10000,
+      retryCondition: RetryConditions.resourceErrors
+    }, logger.image)
+  } catch (error) {
+    logger.image.error('All metadata extraction attempts failed:', error)
     return null
   }
 }
 
 export const convertHeicToJpeg = async (heicBuffer: Buffer) => {
-  try {
-    logger.image.info('Converting HEIC to JPEG...')
+  return await withRetry(async () => {
+    // 检查文件大小，如果太大则降低质量
+    const fileSizeMB = heicBuffer.length / (1024 * 1024)
+    const quality = fileSizeMB > 10 ? 0.8 : 0.95
 
     const jpegBuffer = await heicConvert({
       // @ts-expect-error idk why there is a type error here
       buffer: heicBuffer,
       format: 'JPEG',
-      quality: 0.95,
+      quality,
     })
 
-    logger.image.info('Successfully converted HEIC to JPEG')
-    return Buffer.from(jpegBuffer)
-  } catch (err) {
-    logger.image.error('Failed to convert HEIC to JPEG', err)
-    throw err
-  }
+    logger.image.info(`Successfully converted HEIC to JPEG (quality: ${quality})`)
+    return Buffer.from(jpegBuffer as ArrayBuffer)
+  }, {
+    ...RetryPresets.slow, // HEIC 转换是重量级操作
+    timeout: 30000,
+    retryCondition: (error) => {
+      // HEIC 转换错误通常是资源相关的
+      return RetryConditions.resourceErrors(error) || 
+             error.message.includes('memory') ||
+             error.message.includes('timeout')
+    }
+  }, logger.image)
 }
 
 export const convertBitmapToSharpInst = async (bitmapBuffer: Buffer) => {

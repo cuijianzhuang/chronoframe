@@ -33,7 +33,13 @@ interface UploadingFile {
   file: File
   fileName: string
   fileId: string
-  status: 'preparing' | 'uploading' | 'processing' | 'completed' | 'error'
+  status:
+    | 'waiting'
+    | 'preparing'
+    | 'uploading'
+    | 'processing'
+    | 'completed'
+    | 'error'
   stage?: PipelineQueueItem['statusStage'] | null
   progress?: number
   error?: string
@@ -54,24 +60,33 @@ interface UploadingFile {
 
 const uploadingFiles = ref<Map<string, UploadingFile>>(new Map())
 
-const uploadImage = async (file: File) => {
+const uploadImage = async (file: File, existingFileId?: string) => {
   const fileName = file.name
-  const fileId = `${Date.now()}-${fileName}`
+  const fileId = existingFileId || `${Date.now()}-${fileName}`
 
   const uploadManager = useUpload({
     timeout: 10 * 60 * 1000, // 10分钟超时
   })
 
-  const uploadingFile: UploadingFile = {
-    file,
-    fileName,
-    fileId,
-    status: 'preparing',
-    canAbort: false,
-    abortUpload: () => uploadManager.abortUpload(),
+  // 获取或创建 uploadingFile
+  let uploadingFile = uploadingFiles.value.get(fileId)
+  if (!uploadingFile) {
+    uploadingFile = {
+      file,
+      fileName,
+      fileId,
+      status: 'preparing',
+      canAbort: false,
+      abortUpload: () => uploadManager.abortUpload(),
+    }
+    uploadingFiles.value.set(fileId, uploadingFile)
+  } else {
+    // 更新现有条目的状态和回调
+    uploadingFile.status = 'preparing'
+    uploadingFile.canAbort = false
+    uploadingFile.abortUpload = () => uploadManager.abortUpload()
+    uploadingFiles.value = new Map(uploadingFiles.value)
   }
-
-  uploadingFiles.value.set(fileId, uploadingFile)
 
   try {
     // 第一步：获取预签名 URL
@@ -120,14 +135,17 @@ const uploadImage = async (file: File) => {
         uploadingFiles.value = new Map(uploadingFiles.value)
 
         try {
+          // 检查是否为MOV视频文件（通过MIME类型或文件扩展名）
+          const isMovFile =
+            file.type === 'video/quicktime' ||
+            file.type === 'video/mp4' ||
+            file.name.toLowerCase().endsWith('.mov')
+
           const resp = await $fetch('/api/queue/add-task', {
             method: 'POST',
             body: {
               payload: {
-                type:
-                  file.type === 'video/quicktime'
-                    ? 'live-photo-video'
-                    : 'photo',
+                type: isMovFile ? 'live-photo-video' : 'photo',
                 storageKey: signedUrlResponse.fileKey,
               },
               priority: 0,
@@ -258,21 +276,16 @@ const startTaskStatusCheck = (taskId: number, fileId: string) => {
         clearInterval(intervalId)
         statusIntervals.value.delete(taskId)
 
-        // 显示成功提示
-        toast.add({
-          title: '照片处理完成',
-          description: `照片 ${uploadingFile.fileName} 已完成处理`,
-          color: 'success',
-        })
+        // 不再显示单独的成功提示，由上传组件统一处理
 
         // 刷新照片列表
         await refresh()
 
         // 2秒后从界面移除成功的任务
-        setTimeout(() => {
-          uploadingFiles.value.delete(fileId)
-          uploadingFiles.value = new Map(uploadingFiles.value)
-        }, 2000)
+        // setTimeout(() => {
+        //   uploadingFiles.value.delete(fileId)
+        //   uploadingFiles.value = new Map(uploadingFiles.value)
+        // }, 2000)
       } else if (response.status === 'failed') {
         // 任务失败
         uploadingFile.status = 'error'
@@ -284,12 +297,7 @@ const startTaskStatusCheck = (taskId: number, fileId: string) => {
         clearInterval(intervalId)
         statusIntervals.value.delete(taskId)
 
-        // 显示错误提示
-        toast.add({
-          title: '照片处理失败',
-          description: `照片 ${uploadingFile.fileName} 处理失败: ${response.errorMessage || '未知错误'}`,
-          color: 'error',
-        })
+        // 错误信息已在上传组件中显示，不需要额外通知
         // 失败的任务不自动移除，让用户查看错误信息
       }
     } catch (error) {
@@ -361,6 +369,45 @@ const clearCompletedTasks = () => {
     toast.add({
       title: '任务清理完成',
       description: `已清除 ${toRemove.length} 个已完成的任务`,
+      color: 'info',
+    })
+  }
+}
+
+// 清除已完成的上传
+const clearCompletedUploads = () => {
+  clearCompletedTasks()
+}
+
+// 清除所有上传
+const clearAllUploads = () => {
+  const toRemove: string[] = []
+
+  for (const [fileId, uploadingFile] of uploadingFiles.value) {
+    toRemove.push(fileId)
+
+    // 如果是正在上传的任务，先中止
+    if (uploadingFile.status === 'uploading' && uploadingFile.abortUpload) {
+      uploadingFile.abortUpload()
+    }
+
+    // 清理状态检查定时器
+    if (uploadingFile.taskId) {
+      const intervalId = statusIntervals.value.get(uploadingFile.taskId)
+      if (intervalId) {
+        clearInterval(intervalId)
+        statusIntervals.value.delete(uploadingFile.taskId)
+      }
+    }
+  }
+
+  uploadingFiles.value.clear()
+  uploadingFiles.value = new Map(uploadingFiles.value)
+
+  if (toRemove.length > 0) {
+    toast.add({
+      title: '已清除全部任务',
+      description: `已清除 ${toRemove.length} 个上传任务`,
       color: 'info',
     })
   }
@@ -569,24 +616,96 @@ const handleUpload = async () => {
     return
   }
 
+  const errors: string[] = []
+
+  // 先验证所有文件
+  const validFiles: File[] = []
+  const fileIdMapping = new Map<File, string>()
+
   for (const file of fileList) {
-    // 验证文件
     const validation = validateFile(file)
     if (!validation.valid) {
-      toast.add({
-        title: '文件验证失败',
-        description: validation.error,
-        color: 'error',
-      })
-      continue
+      errors.push(`${file.name}: ${validation.error}`)
+    } else {
+      validFiles.push(file)
+      // 为每个有效文件生成唯一ID
+      const fileId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${file.name}`
+      fileIdMapping.set(file, fileId)
     }
+  }
 
+  if (validFiles.length === 0) {
+    toast.add({
+      title: '批量上传失败',
+      description: '所有文件验证失败',
+      color: 'error',
+    })
+    selectedFiles.value = []
+    return
+  }
+
+  // 立即为所有有效文件创建队列条目，状态为 waiting
+  for (const file of validFiles) {
+    const fileId = fileIdMapping.get(file)!
+    const uploadingFile: UploadingFile = {
+      file,
+      fileName: file.name,
+      fileId,
+      status: 'waiting',
+      canAbort: false,
+    }
+    uploadingFiles.value.set(fileId, uploadingFile)
+  }
+
+  // 触发队列更新
+  uploadingFiles.value = new Map(uploadingFiles.value)
+
+  // 动态并发上传，始终保持 CONCURRENT_LIMIT 个文件在上传
+  const CONCURRENT_LIMIT = 3 // 限制同时上传的文件数量
+
+  // 创建文件队列
+  const fileQueue = [...validFiles]
+  const activeUploads = new Set<Promise<void>>()
+
+  // 启动上传任务的函数
+  const startUpload = async (file: File): Promise<void> => {
+    const fileId = fileIdMapping.get(file)!
     try {
-      await uploadImage(file)
+      await uploadImage(file, fileId)
     } catch (error: any) {
-      // 错误已经在 uploadImage 函数内部处理了
+      errors.push(`${file.name}: ${error.message || '上传失败'}`)
       console.error('上传错误:', error)
     }
+  }
+
+  // 处理队列的函数
+  const processQueue = async (): Promise<void> => {
+    while (fileQueue.length > 0 || activeUploads.size > 0) {
+      // 如果当前活跃上传数量小于限制，且队列中还有文件，则启动新的上传
+      while (activeUploads.size < CONCURRENT_LIMIT && fileQueue.length > 0) {
+        const file = fileQueue.shift()!
+        const uploadPromise = startUpload(file)
+
+        activeUploads.add(uploadPromise)
+
+        // 当上传完成时，从活跃集合中移除
+        uploadPromise.finally(() => {
+          activeUploads.delete(uploadPromise)
+        })
+      }
+
+      // 如果有活跃的上传，等待至少一个完成
+      if (activeUploads.size > 0) {
+        await Promise.race(activeUploads)
+      }
+    }
+  }
+
+  // 开始处理队列
+  await processQueue()
+
+  if (errors.length > 0) {
+    console.error('批量上传错误详情:', errors)
   }
 
   // 清空选中的文件
@@ -837,190 +956,13 @@ onUnmounted(() => {
 
 <template>
   <div class="flex flex-col gap-3 sm:gap-4 h-full p-3 sm:p-4">
-    <!-- 上传进度显示 -->
-    <div
-      v-if="uploadingFiles.size > 0"
-      class="space-y-3"
-    >
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold">上传进度</h3>
-        <UButton
-          size="sm"
-          color="neutral"
-          variant="ghost"
-          icon="tabler:trash"
-          @click="clearCompletedTasks"
-        >
-          清除已完成任务
-        </UButton>
-      </div>
-      <div class="space-y-2">
-        <div
-          v-for="[fileId, uploadingFile] of uploadingFiles"
-          :key="fileId"
-          class="p-3 sm:p-4 border border-neutral-200 dark:border-neutral-700 rounded-lg"
-        >
-          <div
-            class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0 mb-2"
-          >
-            <span class="font-medium text-sm sm:text-base truncate">{{
-              uploadingFile.fileName
-            }}</span>
-            <div class="flex items-center gap-2">
-              <!-- 状态指示器 -->
-              <UBadge
-                :color="
-                  uploadingFile.status === 'completed'
-                    ? 'success'
-                    : uploadingFile.status === 'error'
-                      ? 'error'
-                      : uploadingFile.status === 'processing'
-                        ? 'info'
-                        : 'warning'
-                "
-                variant="soft"
-                size="sm"
-              >
-                {{
-                  uploadingFile.status === 'preparing'
-                    ? '准备中'
-                    : uploadingFile.status === 'uploading'
-                      ? `上传中 ${uploadingFile.progress || 0}%`
-                      : uploadingFile.status === 'processing'
-                        ? uploadingFile.stage
-                          ? uploadingFile.stage === 'preprocessing'
-                            ? '预处理中'
-                            : uploadingFile.stage === 'metadata'
-                              ? '提取元数据'
-                              : uploadingFile.stage === 'thumbnail'
-                                ? '生成缩略图'
-                                : uploadingFile.stage === 'exif'
-                                  ? '处理EXIF'
-                                  : uploadingFile.stage === 'reverse-geocoding'
-                                    ? '地理解析'
-                                    : uploadingFile.stage === 'live-photo'
-                                      ? '处理LivePhoto'
-                                      : '处理中'
-                          : '等待处理'
-                        : uploadingFile.status === 'completed'
-                          ? '完成'
-                          : '错误'
-                }}
-              </UBadge>
-
-              <!-- 操作按钮 -->
-              <div class="flex items-center gap-2">
-                <!-- 中止上传按钮 -->
-                <UButton
-                  v-if="
-                    uploadingFile.status === 'uploading' &&
-                    uploadingFile.canAbort
-                  "
-                  size="xs"
-                  color="error"
-                  variant="soft"
-                  icon="tabler:file-x"
-                  @click="uploadingFile.abortUpload?.()"
-                >
-                  <span class="hidden sm:inline">中止上传</span>
-                  <span class="sm:hidden">中止</span>
-                </UButton>
-
-                <!-- 清除任务按钮 -->
-                <UButton
-                  v-if="
-                    uploadingFile.status === 'completed' ||
-                    uploadingFile.status === 'error'
-                  "
-                  size="xs"
-                  color="neutral"
-                  variant="ghost"
-                  icon="tabler:x"
-                  @click="removeUploadingFile(fileId)"
-                >
-                  <span class="hidden sm:inline">清除</span>
-                </UButton>
-              </div>
-            </div>
-          </div>
-
-          <!-- 上传进度条 -->
-          <div
-            v-if="
-              uploadingFile.status === 'uploading' &&
-              uploadingFile.progress !== undefined
-            "
-            class="mb-2"
-          >
-            <div
-              class="flex justify-between text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mb-1"
-            >
-              <span>上传进度: {{ uploadingFile.progress }}%</span>
-              <span
-                v-if="uploadingFile.uploadProgress?.speedText"
-                class="hidden sm:inline"
-              >
-                {{ uploadingFile.uploadProgress.speedText }}
-              </span>
-            </div>
-            <UProgress
-              :model-value="uploadingFile.progress"
-              class="h-2"
-            />
-            <div
-              v-if="uploadingFile.uploadProgress?.timeRemainingText"
-              class="text-xs text-neutral-500 mt-1"
-            >
-              <span class="hidden sm:inline">预计剩余时间: </span>
-              {{ uploadingFile.uploadProgress.timeRemainingText }}
-            </div>
-          </div>
-
-          <!-- 处理状态进度条 -->
-          <div
-            v-if="uploadingFile.status === 'processing'"
-            class="mb-2"
-          >
-            <div
-              class="flex justify-between text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 mb-1"
-            >
-              <span>
-                处理状态:
-                {{
-                  uploadingFile.stage === 'preprocessing'
-                    ? '预处理中'
-                    : uploadingFile.stage === 'metadata'
-                      ? '提取元数据'
-                      : uploadingFile.stage === 'thumbnail'
-                        ? '生成缩略图'
-                        : uploadingFile.stage === 'exif'
-                          ? '处理EXIF信息'
-                          : uploadingFile.stage === 'reverse-geocoding'
-                            ? '地理位置解析'
-                            : uploadingFile.stage === 'live-photo'
-                              ? '处理LivePhoto'
-                              : '等待处理...'
-                }}
-              </span>
-            </div>
-            <UProgress
-              :model-value="uploadingFile.stage ? undefined : null"
-              animation="carousel"
-              class="h-2"
-            />
-          </div>
-
-          <!-- 错误信息 -->
-          <UAlert
-            v-if="uploadingFile.status === 'error' && uploadingFile.error"
-            :description="uploadingFile.error"
-            color="error"
-            variant="soft"
-            class="mt-2"
-          />
-        </div>
-      </div>
-    </div>
+    <!-- 上传队列容器 - 使用新的浮动组件 -->
+    <UploadQueuePanel
+      :uploading-files="uploadingFiles"
+      @remove-file="removeUploadingFile"
+      @clear-completed="clearCompletedUploads"
+      @clear-all="clearAllUploads"
+    />
 
     <!-- 文件上传组件 -->
     <div class="relative">

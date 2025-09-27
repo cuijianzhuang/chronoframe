@@ -80,7 +80,7 @@ const handleImageError = () => {
   console.warn(`Failed to load image: ${props.photo.thumbnailUrl}`)
 }
 
-// LivePhoto video handling
+// LivePhoto video handling - 优化的交互逻辑
 const handleMouseEnter = async () => {
   // Skip mouse events on mobile devices
   if (isMobile.value) return
@@ -89,9 +89,12 @@ const handleMouseEnter = async () => {
 
   if (!props.photo.isLivePhoto || !props.photo.livePhotoVideoUrl) return
 
-  // Only start video processing if we have the blob ready
-  if (videoBlob.value && videoBlobUrl.value) {
+  // 如果视频已准备好，立即播放
+  if (videoBlob.value && videoBlobUrl.value && isVideoLoaded.value) {
     playLivePhotoVideo()
+  } else if (!processingState.value?.isProcessing) {
+    // 如果视频还未处理，立即开始处理
+    processLivePhotoWhenVisible()
   }
 }
 
@@ -117,9 +120,15 @@ const handleMouseLeave = () => {
 const playLivePhotoVideo = () => {
   if (!videoRef.value || !videoBlobUrl.value) return
 
+  // 预加载视频以确保流畅播放
+  if (videoRef.value.readyState < 2) {
+    videoRef.value.load()
+  }
+
+  // 确保视频从头开始播放
   videoRef.value.currentTime = 0
 
-  // Start the crossfade transition by setting video playing state first
+  // 添加播放前的准备动画
   isVideoPlaying.value = true
 
   // Provide haptic feedback on mobile when starting playback
@@ -127,12 +136,48 @@ const playLivePhotoVideo = () => {
     navigator.vibrate(50) // Short vibration for start
   }
 
-  // Then play the video after a small delay to ensure smooth transition
+  // 延迟播放以确保动画状态已设置
   nextTick(() => {
-    videoRef.value?.play().catch((error: any) => {
-      console.warn('Failed to play LivePhoto video:', error)
-      isVideoPlaying.value = false
-    })
+    if (!videoRef.value || !isVideoPlaying.value) return
+
+    // 设置视频播放属性
+    videoRef.value.muted = true // 确保静音播放
+    videoRef.value.playsInline = true
+
+    // 立即尝试播放，使用更好的错误处理
+    const playPromise = videoRef.value.play()
+
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          // 播放成功，确保状态正确
+          if (videoRef.value && !videoRef.value.paused) {
+            // 视频播放成功，状态已正确设置
+          }
+        })
+        .catch((error: any) => {
+          console.warn('Failed to play LivePhoto video:', error)
+          isVideoPlaying.value = false
+
+          // 如果是因为用户交互策略导致的失败，尝试重新加载
+          if (error.name === 'NotAllowedError') {
+            console.log('Video play blocked by browser policy, retrying...')
+            if (videoRef.value) {
+              videoRef.value.load()
+              setTimeout(() => {
+                if (videoRef.value && isVideoPlaying.value) {
+                  const retryPromise = videoRef.value.play()
+                  if (retryPromise !== undefined) {
+                    retryPromise.catch(() => {
+                      isVideoPlaying.value = false
+                    })
+                  }
+                }
+              }, 100)
+            }
+          }
+        })
+    }
   })
 }
 
@@ -249,7 +294,7 @@ const handleClick = (event: Event) => {
   emit('openViewer', props.index)
 }
 
-// Process LivePhoto when it becomes visible
+// 智能LivePhoto处理：基于可见性和用户行为
 const processLivePhotoWhenVisible = async () => {
   if (
     !props.photo.isLivePhoto ||
@@ -259,10 +304,12 @@ const processLivePhotoWhenVisible = async () => {
     return
 
   try {
+    // 使用优化的转换函数，支持重试和缓存
     const blob = await convertMovToMp4(
       props.photo.livePhotoVideoUrl,
       props.photo.id,
     )
+
     if (blob) {
       videoBlob.value = blob
       // Clean up previous blob URL
@@ -271,9 +318,15 @@ const processLivePhotoWhenVisible = async () => {
       }
       videoBlobUrl.value = URL.createObjectURL(blob)
       isVideoLoaded.value = true
+
+      // 预热视频元素以提高播放性能
+      if (videoRef.value) {
+        videoRef.value.load()
+      }
     }
   } catch (error) {
     console.error('Failed to process LivePhoto:', error)
+    // 错误状态会通过processingState反映出来
   }
 }
 
@@ -446,7 +499,7 @@ onUnmounted(() => {
           @error="handleImageError"
         />
 
-        <!-- LivePhoto video with motion transition -->
+        <!-- LivePhoto video with enhanced motion transition -->
         <motion.video
           v-if="photo.isLivePhoto && videoBlobUrl"
           ref="videoRef"
@@ -456,16 +509,31 @@ onUnmounted(() => {
           muted
           playsinline
           preload="metadata"
-          :initial="{ opacity: 0 }"
+          :initial="{
+            opacity: 0,
+            scale: 1.02,
+          }"
           :animate="{
             opacity: isVideoPlaying ? 1 : 0,
+            scale: isVideoPlaying ? 1 : 1.02,
           }"
           :transition="{
-            duration: 0.4,
-            ease: [0.25, 0.1, 0.25, 1],
-            delay: isVideoPlaying ? 0.1 : 0, // Slight delay when fading in video
+            duration: isVideoPlaying ? 0.3 : 0.2,
+            ease: isVideoPlaying
+              ? [0.23, 1, 0.32, 1]
+              : [0.25, 0.46, 0.45, 0.94],
+            delay: isVideoPlaying ? 0.05 : 0,
           }"
           @ended="handleVideoEnded"
+          @loadeddata="
+            () => {
+              // 视频加载完成后预热
+              if (videoRef && !isVideoPlaying) {
+                videoRef.currentTime = 0.1
+                videoRef.pause()
+              }
+            }
+          "
         />
       </div>
 
