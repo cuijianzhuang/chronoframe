@@ -303,5 +303,40 @@
         "noData": "{0} has no photos"
       }
     }
+  },
+  "dashboard": {
+    "overview": {
+      "title": "Overview",
+      "indicator": {
+        "totalPhotos": "Total Photos",
+        "thisMonth": "New This Month",
+        "queueStatus": {
+          "title": "Queue Status",
+          "processing": "Processing",
+          "pending": "Idle"
+        },
+        "storageUsage": "Storage Usage"
+      },
+      "section": {
+        "runtimeInfo": {
+          "title": "Runtime Information",
+          "version": "Version",
+          "uptime": "Uptime",
+          "environment": "Environment",
+          "lastUpdate": "Last Updated"
+        },
+        "memory": {
+          "title": "Memory Usage"
+        },
+        "queue": {
+          "title": "Queue Status",
+          "activeWorkers": "Active Workers",
+          "totalWorkers": "Total Workers",
+          "totalProcessed": "Processed",
+          "totalFailed": "Failure count",
+          "avgSuccessRate": "Success rate"
+        }
+      }
+    }
   }
 }

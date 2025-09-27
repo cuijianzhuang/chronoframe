@@ -77,17 +77,17 @@ const currentScheme = computed(() => colorSchemes[props.color])
       currentScheme.text,
     ]"
   >
-    <div class="flex-1 flex items-center justify-between">
-      <div>
+    <div class="flex-1 flex items-center justify-between gap-4 overflow-hidden">
+      <div class="flex-1 overflow-hidden">
         <p
           v-if="title"
-          class="text-sm opacity-90 font-medium"
+          class="text-sm opacity-90 font-medium max-w-48 truncate"
         >
           {{ title }}
         </p>
         <p
           v-if="value"
-          class="text-lg font-bold"
+          class="text-lg font-bold max-w-1/2 truncate"
         >
           {{ value }}
         </p>

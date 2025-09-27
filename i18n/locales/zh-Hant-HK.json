@@ -298,5 +298,40 @@
         "noData": "{0}冇相"
       }
     }
+  },
+  "dashboard": {
+    "overview": {
+      "title": "儀表板概覽",
+      "indicator": {
+        "totalPhotos": "照片總數",
+        "thisMonth": "本月新增",
+        "queueStatus": {
+          "title": "隊列狀態",
+          "processing": "處理中",
+          "pending": "空閒"
+        },
+        "storageUsage": "存儲使用"
+      },
+      "section": {
+        "runtimeInfo": {
+          "title": "運行信息",
+          "version": "運行版本",
+          "uptime": "運行時間",
+          "environment": "運行環境",
+          "lastUpdate": "最後更新"
+        },
+        "memory": {
+          "title": "內存使用率"
+        },
+        "queue": {
+          "title": "隊列狀態",
+          "activeWorkers": "活躍 Workers",
+          "totalWorkers": "總 Workers",
+          "totalProcessed": "已處理",
+          "totalFailed": "失敗計數",
+          "avgSuccessRate": "成功率"
+        }
+      }
+    }
   }
 }

@@ -303,5 +303,40 @@
         "noData": "{0}没有照片"
       }
     }
+  },
+  "dashboard": {
+    "overview": {
+      "title": "仪表板概览",
+      "indicator": {
+        "totalPhotos": "照片总数",
+        "thisMonth": "本月新增",
+        "queueStatus": {
+          "title": "队列状态",
+          "processing": "处理中",
+          "pending": "空闲"
+        },
+        "storageUsage": "存储使用"
+      },
+      "section": {
+        "runtimeInfo": {
+          "title": "运行信息",
+          "version": "运行版本",
+          "uptime": "运行时间",
+          "environment": "运行环境",
+          "lastUpdate": "最后更新"
+        },
+        "memory": {
+          "title": "内存使用率"
+        },
+        "queue": {
+          "title": "队列状态",
+          "activeWorkers": "活跃 Workers",
+          "totalWorkers": "总 Workers",
+          "totalProcessed": "已处理",
+          "totalFailed": "失败计数",
+          "avgSuccessRate": "成功率"
+        }
+      }
+    }
   }
 }
