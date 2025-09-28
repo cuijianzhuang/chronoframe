@@ -245,7 +245,8 @@
     "dashboard": "Dashboard",
     "photos": "Photos",
     "locations": "Locations",
-    "globe": "Photo Globe"
+    "globe": "Photo Globe",
+    "queue": "Queue Management"
   },
   "auth": {
     "form": {
