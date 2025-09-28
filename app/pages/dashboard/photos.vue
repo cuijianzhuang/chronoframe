@@ -962,6 +962,7 @@ onUnmounted(() => {
       @remove-file="removeUploadingFile"
       @clear-completed="clearCompletedUploads"
       @clear-all="clearAllUploads"
+      @go-to-queue="$router.push('/dashboard/queue')"
     />
 
     <!-- 文件上传组件 -->

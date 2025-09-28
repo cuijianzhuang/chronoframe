@@ -18,6 +18,11 @@ const items = ref<NavigationMenuItem[]>([
     icon: 'tabler:map-pin-cog',
     to: '/dashboard/location',
   },
+  {
+    label: $t('title.queue'),
+    icon: 'tabler:list-check',
+    to: '/dashboard/queue',
+  },
 ])
 
 const route = useRoute()

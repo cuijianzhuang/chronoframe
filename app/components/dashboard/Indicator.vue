@@ -5,14 +5,20 @@ const props = withDefaults(
     value?: string | number
     icon?: string
     color?: keyof typeof colorSchemes
+    clickable?: boolean
   }>(),
   {
     title: undefined,
     value: undefined,
     icon: undefined,
     color: 'blue',
+    clickable: false,
   },
 )
+
+const emit = defineEmits<{
+  click: []
+}>()
 
 const colorSchemes = {
   blue: {
@@ -75,7 +81,9 @@ const currentScheme = computed(() => colorSchemes[props.color])
       currentScheme.background,
       currentScheme.border,
       currentScheme.text,
+      clickable ? 'cursor-pointer hover:scale-105 transition-transform' : '',
     ]"
+    @click="clickable ? emit('click') : undefined"
   >
     <div class="flex-1 flex items-center justify-between gap-4 overflow-hidden">
       <div class="flex-1 overflow-hidden">

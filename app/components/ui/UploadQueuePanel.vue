@@ -39,6 +39,7 @@ const emit = defineEmits<{
   clearCompleted: []
   clearAll: []
   toggle: []
+  goToQueue: []
 }>()
 
 const isCollapsed = ref(props.collapsed || false)
@@ -298,6 +299,16 @@ const clearAllFiles = () => {
                 @click="clearAllFiles"
               >
                 清除全部
+              </UButton>
+              
+              <UButton
+                size="xs"
+                variant="ghost"
+                color="blue"
+                icon="tabler:list-check"
+                @click="emit('goToQueue')"
+              >
+                队列管理
               </UButton>
             </div>
           </div>
