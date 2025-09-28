@@ -208,7 +208,9 @@
       },
       "whiteBalance": {
         "auto": "オート",
-        "manual": "マニュアル"
+        "manual": "マニュアル",
+        "auto1": "通常補正、ニュートラル",
+        "auto2": "環境の暖色を保持"
       },
       "sceneCaptureType": {
         "standard": "標準",
@@ -218,6 +220,7 @@
         "other": "その他"
       },
       "sensingMethod": {
+        "notDefined": "未定義",
         "monochromeArea": "モノクロエリア",
         "oneChipColorArea": "1 チップカラーエリア",
         "twoChipColorArea": "2 チップカラーエリア",

@@ -208,7 +208,9 @@
       },
       "whiteBalance": {
         "auto": "Auto",
-        "manual": "Manual"
+        "manual": "Manual",
+        "auto1": "Normal correction, neutral",
+        "auto2": "Keep ambient warm tones"
       },
       "sceneCaptureType": {
         "standard": "Standard",
@@ -218,6 +220,7 @@
         "other": "Other"
       },
       "sensingMethod": {
+        "notDefined": "Not Defined",
         "monochromeArea": "Monochrome area",
         "oneChipColorArea": "One-chip color area",
         "twoChipColorArea": "Two-chip color area",

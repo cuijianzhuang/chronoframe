@@ -205,7 +205,9 @@
       },
       "whiteBalance": {
         "auto": "自动",
-        "manual": "手动"
+        "manual": "手动",
+        "auto1": "正常校正，中性",
+        "auto2": "保留环境暖色"
       },
       "sceneCaptureType": {
         "standard": "标准",
@@ -215,6 +217,7 @@
         "other": "其他"
       },
       "sensingMethod": {
+        "notDefined": "未定义",
         "monochromeArea": "单色区域传感器",
         "oneChipColorArea": "单片彩色区域传感器",
         "twoChipColorArea": "双片彩色区域传感器",
