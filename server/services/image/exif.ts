@@ -352,7 +352,6 @@ export const extractPhotoInfo = (
   let views = 0
   let tags: string[] = []
 
-  const dirPath = path.dirname(s3key)
   if (exifData?.Subject || exifData?.Keywords) {
     tags = [
       ...new Set([
@@ -366,18 +365,6 @@ export const extractPhotoInfo = (
     ]
       .map((tag) => tag.trim())
       .filter((tag) => tag.length > 0)
-  } else if (dirPath && dirPath !== '.' && dirPath !== '/') {
-    let relativePath = dirPath
-    relativePath = dirPath.slice('/photos'.length)
-
-    relativePath = relativePath.replaceAll(/^\/+|\/+$/g, '')
-
-    if (relativePath) {
-      const pathParts = relativePath
-        .split('/')
-        .filter((part) => part.trim() !== '')
-      tags = pathParts.map((part) => part.trim())
-    }
   }
 
   if (exifData?.DateTimeOriginal) {
