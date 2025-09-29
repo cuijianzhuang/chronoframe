@@ -39,6 +39,7 @@ export default defineNuxtConfig({
       APP_AUTHOR: '',
       APP_AVATAR_URL: '/avatar.webp',
     },
+    MAPBOX_ACCESS_TOKEN: '',
     STORAGE_PROVIDER: 's3',
     PROVIDER_S3_ENDPOINT: '',
     PROVIDER_S3_BUCKET: '',
