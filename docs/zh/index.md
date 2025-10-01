@@ -13,6 +13,9 @@ hero:
     - theme: alt
       text: 查看 GitHub
       link: https://github.com/HoshinoSuzumi/chronoframe
+    - theme: alt
+      text: 查看演示
+      link: https://lens.bh8.ga
 
 features:
   - title: 强大的照片管理

@@ -13,6 +13,9 @@ hero:
     - theme: alt
       text: View on GitHub
       link: https://github.com/HoshinoSuzumi/chronoframe
+    - theme: alt
+      text: View Demo
+      link: https://lens.bh8.ga
 
 features:
   - title: Powerful Photo Management

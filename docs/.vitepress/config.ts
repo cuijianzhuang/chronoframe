@@ -9,6 +9,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
+      { text: 'Demo', link: 'https://lens.bh8.ga' },
     ],
 
     sidebar: [
