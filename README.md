@@ -59,6 +59,7 @@ docker run -d \
   -e NUXT_PUBLIC_APP_AUTHOR="" \
   -e NUXT_PUBLIC_APP_AVATAR_URL="" \
   -e NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN="" \
+  -e NUXT_MAPBOX_ACCESS_TOKEN="" \
   -e NUXT_STORAGE_PROVIDER="s3" \
   -e NUXT_PROVIDER_S3_ENDPOINT="" \
   -e NUXT_PROVIDER_S3_BUCKET="chronoframe" \
@@ -90,8 +91,11 @@ NUXT_PUBLIC_APP_TITLE=
 NUXT_PUBLIC_APP_SLOGAN=
 NUXT_PUBLIC_APP_AUTHOR=
 NUXT_PUBLIC_APP_AVATAR_URL=
-# Mapbox Token
+
+# Mapbox access token for map features, Mapbox GL JS (Client-side, public)
 NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
+# Mapbox secret access token for server-side, Mapbox Search API (Reverse Geocoding)
+NUXT_MAPBOX_ACCESS_TOKEN=
 
 # Storage provider (s3/github/local)
 NUXT_STORAGE_PROVIDER=s3
@@ -147,6 +151,7 @@ docker-compose up -d
 | NUXT_PUBLIC_APP_AUTHOR             | Application author                     | None        | No                                                   |
 | NUXT_PUBLIC_APP_AVATAR_URL         | Application avatar URL                 | None        | No                                                   |
 | NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN    | Mapbox access token for map service    | None        | Yes                                                  |
+| NUXT_MAPBOX_ACCESS_TOKEN           | Mapbox access token for location info  | None        | No                                                   |
 | NUXT_STORAGE_PROVIDER              | Storage provider (s3, github, local)   | s3          | Yes                                                  |
 | NUXT_PROVIDER_S3_ENDPOINT          | S3 endpoint                            | None        | Required if provider is s3                           |
 | NUXT_PROVIDER_S3_BUCKET            | S3 bucket name                         | chronoframe | Required if provider is s3                           |

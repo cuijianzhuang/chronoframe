@@ -196,12 +196,11 @@ export class NominatimGeocodingProvider implements GeocodingProvider {
 
 /**
  * 创建地理编码提供者实例
- * TODO: 添加配置项指定提供者
  * @description 优先使用 Mapbox，如果没有配置则回退到 Nominatim
  */
 function createGeocodingProvider(): GeocodingProvider {
   const mapboxToken =
-    useRuntimeConfig().public.mapbox.accessToken || process.env.MAPBOX_TOKEN
+    useRuntimeConfig().MAPBOX_ACCESS_TOKEN || process.env.MAPBOX_ACCESS_TOKEN
 
   if (mapboxToken) {
     return new MapboxGeocodingProvider(mapboxToken)
