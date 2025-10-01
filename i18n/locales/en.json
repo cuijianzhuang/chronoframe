@@ -341,6 +341,71 @@
           "avgSuccessRate": "Success rate"
         }
       }
+    },
+    "queue": {
+      "title": "Queue Management",
+      "indicator": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "completed": "Completed",
+        "failed": "Failed"
+      },
+      "actions": {
+        "refresh": "Refresh Data",
+        "clearCompleted": "Clear Completed",
+        "clearFailed": "Clear Failed",
+        "clearAll": "Clear All",
+        "retrySelected": "Retry Selected",
+        "retryAll": "Retry All Failed",
+        "clearNonActive": "Clear Non-Active"
+      },
+      "table": {
+        "id": "Task ID",
+        "type": "Type",
+        "status": "Status",
+        "attempts": "Attempts",
+        "priority": "Priority",
+        "stage": "Stage",
+        "error": "Error",
+        "createdAt": "Created At",
+        "completedAt": "Completed At",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "Pending",
+        "in-stages": "Processing",
+        "completed": "Completed",
+        "failed": "Failed"
+      },
+      "types": {
+        "photo": "Photo Processing",
+        "live-photo-video": "LivePhoto Video"
+      },
+      "stages": {
+        "preprocessing": "Preprocessing",
+        "metadata": "Metadata",
+        "thumbnail": "Thumbnail",
+        "exif": "EXIF Processing",
+        "reverse-geocoding": "Geocoding",
+        "live-photo": "LivePhoto Processing"
+      },
+      "buttons": {
+        "retry": "Retry",
+        "delete": "Delete"
+      },
+      "messages": {
+        "noTasks": "No tasks found",
+        "retrySuccess": "Task retry successful",
+        "deleteSuccess": "Task deleted successfully",
+        "batchRetrySuccess": "Batch retry successful",
+        "clearSuccess": "Clear completed",
+        "operationFailed": "Operation failed"
+      },
+      "filters": {
+        "all": "All",
+        "status": "Filter by Status",
+        "type": "Filter by Type"
+      }
     }
   }
 }

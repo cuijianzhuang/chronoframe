@@ -1,306 +1,493 @@
-<template>
-  <div class="container mx-auto p-6 space-y-6">
-    <div class="flex items-center justify-between">
-      <h1 class="text-3xl font-bold">队列管理</h1>
-      <div class="flex gap-2">
-        <button
-          @click="refreshData"
-          :disabled="loading"
-          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-        >
-          {{ loading ? '刷新中...' : '刷新' }}
-        </button>
-        <button
-          @click="cleanupBlockedTasks"
-          :disabled="cleanupLoading"
-          class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:opacity-50"
-        >
-          {{ cleanupLoading ? '清理中...' : '清理阻塞任务' }}
-        </button>
-      </div>
-    </div>
-
-    <!-- 队列统计 -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div v-for="stat in queueStats" :key="stat.status" class="bg-white p-4 rounded-lg shadow">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-gray-600">{{ getStatusLabel(stat.status) }}</p>
-            <p class="text-2xl font-bold">{{ stat.count }}</p>
-          </div>
-          <div :class="getStatusColor(stat.status)" class="w-12 h-12 rounded-full flex items-center justify-center">
-            <component :is="getStatusIcon(stat.status)" class="w-6 h-6 text-white" />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 失败任务管理 -->
-    <div class="bg-white rounded-lg shadow">
-      <div class="p-4 border-b border-gray-200">
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-semibold">失败任务</h2>
-          <div class="flex gap-2">
-            <button
-              @click="retryAllFailed"
-              :disabled="actionLoading"
-              class="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 disabled:opacity-50"
-            >
-              重试所有
-            </button>
-            <button
-              @click="deleteAllFailed"
-              :disabled="actionLoading"
-              class="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 disabled:opacity-50"
-            >
-              删除所有
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div v-if="failedTasks.length === 0" class="p-8 text-center text-gray-500">
-        没有失败的任务
-      </div>
-
-      <div v-else class="divide-y divide-gray-200">
-        <div v-for="task in failedTasks" :key="task.id" class="p-4 hover:bg-gray-50">
-          <div class="flex items-center justify-between">
-            <div class="flex-1">
-              <div class="flex items-center gap-2 mb-2">
-                <span class="px-2 py-1 bg-gray-100 text-xs rounded">{{ task.type }}</span>
-                <span class="text-sm text-gray-600">任务 #{{ task.id }}</span>
-              </div>
-              <p class="font-medium text-sm">{{ task.storageKey }}</p>
-              <p class="text-red-600 text-sm mt-1">{{ task.errorMessage }}</p>
-              <div class="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                <span>尝试次数: {{ task.attempts }}/{{ task.maxAttempts }}</span>
-                <span>创建时间: {{ formatTime(task.createdAt) }}</span>
-              </div>
-            </div>
-            <div class="flex gap-2">
-              <button
-                @click="retryTask(task.id)"
-                :disabled="actionLoading"
-                class="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50"
-              >
-                重试
-              </button>
-              <button
-                @click="deleteTask(task.id)"
-                :disabled="actionLoading"
-                class="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 disabled:opacity-50"
-              >
-                删除
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 分页 -->
-      <div v-if="pagination.totalPages > 1" class="p-4 border-t border-gray-200">
-        <div class="flex items-center justify-between">
-          <div class="text-sm text-gray-600">
-            显示 {{ (pagination.page - 1) * pagination.limit + 1 }} - 
-            {{ Math.min(pagination.page * pagination.limit, pagination.total) }} 
-            / {{ pagination.total }} 个任务
-          </div>
-          <div class="flex gap-2">
-            <button
-              @click="changePage(pagination.page - 1)"
-              :disabled="!pagination.hasPrev || loading"
-              class="px-3 py-1 border rounded disabled:opacity-50"
-            >
-              上一页
-            </button>
-            <span class="px-3 py-1">{{ pagination.page }} / {{ pagination.totalPages }}</span>
-            <button
-              @click="changePage(pagination.page + 1)"
-              :disabled="!pagination.hasNext || loading"
-              class="px-3 py-1 border rounded disabled:opacity-50"
-            >
-              下一页
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
+import type { TableColumn } from '@nuxt/ui'
+
 definePageMeta({
-  layout: 'dashboard'
+  layout: 'dashboard',
 })
 
-// 响应式数据
-const loading = ref(false)
-const actionLoading = ref(false)
-const cleanupLoading = ref(false)
-
-const queueStats = ref<Array<{ status: string; count: number }>>([])
-const failedTasks = ref<Array<any>>([])
-const pagination = ref({
-  page: 1,
-  limit: 20,
-  total: 0,
-  totalPages: 0,
-  hasNext: false,
-  hasPrev: false,
+useHead({
+  title: $t('dashboard.queue.title'),
 })
 
-// 获取队列统计
-const fetchQueueStats = async () => {
+const toast = useToast()
+
+// 状态管理
+const isLoading = ref(false)
+const selectedTasks = ref<number[]>([])
+const statusFilter = ref<string>('all')
+const typeFilter = ref<string>('all')
+
+// 数据获取
+const { data: queueData, refresh: refreshQueue } = await useFetch(
+  '/api/queue/task/list',
+  {
+    query: computed(() => ({
+      ...(statusFilter.value !== 'all' && { status: statusFilter.value }),
+      ...(typeFilter.value !== 'all' && { type: typeFilter.value }),
+    })),
+  },
+)
+
+// 队列统计数据
+const queueStats = computed(() => {
+  if (!queueData.value?.data)
+    return { pending: 0, processing: 0, completed: 0, failed: 0 }
+
+  const stats = { pending: 0, processing: 0, completed: 0, failed: 0 }
+  queueData.value.data.forEach((task) => {
+    if (task.status === 'pending') stats.pending++
+    else if (task.status === 'in-stages') stats.processing++
+    else if (task.status === 'completed') stats.completed++
+    else if (task.status === 'failed') stats.failed++
+  })
+  return stats
+})
+
+// 刷新数据
+const refreshData = async () => {
+  isLoading.value = true
   try {
-    const { data } = await $fetch('/api/queue/stats')
-    queueStats.value = Object.entries(data.queue).map(([status, count]) => ({
-      status,
-      count: count as number
-    }))
-  } catch (error) {
-    console.error('获取队列统计失败:', error)
+    await refreshQueue()
+    selectedTasks.value = []
+  } finally {
+    isLoading.value = false
   }
 }
 
-// 获取失败任务列表
-const fetchFailedTasks = async (page = 1) => {
-  loading.value = true
+// 清理非活跃任务
+const clearNonActiveTasks = async () => {
   try {
-    const { data } = await $fetch(`/api/queue/failed/list?page=${page}&limit=${pagination.value.limit}`)
-    failedTasks.value = data.tasks
-    pagination.value = data.pagination
-  } catch (error) {
-    console.error('获取失败任务失败:', error)
+    isLoading.value = true
+    const result = await $fetch('/api/queue/task/clear', {
+      method: 'DELETE',
+      query: {
+        includeCompleted: 'true',
+        includeFailed: 'true',
+      },
+    })
+
+    toast.add({
+      title: $t('dashboard.queue.messages.clearSuccess'),
+      description: `清除了 ${result.deletedCount} 个任务`,
+      color: 'success',
+    })
+
+    await refreshData()
+  } catch (error: any) {
+    console.error('Clear tasks failed:', error)
+    toast.add({
+      title: $t('dashboard.queue.messages.operationFailed'),
+      description: error?.message || '清理任务失败',
+      color: 'error',
+    })
   } finally {
-    loading.value = false
+    isLoading.value = false
   }
 }
 
 // 重试单个任务
 const retryTask = async (taskId: number) => {
-  actionLoading.value = true
   try {
-    await $fetch(`/api/queue/failed/${taskId}/retry`, { method: 'POST' })
-    await refreshData()
-  } catch (error) {
-    console.error('重试任务失败:', error)
-  } finally {
-    actionLoading.value = false
-  }
-}
-
-// 删除单个任务
-const deleteTask = async (taskId: number) => {
-  if (!confirm('确定要删除这个失败的任务吗？')) return
-  
-  actionLoading.value = true
-  try {
-    await $fetch(`/api/queue/failed/${taskId}/delete`, { method: 'DELETE' })
-    await refreshData()
-  } catch (error) {
-    console.error('删除任务失败:', error)
-  } finally {
-    actionLoading.value = false
-  }
-}
-
-// 重试所有失败任务
-const retryAllFailed = async () => {
-  if (!confirm('确定要重试所有失败的任务吗？')) return
-  
-  actionLoading.value = true
-  try {
-    await $fetch('/api/queue/failed/batch-retry', { 
+    await $fetch('/api/queue/task/retry', {
       method: 'POST',
-      body: { retryAll: true }
+      body: { taskId },
     })
+
+    toast.add({
+      title: $t('dashboard.queue.messages.retrySuccess'),
+      color: 'success',
+    })
+
     await refreshData()
-  } catch (error) {
-    console.error('批量重试失败:', error)
-  } finally {
-    actionLoading.value = false
+  } catch (error: any) {
+    console.error('Retry task failed:', error)
+    toast.add({
+      title: $t('dashboard.queue.messages.operationFailed'),
+      description: error?.message || '重试任务失败',
+      color: 'error',
+    })
   }
 }
 
-// 删除所有失败任务
-const deleteAllFailed = async () => {
-  if (!confirm('确定要删除所有失败的任务吗？此操作不可恢复！')) return
-  
-  actionLoading.value = true
+// 批量重试失败任务
+const retryAllFailedTasks = async () => {
   try {
-    await $fetch('/api/queue/failed/batch-delete', { 
+    isLoading.value = true
+    const result = await $fetch('/api/queue/task/retry-batch', {
+      method: 'POST',
+      body: { retryAll: true },
+    })
+
+    toast.add({
+      title: $t('dashboard.queue.messages.batchRetrySuccess'),
+      description: `重试了 ${result.retriedCount} 个任务`,
+      color: 'success',
+    })
+
+    await refreshData()
+  } catch (error: any) {
+    console.error('Batch retry failed:', error)
+    toast.add({
+      title: $t('dashboard.queue.messages.operationFailed'),
+      description: error?.message || '批量重试失败',
+      color: 'error',
+    })
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// 删除单个任务（仅适用于失败任务）
+const deleteTask = async (taskId: number) => {
+  try {
+    await $fetch(`/api/queue/failed/${taskId}`, {
       method: 'DELETE',
-      body: { deleteAll: true }
     })
+
+    toast.add({
+      title: $t('dashboard.queue.messages.deleteSuccess'),
+      color: 'success',
+    })
+
     await refreshData()
-  } catch (error) {
-    console.error('批量删除失败:', error)
-  } finally {
-    actionLoading.value = false
+  } catch (error: any) {
+    console.error('Delete task failed:', error)
+    toast.add({
+      title: $t('dashboard.queue.messages.operationFailed'),
+      description: error?.message || '删除任务失败',
+      color: 'error',
+    })
   }
 }
 
-// 清理阻塞任务
-const cleanupBlockedTasks = async () => {
-  if (!confirm('确定要清理阻塞的任务吗？这将重置所有in-stages状态的任务。')) return
-  
-  cleanupLoading.value = true
-  try {
-    // 这里可以调用一个专门的清理API，暂时使用命令行脚本的逻辑
-    await refreshData()
-  } catch (error) {
-    console.error('清理阻塞任务失败:', error)
-  } finally {
-    cleanupLoading.value = false
+// 获取状态颜色
+const getStatusColor = (
+  status: 'pending' | 'in-stages' | 'completed' | 'failed',
+) => {
+  switch (status) {
+    case 'pending':
+      return 'warning'
+    case 'in-stages':
+      return 'info'
+    case 'completed':
+      return 'success'
+    case 'failed':
+      return 'error'
+    default:
+      return 'neutral'
   }
 }
 
-// 换页
-const changePage = (page: number) => {
-  fetchFailedTasks(page)
-}
+// 状态选项
+const statusOptions = [
+  { label: $t('dashboard.queue.filters.all'), value: 'all' },
+  { label: $t('dashboard.queue.status.pending'), value: 'pending' },
+  { label: $t('dashboard.queue.status.in-stages'), value: 'in-stages' },
+  { label: $t('dashboard.queue.status.completed'), value: 'completed' },
+  { label: $t('dashboard.queue.status.failed'), value: 'failed' },
+]
 
-// 刷新数据
-const refreshData = async () => {
-  await Promise.all([
-    fetchQueueStats(),
-    fetchFailedTasks(pagination.value.page)
-  ])
-}
+// 类型选项
+const typeOptions = [
+  { label: $t('dashboard.queue.filters.all'), value: 'all' },
+  { label: $t('dashboard.queue.types.photo'), value: 'photo' },
+  {
+    label: $t('dashboard.queue.types.live-photo-video'),
+    value: 'live-photo-video',
+  },
+]
 
-// 工具函数
-const getStatusLabel = (status: string) => {
-  const labels: Record<string, string> = {
-    pending: '等待中',
-    'in-stages': '处理中',
-    completed: '已完成',
-    failed: '失败'
-  }
-  return labels[status] || status
-}
+// 表格列定义
+const columns: TableColumn<any>[] = [
+  {
+    accessorKey: 'id',
+    header: $t('dashboard.queue.table.id'),
+  },
+  {
+    id: 'type',
+    accessorFn: (row) => row.payload.type,
+    header: $t('dashboard.queue.table.type'),
+  },
+  {
+    accessorKey: 'status',
+    header: $t('dashboard.queue.table.status'),
+  },
+  {
+    accessorKey: 'attempts',
+    header: $t('dashboard.queue.table.attempts'),
+  },
+  {
+    accessorKey: 'priority',
+    header: $t('dashboard.queue.table.priority'),
+  },
+  {
+    accessorKey: 'statusStage',
+    header: $t('dashboard.queue.table.stage'),
+  },
+  {
+    accessorKey: 'createdAt',
+    header: $t('dashboard.queue.table.createdAt'),
+  },
+  {
+    id: 'actions',
+    header: $t('dashboard.queue.table.actions'),
+  },
+]
 
-const getStatusColor = (status: string) => {
-  const colors: Record<string, string> = {
-    pending: 'bg-yellow-500',
-    'in-stages': 'bg-blue-500',
-    completed: 'bg-green-500',
-    failed: 'bg-red-500'
-  }
-  return colors[status] || 'bg-gray-500'
-}
-
-const getStatusIcon = (status: string) => {
-  // 这里可以返回图标组件名称，需要根据你的图标库调整
-  return 'div'
-}
-
-const formatTime = (timestamp: number) => {
-  return new Date(timestamp * 1000).toLocaleString()
-}
-
-// 组件挂载时获取数据
-onMounted(() => {
-  refreshData()
+// 自动刷新
+const refreshInterval = setInterval(refreshData, 10000) // 每10秒刷新一次
+onBeforeUnmount(() => {
+  clearInterval(refreshInterval)
 })
 </script>
+
+<template>
+  <div class="flex flex-col gap-6 h-full p-4">
+    <!-- 页面标题和操作 -->
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold">
+        {{ $t('dashboard.queue.title') }}
+      </h1>
+      <div class="flex items-center gap-2">
+        <UButton
+          icon="tabler:refresh"
+          variant="soft"
+          :loading="isLoading"
+          @click="refreshData"
+        >
+          {{ $t('dashboard.queue.actions.refresh') }}
+        </UButton>
+        <UButton
+          icon="tabler:refresh"
+          color="warning"
+          variant="soft"
+          :loading="isLoading"
+          @click="retryAllFailedTasks"
+        >
+          {{ $t('dashboard.queue.actions.retryAll') }}
+        </UButton>
+        <UButton
+          icon="tabler:trash"
+          color="error"
+          variant="soft"
+          :loading="isLoading"
+          @click="clearNonActiveTasks"
+        >
+          {{ $t('dashboard.queue.actions.clearNonActive') }}
+        </UButton>
+      </div>
+    </div>
+
+    <!-- 状态指示器 -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <DashboardIndicator
+        :title="$t('dashboard.queue.indicator.pending')"
+        icon="tabler:clock"
+        color="orange"
+        :value="queueStats.pending"
+      />
+      <DashboardIndicator
+        :title="$t('dashboard.queue.indicator.processing')"
+        icon="tabler:loader"
+        color="blue"
+        :value="queueStats.processing"
+      />
+      <DashboardIndicator
+        :title="$t('dashboard.queue.indicator.completed')"
+        icon="tabler:check"
+        color="green"
+        :value="queueStats.completed"
+      />
+      <DashboardIndicator
+        :title="$t('dashboard.queue.indicator.failed')"
+        icon="tabler:alert-triangle"
+        color="red"
+        :value="queueStats.failed"
+      />
+    </div>
+
+    <!-- 筛选器和表格 -->
+    <UCard>
+      <template #header>
+        <div class="flex items-center justify-between pb-2">
+          <h2 class="text-lg font-semibold">队列任务列表</h2>
+          <div class="flex items-center gap-2">
+            <USelectMenu
+              v-model="statusFilter"
+              :items="statusOptions"
+              value-key="value"
+              size="sm"
+              variant="soft"
+              class="w-32"
+              :search-input="false"
+            />
+            <USelectMenu
+              v-model="typeFilter"
+              :items="typeOptions"
+              value-key="value"
+              size="sm"
+              variant="soft"
+              class="w-32"
+              :search-input="false"
+            />
+          </div>
+        </div>
+      </template>
+
+      <div class="space-y-4">
+        <!-- 任务表格 -->
+        <UTable
+          :data="queueData?.data || []"
+          :columns="columns"
+          :loading="isLoading"
+          :empty-state="{
+            icon: 'tabler:inbox',
+            label: $t('dashboard.queue.messages.noTasks'),
+          }"
+          class="w-full"
+        >
+          <!-- 任务类型 -->
+          <template #type-cell="{ row }">
+            <UBadge
+              :label="$t(`dashboard.queue.types.${row.original.payload.type}`)"
+              variant="soft"
+              :color="
+                row.original.payload.type === 'photo' ? 'info' : 'secondary'
+              "
+              size="sm"
+            />
+          </template>
+
+          <!-- 状态 -->
+          <template #status-cell="{ row }">
+            <UBadge
+              :label="$t(`dashboard.queue.status.${row.original.status}`)"
+              variant="soft"
+              :color="getStatusColor(row.original.status)"
+              size="sm"
+            />
+          </template>
+
+          <!-- 尝试次数 -->
+          <template #attempts-cell="{ row }">
+            <span class="text-sm">
+              {{ row.original.attempts }}/{{ row.original.maxAttempts }}
+            </span>
+          </template>
+
+          <!-- 处理阶段 -->
+          <template #statusStage-cell="{ row }">
+            <span
+              v-if="row.original.statusStage"
+              class="text-xs text-gray-500"
+            >
+              {{ $t(`dashboard.queue.stages.${row.original.statusStage}`) }}
+            </span>
+            <span
+              v-else
+              class="text-xs text-gray-400"
+              >-</span
+            >
+          </template>
+
+          <!-- 创建时间 -->
+          <template #createdAt-cell="{ row }">
+            <span class="text-sm">{{
+              $dayjs(row.original.createdAt).format('MM-DD HH:mm:ss')
+            }}</span>
+          </template>
+
+          <!-- 操作按钮 -->
+          <template #actions-cell="{ row }">
+            <div class="flex items-center gap-1">
+              <UButton
+                v-if="row.original.status === 'failed'"
+                icon="tabler:refresh"
+                size="xs"
+                variant="soft"
+                color="warning"
+                @click="retryTask(row.original.id)"
+              >
+                {{ $t('dashboard.queue.buttons.retry') }}
+              </UButton>
+              <UButton
+                v-if="row.original.status !== 'in-stage'"
+                icon="tabler:trash"
+                size="xs"
+                variant="soft"
+                color="error"
+                @click="deleteTask(row.original.id)"
+              >
+                {{ $t('dashboard.queue.buttons.delete') }}
+              </UButton>
+              <span
+                v-if="
+                  row.original.status === 'pending' ||
+                  row.original.status === 'in-stages'
+                "
+                class="text-xs text-gray-400"
+              >
+                -
+              </span>
+            </div>
+          </template>
+        </UTable>
+      </div>
+    </UCard>
+
+    <!-- 错误信息显示 -->
+    <UCard
+      v-if="
+        queueData?.data?.some(
+          (task) => task.status === 'failed' && task.errorMessage,
+        )
+      "
+    >
+      <template #header>
+        <h3 class="font-semibold text-red-600">最近的错误信息</h3>
+      </template>
+
+      <div class="space-y-2 max-h-64 overflow-y-auto">
+        <div
+          v-for="task in queueData.data
+            .filter((t) => t.status === 'failed' && t.errorMessage)
+            .slice(0, 5)"
+          :key="task.id"
+          class="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-100 dark:border-red-900/30"
+        >
+          <div class="flex items-start justify-between gap-2 text-sm">
+            <div class="flex-1">
+              <p class="font-medium text-red-800 dark:text-red-200">
+                任务 #{{ task.id }} ({{
+                  $t(`dashboard.queue.types.${task.payload.type}`)
+                }})
+              </p>
+              <p class="text-red-600 dark:text-red-300 mt-1 text-xs break-all">
+                {{ task.errorMessage }}
+              </p>
+              <p class="text-red-500 dark:text-red-400 mt-1 text-xs">
+                {{ $dayjs(task.createdAt).format('MM-DD HH:mm:ss') }}
+              </p>
+            </div>
+            <UButton
+              icon="tabler:refresh"
+              size="xs"
+              variant="soft"
+              color="warning"
+              @click="retryTask(task.id)"
+            >
+              重试
+            </UButton>
+          </div>
+        </div>
+      </div>
+    </UCard>
+  </div>
+</template>
+
+<style scoped>
+/* 确保表格在小屏幕上正常显示 */
+:deep(.table-wrapper) {
+  overflow-x: auto;
+}
+</style>

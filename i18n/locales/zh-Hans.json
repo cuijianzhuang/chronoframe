@@ -341,6 +341,71 @@
           "avgSuccessRate": "成功率"
         }
       }
+    },
+    "queue": {
+      "title": "队列管理",
+      "indicator": {
+        "pending": "等待处理",
+        "processing": "正在处理",
+        "completed": "已完成",
+        "failed": "失败任务"
+      },
+      "actions": {
+        "refresh": "刷新数据",
+        "clearCompleted": "清理已完成",
+        "clearFailed": "清理失败任务",
+        "clearAll": "清理全部",
+        "retrySelected": "重试选中",
+        "retryAll": "重试全部失败",
+        "clearNonActive": "清理非活跃任务"
+      },
+      "table": {
+        "id": "任务ID",
+        "type": "类型",
+        "status": "状态",
+        "attempts": "尝试次数",
+        "priority": "优先级",
+        "stage": "处理阶段",
+        "error": "错误信息",
+        "createdAt": "创建时间",
+        "completedAt": "完成时间",
+        "actions": "操作"
+      },
+      "status": {
+        "pending": "等待中",
+        "in-stages": "处理中",
+        "completed": "已完成",
+        "failed": "失败"
+      },
+      "types": {
+        "photo": "照片处理",
+        "live-photo-video": "LivePhoto视频"
+      },
+      "stages": {
+        "preprocessing": "预处理",
+        "metadata": "元数据",
+        "thumbnail": "缩略图",
+        "exif": "EXIF处理",
+        "reverse-geocoding": "地理解析",
+        "live-photo": "LivePhoto处理"
+      },
+      "buttons": {
+        "retry": "重试",
+        "delete": "删除"
+      },
+      "messages": {
+        "noTasks": "没有找到任务",
+        "retrySuccess": "任务重试成功",
+        "deleteSuccess": "任务删除成功",
+        "batchRetrySuccess": "批量重试成功",
+        "clearSuccess": "清理完成",
+        "operationFailed": "操作失败"
+      },
+      "filters": {
+        "all": "全部",
+        "status": "按状态筛选",
+        "type": "按类型筛选"
+      }
     }
   }
 }

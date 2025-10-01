@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { isNil } from 'es-toolkit';
+
 const props = withDefaults(
   defineProps<{
     title?: string
@@ -94,7 +96,7 @@ const currentScheme = computed(() => colorSchemes[props.color])
           {{ title }}
         </p>
         <p
-          v-if="value"
+          v-if="!isNil(value)"
           class="text-lg font-bold max-w-full sm:max-w-1/2 truncate"
         >
           {{ value }}

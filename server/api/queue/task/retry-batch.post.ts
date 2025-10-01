@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
     const { taskIds, retryAll = false } = await readValidatedBody(
       event,
       z.object({
-        taskIds: z.array(z.number()).optional(),
+        taskIds: z.array(z.number().int().positive()).optional(),
         retryAll: z.boolean().optional().default(false)
       }).parse
     )
@@ -45,43 +45,51 @@ export default defineEventHandler(async (event) => {
         success: true,
         message: 'No failed tasks found to retry',
         retriedCount: 0,
+        skippedCount: retryAll ? 0 : (taskIds?.length || 0)
       }
     }
 
-    // 批量重试失败的任务
+    const nonFailedTasks = tasksToRetry.filter(task => task.status !== 'failed')
+
+    // 批量重置失败任务的状态
+    const failedTaskIds = failedTasks.map(task => task.id)
+    
     await db
       .update(tables.pipelineQueue)
       .set({
         status: 'pending',
-        attempts: 0,
-        errorMessage: null,
         statusStage: null,
-        priority: 1, // 设置高优先级
-        createdAt: new Date(), // 重新设置创建时间
-        completedAt: null,
+        errorMessage: null,
+        attempts: 0, // 重置尝试次数
+        createdAt: new Date() // 更新创建时间以便重新调度
       })
-      .where(
-        retryAll 
-          ? eq(tables.pipelineQueue.status, 'failed')
-          : inArray(tables.pipelineQueue.id, failedTasks.map(t => t.id))
-      )
-
-    logger.chrono.info(`${failedTasks.length} failed tasks have been reset for retry by user`)
+      .where(inArray(tables.pipelineQueue.id, failedTaskIds))
 
     return {
       success: true,
-      message: `${failedTasks.length} failed tasks have been reset and will be retried`,
+      message: `Successfully reset ${failedTasks.length} failed tasks for retry`,
       retriedCount: failedTasks.length,
-      taskIds: failedTasks.map(t => t.id),
+      skippedCount: nonFailedTasks.length,
+      retriedTasks: failedTasks.map(task => ({
+        id: task.id,
+        type: task.payload.type,
+        storageKey: task.payload.storageKey
+      })),
+      skippedTasks: nonFailedTasks.map(task => ({
+        id: task.id,
+        status: task.status,
+        reason: `Task is not in failed status (current: ${task.status})`
+      }))
     }
-  } catch (error: any) {
-    if (error.statusCode) {
+  } catch (error) {
+    if (error && typeof error === 'object' && 'statusCode' in error) {
       throw error
     }
-
+    
+    console.error('Failed to batch retry tasks:', error)
     throw createError({
       statusCode: 500,
-      statusMessage: error instanceof Error ? error.message : 'Failed to retry tasks',
+      statusMessage: 'Failed to batch retry tasks'
     })
   }
 })

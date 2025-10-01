@@ -2,16 +2,16 @@ import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 
 /**
- * 重试失败的任务
+ * 重试指定的失败任务
  */
 export default defineEventHandler(async (event) => {
   await requireUserSession(event)
 
   try {
-    const { taskId } = await getValidatedRouterParams(
+    const { taskId } = await readValidatedBody(
       event,
       z.object({
-        taskId: z.string().transform(val => parseInt(val))
+        taskId: z.number().int().positive()
       }).parse
     )
 
@@ -38,35 +38,36 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    // 重置任务状态，清除错误信息，重置尝试次数
+    // 重置任务状态为 pending，清除错误信息和状态阶段
     await db
       .update(tables.pipelineQueue)
       .set({
         status: 'pending',
-        attempts: 0,
-        errorMessage: null,
         statusStage: null,
-        priority: 1, // 设置高优先级
-        createdAt: new Date(), // 重新设置创建时间
-        completedAt: null,
+        errorMessage: null,
+        attempts: 0, // 重置尝试次数
+        createdAt: new Date() // 更新创建时间以便重新调度
       })
       .where(eq(tables.pipelineQueue.id, taskId))
 
-    logger.chrono.info(`Task ${taskId} has been reset for retry by user`)
-
     return {
       success: true,
-      message: 'Task has been reset and will be retried',
+      message: `Task ${taskId} has been reset and will be retried`,
       taskId,
+      payload: {
+        type: task.payload.type,
+        storageKey: task.payload.storageKey
+      }
     }
-  } catch (error: any) {
-    if (error.statusCode) {
+  } catch (error) {
+    if (error && typeof error === 'object' && 'statusCode' in error) {
       throw error
     }
-
+    
+    console.error('Failed to retry task:', error)
     throw createError({
       statusCode: 500,
-      statusMessage: error instanceof Error ? error.message : 'Failed to retry task',
+      statusMessage: 'Failed to retry task'
     })
   }
 })
