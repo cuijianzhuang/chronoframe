@@ -1,18 +1,26 @@
 <script lang="ts" setup>
+import { isNil } from 'es-toolkit';
+
 const props = withDefaults(
   defineProps<{
     title?: string
     value?: string | number
     icon?: string
     color?: keyof typeof colorSchemes
+    clickable?: boolean
   }>(),
   {
     title: undefined,
     value: undefined,
     icon: undefined,
     color: 'blue',
+    clickable: false,
   },
 )
+
+const emit = defineEmits<{
+  click: []
+}>()
 
 const colorSchemes = {
   blue: {
@@ -75,7 +83,9 @@ const currentScheme = computed(() => colorSchemes[props.color])
       currentScheme.background,
       currentScheme.border,
       currentScheme.text,
+      clickable ? 'cursor-pointer hover:scale-105 transition-transform' : '',
     ]"
+    @click="clickable ? emit('click') : undefined"
   >
     <div class="flex-1 flex items-center justify-between gap-4 overflow-hidden">
       <div class="flex-1 overflow-hidden">
@@ -86,7 +96,7 @@ const currentScheme = computed(() => colorSchemes[props.color])
           {{ title }}
         </p>
         <p
-          v-if="value"
+          v-if="!isNil(value)"
           class="text-lg font-bold max-w-full sm:max-w-1/2 truncate"
         >
           {{ value }}

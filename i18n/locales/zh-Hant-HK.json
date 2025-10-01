@@ -248,7 +248,8 @@
     "locations": "位置管理",
     "photos": "相片庫",
     "gallery": "相片集",
-    "globe": "照片地球儀"
+    "globe": "照片地球儀",
+    "queue": "隊列管理"
   },
   "auth": {
     "form": {
@@ -334,6 +335,71 @@
           "totalFailed": "失敗計數",
           "avgSuccessRate": "成功率"
         }
+      }
+    },
+    "queue": {
+      "title": "隊列管理",
+      "indicator": {
+        "pending": "等待處理",
+        "processing": "正在處理",
+        "completed": "已完成",
+        "failed": "失敗任務"
+      },
+      "actions": {
+        "refresh": "刷新數據",
+        "clearCompleted": "清理已完成",
+        "clearFailed": "清理失敗任務",
+        "clearAll": "清理全部",
+        "retrySelected": "重試選中",
+        "retryAll": "重試全部失敗",
+        "clearNonActive": "清理非活躍任務"
+      },
+      "table": {
+        "id": "任務ID",
+        "type": "類型",
+        "status": "狀態",
+        "attempts": "嘗試次數",
+        "priority": "優先級",
+        "stage": "處理階段",
+        "error": "錯誤信息",
+        "createdAt": "創建時間",
+        "completedAt": "完成時間",
+        "actions": "操作"
+      },
+      "status": {
+        "pending": "等待中",
+        "in-stages": "處理中",
+        "completed": "已完成",
+        "failed": "失敗"
+      },
+      "types": {
+        "photo": "照片處理",
+        "live-photo-video": "LivePhoto視頻"
+      },
+      "stages": {
+        "preprocessing": "預處理",
+        "metadata": "元數據",
+        "thumbnail": "縮略圖",
+        "exif": "EXIF處理",
+        "reverse-geocoding": "地理解析",
+        "live-photo": "LivePhoto處理"
+      },
+      "buttons": {
+        "retry": "重試",
+        "delete": "刪除"
+      },
+      "messages": {
+        "noTasks": "沒有找到任務",
+        "retrySuccess": "任務重試成功",
+        "deleteSuccess": "任務刪除成功",
+        "batchRetrySuccess": "批量重試成功",
+        "clearSuccess": "清理完成",
+        "operationFailed": "操作失敗"
+      },
+      "filters": {
+        "all": "全部",
+        "status": "按狀態篩選",
+        "type": "按類型篩選"
       }
     }
   }

@@ -155,6 +155,8 @@ const yearOptions = computed(() => {
             ? $t('dashboard.overview.indicator.queueStatus.processing')
             : $t('dashboard.overview.indicator.queueStatus.pending')
         "
+        clickable
+        @click="$router.push('/dashboard/queue')"
       />
       <DashboardIndicator
         :title="$t('dashboard.overview.indicator.storageUsage')"

@@ -248,7 +248,8 @@
     "dashboard": "ダッシュボード",
     "photos": "写真",
     "locations": "場所",
-    "globe": "写真グローブ"
+    "globe": "写真グローブ",
+    "queue": "キュー管理"
   },
   "auth": {
     "form": {
@@ -334,6 +335,71 @@
           "totalFailed": "障害カウント",
           "avgSuccessRate": "成功率"
         }
+      }
+    },
+    "queue": {
+      "title": "キュー管理",
+      "indicator": {
+        "pending": "処理待ち",
+        "processing": "処理中",
+        "completed": "完了",
+        "failed": "失敗したタスク"
+      },
+      "actions": {
+        "refresh": "データを更新",
+        "clearCompleted": "完了済みをクリア",
+        "clearFailed": "失敗タスクをクリア",
+        "clearAll": "すべてクリア",
+        "retrySelected": "選択した項目を再試行",
+        "retryAll": "すべての失敗を再試行",
+        "clearNonActive": "非アクティブタスクをクリア"
+      },
+      "table": {
+        "id": "タスクID",
+        "type": "タイプ",
+        "status": "ステータス",
+        "attempts": "試行回数",
+        "priority": "優先度",
+        "stage": "処理段階",
+        "error": "エラー情報",
+        "createdAt": "作成日時",
+        "completedAt": "完了日時",
+        "actions": "操作"
+      },
+      "status": {
+        "pending": "待機中",
+        "in-stages": "処理中",
+        "completed": "完了",
+        "failed": "失敗"
+      },
+      "types": {
+        "photo": "写真処理",
+        "live-photo-video": "LivePhoto動画"
+      },
+      "stages": {
+        "preprocessing": "前処理",
+        "metadata": "メタデータ",
+        "thumbnail": "サムネイル",
+        "exif": "EXIF処理",
+        "reverse-geocoding": "地理解析",
+        "live-photo": "LivePhoto処理"
+      },
+      "buttons": {
+        "retry": "再試行",
+        "delete": "削除"
+      },
+      "messages": {
+        "noTasks": "タスクが見つかりません",
+        "retrySuccess": "タスクの再試行が成功しました",
+        "deleteSuccess": "タスクの削除が成功しました",
+        "batchRetrySuccess": "バッチ再試行が成功しました",
+        "clearSuccess": "クリア完了",
+        "operationFailed": "操作に失敗しました"
+      },
+      "filters": {
+        "all": "すべて",
+        "status": "ステータスでフィルター",
+        "type": "タイプでフィルター"
       }
     }
   }

@@ -39,6 +39,7 @@ const emit = defineEmits<{
   clearCompleted: []
   clearAll: []
   toggle: []
+  goToQueue: []
 }>()
 
 const isCollapsed = ref(props.collapsed || false)
@@ -280,7 +281,7 @@ const clearAllFiles = () => {
               {{ stats.completed }} 完成, {{ stats.error }} 失败
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-0.5">
               <UButton
                 v-if="stats.completed > 0"
                 size="xs"
@@ -295,9 +296,20 @@ const clearAllFiles = () => {
                 size="xs"
                 variant="ghost"
                 color="error"
+                icon="tabler:trash"
                 @click="clearAllFiles"
               >
                 清除全部
+              </UButton>
+              
+              <UButton
+                size="xs"
+                variant="ghost"
+                color="info"
+                icon="tabler:list-check"
+                @click="emit('goToQueue')"
+              >
+                队列管理
               </UButton>
             </div>
           </div>
