@@ -15,7 +15,7 @@ export function useDB() {
   if (!dbInstance || !sqliteInstance) {
     // 创建数据库连接，启用WAL模式以提高并发性能
     sqliteInstance = new Database('data/app.sqlite3', {
-      verbose: process.env.NODE_ENV === 'development' ? console.log : undefined,
+      verbose: process.env.NODE_ENV === 'development' ? logger.dynamic('db').log : undefined,
     })
     
     // 启用WAL模式以提高并发性能
