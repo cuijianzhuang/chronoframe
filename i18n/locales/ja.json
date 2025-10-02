@@ -249,7 +249,8 @@
     "photos": "写真",
     "locations": "場所",
     "globe": "写真グローブ",
-    "queue": "キュー管理"
+    "queue": "キュー管理",
+    "logs": "システムログ"
   },
   "auth": {
     "form": {

@@ -249,7 +249,8 @@
     "photos": "相片庫",
     "gallery": "相片集",
     "globe": "照片地球儀",
-    "queue": "隊列管理"
+    "queue": "佇列管理",
+    "logs": "系統日誌"
   },
   "auth": {
     "form": {

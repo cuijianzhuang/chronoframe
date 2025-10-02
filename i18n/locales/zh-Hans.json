@@ -249,7 +249,8 @@
     "locations": "位置管理",
     "photos": "照片库",
     "globe": "照片地球仪",
-    "queue": "队列管理"
+    "queue": "队列管理",
+    "logs": "系统日志"
   },
   "auth": {
     "form": {

@@ -249,7 +249,8 @@
     "photos": "Photos",
     "locations": "Locations",
     "globe": "Photo Globe",
-    "queue": "Queue Management"
+    "queue": "Queue Management",
+    "logs": "System Logs"
   },
   "auth": {
     "form": {

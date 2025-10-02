@@ -23,6 +23,11 @@ const items = ref<NavigationMenuItem[]>([
     icon: 'tabler:list-check',
     to: '/dashboard/queue',
   },
+  {
+    label: $t('title.logs'),
+    icon: 'tabler:file-text',
+    to: '/dashboard/logs',
+  },
 ])
 
 const route = useRoute()
