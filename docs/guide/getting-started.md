@@ -1,35 +1,43 @@
 # Getting Started
 
-:::warning 🚧WIP
-The documentation is under construction, and some feature docs are not yet complete.
+This documentation will guide you on how to quickly deploy and start using ChronoFrame.
+
+:::warning 🚧 Under Construction
+Documentation is being written, some feature documentation is not yet complete.
 :::
 
-## 🛠️ Prerequisites
+## Prerequisites
 
-- A working [Docker](https://docs.docker.com/get-docker/) environment.
-- An S3-compatible storage bucket *(GitHub repository storage and local filesystem storage are still under development)*.
+- Available [Docker](https://docs.docker.com/get-docker/) environment.
+- An S3 protocol-compatible storage bucket *(GitHub repository storage and local filesystem storage are still in development)*.
   :::tip
-  When using S3 storage, you need at least the following information from your provider: `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY`, `ENDPOINT`, `BUCKET_NAME`, `REGION`. If your bucket's public URL differs from the `ENDPOINT`, you'll also need to provide the public URL as `CDN_URL`.
+  When using S3 storage, you need to obtain at least the following information from your service provider: `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY`, `ENDPOINT`, `BUCKET_NAME`, `REGION`. When the bucket's external URL is different from the `ENDPOINT`, you also need to provide the external URL `CDN_URL`.
   :::
 - Two [Mapbox access tokens](https://console.mapbox.com/account/access-tokens/).
   :::details Why do I need two tokens?
-  - The first token is for frontend map display and requires `styles:read` permission. It's recommended to restrict this token's URL to your ChronoFrame instance domain to prevent abuse.
-  - The second token is for backend reverse geocoding and **cannot** have URL restrictions. This token is **optional**.
+  - The first token is used for frontend map display, requires `styles:read` permission. It's recommended to restrict this token's URL to your ChronoFrame instance domain to prevent abuse.
+  - The second token is used for backend reverse geocoding, this token **cannot** have URL restrictions. This token is **optional**.
   :::
-- `CLIENT_ID` and `CLIENT_SECRET` from a [GitHub OAuth App](https://github.com/settings/applications/new) *(optional, for enabling GitHub login)*.
+- [GitHub OAuth App](https://github.com/settings/applications/new) `CLIENT_ID` and `CLIENT_SECRET` *(optional, for enabling GitHub login)*.
   :::tip
-  When creating the OAuth app, set the `Authorization callback URL` to `http(s)://<your-domain>/api/auth/github`.
+  When creating the OAuth app, the `Authorization callback URL` should be set to `http(s)://<your-domain>/api/auth/github`.
   :::
 
-## 🐳 Quick Deployment
+## Quick Deployment
 
-We recommend using the pre-built Docker image for deployment. [View the image on ghcr](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe).
+### Pre-built Images
 
-Choose between Docker or Docker Compose based on your preference.
+We recommend using pre-built Docker images for deployment, hosted on GitHub Container Registry:
 
-### Deploy with Docker
+```
+ghcr.io/hoshinosuzumi/chronoframe:latest
+```
 
-Run the following command to start a ChronoFrame instance:
+[View all available versions](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe)
+
+### Docker Single Container Deployment
+
+#### Quick Start
 
 ```bash
 docker run -d \
@@ -58,19 +66,21 @@ docker run -d \
   ghcr.io/hoshinosuzumi/chronoframe:latest
 ```
 
-### Deploy with Docker Compose
+### Docker Compose Deployment
 
-Create a `.env` file:
+Recommended for production environment deployment using Docker Compose for easier management and configuration.
+
+#### 1. Create `.env` file
 
 ```env
 # Admin user email (required)
 CFRAME_ADMIN_EMAIL=
-# Admin user name (default to Chronoframe, optional)
+# Admin username (default to Chronoframe, optional)
 CFRAME_ADMIN_NAME=
 # Admin user password (default to CF1234@!, optional)
 CFRAME_ADMIN_PASSWORD=
 
-# App title and slogan
+# Application title and slogan
 NUXT_PUBLIC_APP_TITLE=
 NUXT_PUBLIC_APP_SLOGAN=
 NUXT_PUBLIC_APP_AUTHOR=
@@ -100,7 +110,7 @@ NUXT_OAUTH_GITHUB_CLIENT_ID=
 NUXT_OAUTH_GITHUB_CLIENT_SECRET=
 ```
 
-Create a `docker-compose.yml` file:
+#### 2. Create `docker-compose.yml` file
 
 ```yaml
 services:
@@ -116,10 +126,130 @@ services:
       - .env
 ```
 
-Start the ChronoFrame instance:
+#### 3. Start ChronoFrame Service
 
 ```bash
+# Start service
+docker compose up -d
+
+# View logs
+docker compose logs -f chronoframe
+
+# Stop service
+docker compose down
+
+# Update to latest version
+docker compose pull
 docker compose up -d
 ```
 
+## Reverse Proxy
 
+When deploying in production environment, you usually need a reverse proxy server (like Nginx or Caddy) to handle HTTPS and domain resolution. Here are some example configurations.
+
+### Nginx
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    
+    # HTTPS redirect
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name your-domain.com;
+    
+    # SSL certificate configuration
+    ssl_certificate /path/to/your/certificate.crt;
+    ssl_certificate_key /path/to/your/private.key;
+    
+    # SSL security configuration
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+    
+    # Upload size limit
+    client_max_body_size 100M;
+    
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        
+        # WebSocket support
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Upgrade $http_upgrade;
+        
+        # Timeout settings
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+    
+    # Static resource caching
+    location ~* \.(jpg|jpeg|png|gif|webp|svg|css|js|ico|woff|woff2|ttf|eot)$ {
+        proxy_pass http://localhost:3000;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        proxy_set_header Host $host;
+    }
+}
+```
+
+### Traefik
+
+If you use Traefik as reverse proxy, you can add labels in `docker-compose.yml`:
+
+```yaml
+services:
+  chronoframe:
+    image: ghcr.io/hoshinosuzumi/chronoframe:latest
+    container_name: chronoframe
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.chronoframe.rule=Host(`your-domain.com`)"
+      - "traefik.http.routers.chronoframe.entrypoints=websecure"
+      - "traefik.http.routers.chronoframe.tls.certresolver=letsencrypt"
+      - "traefik.http.services.chronoframe.loadbalancer.server.port=3000"
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: true
+```
+
+## Common Issues
+
+:::details How to generate random `NUXT_SESSION_PASSWORD`?
+```bash
+# Linux / macOS
+openssl rand -base64 32
+
+# Windows (pwsh)
+[Convert]::ToBase64String((1..32|%{[byte](Get-Random -Max 256)}))
+```
+:::
+
+:::details After successful backend authentication login, redirect to homepage and still in unauthenticated state?
+First, please make sure you're not accessing directly through IP address and port number. For security reasons, please access through the configured domain name.
+
+If for some reason you insist on accessing through IP port, please add to configuration:
+```env
+NUXT_ALLOW_INSECURE_COOKIE=true
+```
+:::

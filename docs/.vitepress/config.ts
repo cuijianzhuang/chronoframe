@@ -9,13 +9,31 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
+      { text: 'Development', link: '/guide/contributing' },
       { text: 'Demo', link: 'https://lens.bh8.ga' },
     ],
 
     sidebar: [
       {
         text: 'Guide',
-        items: [{ text: 'Getting Started', link: '/guide/getting-started' }],
+        items: [
+          { text: 'Getting Started', link: '/guide/getting-started' },
+          { text: 'Configuration', link: '/guide/configuration' },
+          { text: 'Update Guide', link: '/guide/updates' },
+        ],
+      },
+      {
+        text: 'Configuration',
+        items: [
+          { text: 'Storage Providers', link: '/guide/storage-providers' },
+        ],
+      },
+      {
+        text: 'Development',
+        items: [
+          { text: 'Contributing Guide', link: '/guide/contributing' },
+          { text: 'API Documentation', link: '/guide/api' },
+        ],
       },
     ],
 

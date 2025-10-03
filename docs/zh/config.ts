@@ -8,13 +8,31 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: '指南', link: '/zh/guide/getting-started' },
+      { text: '开发文档', link: '/zh/guide/contributing' },
       { text: '演示', link: 'https://lens.bh8.ga' },
     ],
 
     sidebar: [
       {
         text: '指南',
-        items: [{ text: '快速开始', link: '/zh/guide/getting-started' }],
+        items: [
+          { text: '快速开始', link: '/zh/guide/getting-started' },
+          { text: '配置说明', link: '/zh/guide/configuration' },
+          { text: '升级指南', link: '/zh/guide/updates' },
+        ],
+      },
+      {
+        text: '配置',
+        items: [
+          { text: '存储提供器', link: '/zh/guide/storage-providers' },
+        ],
+      },
+      {
+        text: '开发',
+        items: [
+          { text: '贡献指南', link: '/zh/guide/contributing' },
+          { text: 'API 文档', link: '/zh/guide/api' },
+        ],
       },
     ],
 
