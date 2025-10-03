@@ -71,16 +71,26 @@
           "copyImage": "Copy Image",
           "downloadImage": "Download Original",
           "generateShareImage": "Generate Share Image",
-          "shareUrl": "Share URL"
+          "shareUrl": "Share URL",
+          "downloadOgImage": "Download Preview"
         },
         "success": {
           "linkCopied": "Link copied to clipboard",
-          "imageCopied": "Image copied to clipboard"
+          "imageCopied": "Image copied to clipboard",
+          "ogImageDownloaded": "Preview image downloaded successfully"
         },
         "error": {
           "copyNotSupported": "Copy not supported in this browser",
           "shareFailed": "Share failed",
-          "nativeShareFailed": "Native share failed"
+          "nativeShareFailed": "Native share failed",
+          "linkCopyFailed": "Failed to copy link",
+          "ogImageDownloadFailed": "Failed to download preview image"
+        },
+        "ogImage": {
+          "title": "Share Preview",
+          "alt": "Photo share preview image",
+          "loading": "Loading...",
+          "loadError": "Failed to load"
         },
         "fallback": {
           "photoTitle": "Beautiful Photo"

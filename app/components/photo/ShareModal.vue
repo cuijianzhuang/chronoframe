@@ -30,6 +30,75 @@ const shareTextAndUrl = computed(() => {
   return `${shareText.value}\n${shareUrl.value}`
 })
 
+// OG Image URL and loading state
+const ogImageLoading = ref(true)
+const ogImageError = ref(false)
+const loadingTimer = ref<NodeJS.Timeout | null>(null)
+
+const ogImageUrl = computed(() => {
+  if (typeof window !== 'undefined') {
+    // Add timestamp to prevent caching issues
+    const timestamp = Date.now()
+    return `${window.location.origin}/__og-image__/image/${props.photo.id}/og.png?t=${timestamp}`
+  }
+  return ''
+})
+
+// Reset loading state when photo changes or modal opens
+const resetLoadingState = () => {
+  ogImageLoading.value = true
+  ogImageError.value = false
+  
+  // Clear existing timer
+  if (loadingTimer.value) {
+    clearTimeout(loadingTimer.value)
+  }
+  
+  // Set a timeout to handle cases where onload/onerror never fires
+  loadingTimer.value = setTimeout(() => {
+    if (ogImageLoading.value) {
+      ogImageLoading.value = false
+      ogImageError.value = true
+    }
+  }, 10000) // 10 second timeout
+}
+
+// Reset loading state when photo changes
+watch(() => props.photo.id, resetLoadingState)
+
+// Reset loading state when modal opens
+watch(() => props.isOpen, (newValue) => {
+  if (newValue) {
+    resetLoadingState()
+  }
+})
+
+// Handle image load events
+const handleOgImageLoad = () => {
+  if (loadingTimer.value) {
+    clearTimeout(loadingTimer.value)
+    loadingTimer.value = null
+  }
+  ogImageLoading.value = false
+  ogImageError.value = false
+}
+
+const handleOgImageError = () => {
+  if (loadingTimer.value) {
+    clearTimeout(loadingTimer.value)
+    loadingTimer.value = null
+  }
+  ogImageLoading.value = false
+  ogImageError.value = true
+}
+
+// Cleanup on unmount
+onUnmounted(() => {
+  if (loadingTimer.value) {
+    clearTimeout(loadingTimer.value)
+  }
+})
+
 // Social media share functions
 const shareToTwitter = () => {
   const text = encodeURIComponent(shareText.value)
@@ -107,6 +176,37 @@ const nativeShare = async () => {
     } catch (error) {
       console.error($t('ui.action.share.error.nativeShareFailed'), error)
     }
+  }
+}
+
+// Download OG Image
+const downloadOgImage = async () => {
+  try {
+    const response = await fetch(ogImageUrl.value)
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${props.photo.title || 'photo'}-og.png`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    
+    toast.add({
+      title: $t('ui.action.share.success.ogImageDownloaded'),
+      color: 'success',
+      icon: 'tabler:download',
+      duration: 3000,
+    })
+  } catch (error) {
+    toast.add({
+      title: $t('ui.action.share.error.ogImageDownloadFailed'),
+      description: (error as Error)?.message || 'Unknown error',
+      color: 'error',
+      icon: 'tabler:x',
+      duration: 3000,
+    })
   }
 }
 
@@ -265,6 +365,74 @@ defineShortcuts({
                   />
                 </div>
               </div>
+              
+              <!-- OG Image Preview -->
+              <div
+                class="rounded-lg border border-neutral-200/50 bg-neutral-50/50 p-3 dark:border-neutral-700/50 dark:bg-neutral-800/50"
+              >
+                <div class="flex items-center justify-between mb-2">
+                  <label
+                    class="block text-xs font-medium text-neutral-600 dark:text-neutral-400"
+                  >
+                    {{ $t('ui.action.share.ogImage.title') }}
+                  </label>
+                  <UButton
+                    size="xs"
+                    variant="ghost"
+                    color="neutral"
+                    icon="tabler:download"
+                    @click="downloadOgImage"
+                  >
+                    {{ $t('ui.action.share.actions.downloadOgImage') }}
+                  </UButton>
+                </div>
+                <div class="relative rounded-md bg-neutral-100/50 dark:bg-neutral-700/50 overflow-hidden">
+                  <!-- Loading indicator -->
+                  <div
+                    v-if="ogImageLoading"
+                    class="flex items-center justify-center bg-neutral-100/50 dark:bg-neutral-700/50 aspect-[2/1]"
+                  >
+                    <div class="flex flex-col items-center gap-2">
+                      <Icon
+                        name="tabler:loader-2"
+                        class="size-6 text-neutral-500 animate-spin"
+                      />
+                      <span class="text-xs text-neutral-500 dark:text-neutral-400">
+                        {{ $t('ui.action.share.ogImage.loading') }}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <!-- Error state -->
+                  <div
+                    v-else-if="ogImageError"
+                    class="flex items-center justify-center bg-neutral-100/50 dark:bg-neutral-700/50 aspect-[2/1]"
+                  >
+                    <div class="flex flex-col items-center gap-2">
+                      <Icon
+                        name="tabler:photo-off"
+                        class="size-6 text-neutral-400"
+                      />
+                      <span class="text-xs text-neutral-500 dark:text-neutral-400">
+                        {{ $t('ui.action.share.ogImage.loadError') }}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <!-- OG Image -->
+                  <img
+                    v-show="!ogImageLoading && !ogImageError"
+                    :key="`og-image-${props.photo.id}-${Date.now()}`"
+                    :src="ogImageUrl"
+                    :alt="$t('ui.action.share.ogImage.alt')"
+                    class="w-full h-auto aspect-[2/1] object-cover rounded"
+                    loading="eager"
+                    @load="handleOgImageLoad"
+                    @error="handleOgImageError"
+                  />
+                </div>
+              </div>
+              
               <!-- Social Platforms Grid -->
               <div class="grid grid-cols-3 gap-3">
                 <button
@@ -295,5 +463,4 @@ defineShortcuts({
 </template>
 
 <style scoped>
-/* 确保模态框在最顶层 */
 </style>

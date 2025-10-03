@@ -71,16 +71,26 @@
           "copyImage": "画像をコピー",
           "downloadImage": "オリジナルをダウンロード",
           "generateShareImage": "共有画像を生成",
-          "shareUrl": "共有URL"
+          "shareUrl": "共有URL",
+          "downloadOgImage": "プレビューをダウンロード"
         },
         "success": {
           "linkCopied": "リンクをクリップボードにコピーしました",
-          "imageCopied": "画像をクリップボードにコピーしました"
+          "imageCopied": "画像をクリップボードにコピーしました",
+          "ogImageDownloaded": "プレビュー画像のダウンロードが完了しました"
         },
         "error": {
           "copyNotSupported": "このブラウザではコピー機能がサポートされていません",
           "shareFailed": "共有に失敗しました",
-          "nativeShareFailed": "ネイティブ共有に失敗しました"
+          "nativeShareFailed": "ネイティブ共有に失敗しました",
+          "linkCopyFailed": "リンクのコピーに失敗しました",
+          "ogImageDownloadFailed": "プレビュー画像のダウンロードに失敗しました"
+        },
+        "ogImage": {
+          "title": "共有プレビュー",
+          "alt": "写真共有プレビュー画像",
+          "loading": "読み込み中...",
+          "loadError": "読み込みに失敗しました"
         },
         "fallback": {
           "photoTitle": "美しい写真"
