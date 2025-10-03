@@ -67,4 +67,6 @@ export default defineConfig({
       link: '/zh/',
     },
   },
+
+  ignoreDeadLinks: [/^http?:\/\/localhost/],
 })
