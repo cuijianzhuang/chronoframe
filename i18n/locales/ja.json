@@ -49,6 +49,45 @@
       },
       "globe": {
         "tooltip": "グローブ"
+      },
+      "share": {
+        "tooltip": "写真を共有",
+        "title": "写真を共有",
+        "tabs": {
+          "social": "ソーシャル共有",
+          "advanced": "高度な共有"
+        },
+        "platforms": {
+          "twitter": "Twitter",
+          "telegram": "Telegram",
+          "weibo": "Weibo",
+          "facebook": "Facebook",
+          "whatsapp": "WhatsApp",
+          "linkedin": "LinkedIn"
+        },
+        "actions": {
+          "nativeShare": "システム共有を使用",
+          "copyLink": "リンクをコピー",
+          "copyImage": "画像をコピー",
+          "downloadImage": "オリジナルをダウンロード",
+          "generateShareImage": "共有画像を生成",
+          "shareUrl": "共有URL"
+        },
+        "success": {
+          "linkCopied": "リンクをクリップボードにコピーしました",
+          "imageCopied": "画像をクリップボードにコピーしました"
+        },
+        "error": {
+          "copyNotSupported": "このブラウザではコピー機能がサポートされていません",
+          "shareFailed": "共有に失敗しました",
+          "nativeShareFailed": "ネイティブ共有に失敗しました"
+        },
+        "fallback": {
+          "photoTitle": "美しい写真"
+        },
+        "text": {
+          "prefix": "この写真をご覧ください:"
+        }
       }
     },
     "stats": {

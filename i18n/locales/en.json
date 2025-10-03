@@ -49,6 +49,45 @@
       },
       "globe": {
         "tooltip": "Globe"
+      },
+      "share": {
+        "tooltip": "Share Photo",
+        "title": "Share Photo",
+        "tabs": {
+          "social": "Social Share",
+          "advanced": "Advanced Share"
+        },
+        "platforms": {
+          "twitter": "Twitter",
+          "telegram": "Telegram",
+          "weibo": "Weibo",
+          "facebook": "Facebook",
+          "whatsapp": "WhatsApp",
+          "linkedin": "LinkedIn"
+        },
+        "actions": {
+          "nativeShare": "Use System Share",
+          "copyLink": "Copy Link",
+          "copyImage": "Copy Image",
+          "downloadImage": "Download Original",
+          "generateShareImage": "Generate Share Image",
+          "shareUrl": "Share URL"
+        },
+        "success": {
+          "linkCopied": "Link copied to clipboard",
+          "imageCopied": "Image copied to clipboard"
+        },
+        "error": {
+          "copyNotSupported": "Copy not supported in this browser",
+          "shareFailed": "Share failed",
+          "nativeShareFailed": "Native share failed"
+        },
+        "fallback": {
+          "photoTitle": "Beautiful Photo"
+        },
+        "text": {
+          "prefix": "Check out this photo:"
+        }
       }
     },
     "stats": {

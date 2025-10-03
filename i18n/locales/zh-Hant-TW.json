@@ -53,6 +53,45 @@
       },
       "globe": {
         "tooltip": "地球儀"
+      },
+      "share": {
+        "tooltip": "分享相片",
+        "title": "分享相片",
+        "tabs": {
+          "social": "社群分享",
+          "advanced": "進階分享"
+        },
+        "platforms": {
+          "twitter": "Twitter",
+          "telegram": "Telegram",
+          "weibo": "微博",
+          "facebook": "Facebook",
+          "whatsapp": "WhatsApp",
+          "linkedin": "LinkedIn"
+        },
+        "actions": {
+          "nativeShare": "使用系統分享",
+          "copyLink": "複製連結",
+          "copyImage": "複製圖片",
+          "downloadImage": "下載原圖",
+          "generateShareImage": "產生分享圖片",
+          "shareUrl": "分享連結"
+        },
+        "success": {
+          "linkCopied": "連結已複製到剪貼簿",
+          "imageCopied": "圖片已複製到剪貼簿"
+        },
+        "error": {
+          "copyNotSupported": "目前瀏覽器不支援複製功能",
+          "shareFailed": "分享失敗",
+          "nativeShareFailed": "原生分享失敗"
+        },
+        "fallback": {
+          "photoTitle": "美麗的相片"
+        },
+        "text": {
+          "prefix": "來看看這張相片:"
+        }
       }
     },
     "stats": {

@@ -32,6 +32,7 @@ const loadingIndicatorRef = ref<LoadingIndicatorRef>()
 // State
 const isImageZoomed = ref(false)
 const showExifPanel = ref(false)
+const showShareModal = ref(false)
 const currentBlobSrc = ref<string | null>(null)
 const zoomLevel = ref(0)
 const showZoomLevel = ref(false)
@@ -69,6 +70,7 @@ watch(
     if (!isOpen) {
       isImageZoomed.value = false
       showExifPanel.value = false
+      showShareModal.value = false
       currentBlobSrc.value = null
       zoomLevel.value = 0
       showZoomLevel.value = false
@@ -473,10 +475,22 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                   <GlassButton
                     v-if="isMobile"
                     icon="tabler:info-circle"
-                    :class="!showExifPanel ? '' : 'bg-black/20 hover:bg-black/30 text-white'"
+                    :class="
+                      !showExifPanel
+                        ? ''
+                        : 'bg-black/20 hover:bg-black/30 text-white'
+                    "
                     size="sm"
                     rounded
                     @click="showExifPanel = !showExifPanel"
+                  />
+
+                  <!-- 分享按钮 -->
+                  <GlassButton
+                    icon="tabler:share-3"
+                    size="sm"
+                    rounded
+                    @click="showShareModal = true"
                   />
 
                   <!-- 关闭按钮 -->
@@ -705,6 +719,14 @@ const swiperModules = [Navigation, Keyboard, Virtual]
         </div>
       </motion.div>
     </AnimatePresence>
+
+    <!-- Share Modal -->
+    <PhotoShareModal
+      v-if="currentPhoto"
+      :is-open="showShareModal"
+      :photo="currentPhoto"
+      @close="showShareModal = false"
+    />
   </Teleport>
 </template>
 
