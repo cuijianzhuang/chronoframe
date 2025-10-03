@@ -22,7 +22,7 @@ withDefaults(
 )
 
 const sizeClasses = {
-  sm: 'h-10 min-w-10 text-sm',
+  sm: 'h-9 min-w-9 text-sm',
   md: 'h-12 min-w-12 text-base',
   lg: 'h-14 min-w-14 text-lg',
 }
@@ -44,7 +44,7 @@ const iconSizeClasses = {
     type="button"
     :class="
       twMerge(
-        'px-2.5 cursor-pointer pointer-events-auto font-medium flex items-center justify-center gap-1.5 bg-white/80 text-neutral-700 backdrop-blur-md border border-neutral-100 shadow-lg shadow-neutral-300/25 dark:bg-neutral-500/50 dark:text-white/80 dark:border-white/10 dark:shadow-black/25 overflow-hidden',
+        'px-2 cursor-pointer pointer-events-auto font-medium flex items-center justify-center gap-1.5 bg-white/30 text-neutral-700 backdrop-blur-md border border-neutral-100 shadow-md shadow-neutral-300/20 dark:bg-neutral-700/30 dark:text-white/80 dark:border-white/10 dark:shadow-black/20 overflow-hidden',
         sizeClasses[$props.size!],
         $props.rounded ? 'rounded-full' : 'rounded-xl',
         $props.class,

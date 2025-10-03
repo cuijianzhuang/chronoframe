@@ -456,6 +456,7 @@ const onTagClick = (tag: string) => {
         icon="tabler:x"
         variant="ghost"
         color="neutral"
+        class="text-white"
         size="sm"
         @click="onClose"
       />

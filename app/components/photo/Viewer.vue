@@ -470,28 +470,22 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                 <!-- 右侧按钮组 -->
                 <div class="flex items-center gap-2">
                   <!-- 信息按钮 - 在移动设备上显示 -->
-                  <button
+                  <GlassButton
                     v-if="isMobile"
-                    type="button"
-                    class="pointer-events-auto flex size-8 items-center justify-center rounded-full text-white backdrop-blur-xl duration-200"
-                    :class="
-                      showExifPanel
-                        ? 'bg-white/30'
-                        : 'bg-black/30 hover:bg-black/40'
-                    "
+                    icon="tabler:info-circle"
+                    :class="!showExifPanel ? '' : 'bg-black/20 hover:bg-black/30 text-white'"
+                    size="sm"
+                    rounded
                     @click="showExifPanel = !showExifPanel"
-                  >
-                    <Icon name="tabler:info-circle" />
-                  </button>
+                  />
 
                   <!-- 关闭按钮 -->
-                  <button
-                    type="button"
-                    class="pointer-events-auto flex size-8 items-center justify-center rounded-full text-white backdrop-blur-xl duration-200 bg-black/30 hover:bg-black/40"
+                  <GlassButton
+                    icon="tabler:x"
+                    size="sm"
+                    rounded
                     @click="emit('close')"
-                  >
-                    <Icon name="tabler:x" />
-                  </button>
+                  />
                 </div>
               </motion.div>
 
