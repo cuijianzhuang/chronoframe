@@ -61,6 +61,33 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss() as any],
+    optimizeDeps: {
+      include: [
+        'dayjs',
+        'dayjs/plugin/updateLocale',
+        'dayjs/locale/zh-cn',
+        'dayjs/locale/zh-hk',
+        'dayjs/locale/zh-tw',
+        'dayjs/locale/en',
+        'dayjs/plugin/relativeTime',
+        'dayjs/plugin/utc',
+        'dayjs/plugin/timezone',
+        'dayjs/plugin/duration',
+        'dayjs/plugin/localizedFormat',
+        'dayjs/plugin/isBetween',
+        '@yeger/vue-masonry-wall',
+        'motion-v',
+        'swiper/vue',
+        'swiper/modules',
+        'tailwind-merge',
+        'thumbhash',
+        'mapbox-gl',
+        'file-type',
+        'reka-ui',
+        'es-toolkit',
+        'tippy.js',
+      ],
+    },
     css: {
       devSourcemap: true,
     },
