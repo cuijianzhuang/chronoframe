@@ -56,32 +56,13 @@ const minColumns = computed(() => {
 
 // Prepare items for masonry-wall
 const masonryItems = computed(() => {
-  const items: Array<{
-    id: string
-    type: 'header' | 'photo'
-    photo?: Photo
-    originalIndex?: number
-  }> = []
-
-  // Add header item for non-mobile layout
-  if (!isMobile.value) {
-    items.push({
-      id: 'header',
-      type: 'header',
-    })
-  }
-
-  // Add photo items
-  displayPhotos.value?.forEach((photo, index) => {
-    items.push({
+  return (
+    displayPhotos.value?.map((photo, index) => ({
       id: photo.id,
-      type: 'photo',
       photo,
       originalIndex: index,
-    })
-  })
-
-  return items
+    })) ?? []
+  )
 })
 
 const photoStats = computed(() => {
@@ -303,10 +284,10 @@ watch(currentPhotoIndex, (newIndex) => {
       :is-mobile="isMobile"
     />
 
-    <!-- 移动端时 ItemHeader 显示在瀑布流容器外 -->
+    <!-- ItemHeader 显示在瀑布流容器外 -->
     <div
-      v-if="isMobile"
-      class="px-1 pt-2 pb-1"
+      class="lg:px-0"
+      :class="isMobile ? 'px-1 pt-2 pb-1' : 'p-1 pb-0'"
     >
       <MasonryItemHeader
         :stats="photoStats"
@@ -330,24 +311,13 @@ watch(currentPhotoIndex, (newIndex) => {
         :ssr-columns="2"
         :key-mapper="
           (_item, _column, _row, index) =>
-            masonryItems[index]?.originalIndex || index
+            masonryItems[index]?.originalIndex ?? index
         "
       >
-        <template #default="{ item, index }">
-          <!-- 非移动端时 ItemHeader 显示在瀑布流内的第一个位置 -->
-          <MasonryItemHeader
-            v-if="!isMobile && index === 0 && item.type === 'header'"
-            :stats="photoStats"
-            :date-range-text
-          />
-
+        <template #default="{ item }">
           <!-- Photo Items -->
           <MasonryItem
-            v-else-if="
-              item.type === 'photo' &&
-              item.photo &&
-              typeof item.originalIndex === 'number'
-            "
+            v-if="item.photo && typeof item.originalIndex === 'number'"
             :key="item.photo.id"
             :photo="item.photo"
             :index="item.originalIndex"
