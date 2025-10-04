@@ -21,8 +21,9 @@ const displayPhotos = computed(() => {
 const { currentPhotoIndex, isViewerOpen } = storeToRefs(useViewerState())
 
 const FIRST_SCREEN_ITEMS_COUNT = 50
+const MASONRY_GAP = 4
 
-const masonryContainer = ref<HTMLElement>()
+const masonryWrapper = ref<HTMLElement>()
 const hasAnimated = ref(false)
 const showFloatingActions = ref(false)
 const dateRange = ref<string>()
@@ -32,6 +33,9 @@ const isMobile = useMediaQuery('(max-width: 768px)')
 const { batchProcessLivePhotos } = useLivePhotoProcessor()
 
 const processedBatch = ref(new Set<string>())
+const headerRef = ref<HTMLElement>()
+const headerHeight = ref(0)
+const headerColumnWidth = ref(0)
 
 const columnWidth = computed(() => {
   if (props.columns === 'auto') {
@@ -56,32 +60,85 @@ const minColumns = computed(() => {
 
 // Prepare items for masonry-wall
 const masonryItems = computed(() => {
-  const items: Array<{
-    id: string
-    type: 'header' | 'photo'
-    photo?: Photo
-    originalIndex?: number
-  }> = []
-
-  // Add header item for non-mobile layout
-  if (!isMobile.value) {
-    items.push({
-      id: 'header',
-      type: 'header',
-    })
-  }
-
-  // Add photo items
-  displayPhotos.value?.forEach((photo, index) => {
-    items.push({
+  return (
+    displayPhotos.value?.map((photo, index) => ({
       id: photo.id,
-      type: 'photo',
       photo,
       originalIndex: index,
-    })
-  })
+    })) ?? []
+  )
+})
+useResizeObserver(headerRef, (entries) => {
+  const entry = entries[0]
+  if (entry) {
+    headerHeight.value = entry.contentRect.height
+  }
+})
 
-  return items
+const updateHeaderWidth = () => {
+  if (isMobile.value) {
+    headerColumnWidth.value = 0
+    return
+  }
+
+  const columnElement =
+    masonryWrapper.value?.querySelector<HTMLElement>(
+      '.masonry-wall .masonry-column',
+    )
+
+  if (columnElement) {
+    headerColumnWidth.value = columnElement.getBoundingClientRect().width
+    return
+  }
+
+  headerColumnWidth.value = columnWidth.value
+}
+
+useResizeObserver(masonryWrapper, () => {
+  updateHeaderWidth()
+})
+
+const headerOffset = computed(() => {
+  if (isMobile.value) {
+    return 0
+  }
+  return headerHeight.value + MASONRY_GAP
+})
+
+const headerStyle = computed(() => {
+  const styles: Record<string, string> = {}
+
+  if (isMobile.value) {
+    styles.width = '100%'
+    styles.marginBottom = `${MASONRY_GAP}px`
+    return styles
+  }
+
+  const width = headerColumnWidth.value || columnWidth.value
+  styles.width = `${width}px`
+
+  return styles
+})
+
+watch([columnWidth, maxColumns, minColumns], () => {
+  if (isMobile.value) {
+    return
+  }
+
+  nextTick(() => {
+    updateHeaderWidth()
+  })
+})
+
+watch(isMobile, (mobile) => {
+  if (mobile) {
+    headerColumnWidth.value = 0
+    return
+  }
+
+  nextTick(() => {
+    updateHeaderWidth()
+  })
 })
 
 const photoStats = computed(() => {
@@ -243,17 +300,20 @@ const handleScroll = () => {
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
+  window.addEventListener('resize', updateHeaderWidth)
 
   nextTick(() => {
+    updateHeaderWidth()
+
     if (currentPhotoIndex.value) {
       scrollToPhoto(currentPhotoIndex.value)
     }
   })
+})
 
-  // Cleanup
-  onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll)
-  })
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('resize', updateHeaderWidth)
 })
 
 const handleOpenViewer = (index: number) => {
@@ -303,61 +363,78 @@ watch(currentPhotoIndex, (newIndex) => {
       :is-mobile="isMobile"
     />
 
-    <!-- 移动端时 ItemHeader 显示在瀑布流容器外 -->
-    <div
-      v-if="isMobile"
-      class="px-1 pt-2 pb-1"
-    >
-      <MasonryItemHeader
-        :stats="photoStats"
-        :date-range-text
-      />
-    </div>
-
-    <!-- Masonry Container -->
     <div
       class="lg:px-0 lg:pb-0"
       :class="isMobile ? 'px-1 pb-1' : 'p-1'"
     >
-      <!-- Masonry Wall -->
-      <MasonryWall
-        ref="masonryContainer"
-        :items="masonryItems"
-        :column-width="columnWidth"
-        :gap="4"
-        :min-columns="minColumns"
-        :max-columns="maxColumns"
-        :ssr-columns="2"
-        :key-mapper="
-          (_item, _column, _row, index) =>
-            masonryItems[index]?.originalIndex || index
-        "
+      <div
+        ref="masonryWrapper"
+        class="relative"
+        :class="{ 'pt-2': isMobile }"
+        :style="{ '--masonry-header-offset': `${headerOffset}px` }"
       >
-        <template #default="{ item, index }">
-          <!-- 非移动端时 ItemHeader 显示在瀑布流内的第一个位置 -->
+        <div
+          ref="headerRef"
+          class="masonry-header-wrapper"
+          :class="{ 'masonry-header-desktop': !isMobile }"
+          :style="headerStyle"
+        >
           <MasonryItemHeader
-            v-if="!isMobile && index === 0 && item.type === 'header'"
             :stats="photoStats"
             :date-range-text
           />
+        </div>
 
-          <!-- Photo Items -->
-          <MasonryItem
-            v-else-if="
-              item.type === 'photo' &&
-              item.photo &&
-              typeof item.originalIndex === 'number'
-            "
-            :key="item.photo.id"
-            :photo="item.photo"
-            :index="item.originalIndex"
-            :has-animated
-            :first-screen-items="FIRST_SCREEN_ITEMS_COUNT"
-            @visibility-change="handleVisibilityChange"
-            @open-viewer="handleOpenViewer($event)"
-          />
-        </template>
-      </MasonryWall>
+        <!-- Masonry Wall -->
+        <MasonryWall
+          class="masonry-wall-with-header"
+          :items="masonryItems"
+          :column-width="columnWidth"
+          :gap="MASONRY_GAP"
+          :min-columns="minColumns"
+          :max-columns="maxColumns"
+          :ssr-columns="2"
+          :key-mapper="
+            (_item, _column, _row, index) =>
+              masonryItems[index]?.originalIndex ?? index
+          "
+        >
+          <template #default="{ item }">
+            <!-- Photo Items -->
+            <MasonryItem
+              v-if="item.photo && typeof item.originalIndex === 'number'"
+              :key="item.photo.id"
+              :photo="item.photo"
+              :index="item.originalIndex"
+              :has-animated
+              :first-screen-items="FIRST_SCREEN_ITEMS_COUNT"
+              @visibility-change="handleVisibilityChange"
+              @open-viewer="handleOpenViewer($event)"
+            />
+          </template>
+        </MasonryWall>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.masonry-header-wrapper {
+  z-index: 1;
+}
+
+.masonry-header-desktop {
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.masonry-wall-with-header :deep(.masonry-column:first-child) {
+  padding-top: var(--masonry-header-offset, 0px);
+}
+
+.masonry-wall-with-header :deep(.masonry-column:first-child .masonry-item:first-child) {
+  margin-top: 0;
+}
+</style>
+
