@@ -6,7 +6,7 @@
     }
   },
   "ui": {
-    "livePhoto": "實況",
+    "livePhoto": "原況",
     "action": {
       "dashboard": {
         "tooltip": "儀表板"
@@ -115,7 +115,7 @@
   "viewer": {
     "hint": {
       "livePhoto": {
-        "mobile": "長按播放實況照片 · 點兩下或雙指縮放",
+        "mobile": "長按播放原況照片 · 點兩下或雙指縮放",
         "desktop": "游標移到左上角播放 · 點兩下／滾輪縮放"
       },
       "mobile": "點兩下或雙指縮放",
