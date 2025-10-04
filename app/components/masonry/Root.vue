@@ -23,7 +23,7 @@ const { currentPhotoIndex, isViewerOpen } = storeToRefs(useViewerState())
 const FIRST_SCREEN_ITEMS_COUNT = 50
 const MASONRY_GAP = 4
 
-const masonryContainer = ref<HTMLElement>()
+const masonryWrapper = ref<HTMLElement>()
 const hasAnimated = ref(false)
 const showFloatingActions = ref(false)
 const dateRange = ref<string>()
@@ -35,6 +35,7 @@ const { batchProcessLivePhotos } = useLivePhotoProcessor()
 const processedBatch = ref(new Set<string>())
 const headerRef = ref<HTMLElement>()
 const headerHeight = ref(0)
+const headerColumnWidth = ref(0)
 
 const columnWidth = computed(() => {
   if (props.columns === 'auto') {
@@ -74,6 +75,29 @@ useResizeObserver(headerRef, (entries) => {
   }
 })
 
+const updateHeaderWidth = () => {
+  if (isMobile.value) {
+    headerColumnWidth.value = 0
+    return
+  }
+
+  const columnElement =
+    masonryWrapper.value?.querySelector<HTMLElement>(
+      '.masonry-wall .masonry-column',
+    )
+
+  if (columnElement) {
+    headerColumnWidth.value = columnElement.getBoundingClientRect().width
+    return
+  }
+
+  headerColumnWidth.value = columnWidth.value
+}
+
+useResizeObserver(masonryWrapper, () => {
+  updateHeaderWidth()
+})
+
 const headerOffset = computed(() => {
   if (isMobile.value) {
     return 0
@@ -82,16 +106,39 @@ const headerOffset = computed(() => {
 })
 
 const headerStyle = computed(() => {
-  const width = isMobile.value ? '100%' : `${columnWidth.value}px`
-  const styles: Record<string, string> = {
-    width,
-  }
+  const styles: Record<string, string> = {}
 
   if (isMobile.value) {
+    styles.width = '100%'
     styles.marginBottom = `${MASONRY_GAP}px`
+    return styles
   }
 
+  const width = headerColumnWidth.value || columnWidth.value
+  styles.width = `${width}px`
+
   return styles
+})
+
+watch([columnWidth, maxColumns, minColumns], () => {
+  if (isMobile.value) {
+    return
+  }
+
+  nextTick(() => {
+    updateHeaderWidth()
+  })
+})
+
+watch(isMobile, (mobile) => {
+  if (mobile) {
+    headerColumnWidth.value = 0
+    return
+  }
+
+  nextTick(() => {
+    updateHeaderWidth()
+  })
 })
 
 const photoStats = computed(() => {
@@ -253,17 +300,20 @@ const handleScroll = () => {
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
+  window.addEventListener('resize', updateHeaderWidth)
 
   nextTick(() => {
+    updateHeaderWidth()
+
     if (currentPhotoIndex.value) {
       scrollToPhoto(currentPhotoIndex.value)
     }
   })
+})
 
-  // Cleanup
-  onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll)
-  })
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('resize', updateHeaderWidth)
 })
 
 const handleOpenViewer = (index: number) => {
@@ -318,6 +368,7 @@ watch(currentPhotoIndex, (newIndex) => {
       :class="isMobile ? 'px-1 pb-1' : 'p-1'"
     >
       <div
+        ref="masonryWrapper"
         class="relative"
         :class="{ 'pt-2': isMobile }"
         :style="{ '--masonry-header-offset': `${headerOffset}px` }"
@@ -336,7 +387,6 @@ watch(currentPhotoIndex, (newIndex) => {
 
         <!-- Masonry Wall -->
         <MasonryWall
-          ref="masonryContainer"
           class="masonry-wall-with-header"
           :items="masonryItems"
           :column-width="columnWidth"
@@ -387,3 +437,4 @@ watch(currentPhotoIndex, (newIndex) => {
   margin-top: 0;
 }
 </style>
+
