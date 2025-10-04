@@ -21,6 +21,7 @@ const displayPhotos = computed(() => {
 const { currentPhotoIndex, isViewerOpen } = storeToRefs(useViewerState())
 
 const FIRST_SCREEN_ITEMS_COUNT = 50
+const MASONRY_GAP = 4
 
 const masonryContainer = ref<HTMLElement>()
 const hasAnimated = ref(false)
@@ -32,6 +33,8 @@ const isMobile = useMediaQuery('(max-width: 768px)')
 const { batchProcessLivePhotos } = useLivePhotoProcessor()
 
 const processedBatch = ref(new Set<string>())
+const headerRef = ref<HTMLElement>()
+const headerHeight = ref(0)
 
 const columnWidth = computed(() => {
   if (props.columns === 'auto') {
@@ -63,6 +66,32 @@ const masonryItems = computed(() => {
       originalIndex: index,
     })) ?? []
   )
+})
+useResizeObserver(headerRef, (entries) => {
+  const entry = entries[0]
+  if (entry) {
+    headerHeight.value = entry.contentRect.height
+  }
+})
+
+const headerOffset = computed(() => {
+  if (isMobile.value) {
+    return 0
+  }
+  return headerHeight.value + MASONRY_GAP
+})
+
+const headerStyle = computed(() => {
+  const width = isMobile.value ? '100%' : `${columnWidth.value}px`
+  const styles: Record<string, string> = {
+    width,
+  }
+
+  if (isMobile.value) {
+    styles.marginBottom = `${MASONRY_GAP}px`
+  }
+
+  return styles
 })
 
 const photoStats = computed(() => {
@@ -284,50 +313,77 @@ watch(currentPhotoIndex, (newIndex) => {
       :is-mobile="isMobile"
     />
 
-    <!-- ItemHeader 显示在瀑布流容器外 -->
-    <div
-      class="lg:px-0"
-      :class="isMobile ? 'px-1 pt-2 pb-1' : 'p-1 pb-0'"
-    >
-      <MasonryItemHeader
-        :stats="photoStats"
-        :date-range-text
-      />
-    </div>
-
-    <!-- Masonry Container -->
     <div
       class="lg:px-0 lg:pb-0"
       :class="isMobile ? 'px-1 pb-1' : 'p-1'"
     >
-      <!-- Masonry Wall -->
-      <MasonryWall
-        ref="masonryContainer"
-        :items="masonryItems"
-        :column-width="columnWidth"
-        :gap="4"
-        :min-columns="minColumns"
-        :max-columns="maxColumns"
-        :ssr-columns="2"
-        :key-mapper="
-          (_item, _column, _row, index) =>
-            masonryItems[index]?.originalIndex ?? index
-        "
+      <div
+        class="relative"
+        :class="{ 'pt-2': isMobile }"
+        :style="{ '--masonry-header-offset': `${headerOffset}px` }"
       >
-        <template #default="{ item }">
-          <!-- Photo Items -->
-          <MasonryItem
-            v-if="item.photo && typeof item.originalIndex === 'number'"
-            :key="item.photo.id"
-            :photo="item.photo"
-            :index="item.originalIndex"
-            :has-animated
-            :first-screen-items="FIRST_SCREEN_ITEMS_COUNT"
-            @visibility-change="handleVisibilityChange"
-            @open-viewer="handleOpenViewer($event)"
+        <div
+          ref="headerRef"
+          class="masonry-header-wrapper"
+          :class="{ 'masonry-header-desktop': !isMobile }"
+          :style="headerStyle"
+        >
+          <MasonryItemHeader
+            :stats="photoStats"
+            :date-range-text
           />
-        </template>
-      </MasonryWall>
+        </div>
+
+        <!-- Masonry Wall -->
+        <MasonryWall
+          ref="masonryContainer"
+          class="masonry-wall-with-header"
+          :items="masonryItems"
+          :column-width="columnWidth"
+          :gap="MASONRY_GAP"
+          :min-columns="minColumns"
+          :max-columns="maxColumns"
+          :ssr-columns="2"
+          :key-mapper="
+            (_item, _column, _row, index) =>
+              masonryItems[index]?.originalIndex ?? index
+          "
+        >
+          <template #default="{ item }">
+            <!-- Photo Items -->
+            <MasonryItem
+              v-if="item.photo && typeof item.originalIndex === 'number'"
+              :key="item.photo.id"
+              :photo="item.photo"
+              :index="item.originalIndex"
+              :has-animated
+              :first-screen-items="FIRST_SCREEN_ITEMS_COUNT"
+              @visibility-change="handleVisibilityChange"
+              @open-viewer="handleOpenViewer($event)"
+            />
+          </template>
+        </MasonryWall>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.masonry-header-wrapper {
+  z-index: 1;
+}
+
+.masonry-header-desktop {
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+.masonry-wall-with-header :deep(.masonry-column:first-child) {
+  padding-top: var(--masonry-header-offset, 0px);
+}
+
+.masonry-wall-with-header :deep(.masonry-column:first-child .masonry-item:first-child) {
+  margin-top: 0;
+}
+</style>
