@@ -42,40 +42,7 @@
 
 推荐使用预构建的 docker 镜像部署，[在 ghcr 上查看镜像](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe)
 
-### Docker
-
-修改命令中的环境变量后运行：
-
-```bash
-docker run -d \
-  --name chronoframe \
-  -p 3000:3000 \
-  -v $(pwd)/data:/app/data \
-  -e CFRAME_ADMIN_EMAIL="" \
-  -e CFRAME_ADMIN_NAME="" \
-  -e CFRAME_ADMIN_PASSWORD="" \
-  -e NUXT_PUBLIC_APP_TITLE="" \
-  -e NUXT_PUBLIC_APP_SLOGAN="" \
-  -e NUXT_PUBLIC_APP_AUTHOR="" \
-  -e NUXT_PUBLIC_APP_AVATAR_URL="" \
-  -e NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN="" \
-  -e NUXT_STORAGE_PROVIDER="s3" \
-  -e NUXT_PROVIDER_S3_ENDPOINT="" \
-  -e NUXT_PROVIDER_S3_BUCKET="chronoframe" \
-  -e NUXT_PROVIDER_S3_REGION="auto" \
-  -e NUXT_PROVIDER_S3_ACCESS_KEY_ID="" \
-  -e NUXT_PROVIDER_S3_SECRET_ACCESS_KEY="" \
-  -e NUXT_PROVIDER_S3_PREFIX="photos/" \
-  -e NUXT_PROVIDER_S3_CDN_URL="" \
-  -e NUXT_OAUTH_GITHUB_CLIENT_ID="" \
-  -e NUXT_OAUTH_GITHUB_CLIENT_SECRET="" \
-  -e NUXT_SESSION_PASSWORD="" \
-  ghcr.io/hoshinosuzumi/chronoframe:latest
-```
-
-### Docker Compose
-
-创建 `.env` 文件
+部署前请先创建 `.env` 文件并配置环境变量，参考 [.env.example](./.env.example)。
 
 ```env
 # Admin user email (required)
@@ -113,8 +80,17 @@ NUXT_SESSION_PASSWORD=
 # GitHub OAuth
 NUXT_OAUTH_GITHUB_CLIENT_ID=
 NUXT_OAUTH_GITHUB_CLIENT_SECRET=
-
 ```
+
+### Docker
+
+一行命令启动：
+
+```bash
+docker run -d --name chronoframe -p 3000:3000 -v $(pwd)/data:/app/data --env-file .env ghcr.io/hoshinosuzumi/chronoframe:latest
+```
+
+### Docker Compose
 
 创建 `docker-compose.yml`：
 

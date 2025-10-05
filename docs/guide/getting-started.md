@@ -35,35 +35,54 @@ ghcr.io/hoshinosuzumi/chronoframe:latest
 
 [View all available versions](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe)
 
+### Create Configuration File
+
+Create a `.env` file in a directory beforehand. To see all configuration options, please refer to the [Configuration Guide](/guide/configuration).
+
+```env
+# Admin user email (required)
+CFRAME_ADMIN_EMAIL=
+# Admin username (default to Chronoframe, optional)
+CFRAME_ADMIN_NAME=
+# Admin user password (default to CF1234@!, optional)
+CFRAME_ADMIN_PASSWORD=
+
+# 应用标题与口号
+NUXT_PUBLIC_APP_TITLE=
+NUXT_PUBLIC_APP_SLOGAN=
+NUXT_PUBLIC_APP_AUTHOR=
+NUXT_PUBLIC_APP_AVATAR_URL=
+
+# Mapbox access token for map features, Mapbox GL JS (Client-side, public)
+NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
+# Mapbox secret access token for server-side, Mapbox Search API (Reverse Geocoding)
+NUXT_MAPBOX_ACCESS_TOKEN=
+
+# 存储提供者（s3/github/local）
+NUXT_STORAGE_PROVIDER=s3
+# S3 存储服务配置
+NUXT_PROVIDER_S3_ENDPOINT=
+NUXT_PROVIDER_S3_BUCKET=chronoframe
+NUXT_PROVIDER_S3_REGION=auto
+NUXT_PROVIDER_S3_ACCESS_KEY_ID=
+NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=
+NUXT_PROVIDER_S3_PREFIX=photos/
+NUXT_PROVIDER_S3_CDN_URL=
+
+# 会话密码（32 位随机字符串，必须设置）
+NUXT_SESSION_PASSWORD=
+
+# GitHub OAuth
+NUXT_OAUTH_GITHUB_CLIENT_ID=
+NUXT_OAUTH_GITHUB_CLIENT_SECRET=
+```
+
 ### Docker Single Container Deployment
 
 #### Quick Start
 
 ```bash
-docker run -d \
-  --name chronoframe \
-  -p 3000:3000 \
-  -v $(pwd)/data:/app/data \
-  -e CFRAME_ADMIN_EMAIL="" \
-  -e CFRAME_ADMIN_NAME="" \
-  -e CFRAME_ADMIN_PASSWORD="" \
-  -e NUXT_PUBLIC_APP_TITLE="" \
-  -e NUXT_PUBLIC_APP_SLOGAN="" \
-  -e NUXT_PUBLIC_APP_AUTHOR="" \
-  -e NUXT_PUBLIC_APP_AVATAR_URL="" \
-  -e NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN="" \
-  -e NUXT_STORAGE_PROVIDER="s3" \
-  -e NUXT_PROVIDER_S3_ENDPOINT="" \
-  -e NUXT_PROVIDER_S3_BUCKET="chronoframe" \
-  -e NUXT_PROVIDER_S3_REGION="auto" \
-  -e NUXT_PROVIDER_S3_ACCESS_KEY_ID="" \
-  -e NUXT_PROVIDER_S3_SECRET_ACCESS_KEY="" \
-  -e NUXT_PROVIDER_S3_PREFIX="photos/" \
-  -e NUXT_PROVIDER_S3_CDN_URL="" \
-  -e NUXT_OAUTH_GITHUB_CLIENT_ID="" \
-  -e NUXT_OAUTH_GITHUB_CLIENT_SECRET="" \
-  -e NUXT_SESSION_PASSWORD="" \
-  ghcr.io/hoshinosuzumi/chronoframe:latest
+docker run -d --name chronoframe -p 3000:3000 -v $(pwd)/data:/app/data --env-file .env ghcr.io/hoshinosuzumi/chronoframe:latest
 ```
 
 ### Docker Compose Deployment

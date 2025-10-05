@@ -35,42 +35,9 @@ ghcr.io/hoshinosuzumi/chronoframe:latest
 
 [查看所有可用版本](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe)
 
-### Docker 单容器部署
+### 创建配置文件
 
-#### 快速启动
-
-```bash
-docker run -d \
-  --name chronoframe \
-  -p 3000:3000 \
-  -v $(pwd)/data:/app/data \
-  -e CFRAME_ADMIN_EMAIL="" \
-  -e CFRAME_ADMIN_NAME="" \
-  -e CFRAME_ADMIN_PASSWORD="" \
-  -e NUXT_PUBLIC_APP_TITLE="" \
-  -e NUXT_PUBLIC_APP_SLOGAN="" \
-  -e NUXT_PUBLIC_APP_AUTHOR="" \
-  -e NUXT_PUBLIC_APP_AVATAR_URL="" \
-  -e NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN="" \
-  -e NUXT_STORAGE_PROVIDER="s3" \
-  -e NUXT_PROVIDER_S3_ENDPOINT="" \
-  -e NUXT_PROVIDER_S3_BUCKET="chronoframe" \
-  -e NUXT_PROVIDER_S3_REGION="auto" \
-  -e NUXT_PROVIDER_S3_ACCESS_KEY_ID="" \
-  -e NUXT_PROVIDER_S3_SECRET_ACCESS_KEY="" \
-  -e NUXT_PROVIDER_S3_PREFIX="photos/" \
-  -e NUXT_PROVIDER_S3_CDN_URL="" \
-  -e NUXT_OAUTH_GITHUB_CLIENT_ID="" \
-  -e NUXT_OAUTH_GITHUB_CLIENT_SECRET="" \
-  -e NUXT_SESSION_PASSWORD="" \
-  ghcr.io/hoshinosuzumi/chronoframe:latest
-```
-
-### Docker Compose 部署
-
-推荐使用 Docker Compose 进行生产环境部署，便于管理和配置。
-
-#### 1. 创建 `.env` 文件
+事先在一个目录中创建 `.env` 文件。要查看所有的配置项，请查看 [配置说明](/zh/guide/configuration) 章节。
 
 ```env
 # Admin user email (required)
@@ -110,7 +77,19 @@ NUXT_OAUTH_GITHUB_CLIENT_ID=
 NUXT_OAUTH_GITHUB_CLIENT_SECRET=
 ```
 
-#### 2. 创建 `docker-compose.yml` 文件
+### Docker 单容器部署
+
+#### 快速启动
+
+```bash
+docker run -d --name chronoframe -p 3000:3000 -v $(pwd)/data:/app/data --env-file .env ghcr.io/hoshinosuzumi/chronoframe:latest
+```
+
+### Docker Compose 部署
+
+推荐使用 Docker Compose 进行生产环境部署，便于管理和配置。
+
+#### 1. 创建 `docker-compose.yml` 文件
 
 ```yaml
 services:
@@ -126,7 +105,7 @@ services:
       - .env
 ```
 
-#### 3. 启动 ChronoFrame 服务
+#### 2. 启动 ChronoFrame 服务
 
 ```bash
 # 启动服务
