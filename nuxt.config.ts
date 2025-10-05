@@ -97,7 +97,8 @@ export default defineNuxtConfig({
   },
 
   colorMode: {
-    preference: 'dark',
+    preference: process.env.NUXT_PUBLIC_COLOR_MODE_PREFERENCE || 'dark',
+    storageKey: 'cframe-color-mode',
   },
 
   icon: {
