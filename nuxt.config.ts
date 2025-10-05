@@ -22,6 +22,7 @@ export default defineNuxtConfig({
     '@nuxtjs/i18n',
     'nuxt-mapbox',
     'nuxt-og-image',
+    'nuxt-gtag',
   ],
 
   css: ['~/assets/css/tailwind.css'],
@@ -94,6 +95,11 @@ export default defineNuxtConfig({
     build: {
       sourcemap: false,
     },
+  },
+
+  gtag: {
+    enabled: process.env.NODE_ENV === 'production' && !!process.env.CFRAME_GTAG,
+    id: process.env.CFRAME_GTAG || '',
   },
 
   colorMode: {
