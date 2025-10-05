@@ -26,4 +26,4 @@
 | NUXT_OAUTH_GITHUB_CLIENT_ID        | GitHub OAuth 应用的 Client ID                  | 无          | 是                                        |
 | NUXT_OAUTH_GITHUB_CLIENT_SECRET    | GitHub OAuth 应用的 Client Secret              | 无          | 是                                        |
 | NUXT_SESSION_PASSWORD              | 用于加密会话的密码，32 位随机字符串            | 无          | 是                                        |
-| CFRAME_GTAG                        | Google Analytics 追踪 ID                       | 无          | 否                                        |
+| NUXT_PUBLIC_GTAG_ID                        | Google Analytics 追踪 ID                       | 无          | 否                                        |

@@ -98,8 +98,7 @@ export default defineNuxtConfig({
   },
 
   gtag: {
-    enabled: process.env.NODE_ENV === 'production' && !!process.env.CFRAME_GTAG,
-    id: process.env.CFRAME_GTAG || '',
+    enabled: process.env.NODE_ENV === 'production'
   },
 
   colorMode: {

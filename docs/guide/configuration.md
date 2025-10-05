@@ -26,4 +26,4 @@ Whether using Docker or Docker Compose (.env) deployment, configuration is done 
 | NUXT_OAUTH_GITHUB_CLIENT_ID        | GitHub OAuth app Client ID                                      | None        | Yes                                                  |
 | NUXT_OAUTH_GITHUB_CLIENT_SECRET    | GitHub OAuth app Client Secret                                  | None        | Yes                                                  |
 | NUXT_SESSION_PASSWORD              | Password for encrypting sessions, 32-character random string    | None        | Yes                                                  |
-| CFRAME_GTAG                        | Google Analytics Tracking ID                                    | None        | No                                                   |
+| NUXT_PUBLIC_GTAG_ID                        | Google Analytics Tracking ID                                    | None        | No                                                   |
