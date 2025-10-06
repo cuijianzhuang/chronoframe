@@ -15,6 +15,8 @@ const emit = defineEmits<{
   openViewer: [number]
 }>()
 
+const { gtag } = useGtag()
+
 const isLoading = ref(true)
 const photoRef = ref<HTMLElement>()
 const videoRef = useDomRef()
@@ -288,6 +290,13 @@ const handleClick = (event: Event) => {
     event.stopPropagation()
     return
   }
+
+  // Track photo view event in Google Analytics
+  gtag('event', 'photo_view', {
+    photo_id: props.photo.id,
+    photo_title: props.photo.title || 'Untitled',
+    has_live_photo: props.photo.isLivePhoto ? 'yes' : 'no',
+  })
 
   // On desktop, always allow opening the viewer
   // Otherwise, open the viewer

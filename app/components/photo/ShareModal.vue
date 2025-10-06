@@ -12,6 +12,7 @@ const emit = defineEmits<{
 }>()
 
 const toast = useToast()
+const { gtag } = useGtag()
 
 const shareUrl = computed(() => {
   if (typeof window !== 'undefined') {
@@ -48,12 +49,12 @@ const ogImageUrl = computed(() => {
 const resetLoadingState = () => {
   ogImageLoading.value = true
   ogImageError.value = false
-  
+
   // Clear existing timer
   if (loadingTimer.value) {
     clearTimeout(loadingTimer.value)
   }
-  
+
   // Set a timeout to handle cases where onload/onerror never fires
   loadingTimer.value = setTimeout(() => {
     if (ogImageLoading.value) {
@@ -67,11 +68,14 @@ const resetLoadingState = () => {
 watch(() => props.photo.id, resetLoadingState)
 
 // Reset loading state when modal opens
-watch(() => props.isOpen, (newValue) => {
-  if (newValue) {
-    resetLoadingState()
-  }
-})
+watch(
+  () => props.isOpen,
+  (newValue) => {
+    if (newValue) {
+      resetLoadingState()
+    }
+  },
+)
 
 // Handle image load events
 const handleOgImageLoad = () => {
@@ -101,6 +105,13 @@ onUnmounted(() => {
 
 // Social media share functions
 const shareToTwitter = () => {
+  // Track Twitter share event in Google Analytics
+  gtag('event', 'photo_share', {
+    photo_id: props.photo.id,
+    photo_title: props.photo.title || 'Untitled',
+    share_method: 'twitter',
+  })
+
   const text = encodeURIComponent(shareText.value)
   const url = encodeURIComponent(shareUrl.value)
   window.open(
@@ -110,6 +121,13 @@ const shareToTwitter = () => {
 }
 
 const shareToTelegram = () => {
+  // Track Telegram share event in Google Analytics
+  gtag('event', 'photo_share', {
+    photo_id: props.photo.id,
+    photo_title: props.photo.title || 'Untitled',
+    share_method: 'telegram',
+  })
+
   window.open(
     `https://t.me/share/url?url=${encodeURIComponent(shareUrl.value)}&text=${encodeURIComponent(shareText.value)}`,
     '_blank',
@@ -117,6 +135,13 @@ const shareToTelegram = () => {
 }
 
 const shareToWeibo = () => {
+  // Track Weibo share event in Google Analytics
+  gtag('event', 'photo_share', {
+    photo_id: props.photo.id,
+    photo_title: props.photo.title || 'Untitled',
+    share_method: 'weibo',
+  })
+
   const text = encodeURIComponent(shareText.value)
   const url = encodeURIComponent(shareUrl.value)
   window.open(
@@ -126,16 +151,37 @@ const shareToWeibo = () => {
 }
 
 const shareToFacebook = () => {
+  // Track Facebook share event in Google Analytics
+  gtag('event', 'photo_share', {
+    photo_id: props.photo.id,
+    photo_title: props.photo.title || 'Untitled',
+    share_method: 'facebook',
+  })
+
   const url = encodeURIComponent(shareUrl.value)
   window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank')
 }
 
 const shareToWhatsApp = () => {
+  // Track WhatsApp share event in Google Analytics
+  gtag('event', 'photo_share', {
+    photo_id: props.photo.id,
+    photo_title: props.photo.title || 'Untitled',
+    share_method: 'whatsapp',
+  })
+
   const text = encodeURIComponent(`${shareText.value}\n${shareUrl.value}`)
   window.open(`https://wa.me/?text=${text}`, '_blank')
 }
 
 const shareToLinkedIn = () => {
+  // Track LinkedIn share event in Google Analytics
+  gtag('event', 'photo_share', {
+    photo_id: props.photo.id,
+    photo_title: props.photo.title || 'Untitled',
+    share_method: 'linkedin',
+  })
+
   const url = encodeURIComponent(shareUrl.value)
   const title = encodeURIComponent(shareText.value)
   window.open(
@@ -169,6 +215,13 @@ const copyLink = async () => {
 const nativeShare = async () => {
   if (navigator.share) {
     try {
+      // Track native share event in Google Analytics
+      gtag('event', 'photo_share', {
+        photo_id: props.photo.id,
+        photo_title: props.photo.title || 'Untitled',
+        share_method: 'native_share',
+      })
+
       await navigator.share({
         title: shareText.value,
         url: shareUrl.value,
@@ -192,7 +245,7 @@ const downloadOgImage = async () => {
     link.click()
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
-    
+
     toast.add({
       title: $t('ui.action.share.success.ogImageDownloaded'),
       color: 'success',
@@ -365,7 +418,7 @@ defineShortcuts({
                   />
                 </div>
               </div>
-              
+
               <!-- OG Image Preview -->
               <div
                 class="rounded-lg border border-neutral-200/50 bg-neutral-50/50 p-3 dark:border-neutral-700/50 dark:bg-neutral-800/50"
@@ -386,7 +439,9 @@ defineShortcuts({
                     {{ $t('ui.action.share.actions.downloadOgImage') }}
                   </UButton>
                 </div>
-                <div class="relative rounded-md bg-neutral-100/50 dark:bg-neutral-700/50 overflow-hidden">
+                <div
+                  class="relative rounded-md bg-neutral-100/50 dark:bg-neutral-700/50 overflow-hidden"
+                >
                   <!-- Loading indicator -->
                   <div
                     v-if="ogImageLoading"
@@ -397,12 +452,14 @@ defineShortcuts({
                         name="tabler:loader-2"
                         class="size-6 text-neutral-500 animate-spin"
                       />
-                      <span class="text-xs text-neutral-500 dark:text-neutral-400">
+                      <span
+                        class="text-xs text-neutral-500 dark:text-neutral-400"
+                      >
                         {{ $t('ui.action.share.ogImage.loading') }}
                       </span>
                     </div>
                   </div>
-                  
+
                   <!-- Error state -->
                   <div
                     v-else-if="ogImageError"
@@ -413,12 +470,14 @@ defineShortcuts({
                         name="tabler:photo-off"
                         class="size-6 text-neutral-400"
                       />
-                      <span class="text-xs text-neutral-500 dark:text-neutral-400">
+                      <span
+                        class="text-xs text-neutral-500 dark:text-neutral-400"
+                      >
                         {{ $t('ui.action.share.ogImage.loadError') }}
                       </span>
                     </div>
                   </div>
-                  
+
                   <!-- OG Image -->
                   <img
                     v-show="!ogImageLoading && !ogImageError"
@@ -432,7 +491,7 @@ defineShortcuts({
                   />
                 </div>
               </div>
-              
+
               <!-- Social Platforms Grid -->
               <div class="grid grid-cols-3 gap-3">
                 <button
@@ -462,5 +521,4 @@ defineShortcuts({
   </Teleport>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
