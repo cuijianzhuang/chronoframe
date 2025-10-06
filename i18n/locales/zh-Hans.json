@@ -120,6 +120,11 @@
       },
       "mobile": "双击或捏合缩放",
       "desktop": "双击或用鼠标滚轮缩放"
+    },
+    "reaction": {
+      "add": "表态",
+      "change": "已表态",
+      "count": "无表态 | {count} 个表态 | {count} 个表态"
     }
   },
   "exif": {

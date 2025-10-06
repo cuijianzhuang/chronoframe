@@ -123,6 +123,11 @@
       },
       "mobile": "Double-click or pinch zoom",
       "desktop": "Double-click or zoom with the mouse wheel"
+    },
+    "reaction": {
+      "add": "React",
+      "change": "Reacted",
+      "count": "no reactions | {count} reaction | {count} reactions"
     }
   },
   "exif": {

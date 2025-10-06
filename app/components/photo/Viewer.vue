@@ -10,6 +10,7 @@ import LoadingIndicator from './LoadingIndicator.vue'
 import ProgressiveImage from './ProgressiveImage.vue'
 import GalleryThumbnail from './GalleryThumbnail.vue'
 import InfoPanel from './InfoPanel.vue'
+import ReactionPicker from './ReactionPicker.vue'
 import type { LoadingIndicatorRef } from './LoadingIndicator.vue'
 
 interface Props {
@@ -37,6 +38,44 @@ const currentBlobSrc = ref<string | null>(null)
 const zoomLevel = ref(0)
 const showZoomLevel = ref(false)
 const zoomLevelTimer = ref<NodeJS.Timeout | null>(null)
+
+// Reaction state
+const showReactionPicker = ref(false)
+const selectedReaction = ref<string | null>(null)
+const reactionCounts = ref<Record<string, number>>({})
+const isLoadingReaction = ref(false)
+
+// 表态图标映射
+const reactionIcons: Record<string, string> = {
+  'like': 'fluent-emoji-flat:thumbs-up',
+  'love': 'fluent-emoji-flat:red-heart',
+  'amazing': 'fluent-emoji-flat:smiling-face-with-heart-eyes',
+  'funny': 'fluent-emoji-flat:face-with-tears-of-joy',
+  'wow': 'fluent-emoji-flat:face-with-open-mouth',
+  'sad': 'fluent-emoji-flat:crying-face',
+  'fire': 'fluent-emoji-flat:fire',
+  'sparkle': 'fluent-emoji-flat:sparkles',
+}
+
+const currentReactionIcon = computed(() => {
+  return selectedReaction.value ? reactionIcons[selectedReaction.value] : null
+})
+
+// 计算总表态数
+const totalReactions = computed(() => {
+  return Object.values(reactionCounts.value).reduce((sum, count) => sum + count, 0)
+})
+
+// 加载照片表态数据
+const loadPhotoReactions = async (photoId: string) => {
+  try {
+    const data = await $fetch(`/api/photos/${photoId}/reactions`) as any
+    selectedReaction.value = data.userReaction || null
+    reactionCounts.value = data.reactions || {}
+  } catch (error) {
+    console.error('Failed to load reactions:', error)
+  }
+}
 
 // LivePhoto state
 const isLivePhotoHovering = ref(false)
@@ -74,6 +113,10 @@ watch(
       currentBlobSrc.value = null
       zoomLevel.value = 0
       showZoomLevel.value = false
+
+      // Reset reaction state
+      showReactionPicker.value = false
+      selectedReaction.value = null
 
       // Reset LivePhoto state
       isLivePhotoHovering.value = false
@@ -117,6 +160,10 @@ watch(
     // 切换图片时重置缩放状态
     isImageZoomed.value = false
     zoomLevel.value = 0
+
+    // Reset reaction state when switching photos
+    showReactionPicker.value = false
+    selectedReaction.value = null
 
     // Reset LivePhoto state when switching photos
     isLivePhotoPlaying.value = false
@@ -346,6 +393,71 @@ const handleLivePhotoVideoEnded = () => {
     livePhotoVideoRef.value.currentTime = 0
   }
 }
+
+// Reaction handlers
+const handleReactionSelect = async (reactionId: string) => {
+  if (!currentPhoto.value) return
+  
+  isLoadingReaction.value = true
+  
+  try {
+    if (selectedReaction.value === reactionId) {
+      // 取消表态
+      await $fetch(`/api/photos/${currentPhoto.value.id}/reactions`, {
+        method: 'DELETE',
+      })
+      selectedReaction.value = null
+      // 减少计数
+      if (reactionCounts.value[reactionId]) {
+        reactionCounts.value[reactionId]--
+      }
+    } else {
+      // 如果之前有表态，先减少旧表态的计数
+      const oldReaction = selectedReaction.value
+      if (oldReaction && reactionCounts.value[oldReaction] !== undefined) {
+        reactionCounts.value[oldReaction]--
+      }
+      
+      // 添加或更新表态
+      await $fetch(`/api/photos/${currentPhoto.value.id}/reactions`, {
+        method: 'POST',
+        body: { reactionType: reactionId },
+      })
+      
+      selectedReaction.value = reactionId
+      // 增加计数
+      reactionCounts.value[reactionId] = (reactionCounts.value[reactionId] || 0) + 1
+    }
+  } catch (error: any) {
+    console.error('Failed to update reaction:', error)
+    
+    // 显示错误提示
+    if (error?.statusCode === 429) {
+      alert('操作过于频繁，请稍后再试')
+    } else {
+      alert('表态失败，请稍后重试')
+    }
+  } finally {
+    isLoadingReaction.value = false
+  }
+  
+  showReactionPicker.value = false
+}
+
+const toggleReactionPicker = () => {
+  showReactionPicker.value = !showReactionPicker.value
+}
+
+// 监听当前照片变化，加载表态数据
+watch(
+  () => currentPhoto.value?.id,
+  (newPhotoId) => {
+    if (newPhotoId) {
+      loadPhotoReactions(newPhotoId)
+    }
+  },
+  { immediate: true }
+)
 
 defineShortcuts({
   escape: () => {
@@ -660,6 +772,82 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                               : $t('viewer.hint.desktop')
                           }}
                         </span>
+                      </motion.div>
+                    </AnimatePresence>
+
+                    <!-- 表态按钮 -->
+                    <AnimatePresence>
+                      <motion.div
+                        v-if="!isImageZoomed && !isLivePhotoPlaying"
+                        :initial="{ opacity: 0, scale: 0.8, y: 20 }"
+                        :animate="{ opacity: 1, scale: 1, y: 0 }"
+                        :exit="{ opacity: 0, scale: 0.8, y: 20 }"
+                        :transition="{ 
+                          type: 'spring', 
+                          stiffness: 300, 
+                          damping: 20,
+                          delay: 0.1
+                        }"
+                        class="absolute bottom-6 right-6 z-20"
+                      >
+                        <div class="relative">
+                          <!-- 表态选择器 -->
+                          <ReactionPicker
+                            :is-open="showReactionPicker"
+                            :selected-reaction="selectedReaction"
+                            :reaction-counts="reactionCounts"
+                            @select="handleReactionSelect"
+                            @close="showReactionPicker = false"
+                          />
+
+                          <!-- 表态按钮 -->
+                          <motion.button
+                            type="button"
+                            :initial="{ scale: 0.8, opacity: 0 }"
+                            :animate="{ 
+                              scale: showReactionPicker ? 0.92 : 1, 
+                              opacity: 1,
+                              transition: showReactionPicker 
+                                ? { duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }
+                                : { type: 'spring', stiffness: 300, damping: 25, mass: 0.8 }
+                            }"
+                            :while-hover="{ scale: showReactionPicker ? 0.95 : 1.05 }"
+                            :while-tap="{ scale: 0.88 }"
+                            :class="[
+                              'pointer-events-auto flex items-center justify-center gap-2',
+                              'px-4 h-11 rounded-full',
+                              'backdrop-blur-xl border shadow-lg',
+                              'transition-all duration-200',
+                              selectedReaction 
+                                ? 'bg-blue-500/90 border-blue-400/50 text-white shadow-blue-500/30' 
+                                : 'bg-white/90 dark:bg-neutral-800/90 border-neutral-200/50 dark:border-white/10 text-neutral-700 dark:text-white/80 shadow-black/10 dark:shadow-black/30',
+                              'hover:shadow-xl'
+                            ]"
+                            @click="toggleReactionPicker"
+                          >
+                            <Icon 
+                              v-if="selectedReaction && currentReactionIcon" 
+                              :name="currentReactionIcon"
+                              class="text-xl leading-none select-none"
+                            />
+                            <Icon 
+                              v-else
+                              name="tabler:mood-smile"
+                              class="text-xl"
+                            />
+                            <div class="flex flex-col items-start gap-0.5">
+                              <span class="text-sm font-medium leading-none">
+                                {{ selectedReaction ? $t('viewer.reaction.change') : $t('viewer.reaction.add') }}
+                              </span>
+                              <span 
+                                v-if="totalReactions > 0"
+                                class="text-[10px] leading-none opacity-70"
+                              >
+                                {{ $t('viewer.reaction.count', { count: totalReactions }, totalReactions) }}
+                              </span>
+                            </div>
+                          </motion.button>
+                        </div>
                       </motion.div>
                     </AnimatePresence>
                   </motion.div>

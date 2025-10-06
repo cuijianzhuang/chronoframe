@@ -82,3 +82,22 @@ export const pipelineQueue = sqliteTable('pipeline_queue', {
     .default(sql`(unixepoch())`),
   completedAt: integer('completed_at', { mode: 'timestamp' }),
 })
+
+// 照片表态表
+export const photoReactions = sqliteTable('photo_reactions', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  photoId: text('photo_id').notNull().references(() => photos.id, { onDelete: 'cascade' }),
+  reactionType: text('reaction_type', {
+    enum: ['like', 'love', 'amazing', 'funny', 'wow', 'sad', 'fire', 'sparkle'],
+  }).notNull(),
+  // 使用指纹而不是 IP 地址，更准确且支持匿名用户
+  fingerprint: text('fingerprint').notNull(),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+})
