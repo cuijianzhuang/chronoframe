@@ -150,6 +150,9 @@ importers:
       '@iconify-json/carbon':
         specifier: ^1.2.13
         version: 1.2.13
+      '@iconify-json/fluent-emoji-flat':
+        specifier: ^1.2.5
+        version: 1.2.5
       '@iconify-json/lucide':
         specifier: ^1.2.68
         version: 1.2.68
@@ -1005,6 +1008,9 @@ packages:
 
   '@iconify-json/carbon@1.2.13':
     resolution: {integrity: sha512-vXrFFKkfYaZSwf4WfnRQJQMnpEzxlPlupwZZlS1WvOAuNnWahsUudHycaMpoBzDqBfniH4KQ2b5qnw0VMKoJug==}
+
+  '@iconify-json/fluent-emoji-flat@1.2.5':
+    resolution: {integrity: sha512-5ShoOHJ0ezYEIMfp2zvbRiZpL1Af8Prg5v9pElaIQhfqwbyD57pzrp70g/rK2EjigajBq9/cPrJXh224HaP3TQ==}
 
   '@iconify-json/lucide@1.2.68':
     resolution: {integrity: sha512-lR5xNJdn2CT0iR7lM25G4SewBO4G2hbr3fTWOc3AE9BspflEcneh02E3l9TBaCU/JOHozTJevWLrxBGypD7Tng==}
@@ -8584,6 +8590,10 @@ snapshots:
   '@humanwhocodes/retry@0.4.3': {}
 
   '@iconify-json/carbon@1.2.13':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify-json/fluent-emoji-flat@1.2.5':
     dependencies:
       '@iconify/types': 2.0.0
 

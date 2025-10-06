@@ -1,4 +1,4 @@
-import { useDB, tables, sql, inArray } from '~~/server/utils/db'
+import { sql, inArray } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -21,11 +21,11 @@ export default defineEventHandler(async (event) => {
   const db = useDB()
   
   // 获取所有照片的表态统计
-  const reactions = await db
+  const reactions = db
     .select({
       photoId: tables.photoReactions.photoId,
       reactionType: tables.photoReactions.reactionType,
-      count: sql<number>`count(*)`,
+      count: sql<number> `count(*)`,
     })
     .from(tables.photoReactions)
     .where(inArray(tables.photoReactions.photoId, ids as string[]))

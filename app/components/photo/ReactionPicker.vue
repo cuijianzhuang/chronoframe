@@ -20,6 +20,16 @@ const emit = defineEmits<{
   close: []
 }>()
 
+// 用于检测点击外部
+const pickerRef = ref<HTMLElement | null>(null)
+
+// 点击外部时关闭
+onClickOutside(pickerRef, () => {
+  if (props.isOpen) {
+    emit('close')
+  }
+})
+
 // 可用的表态选项
 const reactions = computed<Reaction[]>(() => [
   { id: 'like', iconName: 'fluent-emoji-flat:thumbs-up', label: 'like', count: props.reactionCounts?.like || 0 },
@@ -50,6 +60,7 @@ const handleSelect = (id: string) => {
   <AnimatePresence>
     <motion.div
       v-if="isOpen"
+      ref="pickerRef"
       :initial="{ opacity: 0, scale: 0.9, y: 10 }"
       :animate="{ opacity: 1, scale: 1, y: 0 }"
       :exit="{ opacity: 0, scale: 0.9, y: 10 }"
@@ -112,6 +123,7 @@ const handleSelect = (id: string) => {
             <Icon 
               :name="reaction.iconName" 
               class="text-[28px] select-none"
+              mode="svg"
             />
             
             <!-- 数量徽章 - 右上角 -->

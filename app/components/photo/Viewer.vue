@@ -788,7 +788,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                           damping: 20,
                           delay: 0.1
                         }"
-                        class="absolute bottom-6 right-6 z-20"
+                        class="absolute bottom-4 right-4 z-20"
                       >
                         <div class="relative">
                           <!-- 表态选择器 -->

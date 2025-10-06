@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { useDB, tables, eq, and, sql } from '~~/server/utils/db'
+import { eq, and, sql } from 'drizzle-orm'
 
 const REACTION_TYPES = ['like', 'love', 'amazing', 'funny', 'wow', 'sad', 'fire', 'sparkle'] as const
 const RATE_LIMIT_WINDOW = 60 * 1000 // 1分钟

@@ -76,6 +76,7 @@
   "packageManager": "pnpm@9.15.3+sha512.1f79bc245a66eb0b07c5d4d83131240774642caaa86ef7d0434ab47c0d16f66b04e21e0c086eb61e62c77efc4d7f7ec071afad3796af64892fae66509173893a",
   "devDependencies": {
     "@iconify-json/carbon": "^1.2.13",
+    "@iconify-json/fluent-emoji-flat": "^1.2.5",
     "@iconify-json/lucide": "^1.2.68",
     "@iconify-json/material-symbols": "^1.2.33",
     "@iconify-json/mdi": "^1.2.3",
