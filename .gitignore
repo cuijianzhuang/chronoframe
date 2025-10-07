@@ -5,6 +5,7 @@
 .nitro
 .cache
 dist
+node-compile-cache
 
 # Date
 data
