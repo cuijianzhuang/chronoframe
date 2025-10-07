@@ -22,10 +22,10 @@ const currentPhoto = computed(() =>
 
 defineOgImageComponent('Photo', {
   headline: currentPhoto.value ? 'PHOTO' : 'ChronoFrame',
-  title: currentPhoto.value?.title || config.public.APP_TITLE,
+  title: currentPhoto.value?.title || config.public.app.title,
   description: currentPhoto.value
     ? currentPhoto.value.description
-    : config.public.APP_SLOGAN,
+    : config.public.app.slogan,
   thumbnailJpegUrl:
     currentPhoto.value && currentPhoto.value.thumbnailKey
       ? `/thumb/${currentPhoto.value.thumbnailKey}`

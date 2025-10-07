@@ -35,21 +35,33 @@ export default defineNuxtConfig({
       mapbox: {
         accessToken: '',
       },
-      APP_TITLE: 'ChronoFrame',
-      APP_SLOGAN: '',
-      APP_AUTHOR: '',
-      APP_AVATAR_URL: '/avatar.webp',
-      OAUTH_GITHUB_ENABLED: false,
+      app: {
+        title: 'ChronoFrame',
+        slogan: '',
+        author: '',
+        avatarUrl: '',
+      },
+      oauth: {
+        github: {
+          enabled: false,
+        }
+      },
     },
-    MAPBOX_ACCESS_TOKEN: '',
+    mapbox: {
+      accessToken: '',
+    },
     STORAGE_PROVIDER: 's3',
-    PROVIDER_S3_ENDPOINT: '',
-    PROVIDER_S3_BUCKET: '',
-    PROVIDER_S3_REGION: '',
-    PROVIDER_S3_ACCESS_KEY_ID: '',
-    PROVIDER_S3_SECRET_ACCESS_KEY: '',
-    PROVIDER_S3_PREFIX: '',
-    PROVIDER_S3_CDN_URL: '',
+    provider: {
+      s3: {
+        endpoint: '',
+        bucket: '',
+        region: '',
+        accessKeyId: '',
+        secretAccessKey: '',
+        prefix: '',
+        cdnUrl: '',
+      }
+    },
     ALLOW_INSECURE_COOKIE: false,
   },
 

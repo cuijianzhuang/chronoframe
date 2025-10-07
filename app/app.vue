@@ -8,7 +8,7 @@ const dayjs = useDayjs()
 
 useHead({
   titleTemplate: (title) =>
-    `${title ? title + ' | ' : ''}${config.public.APP_TITLE}`,
+    `${title ? title + ' | ' : ''}${config.public.app.title}`,
 })
 
 const { data, refresh, status } = useFetch('/api/photos')

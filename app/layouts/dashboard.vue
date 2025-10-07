@@ -38,7 +38,7 @@ const { loggedIn, user } = useUserSession()
 useHead({
   title: $t('title.dashboard'),
   titleTemplate: (title) =>
-    `${title ? title + ' | ' : ''}${config.public.APP_TITLE}`,
+    `${title ? title + ' | ' : ''}${config.public.app.title}`,
 })
 
 const isMobileMenuOpen = ref(false)
@@ -83,7 +83,7 @@ const closeMobileMenu = () => {
             to="/"
             class="text-lg font-medium text-nowrap"
           >
-            {{ config.public.APP_TITLE || $t('title.dashboard') }}
+            {{ config.public.app.title || $t('title.dashboard') }}
           </NuxtLink>
         </div>
         <UNavigationMenu
@@ -109,7 +109,7 @@ const closeMobileMenu = () => {
               to="/"
               class="text-lg font-medium"
             >
-              {{ config.public.APP_TITLE || $t('title.dashboard') }}
+              {{ config.public.app.title || $t('title.dashboard') }}
             </NuxtLink>
           </div>
           <UButton

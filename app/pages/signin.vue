@@ -47,7 +47,7 @@ const onAuthSubmit = async (event: any) => {
       :subtitle="$t('auth.form.signin.subtitle')"
       :loading="isLoading"
       :providers="[
-        config.public.OAUTH_GITHUB_ENABLED && {
+        config.public.oauth.github.enabled && {
           icon: 'tabler:brand-github',
           size: 'lg',
           color: 'neutral',
