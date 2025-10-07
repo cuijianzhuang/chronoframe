@@ -99,21 +99,21 @@ const loadingVariants = {
         <div class="flex flex-col min-w-0 gap-0.5">
           <template v-if="loadingState.isError">
             <p class="text-xs font-medium text-red-400">
-              {{ loadingState.errorMessage || '图片加载失败' }}
+              {{ loadingState.errorMessage || $t('viewer.photoload.loadError')}}
             </p>
-            <p class="text-xs text-white/70">正在加载图片</p>
+            <p class="text-xs text-white/70">{{ $t('viewer.photoload.loading') }}</p>
           </template>
 
           <template v-else-if="loadingState.isConverting">
             <p class="text-xs font-medium text-white tabular-nums">
-              {{ loadingState.message || '正在转换中...' }}
+              {{ loadingState.message || $t('viewer.photoload.converting')}}
             </p>
           </template>
 
           <template v-else-if="loadingState.isWebGLLoading">
             <div class="flex items-center gap-2">
               <p class="text-xs font-medium text-white">
-                {{ loadingState.webglMessage || '正在加载 WebGL...' }}
+                {{ loadingState.webglMessage || $t('viewer.photoload.loadingWebGL') }}
               </p>
               <span
                 v-if="loadingState.webglQuality !== 'unknown'"
@@ -132,14 +132,14 @@ const loadingVariants = {
                 {{ loadingState.webglQuality }}
               </span>
             </div>
-            <p class="text-xs text-white/70">正在构建纹理</p>
+            <p class="text-xs text-white/70">{{ $t('viewer.photoload.loadingTexture') }}</p>
           </template>
 
           <template v-else>
             <div class="flex items-center gap-2">
               <p class="text-xs font-medium text-white">
                 {{
-                  loadingState.isHeic ? 'HEIC 图片加载中...' : '正在加载图片'
+                  loadingState.isHeic ? $t('viewer.photoload.loadingHEIC') : $t('viewer.photoload.loading')
                 }}
               </p>
               <span class="text-xs text-white/60 tabular-nums">
