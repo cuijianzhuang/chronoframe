@@ -334,21 +334,31 @@ const handleLivePhotoTouchStart = (event: TouchEvent) => {
 
     // Only handle single finger touch to avoid conflicts with pinch-to-zoom
     if (event.touches.length === 1) {
-      // Prevent browser's default long-press actions (context menu, image save dialog, etc.)
-      event.preventDefault()
-      isLivePhotoTouching.value = true
+      // Check if the touch target is an interactive element (button, etc.)
+      const target = event.target as HTMLElement
+      const isInteractiveElement =
+        target.closest('button') ||
+        target.closest('[role="button"]') ||
+        target.classList.contains('pointer-events-auto')
 
-      // Set a 500ms timer before starting playback
-      longPressTimer.value = setTimeout(() => {
-        // Double check: only play if still single touch and touching
-        if (
-          isLivePhotoTouching.value &&
-          touchCount.value === 1 &&
-          !isImageZoomed.value
-        ) {
-          playLivePhotoVideo()
-        }
-      }, 350)
+      // Don't prevent default for interactive elements to allow clicks
+      if (!isInteractiveElement) {
+        // Prevent browser's default long-press actions (context menu, image save dialog, etc.)
+        event.preventDefault()
+        isLivePhotoTouching.value = true
+
+        // Set a 500ms timer before starting playback
+        longPressTimer.value = setTimeout(() => {
+          // Double check: only play if still single touch and touching
+          if (
+            isLivePhotoTouching.value &&
+            touchCount.value === 1 &&
+            !isImageZoomed.value
+          ) {
+            playLivePhotoVideo()
+          }
+        }, 350)
+      }
     }
   }
 }
