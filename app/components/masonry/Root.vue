@@ -261,7 +261,7 @@ const updateDateRange = () => {
   } else if (uniqueCities.length <= 3) {
     visibleCities.value = uniqueCities.join('、')
   } else {
-    visibleCities.value = `${uniqueCities.slice(0, 2).join('、')} 等 ${uniqueCities.length} 个城市`
+    visibleCities.value = `${uniqueCities.slice(0, 2).join('、')} `+$t('ui.indexPanelCountCity',uniqueCities.length)
   }
 
   if (visibleDates.length === 0) {

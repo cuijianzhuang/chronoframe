@@ -30,16 +30,18 @@ onClickOutside(pickerRef, () => {
   }
 })
 
+
+
 // 可用的表态选项
 const reactions = computed<Reaction[]>(() => [
-  { id: 'like', iconName: 'fluent-emoji-flat:thumbs-up', label: 'like', count: props.reactionCounts?.like || 0 },
-  { id: 'love', iconName: 'fluent-emoji-flat:red-heart', label: 'love', count: props.reactionCounts?.love || 0 },
-  { id: 'amazing', iconName: 'fluent-emoji-flat:smiling-face-with-heart-eyes', label: 'amazing', count: props.reactionCounts?.amazing || 0 },
-  { id: 'funny', iconName: 'fluent-emoji-flat:face-with-tears-of-joy', label: 'funny', count: props.reactionCounts?.funny || 0 },
-  { id: 'wow', iconName: 'fluent-emoji-flat:face-with-open-mouth', label: 'wow', count: props.reactionCounts?.wow || 0 },
-  { id: 'sad', iconName: 'fluent-emoji-flat:crying-face', label: 'sad', count: props.reactionCounts?.sad || 0 },
-  { id: 'fire', iconName: 'fluent-emoji-flat:fire', label: 'fire', count: props.reactionCounts?.fire || 0 },
-  { id: 'sparkle', iconName: 'fluent-emoji-flat:sparkles', label: 'sparkle', count: props.reactionCounts?.sparkle || 0 },
+  { id: 'like', iconName: 'fluent-emoji-flat:thumbs-up', label: $t('viewer.reaction.like'), count: props.reactionCounts?.like || 0 },
+  { id: 'love', iconName: 'fluent-emoji-flat:red-heart', label: $t('viewer.reaction.love'), count: props.reactionCounts?.love || 0 },
+  { id: 'amazing', iconName: 'fluent-emoji-flat:smiling-face-with-heart-eyes', label: $t('viewer.reaction.amazing'), count: props.reactionCounts?.amazing || 0 },
+  { id: 'funny', iconName: 'fluent-emoji-flat:face-with-tears-of-joy', label: $t('viewer.reaction.funny'), count: props.reactionCounts?.funny || 0 },
+  { id: 'wow', iconName: 'fluent-emoji-flat:face-with-open-mouth', label: $t('viewer.reaction.wow'), count: props.reactionCounts?.wow || 0 },
+  { id: 'sad', iconName: 'fluent-emoji-flat:crying-face', label: $t('viewer.reaction.sad'), count: props.reactionCounts?.sad || 0 },
+  { id: 'fire', iconName: 'fluent-emoji-flat:fire', label: $t('viewer.reaction.fire'), count: props.reactionCounts?.fire || 0 },
+  { id: 'sparkle', iconName: 'fluent-emoji-flat:sparkles', label: $t('viewer.reaction.sparkle'), count: props.reactionCounts?.sparkle || 0 },
 ])
 
 // 格式化数量显示

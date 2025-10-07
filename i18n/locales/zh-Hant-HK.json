@@ -124,7 +124,23 @@
     "reaction": {
       "add": "表態",
       "change": "已表態",
-      "count": "無表態 | {count} 個表態 | {count} 個表態"
+      "count": "無表態 | {count} 個表態 | {count} 個表態",
+      "like": "讚好",
+      "love": "心心",
+      "amazing": "花癡",
+      "funny": "笑哭",
+      "wow": "驚訝",
+      "sad": "喊",
+      "fire": "火焰",
+      "sparkle": "星星"
+    },
+    "photoload": {
+      "loadError": "圖片載入失敗",
+      "loading": "正在載入圖片",
+      "converting": "正在轉換中...",
+      "loadingWebGL": "正在載入 WebGL...",
+      "loadingHEIC": "HEIC 圖片載入中...",
+      "loadingTexture": "正在建立紋理"
     }
   },
   "exif": {
@@ -310,7 +326,7 @@
     "form": {
       "signin": {
         "title": "登入",
-        "subtitle": "登錄到 ChronoFrame"
+        "subtitle": "登錄到 {0}"
       },
       "action": {
         "or": "或",

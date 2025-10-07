@@ -104,7 +104,8 @@
       "totalPhotosWithRange": "{range}, @:plural.photo total",
       "noPhotosTip": "Nno photos yet, upload some now!"
     },
-    "livePhoto": "Live Photo"
+    "livePhoto": "Live Photo",
+    "indexPanelCountCity":"and more other cities"
   },
   "map": {
     "cluster": {
@@ -127,7 +128,23 @@
     "reaction": {
       "add": "React",
       "change": "Reacted",
-      "count": "no reactions | {count} reaction | {count} reactions"
+      "count": "no reactions | {count} reaction | {count} reactions",
+      "like":"like",
+      "love":"love",
+      "amazing":"amazing",
+      "funny":"funny",
+      "wow":"wow",
+      "sad":"sad",
+      "fire":"fire",
+      "sparkle":"sparkle"
+    },
+    "photoload": {
+      "loadError": "Image loading failed",
+      "loading": "Loading image",
+      "converting": "Converting...",
+      "loadingWebGL": "Loading WebGL...",
+      "loadingHEIC": "Loading HEIC image...",
+      "loadingTexture": "Building texture"
     }
   },
   "exif": {
@@ -314,7 +331,7 @@
       },
       "signin": {
         "title": "Sign In",
-        "subtitle": "Log in to ChronoFrame"
+        "subtitle": "Log in to {0}"
       },
       "action": {
         "backToHome": "Back to Home",
