@@ -16,7 +16,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const emit = defineEmits<{
-  select: [id: string]
+  select: [id: string, iconName: string]
   close: []
 }>()
 
@@ -52,7 +52,10 @@ const formatCount = (count?: number): string => {
 }
 
 const handleSelect = (id: string) => {
-  emit('select', id)
+  const reaction = reactions.value.find(r => r.id === id)
+  if (reaction) {
+    emit('select', id, reaction.iconName)
+  }
 }
 </script>
 
