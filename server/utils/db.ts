@@ -5,6 +5,7 @@ import Database from 'better-sqlite3'
 import * as schema from '../database/schema'
 
 export const tables = schema
+export { eq, and, or, inArray } from 'drizzle-orm'
 
 // 创建单例数据库连接
 let dbInstance: ReturnType<typeof drizzle> | null = null
@@ -14,18 +15,21 @@ export function useDB() {
   if (!dbInstance || !sqliteInstance) {
     // 创建数据库连接，启用WAL模式以提高并发性能
     sqliteInstance = new Database('data/app.sqlite3', {
-      verbose: process.env.NODE_ENV === 'development' ? logger.dynamic('db').verbose : undefined,
+      verbose:
+        process.env.NODE_ENV === 'development'
+          ? logger.dynamic('db').verbose
+          : undefined,
     })
-    
+
     // 启用WAL模式以提高并发性能
     sqliteInstance.pragma('journal_mode = WAL')
     sqliteInstance.pragma('synchronous = NORMAL')
     sqliteInstance.pragma('cache_size = 1000')
     sqliteInstance.pragma('temp_store = MEMORY')
-    
+
     dbInstance = drizzle(sqliteInstance, { schema })
   }
-  
+
   return dbInstance
 }
 
