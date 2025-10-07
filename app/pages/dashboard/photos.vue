@@ -29,6 +29,27 @@ const totalSelectedFilters = computed(() => {
   )
 })
 
+// 表态数据
+const reactionsData = ref<Record<string, Record<string, number>>>({})
+const reactionsLoading = ref(false)
+
+// 获取表态数据
+const fetchReactions = async (photoIds: string[]) => {
+  if (photoIds.length === 0) return
+  
+  reactionsLoading.value = true
+  try {
+    const data = await $fetch('/api/photos/reactions', {
+      query: { ids: photoIds },
+    })
+    reactionsData.value = data as Record<string, Record<string, number>>
+  } catch (error) {
+    console.error('获取表态数据失败:', error)
+  } finally {
+    reactionsLoading.value = false
+  }
+}
+
 interface UploadingFile {
   file: File
   fileName: string
@@ -244,6 +265,18 @@ const filteredData = computed(() => {
       return filteredPhotos.value
   }
 })
+
+// 监听过滤后的照片变化，自动获取表态数据
+watch(
+  () => filteredData.value,
+  async (photos) => {
+    if (photos && photos.length > 0) {
+      const photoIds = photos.map((p: Photo) => p.id)
+      await fetchReactions(photoIds)
+    }
+  },
+  { immediate: true },
+)
 
 // 状态检查间隔 Map，每个任务对应一个定时器
 const statusIntervals = ref<Map<number, NodeJS.Timeout>>(new Map())
@@ -567,6 +600,75 @@ const columns: TableColumn<Photo>[] = [
   {
     accessorFn: (row) => row.exif?.ColorSpace,
     header: '颜色空间',
+  },
+  {
+    accessorKey: 'reactions',
+    header: '表态',
+    cell: ({ row }) => {
+      const photoId = row.original.id
+      const reactions = reactionsData.value[photoId] || {}
+      const totalReactions = Object.values(reactions).reduce(
+        (sum: number, count) => sum + (count as number),
+        0,
+      )
+
+      if (totalReactions === 0) {
+        return h(
+          'span',
+          { class: 'text-neutral-400 text-xs' },
+          '无表态',
+        )
+      }
+
+      const reactionIcons: Record<string, string> = {
+        like: 'fluent-emoji-flat:thumbs-up',
+        love: 'fluent-emoji-flat:red-heart',
+        amazing: 'fluent-emoji-flat:smiling-face-with-heart-eyes',
+        funny: 'fluent-emoji-flat:face-with-tears-of-joy',
+        wow: 'fluent-emoji-flat:face-with-open-mouth',
+        sad: 'fluent-emoji-flat:crying-face',
+        fire: 'fluent-emoji-flat:fire',
+        sparkle: 'fluent-emoji-flat:sparkles',
+      }
+
+      // 显示前3个有数据的表态
+      const topReactions = Object.entries(reactions)
+        .filter(([_, count]) => (count as number) > 0)
+        .sort((a, b) => (b[1] as number) - (a[1] as number))
+        .slice(0, 3)
+
+      return h(
+        'div',
+        { class: 'flex items-center gap-2' },
+        [
+          ...topReactions.map(([type, count]) =>
+            h(
+              'div',
+              { class: 'flex items-center gap-0.5' },
+              [
+                h(Icon, {
+                  name: reactionIcons[type] || 'fluent-emoji-flat:face-with-tears-of-joy',
+                  class: 'size-4',
+                  mode: 'svg',
+                }),
+                h(
+                  'span',
+                  { class: 'text-xs font-medium text-neutral-700 dark:text-neutral-300' },
+                  count,
+                ),
+              ],
+            ),
+          ),
+          totalReactions > topReactions.length
+            ? h(
+                'span',
+                { class: 'text-xs text-neutral-400' },
+                `+${totalReactions - topReactions.reduce((sum, [_, count]) => sum + (count as number), 0)}`,
+              )
+            : null,
+        ].filter(Boolean),
+      )
+    },
   },
   {
     accessorKey: 'actions',
@@ -1089,7 +1191,13 @@ onUnmounted(() => {
           color="info"
           size="sm"
           icon="tabler:refresh"
-          @click="() => refresh()"
+          :loading="reactionsLoading"
+          @click="async () => {
+            await refresh()
+            if (filteredData.length > 0) {
+              await fetchReactions(filteredData.map((p: Photo) => p.id))
+            }
+          }"
         >
           <span class="hidden sm:inline">刷新</span>
         </UButton>
