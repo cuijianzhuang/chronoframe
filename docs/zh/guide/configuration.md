@@ -6,7 +6,7 @@
 
 | 环境变量                           | 说明                                           | 默认值      | 必需                                      |
 | ---------------------------------- | ---------------------------------------------- | ----------- | ----------------------------------------- |
-| CFRAME_ADMIN_EMAIL                 | 初始管理员用户的邮箱                           | 无          | 是，填写登录使用的 GitHub 账户的邮箱      |
+| CFRAME_ADMIN_EMAIL                 | 初始管理员用户的邮箱                           | 无          | 是                                        |
 | CFRAME_ADMIN_NAME                  | 初始管理员用户的用户名                         | Chronoframe | 否                                        |
 | CFRAME_ADMIN_PASSWORD              | 初始管理员用户的密码                           | CF1234@!    | 否                                        |
 | NUXT_PUBLIC_APP_TITLE              | 应用标题                                       | ChronoFrame | 否                                        |
@@ -23,7 +23,8 @@
 | NUXT_PROVIDER_S3_SECRET_ACCESS_KEY | S3 访问密钥                                    | 无          | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
 | NUXT_PROVIDER_S3_PREFIX            | S3 存储前缀                                    | photos/     | 否                                        |
 | NUXT_PROVIDER_S3_CDN_URL           | S3 存储的 CDN 地址                             | 无          | 否                                        |
-| NUXT_OAUTH_GITHUB_CLIENT_ID        | GitHub OAuth 应用的 Client ID                  | 无          | 是                                        |
-| NUXT_OAUTH_GITHUB_CLIENT_SECRET    | GitHub OAuth 应用的 Client Secret              | 无          | 是                                        |
+| NUXT_PUBLIC_OAUTH_GITHUB_ENABLED   | 是否启用 GitHub OAuth 登录                     | false       | 否                                        |
+| NUXT_OAUTH_GITHUB_CLIENT_ID        | GitHub OAuth 应用的 Client ID                  | 无          | 否(可选,用于 GitHub 登录)                 |
+| NUXT_OAUTH_GITHUB_CLIENT_SECRET    | GitHub OAuth 应用的 Client Secret              | 无          | 否(可选,用于 GitHub 登录)                 |
 | NUXT_SESSION_PASSWORD              | 用于加密会话的密码，32 位随机字符串            | 无          | 是                                        |
-| NUXT_PUBLIC_GTAG_ID                        | Google Analytics 追踪 ID                       | 无          | 否                                        |
+| NUXT_PUBLIC_GTAG_ID                | Google Analytics 追踪 ID                       | 无          | 否                                        |

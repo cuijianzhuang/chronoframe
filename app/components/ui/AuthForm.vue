@@ -7,7 +7,7 @@ defineProps<{
   icon?: string
   title?: string
   subtitle?: string
-  providers?: Array<ButtonProps>
+  providers?: Array<ButtonProps | false | undefined>
   class?: string
   loading?: boolean
 }>()
@@ -74,18 +74,18 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
     </div>
     <div class="flex flex-col gap-4">
       <div
-        v-if="providers && providers.length > 0"
+        v-if="providers && providers.filter((item) => !!item).length > 0"
         :class="providers.length > 3 ? 'space-y-2' : 'flex items-center gap-2'"
       >
         <UButton
-          v-for="provider in providers"
+          v-for="provider in providers.filter((item) => !!item)"
           :key="provider.icon"
           v-bind="provider"
           :loading="loading"
         />
       </div>
       <USeparator
-        v-if="providers && providers.length > 0"
+        v-if="providers && providers.filter((item) => !!item).length > 0"
         :label="$t('auth.form.action.or')"
       />
       <UForm

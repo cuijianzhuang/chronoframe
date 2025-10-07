@@ -4,6 +4,7 @@ useHead({
 })
 
 const { fetch: fetchUserSession } = useUserSession()
+const config = useRuntimeConfig()
 const toast = useToast()
 const route = useRoute()
 const router = useRouter()
@@ -46,7 +47,7 @@ const onAuthSubmit = async (event: any) => {
       :subtitle="$t('auth.form.signin.subtitle')"
       :loading="isLoading"
       :providers="[
-        {
+        config.public.OAUTH_GITHUB_ENABLED && {
           icon: 'tabler:brand-github',
           size: 'lg',
           color: 'neutral',

@@ -22,6 +22,9 @@ Documentation is being written, some feature documentation is not yet complete.
   :::tip
   When creating the OAuth app, the `Authorization callback URL` should be set to `http(s)://<your-domain>/api/auth/github`.
   :::
+  :::info
+  GitHub OAuth credentials are **optional**. If not configured, you can still use the default admin account to log in.
+  :::
 
 ## Quick Deployment
 

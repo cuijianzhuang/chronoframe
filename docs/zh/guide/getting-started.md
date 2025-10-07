@@ -22,6 +22,9 @@
   :::tip
   创建 OAuth 应用时，`Authorization callback URL` 应设置为 `http(s)://<你的域名>/api/auth/github`。
   :::
+  :::info
+  GitHub OAuth 凭据是**可选的**。如果不配置，您仍然可以使用默认管理员账号登录。
+  :::
 
 ## 快速部署
 

@@ -39,6 +39,7 @@ export default defineNuxtConfig({
       APP_SLOGAN: '',
       APP_AUTHOR: '',
       APP_AVATAR_URL: '/avatar.webp',
+      OAUTH_GITHUB_ENABLED: false,
     },
     MAPBOX_ACCESS_TOKEN: '',
     STORAGE_PROVIDER: 's3',
@@ -98,7 +99,7 @@ export default defineNuxtConfig({
   },
 
   gtag: {
-    enabled: process.env.NODE_ENV === 'production'
+    enabled: process.env.NODE_ENV === 'production',
   },
 
   colorMode: {
