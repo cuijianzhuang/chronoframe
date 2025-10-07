@@ -52,7 +52,7 @@ export default defineNuxtConfig({
       oauth: {
         github: {
           enabled: false,
-        }
+        },
       },
     },
     mapbox: {
@@ -68,7 +68,7 @@ export default defineNuxtConfig({
         secretAccessKey: '',
         prefix: '',
         cdnUrl: '',
-      }
+      },
     },
     ALLOW_INSECURE_COOKIE: false,
   },
@@ -85,6 +85,7 @@ export default defineNuxtConfig({
     plugins: [tailwindcss() as any],
     optimizeDeps: {
       include: [
+        'zod',
         'dayjs',
         'dayjs/plugin/updateLocale',
         'dayjs/locale/zh-cn',
