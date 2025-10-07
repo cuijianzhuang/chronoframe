@@ -1,5 +1,6 @@
 import pkg from './package.json'
 import tailwindcss from '@tailwindcss/vite'
+import type { AnalyticsConfig } from './shared/types/config'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -41,6 +42,13 @@ export default defineNuxtConfig({
         author: '',
         avatarUrl: '',
       },
+      analytics: {
+        matomo: {
+          enabled: false,
+          url: '',
+          siteId: '',
+        },
+      } satisfies AnalyticsConfig,
       oauth: {
         github: {
           enabled: false,
