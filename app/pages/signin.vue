@@ -44,7 +44,7 @@ const onAuthSubmit = async (event: any) => {
     <AuthForm
       icon="tabler:photo-circle"
       :title="$t('auth.form.signin.title')"
-      :subtitle="$t('auth.form.signin.subtitle',[config.public.APP_TITLE])"
+      :subtitle="$t('auth.form.signin.subtitle', [config.public.app.title])"
       :loading="isLoading"
       :providers="[
         config.public.oauth.github.enabled && {
