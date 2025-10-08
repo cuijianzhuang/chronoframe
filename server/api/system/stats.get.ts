@@ -172,11 +172,38 @@ export default eventHandler(async (event) => {
     })
   }
 
+  // 获取操作系统信息，处理编码问题
+  let osInfo = 'unknown'
+  try {
+    if (await checkIfDocker()) {
+      osInfo = 'docker'
+    } else {
+      const info = await si.osInfo()
+      // 清理和标准化操作系统信息，避免编码问题
+      let distro = info.distro || info.platform || 'unknown'
+      
+      // 处理常见的Windows系统名称
+      if (distro.toLowerCase().includes('windows')) {
+        if (distro.includes('11')) {
+          osInfo = 'Microsoft Windows 11'
+        } else if (distro.includes('10')) {
+          osInfo = 'Microsoft Windows 10'
+        } else {
+          osInfo = 'Microsoft Windows'
+        }
+      } else {
+        // 对于其他系统，尝试清理非ASCII字符
+        osInfo = distro.replace(/[^\x00-\x7F]/g, '').trim() || 'unknown'
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to get OS info:', error)
+    osInfo = 'unknown'
+  }
+
   return {
     uptime: process.uptime() || 0,
-    runningOn: (await checkIfDocker())
-      ? 'docker'
-      : (await si.osInfo().then((info) => info.distro)) || 'unknown',
+    runningOn: osInfo,
     memory: (await getMemoryStats()) || { used: 0, total: 0 },
     photos: {
       total: totalPhotos?.count || 0,
