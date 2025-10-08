@@ -127,7 +127,23 @@
     "reaction": {
       "add": "リアクション",
       "change": "リアクション済み",
-      "count": "リアクションなし | {count} 件のリアクション | {count} 件のリアクション"
+      "count": "リアクションなし | {count} 件のリアクション | {count} 件のリアクション",
+      "like": "いいね",
+      "love": "ハート",
+      "amazing": "憧れ",
+      "funny": "笑",
+      "wow": "驚",
+      "sad": "泣",
+      "fire": "炎",
+      "sparkle": "星"
+    },
+    "photoload": {
+      "loadError": "画像の読み込みに失敗しました",
+      "loading": "画像を読み込み中",
+      "converting": "変換中...",
+      "loadingWebGL": "WebGLを読み込み中...",
+      "loadingHEIC": "HEIC画像を読み込み中...",
+      "loadingTexture": "テクスチャを構築中"
     }
   },
   "exif": {
@@ -310,7 +326,7 @@
     "form": {
       "signin": {
         "title": "サインイン",
-        "subtitle": "ChronoFrame にログインします"
+        "subtitle": "{0} にログインします"
       },
       "action": {
         "or": "または",

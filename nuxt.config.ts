@@ -1,5 +1,6 @@
 import pkg from './package.json'
 import tailwindcss from '@tailwindcss/vite'
+import type { AnalyticsConfig } from './shared/types/config'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -35,21 +36,40 @@ export default defineNuxtConfig({
       mapbox: {
         accessToken: '',
       },
-      APP_TITLE: 'ChronoFrame',
-      APP_SLOGAN: '',
-      APP_AUTHOR: '',
-      APP_AVATAR_URL: '/avatar.webp',
-      OAUTH_GITHUB_ENABLED: false,
+      app: {
+        title: 'ChronoFrame',
+        slogan: '',
+        author: '',
+        avatarUrl: '',
+      },
+      analytics: {
+        matomo: {
+          enabled: false,
+          url: '',
+          siteId: '',
+        },
+      } satisfies AnalyticsConfig,
+      oauth: {
+        github: {
+          enabled: false,
+        },
+      },
     },
-    MAPBOX_ACCESS_TOKEN: '',
+    mapbox: {
+      accessToken: '',
+    },
     STORAGE_PROVIDER: 's3',
-    PROVIDER_S3_ENDPOINT: '',
-    PROVIDER_S3_BUCKET: '',
-    PROVIDER_S3_REGION: '',
-    PROVIDER_S3_ACCESS_KEY_ID: '',
-    PROVIDER_S3_SECRET_ACCESS_KEY: '',
-    PROVIDER_S3_PREFIX: '',
-    PROVIDER_S3_CDN_URL: '',
+    provider: {
+      s3: {
+        endpoint: '',
+        bucket: '',
+        region: '',
+        accessKeyId: '',
+        secretAccessKey: '',
+        prefix: '',
+        cdnUrl: '',
+      },
+    },
     ALLOW_INSECURE_COOKIE: false,
     // 上传文件类型白名单配置
     UPLOAD_MIME_WHITELIST_ENABLED: true,
@@ -71,6 +91,7 @@ export default defineNuxtConfig({
     plugins: [tailwindcss() as any],
     optimizeDeps: {
       include: [
+        'zod',
         'dayjs',
         'dayjs/plugin/updateLocale',
         'dayjs/locale/zh-cn',

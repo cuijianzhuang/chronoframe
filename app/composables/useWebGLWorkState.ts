@@ -12,9 +12,9 @@ export const useWebGLWorkState = (
     let message = ''
 
     if (state === LoadingState.TEXTURE_LOADING) {
-      message = '正在创建纹理'
+      message = $t('viewer.photoload.loadingTexture')
     } else if (state === LoadingState.IMAGE_LOADING) {
-      message = '正在加载图像'
+      message = $t('viewer.photoload.loading')
     }
 
     loadingIndicatorRef?.updateLoadingState({

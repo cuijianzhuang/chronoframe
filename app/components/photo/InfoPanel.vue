@@ -111,7 +111,7 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.currentPhoto.storageKey
           ? {
               label: $t('exif.filename'),
-              value: props.currentPhoto.storageKey,
+              value: props.currentPhoto.storageKey.split('/').pop() || props.currentPhoto.storageKey,
               icon: 'tabler:file',
             }
           : null,

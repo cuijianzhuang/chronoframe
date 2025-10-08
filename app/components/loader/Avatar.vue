@@ -10,9 +10,9 @@ const config = useRuntimeConfig()
 
     <div class="absolute inset-1 rounded-full overflow-hidden">
       <img
-        v-if="config.public.APP_AVATAR_URL"
+        v-if="config.public.app.avatarUrl"
         class="w-full h-full object-cover"
-        :src="config.public.APP_AVATAR_URL"
+        :src="config.public.app.avatarUrl"
         alt="Loading..."
       />
       <img

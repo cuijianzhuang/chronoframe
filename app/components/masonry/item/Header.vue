@@ -55,7 +55,7 @@ const isRepoLinkHovering = ref(false)
     <div
       class="absolute inset-0 -z-10 blur-3xl scale-110 bg-cover bg-center opacity-35"
       :style="{
-        backgroundImage: `url(${config.public.APP_AVATAR_URL || avatarImage})`,
+        backgroundImage: `url(${config.public.app.avatarUrl || avatarImage})`,
       }"
     ></div>
     <div
@@ -73,7 +73,7 @@ const isRepoLinkHovering = ref(false)
                 <Icon name="tabler:star-filled" />
               </div>
               <img
-                :src="config.public.APP_AVATAR_URL || avatarImage"
+                :src="config.public.app.avatarUrl || avatarImage"
                 class="size-12 rounded-full object-cover"
                 :class="!loggedIn && 'cursor-pointer'"
                 alt="Author's avatar"
@@ -83,7 +83,7 @@ const isRepoLinkHovering = ref(false)
             <h1
               class="text-2xl font-bold text-neutral-900 dark:text-white/90 mb-2"
             >
-              {{ config.public.APP_TITLE }}
+              {{ config.public.app.title }}
             </h1>
           </div>
           <div
@@ -107,10 +107,10 @@ const isRepoLinkHovering = ref(false)
               {{ $t('ui.stats.noPhotosTip') }}
             </p>
             <p
-              v-if="config.public.APP_SLOGAN"
+              v-if="config.public.app.slogan"
               class="font-[Pacifico]"
             >
-              {{ config.public.APP_SLOGAN }}
+              {{ config.public.app.slogan }}
             </p>
           </div>
           <div
@@ -240,11 +240,11 @@ const isRepoLinkHovering = ref(false)
         class="w-full px-2 pb-1 pt-1.5 bg-neutral-200/50 dark:bg-neutral-900/50 flex justify-between items-center gap-2"
       >
         <div
-          v-if="$config.public.APP_AUTHOR || $config.public.APP_TITLE"
+          v-if="$config.public.app.author || $config.public.app.title"
           class="text-xs text-neutral-500/80 dark:text-neutral-500 font-medium truncate"
         >
           © {{ $dayjs().format('YYYY') }}
-          {{ $config.public.APP_AUTHOR || $config.public.APP_TITLE }}
+          {{ $config.public.app.author || $config.public.app.title }}
         </div>
         <div
           class="text-xs text-neutral-500/60 dark:text-neutral-500/80 font-medium inline-flex justify-center items-center gap-0.5"
