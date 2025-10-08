@@ -377,7 +377,23 @@
           "version": "ランニングバージョン",
           "uptime": "実行時間",
           "environment": "ランニング環境",
-          "lastUpdate": "最後に更新されました"
+          "lastUpdate": "最後に更新されました",
+          "systems": {
+            "windows": "Microsoft Windows",
+            "windows10": "Microsoft Windows 10",
+            "windows11": "Microsoft Windows 11",
+            "ubuntu": "Ubuntu",
+            "debian": "Debian",
+            "centos": "CentOS",
+            "redhat": "Red Hat Enterprise Linux",
+            "fedora": "Fedora",
+            "arch": "Arch Linux",
+            "alpine": "Alpine Linux",
+            "opensuse": "openSUSE",
+            "macos": "macOS",
+            "docker": "Docker コンテナ",
+            "unknown": "不明なシステム"
+          }
         },
         "memory": {
           "title": "メモリの使用"

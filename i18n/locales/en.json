@@ -382,7 +382,23 @@
           "version": "Version",
           "uptime": "Uptime",
           "environment": "Environment",
-          "lastUpdate": "Last Updated"
+          "lastUpdate": "Last Updated",
+          "systems": {
+            "windows": "Microsoft Windows",
+            "windows10": "Microsoft Windows 10",
+            "windows11": "Microsoft Windows 11",
+            "ubuntu": "Ubuntu",
+            "debian": "Debian",
+            "centos": "CentOS",
+            "redhat": "Red Hat Enterprise Linux",
+            "fedora": "Fedora",
+            "arch": "Arch Linux",
+            "alpine": "Alpine Linux",
+            "opensuse": "openSUSE",
+            "macos": "macOS",
+            "docker": "Docker Container",
+            "unknown": "Unknown System"
+          }
         },
         "memory": {
           "title": "Memory Usage"
