@@ -42,7 +42,7 @@ watchEffect(() => {
   currentImage = img
   img.crossOrigin = 'anonymous'
   
-  const url = new URL(props.thumbnailUrl)
+  const url = new URL(props.thumbnailUrl, window.location.origin)
   url.searchParams.set('_cors', Date.now().toString())
   img.src = url.toString()
 

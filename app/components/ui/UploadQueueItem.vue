@@ -13,6 +13,8 @@ interface UploadFile {
     | 'processing'
     | 'completed'
     | 'error'
+    | 'skipped'
+    | 'blocked'
   stage?: string | null
   progress?: number
   error?: string
@@ -63,6 +65,10 @@ const statusColor = computed(() => {
       return 'success'
     case 'error':
       return 'error'
+    case 'skipped':
+      return 'warning'
+    case 'blocked':
+      return 'error'
     default:
       return 'neutral'
   }
@@ -84,6 +90,10 @@ const statusText = computed(() => {
       return '完成'
     case 'error':
       return '错误'
+    case 'skipped':
+      return '已跳过'
+    case 'blocked':
+      return '被阻止'
     default:
       return '未知'
   }
@@ -190,7 +200,7 @@ const generateParticleStyle = (index: number) => {
     layout
   >
     <!-- 文件信息头部 -->
-    <div class="flex items-start justify-between mb-3">
+    <div class="flex items-start justify-between">
       <div class="flex items-center gap-3 flex-1 min-w-0">
         <!-- 文件图标 -->
         <motion.div
@@ -210,6 +220,8 @@ const generateParticleStyle = (index: number) => {
                 statusColor === 'success',
               'bg-red-100 dark:bg-red-900/30 border-red-200 dark:border-red-800/50':
                 statusColor === 'error',
+              'bg-yellow-100 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-800/50':
+                statusColor === 'warning',
               'bg-neutral-100 dark:bg-neutral-900/30 border-neutral-200 dark:border-neutral-800/50':
                 statusColor === 'neutral',
             }"
@@ -223,6 +235,7 @@ const generateParticleStyle = (index: number) => {
                 'text-green-600/80 dark:text-green-400/80':
                   statusColor === 'success',
                 'text-red-600/80 dark:text-red-400/80': statusColor === 'error',
+                'text-yellow-600/80 dark:text-yellow-400/80': statusColor === 'warning',
                 'text-neutral-600/80 dark:text-neutral-400/80':
                   statusColor === 'neutral',
               }"
@@ -239,6 +252,34 @@ const generateParticleStyle = (index: number) => {
           >
             <Icon
               name="tabler:check"
+              class="size-3 text-white"
+            />
+          </motion.div>
+
+          <!-- 跳过指示器 -->
+          <motion.div
+            v-if="uploadingFile.status === 'skipped'"
+            class="absolute -top-2 -right-2 size-5 bg-yellow-600 rounded-full border-2 border-white dark:border-neutral-800 flex items-center justify-center"
+            :initial="{ scale: 0 }"
+            :animate="{ scale: 1 }"
+            :transition="{ delay: 0.2, duration: 0.3, ease: 'backOut' }"
+          >
+            <Icon
+              name="tabler:arrow-big-right-lines"
+              class="size-3 text-white"
+            />
+          </motion.div>
+
+          <!-- 阻止指示器 -->
+          <motion.div
+            v-if="uploadingFile.status === 'blocked'"
+            class="absolute -top-2 -right-2 size-5 bg-red-600 rounded-full border-2 border-white dark:border-neutral-800 flex items-center justify-center"
+            :initial="{ scale: 0 }"
+            :animate="{ scale: 1 }"
+            :transition="{ delay: 0.2, duration: 0.3, ease: 'backOut' }"
+          >
+            <Icon
+              name="tabler:cancel"
               class="size-3 text-white"
             />
           </motion.div>
@@ -351,7 +392,7 @@ const generateParticleStyle = (index: number) => {
         :animate="{ opacity: 1, height: 'auto' }"
         :exit="{ opacity: 0, height: 0 }"
         :transition="{ duration: 0.3 }"
-        class="space-y-2"
+        class="space-y-2 mt-3"
       >
         <!-- 上传进度 -->
         <div

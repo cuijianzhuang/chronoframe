@@ -86,6 +86,37 @@ async function getMemoryStats() {
   return memoryInfo
 }
 
+// 系统信息映射函数
+function mapSystemInfo(distribution: string): string {
+  if (!distribution) return 'unknown'
+  
+  // 转换为小写以便匹配
+  const distro = distribution.toLowerCase()
+  
+  // Windows 系统映射
+  if (distro.includes('windows') || distro.includes('microsoft')) {
+    if (distro.includes('11')) return 'windows11'
+    if (distro.includes('10')) return 'windows10'
+    return 'windows'
+  }
+  
+  // Linux 发行版映射
+  if (distro.includes('ubuntu')) return 'ubuntu'
+  if (distro.includes('debian')) return 'debian'
+  if (distro.includes('centos')) return 'centos'
+  if (distro.includes('redhat') || distro.includes('rhel')) return 'redhat'
+  if (distro.includes('fedora')) return 'fedora'
+  if (distro.includes('arch')) return 'arch'
+  if (distro.includes('alpine')) return 'alpine'
+  if (distro.includes('suse') || distro.includes('opensuse')) return 'opensuse'
+  
+  // macOS 系统映射
+  if (distro.includes('macos') || distro.includes('darwin')) return 'macos'
+  
+  // 其他情况返回原始值（处理未知系统）
+  return 'unknown'
+}
+
 export default eventHandler(async (event) => {
   await requireUserSession(event)
 
@@ -172,11 +203,23 @@ export default eventHandler(async (event) => {
     })
   }
 
+  // 获取系统信息并映射
+  let systemInfo = 'unknown'
+  if (await checkIfDocker()) {
+    systemInfo = 'docker'
+  } else {
+    try {
+      const osInfo = await si.osInfo()
+      systemInfo = mapSystemInfo(osInfo.distro)
+    } catch (error) {
+      console.warn('Failed to get OS info:', error)
+      systemInfo = 'unknown'
+    }
+  }
+
   return {
     uptime: process.uptime() || 0,
-    runningOn: (await checkIfDocker())
-      ? 'docker'
-      : (await si.osInfo().then((info) => info.distro)) || 'unknown',
+    runningOn: systemInfo,
     memory: (await getMemoryStats()) || { used: 0, total: 0 },
     photos: {
       total: totalPhotos?.count || 0,

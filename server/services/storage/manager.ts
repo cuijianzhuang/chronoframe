@@ -2,6 +2,7 @@ import type { StorageConfig, StorageProvider } from '.';
 import { S3StorageProvider } from '.'
 import type { Logger } from '../../utils/logger'
 import { HubR2StorageProvider } from './providers/hub-r2'
+import { LocalStorageProvider } from './providers/local'
 
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class
 export class StorageProviderFactory {
@@ -14,6 +15,8 @@ export class StorageProviderFactory {
         return new S3StorageProvider(config, logger)
       case 'hub-r2':
         return new HubR2StorageProvider(config, logger)
+      case 'local':
+        return new LocalStorageProvider(config, logger)
       case 'github':
         // TODO: Implement GitHub storage provider
         throw new Error('GitHub storage provider not implemented yet')

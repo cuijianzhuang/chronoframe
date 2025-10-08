@@ -208,7 +208,7 @@ const yearOptions = computed(() => {
             :color="dashboardStats?.runningOn === 'docker' ? 'info' : 'success'"
             variant="soft"
           >
-            {{ dashboardStats?.runningOn || 'unknown' }}
+            {{ $t(`dashboard.overview.section.runtimeInfo.systems.${dashboardStats?.runningOn || 'unknown'}`) }}
           </UBadge>
         </div>
         <div>

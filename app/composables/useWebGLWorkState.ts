@@ -4,6 +4,8 @@ import { LoadingState } from '@chronoframe/webgl-image'
 export const useWebGLWorkState = (
   loadingIndicatorRef: LoadingIndicatorRef | null,
 ) => {
+  const { t } = useI18n()
+
   return (
     isLoading: boolean,
     state?: LoadingState,
@@ -12,9 +14,9 @@ export const useWebGLWorkState = (
     let message = ''
 
     if (state === LoadingState.TEXTURE_LOADING) {
-      message = $t('viewer.photoload.loadingTexture')
+      message = t('viewer.photoload.loadingTexture')
     } else if (state === LoadingState.IMAGE_LOADING) {
-      message = $t('viewer.photoload.loading')
+      message = t('viewer.photoload.loading')
     }
 
     loadingIndicatorRef?.updateLoadingState({

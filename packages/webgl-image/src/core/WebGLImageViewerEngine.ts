@@ -326,7 +326,12 @@ export class WebGLImageViewerEngine {
       this.imageLoadingResolve = resolve
       this.imageLoadingReject = reject
       if (this.worker) {
-        this.worker.postMessage({ type: 'load', payload: { src } })
+        try {
+          const absolute = new URL(src, self.location?.origin || 'http://localhost')
+          this.worker.postMessage({ type: 'load', payload: { src: absolute.toString() } })
+        } catch {
+          this.worker.postMessage({ type: 'load', payload: { src } })
+        }
       } else {
         reject(new Error('No worker available'))
       }

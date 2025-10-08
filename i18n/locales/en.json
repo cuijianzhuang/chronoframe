@@ -345,6 +345,7 @@
     }
   },
   "common": {
+    "unknown": "unknown",
     "months": {
       "jan": "Jan",
       "feb": "Feb",
@@ -380,6 +381,56 @@
       }
     }
   },
+  "upload": {
+    "duplicate": {
+      "block": {
+        "title": "File Already Exists",
+        "message": "Photo \"{fileName}\" already exists and duplicate uploads are not allowed",
+        "suggestion": "You can: 1) Rename the file and upload again; 2) Switch to \"warn mode\" in settings to allow overwriting"
+      },
+      "skip": {
+        "title": "Duplicate File Skipped",
+        "message": "Photo \"{fileName}\" already exists and has been automatically skipped",
+        "info": "Existing photo taken on {dateTaken}"
+      },
+      "warn": {
+        "title": "Duplicate File Detected",
+        "message": "Photo \"{fileName}\" already exists. Continuing will overwrite the existing photo",
+        "warning": "After overwriting, all information of the original photo (EXIF, tags, reactions, etc.) will be replaced",
+        "info": "Existing photo: {title}, taken on {dateTaken}"
+      }
+    },
+    "success": {
+      "upload": {
+        "single": "Photo uploaded successfully, processing...",
+        "multiple": "{count} photos uploaded successfully, processing..."
+      },
+      "check": {
+        "title": "Check Complete",
+        "message": "Checked {total} files, found {duplicates} duplicates"
+      }
+    },
+    "error": {
+      "required": {
+        "title": "Missing Required Parameter",
+        "message": "Please provide {field} parameter"
+      },
+      "invalidType": {
+        "title": "Unsupported File Type",
+        "message": "Unsupported media type: {type}",
+        "suggestion": "Allowed types: {allowed}"
+      },
+      "tooLarge": {
+        "title": "File Too Large",
+        "message": "File size {size}MB exceeds limit",
+        "suggestion": "Maximum allowed: {maxSize}MB"
+      },
+      "uploadFailed": {
+        "title": "Upload Failed",
+        "message": "An error occurred during upload, please try again later"
+      }
+    }
+  },
   "dashboard": {
     "overview": {
       "title": "Overview",
@@ -399,7 +450,23 @@
           "version": "Version",
           "uptime": "Uptime",
           "environment": "Environment",
-          "lastUpdate": "Last Updated"
+          "lastUpdate": "Last Updated",
+          "systems": {
+            "windows": "Microsoft Windows",
+            "windows10": "Microsoft Windows 10",
+            "windows11": "Microsoft Windows 11",
+            "ubuntu": "Ubuntu",
+            "debian": "Debian",
+            "centos": "CentOS",
+            "redhat": "Red Hat Enterprise Linux",
+            "fedora": "Fedora",
+            "arch": "Arch Linux",
+            "alpine": "Alpine Linux",
+            "opensuse": "openSUSE",
+            "macos": "macOS",
+            "docker": "Docker Container",
+            "unknown": "Unknown System"
+          }
         },
         "memory": {
           "title": "Memory Usage"

@@ -393,7 +393,23 @@
           "version": "運行版本",
           "uptime": "運行時間",
           "environment": "運行環境",
-          "lastUpdate": "最後更新"
+          "lastUpdate": "最後更新",
+          "systems": {
+            "windows": "Microsoft Windows",
+            "windows10": "Microsoft Windows 10",
+            "windows11": "Microsoft Windows 11",
+            "ubuntu": "Ubuntu",
+            "debian": "Debian",
+            "centos": "CentOS",
+            "redhat": "Red Hat Enterprise Linux",
+            "fedora": "Fedora",
+            "arch": "Arch Linux",
+            "alpine": "Alpine Linux",
+            "opensuse": "openSUSE",
+            "macos": "macOS",
+            "docker": "Docker 容器",
+            "unknown": "未知系統"
+          }
         },
         "memory": {
           "title": "內存使用率"

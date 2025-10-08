@@ -345,6 +345,7 @@
     }
   },
   "common": {
+    "unknown": "未知",
     "months": {
       "jan": "一月",
       "feb": "二月",
@@ -380,6 +381,56 @@
       }
     }
   },
+  "upload": {
+    "duplicate": {
+      "block": {
+        "title": "文件已存在",
+        "message": "照片 \"{fileName}\" 已存在，无法上传重复文件",
+        "suggestion": "您可以：1) 重命名文件后重新上传；2) 在设置中切换到\"警告模式\"以允许覆盖"
+      },
+      "skip": {
+        "title": "跳过重复文件",
+        "message": "照片 \"{fileName}\" 已存在，已自动跳过上传",
+        "info": "现有照片拍摄于 {dateTaken}"
+      },
+      "warn": {
+        "title": "检测到重复文件",
+        "message": "照片 \"{fileName}\" 已存在，继续上传将会覆盖现有照片",
+        "warning": "覆盖后，原有照片的所有信息（EXIF、标签、表态等）将被替换",
+        "info": "现有照片：{title}，拍摄于 {dateTaken}"
+      }
+    },
+    "success": {
+      "upload": {
+        "single": "照片已成功上传，正在处理中...",
+        "multiple": "已成功上传 {count} 张照片，正在处理中..."
+      },
+      "check": {
+        "title": "检查完成",
+        "message": "已检查 {total} 个文件，发现 {duplicates} 个重复文件"
+      }
+    },
+    "error": {
+      "required": {
+        "title": "缺少必填参数",
+        "message": "请提供 {field} 参数"
+      },
+      "invalidType": {
+        "title": "不支持的文件类型",
+        "message": "不支持的媒体类型：{type}",
+        "suggestion": "允许的类型：{allowed}"
+      },
+      "tooLarge": {
+        "title": "文件太大",
+        "message": "文件大小 {size}MB 超过限制",
+        "suggestion": "最大允许 {maxSize}MB"
+      },
+      "uploadFailed": {
+        "title": "上传失败",
+        "message": "上传过程中发生错误，请稍后重试"
+      }
+    }
+  },
   "dashboard": {
     "overview": {
       "title": "仪表板概览",
@@ -399,7 +450,23 @@
           "version": "运行版本",
           "uptime": "运行时间",
           "environment": "运行环境",
-          "lastUpdate": "最后更新"
+          "lastUpdate": "最后更新",
+          "systems": {
+            "windows": "Microsoft Windows",
+            "windows10": "Microsoft Windows 10",
+            "windows11": "Microsoft Windows 11",
+            "ubuntu": "Ubuntu",
+            "debian": "Debian",
+            "centos": "CentOS",
+            "redhat": "Red Hat Enterprise Linux",
+            "fedora": "Fedora",
+            "arch": "Arch Linux",
+            "alpine": "Alpine Linux",
+            "opensuse": "openSUSE",
+            "macos": "macOS",
+            "docker": "Docker 容器",
+            "unknown": "未知系统"
+          }
         },
         "memory": {
           "title": "内存使用率"

@@ -36,7 +36,7 @@ const reactionsLoading = ref(false)
 // 获取表态数据
 const fetchReactions = async (photoIds: string[]) => {
   if (photoIds.length === 0) return
-  
+
   reactionsLoading.value = true
   try {
     const data = await $fetch('/api/photos/reactions', {
@@ -61,6 +61,8 @@ interface UploadingFile {
     | 'processing'
     | 'completed'
     | 'error'
+    | 'skipped'
+    | 'blocked'
   stage?: PipelineQueueItem['statusStage'] | null
   progress?: number
   error?: string
@@ -121,6 +123,16 @@ const uploadImage = async (file: File, existingFileId?: string) => {
     })
 
     uploadingFile.signedUrlResponse = signedUrlResponse
+
+    // 检查是否为跳过模式（重复文件）
+    if (signedUrlResponse.skipped) {
+      uploadingFile.status = 'skipped'
+      uploadingFile.progress = 100
+      uploadingFile.canAbort = false
+      uploadingFiles.value = new Map(uploadingFiles.value)
+      return
+    }
+
     uploadingFile.status = 'uploading'
     uploadingFile.canAbort = true
     uploadingFile.progress = 0
@@ -202,8 +214,17 @@ const uploadImage = async (file: File, existingFileId?: string) => {
     })
   } catch (error: any) {
     uploadingFile.status = 'error'
-    uploadingFile.error = error.message || '上传失败'
     uploadingFile.canAbort = false
+
+    // 处理重复文件阻止模式的错误
+    if (error.statusCode === 409 && error.data?.duplicate) {
+      uploadingFile.status = 'blocked'
+      uploadingFile.error = error.data.title || '文件已存在'
+    } else {
+      // 其他错误
+      uploadingFile.error = error.message || '上传失败'
+    }
+
     uploadingFiles.value = new Map(uploadingFiles.value)
 
     // 提供更详细的错误信息
@@ -613,11 +634,7 @@ const columns: TableColumn<Photo>[] = [
       )
 
       if (totalReactions === 0) {
-        return h(
-          'span',
-          { class: 'text-neutral-400 text-xs' },
-          '无表态',
-        )
+        return h('span', { class: 'text-neutral-400 text-xs' }, '无表态')
       }
 
       const reactionIcons: Record<string, string> = {
@@ -642,22 +659,23 @@ const columns: TableColumn<Photo>[] = [
         { class: 'flex items-center gap-2' },
         [
           ...topReactions.map(([type, count]) =>
-            h(
-              'div',
-              { class: 'flex items-center gap-0.5' },
-              [
-                h(Icon, {
-                  name: reactionIcons[type] || 'fluent-emoji-flat:face-with-tears-of-joy',
-                  class: 'size-4',
-                  mode: 'svg',
-                }),
-                h(
-                  'span',
-                  { class: 'text-xs font-medium text-neutral-700 dark:text-neutral-300' },
-                  count,
-                ),
-              ],
-            ),
+            h('div', { class: 'flex items-center gap-0.5' }, [
+              h(Icon, {
+                name:
+                  reactionIcons[type] ||
+                  'fluent-emoji-flat:face-with-tears-of-joy',
+                class: 'size-4',
+                mode: 'svg',
+              }),
+              h(
+                'span',
+                {
+                  class:
+                    'text-xs font-medium text-neutral-700 dark:text-neutral-300',
+                },
+                count,
+              ),
+            ]),
           ),
           totalReactions > topReactions.length
             ? h(
@@ -1192,12 +1210,14 @@ onUnmounted(() => {
           size="sm"
           icon="tabler:refresh"
           :loading="reactionsLoading"
-          @click="async () => {
-            await refresh()
-            if (filteredData.length > 0) {
-              await fetchReactions(filteredData.map((p: Photo) => p.id))
+          @click="
+            async () => {
+              await refresh()
+              if (filteredData.length > 0) {
+                await fetchReactions(filteredData.map((p: Photo) => p.id))
+              }
             }
-          }"
+          "
         >
           <span class="hidden sm:inline">刷新</span>
         </UButton>
