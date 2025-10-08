@@ -16,6 +16,33 @@ export interface ImageMeta {
   height: number
   format: string
 }
+// Minimal JPEG size extractor as last-resort fallback
+const tryExtractJpegSize = (buffer: Buffer): { width: number; height: number } | null => {
+  // JPEG starts with 0xFFD8
+  if (buffer.length < 4 || buffer[0] !== 0xff || buffer[1] !== 0xd8) return null
+  let offset = 2
+  while (offset + 9 < buffer.length) {
+    if (buffer[offset] !== 0xff) { offset++; continue }
+    const marker = buffer[offset + 1]
+    offset += 2
+    // Skip padding FFs
+    if (marker === 0xff) continue
+    // Standalone markers without length
+    if (marker === 0xd8 || marker === 0xd9) continue
+    const length = (buffer[offset] << 8) + buffer[offset + 1]
+    if (length < 2) break
+    // SOF0..SOF3 and SOF5..SOF7 indicate dimensions
+    if ((marker >= 0xc0 && marker <= 0xc3) || (marker >= 0xc5 && marker <= 0xc7)) {
+      if (offset + 7 >= buffer.length) break
+      const height = (buffer[offset + 3] << 8) + buffer[offset + 4]
+      const width = (buffer[offset + 5] << 8) + buffer[offset + 6]
+      if (width > 0 && height > 0) return { width, height }
+      break
+    }
+    offset += length
+  }
+  return null
+}
 
 const isBitmap = (buffer: Buffer) => {
   if (buffer.length < 2) return false
@@ -28,13 +55,44 @@ const getMetadataWithSharp = async (
 ): Promise<ImageMeta | null> => {
   try {
     return await withRetry(async () => {
-      const metadata = await sharpInst.metadata()
+      let metadata = await sharpInst.metadata()
+
+      // Fallback 1: try rotate() which can populate dimensions for some orientations
+      if (!metadata.height || !metadata.width || !metadata.format) {
+        try {
+          metadata = await sharpInst.clone().rotate().metadata()
+        } catch {}
+      }
+
+      // Fallback 2: re-instantiate sharp from a fresh buffer
+      if (!metadata.height || !metadata.width || !metadata.format) {
+        try {
+          const buf = await sharpInst.clone().toBuffer()
+          metadata = await sharp(buf).metadata()
+        } catch {}
+      }
+
+      // Fallback 3: force re-encode to JPEG then read metadata
+      if (!metadata.height || !metadata.width || !metadata.format) {
+        try {
+          const jpegBuf = await sharpInst.clone().jpeg().toBuffer()
+          metadata = await sharp(jpegBuf).metadata()
+          if (!metadata.height || !metadata.width) {
+            const dims = tryExtractJpegSize(jpegBuf)
+            if (dims) {
+              metadata.width = dims.width
+              metadata.height = dims.height
+              metadata.format = metadata.format || 'jpeg'
+            }
+          }
+        } catch {}
+      }
 
       if (!metadata.height || !metadata.width || !metadata.format) {
-        logger.image.warn('Incomplete metadata received:', { 
-          hasHeight: !!metadata.height, 
-          hasWidth: !!metadata.width, 
-          hasFormat: !!metadata.format 
+        logger.image.warn('Incomplete metadata received:', {
+          hasHeight: !!metadata.height,
+          hasWidth: !!metadata.width,
+          hasFormat: !!metadata.format,
         })
         return null
       }
@@ -219,7 +277,8 @@ export const processImageMetadataAndSharp = async (
   s3key: string,
 ): Promise<ProcessedImageData | null> => {
   try {
-    let sharpInst = sharp(buffer)
+    // Disable input pixel limit to avoid failures on very large images
+    let sharpInst = sharp(buffer, { limitInputPixels: false })
     let convertedBuffer = buffer
 
     if (isBitmap(buffer)) {
@@ -235,6 +294,7 @@ export const processImageMetadataAndSharp = async (
 
     const metadata = await getMetadataWithSharp(sharpInst)
     if (!metadata) {
+      logger.image.error('Metadata extraction returned null (after fallbacks):', s3key)
       return null
     }
 

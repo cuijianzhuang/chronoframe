@@ -51,6 +51,12 @@ export default defineNuxtConfig({
     PROVIDER_S3_PREFIX: '',
     PROVIDER_S3_CDN_URL: '',
     ALLOW_INSECURE_COOKIE: false,
+    // 上传文件类型白名单配置
+    UPLOAD_MIME_WHITELIST_ENABLED: true,
+    UPLOAD_MIME_WHITELIST: 'image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/heic,image/heif,video/quicktime,video/mp4',
+    // 重复文件检测配置
+    UPLOAD_DUPLICATE_CHECK_ENABLED: true,
+    UPLOAD_DUPLICATE_CHECK_MODE: 'warn', // 'warn' | 'block' | 'skip'
   },
 
   nitro: {

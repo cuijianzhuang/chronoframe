@@ -12,6 +12,8 @@ interface UploadFile {
     | 'processing'
     | 'completed'
     | 'error'
+    | 'skipped'
+    | 'blocked'
   stage?: string | null
   progress?: number
   error?: string
@@ -54,6 +56,8 @@ const stats = computed(() => {
     processing: files.filter((f) => f.status === 'processing').length,
     completed: files.filter((f) => f.status === 'completed').length,
     error: files.filter((f) => f.status === 'error').length,
+    skipped: files.filter((f) => f.status === 'skipped').length,
+    blocked: files.filter((f) => f.status === 'blocked').length,
     active: files.filter(
       (f) => f.status === 'uploading' || f.status === 'processing',
     ).length,
@@ -85,6 +89,9 @@ const overallProgress = computed(() => {
     } else if (file.status === 'waiting') {
       // 等待状态：0%
       totalProgress += 0
+    } else if (file.status === 'skipped' || file.status === 'blocked') {
+      // 跳过或被阻止：0%（不参与进度计算）
+      totalProgress += 0
     }
   })
 
@@ -93,8 +100,9 @@ const overallProgress = computed(() => {
 
 // 计算状态颜色
 const statusColor = computed(() => {
-  if (stats.value.error > 0) return 'error'
+  if (stats.value.error > 0 || stats.value.blocked > 0) return 'error'
   if (stats.value.active > 0) return 'primary'
+  if (stats.value.skipped > 0 && stats.value.active === 0) return 'warning'
   if (stats.value.completed > 0 && stats.value.active === 0) return 'success'
   return 'neutral'
 })
@@ -147,6 +155,7 @@ const clearAllFiles = () => {
                   primary: 'tabler:upload',
                   success: 'tabler:circle-check',
                   error: 'tabler:alert-circle',
+                  warning: 'tabler:alert-triangle',
                   neutral: 'tabler:info-circle',
                 }[statusColor]
               "
@@ -155,6 +164,7 @@ const clearAllFiles = () => {
                 'text-blue-600 dark:text-blue-400': statusColor === 'primary',
                 'text-green-600 dark:text-green-400': statusColor === 'success',
                 'text-red-600 dark:text-red-400': statusColor === 'error',
+                'text-yellow-600 dark:text-yellow-400': statusColor === 'warning',
                 'text-neutral-600 dark:text-neutral-400':
                   statusColor === 'neutral',
               }"
@@ -197,6 +207,18 @@ const clearAllFiles = () => {
                   class="text-red-600 dark:text-red-400"
                 >
                   {{ stats.error }} 失败
+                </span>
+                <span
+                  v-if="stats.skipped > 0"
+                  class="text-yellow-600 dark:text-yellow-400"
+                >
+                  {{ stats.skipped }} 跳过
+                </span>
+                <span
+                  v-if="stats.blocked > 0"
+                  class="text-red-600 dark:text-red-400"
+                >
+                  {{ stats.blocked }} 被阻止
                 </span>
               </div>
             </div>

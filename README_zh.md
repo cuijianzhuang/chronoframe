@@ -45,7 +45,14 @@
 
 推荐使用预构建的 docker 镜像部署，[在 ghcr 上查看镜像](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe)
 
-部署前请先创建 `.env` 文件并配置环境变量，参考 [.env.example](./.env.example)。
+部署前请先创建 `.env` 文件并配置环境变量。
+
+你可以复制示例文件开始：
+```bash
+cp env.example .env
+```
+
+然后编辑 `.env` 文件，填入你的配置。完整配置说明请参考 [env.example](./env.example)。
 
 ```env
 # Admin user email (required)
@@ -83,6 +90,10 @@ NUXT_SESSION_PASSWORD=
 # GitHub OAuth
 NUXT_OAUTH_GITHUB_CLIENT_ID=
 NUXT_OAUTH_GITHUB_CLIENT_SECRET=
+
+# 上传文件类型白名单（可选）
+NUXT_UPLOAD_MIME_WHITELIST_ENABLED=true
+NUXT_UPLOAD_MIME_WHITELIST=image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/heic,image/heif,video/quicktime,video/mp4
 ```
 
 ### Docker

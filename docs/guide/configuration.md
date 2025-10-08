@@ -28,3 +28,76 @@ Whether using Docker or Docker Compose (.env) deployment, configuration is done 
 | NUXT_OAUTH_GITHUB_CLIENT_SECRET    | GitHub OAuth app Client Secret                                  | None        | No (optional, for GitHub login)               |
 | NUXT_SESSION_PASSWORD              | Password for encrypting sessions, 32-character random string    | None        | Yes                                           |
 | NUXT_PUBLIC_GTAG_ID                | Google Analytics Tracking ID                                    | None        | No                                            |
+| NUXT_UPLOAD_MIME_WHITELIST_ENABLED | Enable MIME type whitelist validation for uploads               | true        | No                                            |
+| NUXT_UPLOAD_MIME_WHITELIST         | Allowed MIME types for uploads (comma-separated)                | See below   | No                                            |
+| NUXT_UPLOAD_DUPLICATE_CHECK_ENABLED | Enable duplicate file detection during upload                   | true        | No                                            |
+| NUXT_UPLOAD_DUPLICATE_CHECK_MODE   | Duplicate handling mode: warn/block/skip                        | warn        | No                                            |
+
+## Upload File Type Whitelist
+
+The default value of `NUXT_UPLOAD_MIME_WHITELIST` includes the following MIME types:
+- `image/jpeg` - JPEG images
+- `image/png` - PNG images
+- `image/webp` - WebP images
+- `image/gif` - GIF images
+- `image/bmp` - BMP images
+- `image/tiff` - TIFF images
+- `image/heic` - HEIC images (Apple)
+- `image/heif` - HEIF images
+- `video/quicktime` - QuickTime videos (MOV)
+- `video/mp4` - MP4 videos
+
+To customize the whitelist, use a comma-separated string of MIME types, for example:
+```
+NUXT_UPLOAD_MIME_WHITELIST=image/jpeg,image/png,video/mp4
+```
+
+To disable whitelist validation (allow any file type), set:
+```
+NUXT_UPLOAD_MIME_WHITELIST_ENABLED=false
+```
+
+## Duplicate File Detection
+
+`NUXT_UPLOAD_DUPLICATE_CHECK_ENABLED` controls whether to detect duplicate files during upload.
+
+`NUXT_UPLOAD_DUPLICATE_CHECK_MODE` has three modes:
+
+### warn (Warning Mode) - Default
+- Shows warning when duplicate file is detected
+- Continues upload, will overwrite existing photo data
+- Suitable for scenarios where photo updates are needed
+
+```
+NUXT_UPLOAD_DUPLICATE_CHECK_MODE=warn
+```
+
+### block (Block Mode)
+- Rejects upload if duplicate file is detected
+- Returns 409 error, doesn't allow overwriting
+- Suitable for scenarios requiring strict duplicate prevention
+
+```
+NUXT_UPLOAD_DUPLICATE_CHECK_MODE=block
+```
+
+### skip (Skip Mode)
+- Skips upload when duplicate file is detected
+- Returns existing photo info without any operations
+- Suitable for automatic deduplication during batch uploads
+
+```
+NUXT_UPLOAD_DUPLICATE_CHECK_MODE=skip
+```
+
+### Completely Disable Detection
+
+```
+NUXT_UPLOAD_DUPLICATE_CHECK_ENABLED=false
+```
+
+**Notes**:
+- Duplicate detection is based on filename, not file content
+- Same filename generates same photoId
+- Even with detection disabled, uploading same filename will still overwrite existing data (database uses `onConflictDoUpdate`)
+- Recommend using unique filenames (e.g., adding timestamps) to avoid conflicts

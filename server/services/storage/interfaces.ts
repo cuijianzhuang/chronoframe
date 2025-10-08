@@ -34,10 +34,21 @@ export type GitHubStorageConfig = {
   token?: string
 }
 
+export type LocalStorageConfig = {
+  provider: 'local'
+  /** Absolute directory where files are stored */
+  basePath: string
+  /** Public base URL to serve files, e.g. /storage or https://domain.com/storage */
+  baseUrl?: string
+  /** Optional prefix for logical keys within basePath */
+  prefix?: string
+}
+
 export type StorageConfig =
   | S3StorageConfig
   | HubR2StorageConfig
   | GitHubStorageConfig
+  | LocalStorageConfig
 
 export interface UploadOptions {
   contentType?: string

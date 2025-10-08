@@ -235,8 +235,18 @@ export class QueueManager {
         try {
           this.logger.info(`Start processing task ${taskId}: ${storageKey}`)
 
-          const storageObject = await storageProvider.getFileMeta(storageKey)
-
+          let storageObject = await storageProvider.getFileMeta(storageKey)
+          if (!storageObject) {
+            // Fallback: try read the file directly to confirm existence (e.g., local provider)
+            const maybeBuffer = await storageProvider.get(storageKey)
+            if (maybeBuffer) {
+              storageObject = {
+                key: storageKey,
+                size: maybeBuffer.length,
+                lastModified: new Date(),
+              }
+            }
+          }
           if (!storageObject) {
             throw new Error(`Storage object not found`)
           }
@@ -388,8 +398,17 @@ export class QueueManager {
             `Start processing LivePhoto detection task ${taskId}: ${videoKey}`,
           )
 
-          const storageObject = await storageProvider.getFileMeta(videoKey)
-
+          let storageObject = await storageProvider.getFileMeta(videoKey)
+          if (!storageObject) {
+            const maybeBuffer = await storageProvider.get(videoKey)
+            if (maybeBuffer) {
+              storageObject = {
+                key: videoKey,
+                size: maybeBuffer.length,
+                lastModified: new Date(),
+              }
+            }
+          }
           if (!storageObject) {
             throw new Error(`Storage object not found`)
           }

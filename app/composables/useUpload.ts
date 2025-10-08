@@ -20,6 +20,7 @@ export interface UploadCallbacks {
   onSuccess?: (response: XMLHttpRequest) => void
   onError?: (error: string, xhr: XMLHttpRequest) => void
   onAbort?: () => void
+  onRetry?: (attempt: number, maxAttempts: number) => void
 }
 
 export interface UseUploadOptions {
@@ -27,6 +28,8 @@ export interface UseUploadOptions {
   withCredentials?: boolean
   headers?: Record<string, string>
   speedSampleSize?: number // 用于计算速度的样本数量
+  maxRetries?: number // 最大重试次数
+  retryDelay?: number // 重试延迟（毫秒）
 }
 
 export function useUpload(options: UseUploadOptions = {}) {
@@ -34,7 +37,9 @@ export function useUpload(options: UseUploadOptions = {}) {
     timeout = 0,
     withCredentials = false,
     headers = {},
-    speedSampleSize = 5
+    speedSampleSize = 5,
+    maxRetries = 3,
+    retryDelay = 1000
   } = options
 
   // 响应式状态
@@ -129,10 +134,13 @@ export function useUpload(options: UseUploadOptions = {}) {
   const uploadFile = async (
     file: File,
     signedUrl: string,
-    callbacks: UploadCallbacks = {}
+    callbacks: UploadCallbacks = {},
+    attempt: number = 1
   ): Promise<XMLHttpRequest> => {
-    // 重置状态
-    resetStatus()
+    // 重置状态（仅在第一次尝试时）
+    if (attempt === 1) {
+      resetStatus()
+    }
 
     return new Promise((resolve, reject) => {
       // 创建新的 XHR 实例
@@ -172,21 +180,82 @@ export function useUpload(options: UseUploadOptions = {}) {
       // 错误处理
       xhr.addEventListener('error', () => {
         const endTime = Date.now()
-        const error = `网络错误 (状态码: ${xhr.status})`
-        updateStatus({ status: 'error', error, endTime })
-        callbacks.onStatusChange?.('error')
-        callbacks.onError?.(error, xhr)
-        reject(new Error(error))
+        let errorMessage = ''
+        let suggestion = ''
+        
+        if (xhr.status === 0) {
+          // 状态码 0 通常表示网络连接失败、CORS 问题或服务器不可达
+          errorMessage = '网络连接失败'
+          suggestion = '请检查网络连接或稍后重试。如果问题持续存在，可能是服务器配置问题。'
+        } else if (xhr.status >= 400 && xhr.status < 500) {
+          errorMessage = `客户端错误 (${xhr.status})`
+          suggestion = '请检查文件格式和大小是否符合要求。'
+        } else if (xhr.status >= 500) {
+          errorMessage = `服务器错误 (${xhr.status})`
+          suggestion = '服务器暂时不可用，请稍后重试。'
+        } else {
+          errorMessage = `网络错误 (状态码: ${xhr.status})`
+          suggestion = '请检查网络连接后重试。'
+        }
+        
+        // 检查是否可以重试
+        const canRetry = attempt < maxRetries && (
+          xhr.status === 0 || // 网络错误
+          xhr.status >= 500 || // 服务器错误
+          xhr.status === 429 // 频率限制
+        )
+        
+        if (canRetry) {
+          updateStatus({ 
+            status: 'error', 
+            error: `${errorMessage} (尝试 ${attempt}/${maxRetries})`, 
+            endTime 
+          })
+          callbacks.onRetry?.(attempt, maxRetries)
+          
+          // 延迟后重试
+          setTimeout(() => {
+            uploadFile(file, signedUrl, callbacks, attempt + 1)
+              .then(resolve)
+              .catch(reject)
+          }, retryDelay * attempt) // 指数退避
+        } else {
+          updateStatus({ status: 'error', error: errorMessage, endTime })
+          callbacks.onStatusChange?.('error')
+          callbacks.onError?.(errorMessage, xhr)
+          reject(new Error(errorMessage))
+        }
       })
 
       // 超时处理
       xhr.addEventListener('timeout', () => {
         const endTime = Date.now()
-        const error = `上传超时 (${timeout}ms)`
-        updateStatus({ status: 'error', error, endTime })
-        callbacks.onStatusChange?.('error')
-        callbacks.onError?.(error, xhr)
-        reject(new Error(error))
+        const errorMessage = `上传超时 (${timeout}ms)`
+        const suggestion = '文件可能过大或网络较慢，请尝试：1) 检查网络连接；2) 稍后重试；3) 尝试上传较小的文件。'
+        
+        // 检查是否可以重试（超时也可以重试）
+        const canRetry = attempt < maxRetries
+        
+        if (canRetry) {
+          updateStatus({ 
+            status: 'error', 
+            error: `${errorMessage} (尝试 ${attempt}/${maxRetries})`, 
+            endTime 
+          })
+          callbacks.onRetry?.(attempt, maxRetries)
+          
+          // 延迟后重试
+          setTimeout(() => {
+            uploadFile(file, signedUrl, callbacks, attempt + 1)
+              .then(resolve)
+              .catch(reject)
+          }, retryDelay * attempt) // 指数退避
+        } else {
+          updateStatus({ status: 'error', error: errorMessage, endTime })
+          callbacks.onStatusChange?.('error')
+          callbacks.onError?.(errorMessage, xhr)
+          reject(new Error(errorMessage))
+        }
       })
 
       // 中止处理
@@ -206,21 +275,80 @@ export function useUpload(options: UseUploadOptions = {}) {
             return
           } else if (xhr.status >= 400) {
             const endTime = Date.now()
-            let error = `HTTP 错误: ${xhr.status}`
+            let errorMessage = ''
+            let suggestion = ''
             
-            // 尝试获取更详细的错误信息
+            // 根据状态码提供更友好的错误信息
+            switch (xhr.status) {
+              case 400:
+                errorMessage = '请求格式错误'
+                suggestion = '请检查文件格式是否正确。'
+                break
+              case 401:
+                errorMessage = '未授权访问'
+                suggestion = '请重新登录后再试。'
+                break
+              case 403:
+                errorMessage = '访问被拒绝'
+                suggestion = '您没有权限执行此操作。'
+                break
+              case 404:
+                errorMessage = '上传接口不存在'
+                suggestion = '请检查应用配置或联系管理员。'
+                break
+              case 409:
+                errorMessage = '文件冲突'
+                suggestion = '文件已存在，请重命名后重新上传。'
+                break
+              case 413:
+                errorMessage = '文件过大'
+                suggestion = '请选择更小的文件（建议小于 128MB）。'
+                break
+              case 415:
+                errorMessage = '不支持的文件类型'
+                suggestion = '请上传支持的文件格式（JPEG、PNG、HEIC、MOV）。'
+                break
+              case 429:
+                errorMessage = '上传频率过高'
+                suggestion = '请稍等片刻后再试。'
+                break
+              case 500:
+                errorMessage = '服务器内部错误'
+                suggestion = '服务器暂时出现问题，请稍后重试。'
+                break
+              case 502:
+              case 503:
+              case 504:
+                errorMessage = '服务器暂时不可用'
+                suggestion = '服务器正在维护中，请稍后重试。'
+                break
+              default:
+                errorMessage = `HTTP 错误: ${xhr.status}`
+                suggestion = '请检查网络连接后重试。'
+            }
+            
+            // 尝试获取服务器返回的详细错误信息
             try {
               const responseText = xhr.responseText
               if (responseText) {
-                error += ` - ${responseText}`
+                try {
+                  const responseData = JSON.parse(responseText)
+                  if (responseData.data?.message) {
+                    errorMessage = responseData.data.title || errorMessage
+                    suggestion = responseData.data.suggestion || suggestion
+                  }
+                } catch {
+                  // 如果不是 JSON，使用原始文本
+                  errorMessage += ` - ${responseText}`
+                }
               }
             } catch {
               // 忽略解析错误
             }
 
-            updateStatus({ status: 'error', error, endTime })
+            updateStatus({ status: 'error', error: errorMessage, endTime })
             callbacks.onStatusChange?.('error')
-            callbacks.onError?.(error, xhr)
+            callbacks.onError?.(errorMessage, xhr)
           }
         }
       })
@@ -295,11 +423,15 @@ export function useUpload(options: UseUploadOptions = {}) {
     }
   })
 
-  // 清理函数
-  onUnmounted(() => {
-    abortUpload()
-    currentXHR = null
-  })
+  // 清理函数（仅在组件上下文中可用）
+  try {
+    onUnmounted(() => {
+      abortUpload()
+      currentXHR = null
+    })
+  } catch {
+    // 忽略在非组件 setup 上下文中调用时的生命周期注册
+  }
 
   return {
     // 状态

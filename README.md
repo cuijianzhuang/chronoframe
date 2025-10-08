@@ -42,7 +42,14 @@ A smooth photo display and management application, supporting multiple image for
 
 We recommend deploying with the prebuilt Docker image. [View the image on ghcr](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe)
 
-Before deployment, create a `.env` file and configure environment variables. Refer to [.env.example](./.env.example).
+Before deployment, create a `.env` file and configure environment variables.
+
+You can copy the example file to get started:
+```bash
+cp env.example .env
+```
+
+Then edit the `.env` file with your configuration. For complete configuration reference, see [env.example](./env.example).
 
 ```env
 # Admin user email (required)
@@ -81,6 +88,10 @@ NUXT_SESSION_PASSWORD=
 NUXT_PUBLIC_OAUTH_GITHUB_ENABLED=false
 NUXT_OAUTH_GITHUB_CLIENT_ID=
 NUXT_OAUTH_GITHUB_CLIENT_SECRET=
+
+# Upload file type whitelist (optional)
+NUXT_UPLOAD_MIME_WHITELIST_ENABLED=true
+NUXT_UPLOAD_MIME_WHITELIST=image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/heic,image/heif,video/quicktime,video/mp4
 ```
 
 ### Docker
