@@ -1,19 +1,13 @@
-import type { BlobObject } from '@nuxthub/core'
 import type {
   HubR2StorageConfig,
   StorageObject,
   StorageProvider,
+  UploadOptions,
 } from '../interfaces'
 
-const convertToStorageObject = (blob: BlobObject): StorageObject => {
-  return {
-    key: blob.pathname,
-    size: blob.size,
-    lastModified: blob.uploadedAt,
-    etag: blob.httpEtag,
-  }
-}
-
+/**
+ * @deprecated DO NOT use HubR2StorageProvider anymore, use S3StorageProvider instead
+ */
 export class HubR2StorageProvider implements StorageProvider {
   config: HubR2StorageConfig
   private logger?: Logger['storage']
@@ -22,40 +16,27 @@ export class HubR2StorageProvider implements StorageProvider {
     this.config = config
     this.logger = logger
   }
+  getSignedUrl?(_key: string, _expiresIn?: number, _options?: UploadOptions): Promise<string> {
+    throw new Error('Method not implemented.')
+  }
+  getFileMeta(_key: string): Promise<StorageObject | null> {
+    throw new Error('Method not implemented.')
+  }
 
   async create(
-    key: string,
-    fileBuffer: Buffer,
+    _key: string,
+    _fileBuffer: Buffer,
     _contentType?: string,
   ): Promise<StorageObject> {
-    const file = new File([new Uint8Array(fileBuffer)], key)
-
-    if (!file || !file.size) {
-      throw new Error('Invalid file')
-    }
-
-    ensureBlob(file, {
-      maxSize: '128MB',
-    })
-
-    const blob = await hubBlob().put(key, file, {
-      prefix: this.config.prefix,
-    })
-
-    return convertToStorageObject(blob)
+    throw new Error('Method not implemented.')
   }
 
-  async delete(key: string): Promise<void> {
-    return await hubBlob().del(key)
+  async delete(_key: string): Promise<void> {
+    throw new Error('Method not implemented.')
   }
 
-  async get(key: string): Promise<Buffer | null> {
-    const blob = await hubBlob().get(key)
-    if (!blob) {
-      return null
-    }
-    const arrayBuffer = await blob.arrayBuffer()
-    return Buffer.from(arrayBuffer)
+  async get(_key: string): Promise<Buffer | null> {
+    throw new Error('Method not implemented.')
   }
 
   getPublicUrl(key: string): string {
@@ -69,11 +50,7 @@ export class HubR2StorageProvider implements StorageProvider {
   }
 
   async listAll(): Promise<StorageObject[]> {
-    const { blobs } = await hubBlob().list({
-      prefix: this.config.prefix,
-      limit: this.config.maxKeys,
-    })
-    return blobs.map(convertToStorageObject)
+    throw new Error('Method not implemented.')
   }
 
   listImages(): Promise<StorageObject[]> {

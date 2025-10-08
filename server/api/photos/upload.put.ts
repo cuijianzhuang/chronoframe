@@ -1,19 +1,20 @@
 import { useStorageProvider } from '~~/server/utils/useStorageProvider'
-import { getMessage, getPreferredLanguage } from '~~/server/utils/upload-messages'
 
 export default eventHandler(async (event) => {
   await requireUserSession(event)
 
   const { storageProvider } = useStorageProvider(event)
   const key = getQuery(event).key as string | undefined
-  const lang = getPreferredLanguage(event)
+  const t = await useTranslation(event)
 
   if (!key) {
-    const errorMsg = getMessage('error', 'required', lang, 'key')
     throw createError({
       statusCode: 400,
-      statusMessage: errorMsg?.title || 'Missing required parameter',
-      data: errorMsg,
+      statusMessage: t('upload.error.required.title'),
+      data: {
+        title: t('upload.error.required.title'),
+        message: t('upload.error.required.message', { field: 'key' }),
+      },
     })
   }
 
@@ -21,20 +22,23 @@ export default eventHandler(async (event) => {
   
   // MIME 类型白名单验证（可通过环境变量配置）
   const config = useRuntimeConfig(event)
-  const whitelistEnabled = config.UPLOAD_MIME_WHITELIST_ENABLED
+  const whitelistEnabled = config.upload.mime.whitelistEnabled
   
   if (whitelistEnabled) {
-    const whitelistStr = config.UPLOAD_MIME_WHITELIST
+    const whitelistStr = config.upload.mime.whitelist
     const allowedTypes = whitelistStr
       ? whitelistStr.split(',').map((type: string) => type.trim()).filter(Boolean)
       : []
     
     if (allowedTypes.length > 0 && !allowedTypes.includes(contentType)) {
-      const errorMsg = getMessage('error', 'invalidType', lang, contentType, allowedTypes)
       throw createError({
         statusCode: 415,
-        statusMessage: errorMsg?.title || 'Unsupported media type',
-        data: errorMsg,
+        statusMessage: t('upload.error.invalidType.title'),
+        data: {
+          title: t('upload.error.invalidType.title'),
+          message: t('upload.error.invalidType.message', { type: contentType }),
+          suggestion: t('upload.error.invalidType.suggestion', { allowed: allowedTypes.join(', ') }),
+        },
       })
     }
   }
@@ -43,18 +47,26 @@ export default eventHandler(async (event) => {
   if (!raw || !(raw instanceof Buffer)) {
     throw createError({
       statusCode: 400,
-      statusMessage: lang === 'zh' ? '请求体为空' : 'Empty request body',
+      statusMessage: t('upload.error.uploadFailed.title'),
+      data: {
+        title: t('upload.error.uploadFailed.title'),
+        message: t('upload.error.uploadFailed.message'),
+      },
     })
   }
   
   // 简单大小限制（例如 128MB）
   const maxBytes = 128 * 1024 * 1024
   if (raw.byteLength > maxBytes) {
-    const errorMsg = getMessage('error', 'tooLarge', lang, raw.byteLength, 128)
+    const sizeInMB = (raw.byteLength / 1024 / 1024).toFixed(2)
     throw createError({
       statusCode: 413,
-      statusMessage: errorMsg?.title || 'Payload too large',
-      data: errorMsg,
+      statusMessage: t('upload.error.tooLarge.title'),
+      data: {
+        title: t('upload.error.tooLarge.title'),
+        message: t('upload.error.tooLarge.message', { size: sizeInMB }),
+        suggestion: t('upload.error.tooLarge.suggestion', { maxSize: 128 }),
+      },
     })
   }
 
@@ -63,5 +75,4 @@ export default eventHandler(async (event) => {
 
   return { ok: true, key }
 })
-
 

@@ -58,7 +58,7 @@ export default defineNuxtConfig({
     mapbox: {
       accessToken: '',
     },
-    STORAGE_PROVIDER: 's3',
+    STORAGE_PROVIDER: 's3' satisfies 's3' | 'local',
     provider: {
       s3: {
         endpoint: '',
@@ -69,14 +69,24 @@ export default defineNuxtConfig({
         prefix: '',
         cdnUrl: '',
       },
+      local: {
+        localPath: './data/storage',
+        baseUrl: '/storage',
+        prefix: 'photos/',
+      },
     },
-    ALLOW_INSECURE_COOKIE: false,
-    // 上传文件类型白名单配置
-    UPLOAD_MIME_WHITELIST_ENABLED: true,
-    UPLOAD_MIME_WHITELIST: 'image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/heic,image/heif,video/quicktime,video/mp4',
-    // 重复文件检测配置
-    UPLOAD_DUPLICATE_CHECK_ENABLED: true,
-    UPLOAD_DUPLICATE_CHECK_MODE: 'warn', // 'warn' | 'block' | 'skip'
+    upload: {
+      mime: {
+        whitelistEnabled: true,
+        whitelist:
+          'image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/heic,image/heif,video/quicktime,video/mp4',
+      },
+      duplicateCheck: {
+        enabled: true,
+        mode: 'skip' as 'warn' | 'block' | 'skip',
+      },
+    },
+    allowInsecureCookie: false,
   },
 
   nitro: {
@@ -159,12 +169,16 @@ export default defineNuxtConfig({
   },
 
   i18n: {
+    experimental: {
+      localeDetector: 'localeDetector.ts',
+    },
     detectBrowserLanguage: {
       fallbackLocale: 'en',
       useCookie: false,
       cookieKey: 'chronoframe-locale',
     },
     strategy: 'no_prefix',
+    defaultLocale: 'en',
     locales: [
       {
         code: 'zh-Hans',

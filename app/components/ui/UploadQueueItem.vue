@@ -200,7 +200,7 @@ const generateParticleStyle = (index: number) => {
     layout
   >
     <!-- 文件信息头部 -->
-    <div class="flex items-start justify-between mb-3">
+    <div class="flex items-start justify-between">
       <div class="flex items-center gap-3 flex-1 min-w-0">
         <!-- 文件图标 -->
         <motion.div
@@ -265,7 +265,7 @@ const generateParticleStyle = (index: number) => {
             :transition="{ delay: 0.2, duration: 0.3, ease: 'backOut' }"
           >
             <Icon
-              name="tabler:arrow-right"
+              name="tabler:arrow-big-right-lines"
               class="size-3 text-white"
             />
           </motion.div>
@@ -279,7 +279,7 @@ const generateParticleStyle = (index: number) => {
             :transition="{ delay: 0.2, duration: 0.3, ease: 'backOut' }"
           >
             <Icon
-              name="tabler:x"
+              name="tabler:cancel"
               class="size-3 text-white"
             />
           </motion.div>
@@ -392,7 +392,7 @@ const generateParticleStyle = (index: number) => {
         :animate="{ opacity: 1, height: 'auto' }"
         :exit="{ opacity: 0, height: 0 }"
         :transition="{ duration: 0.3 }"
-        class="space-y-2"
+        class="space-y-2 mt-3"
       >
         <!-- 上传进度 -->
         <div

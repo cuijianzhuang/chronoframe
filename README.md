@@ -42,56 +42,49 @@ A smooth photo display and management application, supporting multiple image for
 
 We recommend deploying with the prebuilt Docker image. [View the image on ghcr](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe)
 
-Before deployment, create a `.env` file and configure environment variables.
+Create a `.env` file and configure environment variables.
 
-You can copy the example file to get started:
-```bash
-cp env.example .env
-```
-
-Then edit the `.env` file with your configuration. For complete configuration reference, see [env.example](./env.example).
+Below is a **minimal configuration** example. For complete configuration options, see [.env.example](./.env.example):
 
 ```env
-# Admin user email (required)
+# Admin email (required)
 CFRAME_ADMIN_EMAIL=
-# Admin user name (default to Chronoframe, optional)
+# Admin username (optional, default: Chronoframe)
 CFRAME_ADMIN_NAME=
-# Admin user password (default to CF1234@!, optional)
+# Admin password (optional, default: CF1234@!)
 CFRAME_ADMIN_PASSWORD=
 
-# App info
+# Site title (optional)
 NUXT_PUBLIC_APP_TITLE=
+# Site slogan (optional)
 NUXT_PUBLIC_APP_SLOGAN=
+# Site author (optional)
 NUXT_PUBLIC_APP_AUTHOR=
+# Site avatar URL (optional)
 NUXT_PUBLIC_APP_AVATAR_URL=
 
-# Mapbox access token for map features, Mapbox GL JS (Client-side, public)
+# Mapbox access token (required)
 NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
-# Mapbox secret access token for server-side, Mapbox Search API (Reverse Geocoding)
+# Mapbox unrestricted access token (optional)
 NUXT_MAPBOX_ACCESS_TOKEN=
 
-# Storage provider (s3/github/local)
-NUXT_STORAGE_PROVIDER=s3
-# S3 storage config
+# Storage provider (local/s3, choose one)
+NUXT_STORAGE_PROVIDER=local
+
+# S3 storage configuration
 NUXT_PROVIDER_S3_ENDPOINT=
 NUXT_PROVIDER_S3_BUCKET=chronoframe
 NUXT_PROVIDER_S3_REGION=auto
 NUXT_PROVIDER_S3_ACCESS_KEY_ID=
 NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=
-NUXT_PROVIDER_S3_PREFIX=photos/
 NUXT_PROVIDER_S3_CDN_URL=
 
-# Session password (32 chars, required)
+# Local storage configuration
+# (If using local storage, ensure /app/data directory is mounted)
+NUXT_PROVIDER_LOCAL_PATH=/app/data/photos
+
+# Session password (required, 32 random characters)
 NUXT_SESSION_PASSWORD=
-
-# GitHub OAuth
-NUXT_PUBLIC_OAUTH_GITHUB_ENABLED=false
-NUXT_OAUTH_GITHUB_CLIENT_ID=
-NUXT_OAUTH_GITHUB_CLIENT_SECRET=
-
-# Upload file type whitelist (optional)
-NUXT_UPLOAD_MIME_WHITELIST_ENABLED=true
-NUXT_UPLOAD_MIME_WHITELIST=image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/heic,image/heif,video/quicktime,video/mp4
 ```
 
 ### Docker

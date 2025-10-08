@@ -1,31 +1,29 @@
 import { useStorageProvider } from '~~/server/utils/useStorageProvider'
 import { eq } from 'drizzle-orm'
 import { generateSafePhotoId } from '~~/server/utils/file-utils'
-import { getMessage, getPreferredLanguage } from '~~/server/utils/upload-messages'
 
 export default eventHandler(async (event) => {
   await requireUserSession(event)
   const { storageProvider } = useStorageProvider(event)
-  const lang = getPreferredLanguage(event)
+  const config = useRuntimeConfig(event)
+  const t = await useTranslation(event)
 
   const body = await readBody(event)
   const { fileName, contentType, skipDuplicateCheck } = body
 
   if (!fileName) {
-    const errorMsg = getMessage('error', 'required', lang, 'fileName')
     throw createError({
       statusCode: 400,
-      statusMessage: errorMsg?.title || 'Missing required parameter',
-      data: errorMsg,
+      statusMessage: t('upload.error.required.title'),
     })
   }
 
   try {
     const objectKey = `${(storageProvider.config?.prefix || '').replace(/\/+$/, '')}/${fileName}`
-    const config = useRuntimeConfig(event)
 
     // 重复文件检测
-    const duplicateCheckEnabled = config.UPLOAD_DUPLICATE_CHECK_ENABLED && !skipDuplicateCheck
+    const duplicateCheckEnabled =
+      config.upload.duplicateCheck.enabled && !skipDuplicateCheck
     let existingPhoto = null
 
     if (duplicateCheckEnabled) {
@@ -46,29 +44,33 @@ export default eventHandler(async (event) => {
         .get()
 
       if (existingPhoto) {
-        const checkMode = config.UPLOAD_DUPLICATE_CHECK_MODE || 'warn'
+        const checkMode = config.upload.duplicateCheck.mode || 'skip'
 
         if (checkMode === 'block') {
           // 阻止模式：直接拒绝上传
-          const blockMsg = getMessage('duplicate', 'block', lang, fileName)
           throw createError({
             statusCode: 409,
-            statusMessage: blockMsg?.title || 'File already exists',
+            statusMessage: t('upload.duplicate.block.title'),
             data: {
               duplicate: true,
               existingPhoto,
-              ...blockMsg,
+              title: t('upload.duplicate.block.title'),
+              message: t('upload.duplicate.block.message', { fileName }),
             },
           })
         } else if (checkMode === 'skip') {
           // 跳过模式：返回现有照片信息，不上传
-          const skipMsg = getMessage('duplicate', 'skip', lang, fileName, existingPhoto)
           return {
             skipped: true,
             duplicate: true,
             existingPhoto,
             fileKey: objectKey,
-            ...skipMsg,
+            title: t('upload.duplicate.skip.title'),
+            message: t('upload.duplicate.skip.message', { fileName }),
+            info: t('upload.duplicate.skip.info', {
+              dateTaken:
+                existingPhoto.dateTaken || t('common.unknown', 'unknown date'),
+            }),
           }
         }
         // 'warn' 模式：继续上传但返回警告信息
@@ -77,13 +79,9 @@ export default eventHandler(async (event) => {
 
     // 若存储提供商支持预签名 URL，返回外部直传地址
     if (storageProvider.getSignedUrl) {
-      const signedUrl = await storageProvider.getSignedUrl(
-        objectKey,
-        3600,
-        {
-          contentType: contentType || 'application/octet-stream',
-        },
-      )
+      const signedUrl = await storageProvider.getSignedUrl(objectKey, 3600, {
+        contentType: contentType || 'application/octet-stream',
+      })
 
       const response: any = {
         signedUrl,
@@ -92,11 +90,17 @@ export default eventHandler(async (event) => {
       }
 
       if (existingPhoto) {
-        const warnMsg = getMessage('duplicate', 'warn', lang, fileName, existingPhoto)
         response.duplicate = true
         response.existingPhoto = existingPhoto
-        if (warnMsg) {
-          response.warningInfo = warnMsg
+        response.warningInfo = {
+          title: t('upload.duplicate.warn.title'),
+          message: t('upload.duplicate.warn.message', { fileName }),
+          warning: t('upload.duplicate.warn.warning'),
+          info: t('upload.duplicate.warn.info', {
+            title: existingPhoto.title || fileName,
+            dateTaken:
+              existingPhoto.dateTaken || t('common.unknown', 'unknown date'),
+          }),
         }
       }
 
@@ -112,11 +116,17 @@ export default eventHandler(async (event) => {
     }
 
     if (existingPhoto) {
-      const warnMsg = getMessage('duplicate', 'warn', lang, fileName, existingPhoto)
       response.duplicate = true
       response.existingPhoto = existingPhoto
-      if (warnMsg) {
-        response.warningInfo = warnMsg
+      response.warningInfo = {
+        title: t('upload.duplicate.warn.title'),
+        message: t('upload.duplicate.warn.message', { fileName }),
+        warning: t('upload.duplicate.warn.warning'),
+        info: t('upload.duplicate.warn.info', {
+          title: existingPhoto.title || fileName,
+          dateTaken:
+            existingPhoto.dateTaken || t('common.unknown', 'unknown date'),
+        }),
       }
     }
 
@@ -126,6 +136,9 @@ export default eventHandler(async (event) => {
       throw error
     }
     logger.chrono.error('Failed to prepare upload:', error)
-    throw createError({ statusCode: 500, statusMessage: 'Failed to prepare upload' })
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'Failed to prepare upload',
+    })
   }
 })

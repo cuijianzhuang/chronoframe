@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { createReadStream, promises as fs } from 'node:fs'
+import { getStorageManager } from '../../plugins/storage'
 // lightweight: avoid TS type dep; fallback when not resolvable
 const guessContentType = (filePath: string): string => {
   const ext = (filePath.split('.').pop() || '').toLowerCase()
@@ -28,10 +29,8 @@ const guessContentType = (filePath: string): string => {
       return 'application/octet-stream'
   }
 }
-import { getStorageManager } from '../../plugins/storage'
 
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig(event)
   const manager = getStorageManager()
   const provider = manager.getProvider()
 
@@ -104,5 +103,3 @@ export default defineEventHandler(async (event) => {
   const stream = createReadStream(absolute)
   return sendStream(event, stream)
 })
-
-

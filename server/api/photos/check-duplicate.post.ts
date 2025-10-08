@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { generateSafePhotoId } from '~~/server/utils/file-utils'
-import { getMessage, getPreferredLanguage } from '~~/server/utils/upload-messages'
 
 /**
  * 检查照片是否已存在
@@ -10,7 +9,7 @@ import { getMessage, getPreferredLanguage } from '~~/server/utils/upload-message
 export default defineEventHandler(async (event) => {
   await requireUserSession(event)
 
-  const lang = getPreferredLanguage(event)
+  const t = await useTranslation(event)
 
   try {
     const { fileNames, storageKeys } = await readValidatedBody(
@@ -22,11 +21,13 @@ export default defineEventHandler(async (event) => {
     )
 
     if (!fileNames && !storageKeys) {
-      const errorMsg = getMessage('error', 'required', lang, 'fileNames or storageKeys')
       throw createError({
         statusCode: 400,
-        statusMessage: errorMsg?.title || 'Missing required parameter',
-        data: errorMsg,
+        statusMessage: t('upload.error.required.title'),
+        data: {
+          title: t('upload.error.required.title'),
+          message: t('upload.error.required.message', { field: 'fileNames or storageKeys' }),
+        },
       })
     }
 
@@ -99,17 +100,17 @@ export default defineEventHandler(async (event) => {
     }
 
     const duplicatesFound = results.filter(r => r.exists).length
-    const successMsg = getMessage('success', 'check', lang, results.length, duplicatesFound)
 
     return {
       success: true,
       results,
       duplicatesFound,
-      summary: successMsg || {
-        title: lang === 'zh' ? '检查完成' : 'Check Complete',
-        message: lang === 'zh'
-          ? `已检查 ${results.length} 个文件，发现 ${duplicatesFound} 个重复文件`
-          : `Checked ${results.length} files, found ${duplicatesFound} duplicates`,
+      summary: {
+        title: t('upload.success.check.title'),
+        message: t('upload.success.check.message', { 
+          total: results.length, 
+          duplicates: duplicatesFound 
+        }),
       },
     }
   } catch (error: any) {
@@ -117,12 +118,13 @@ export default defineEventHandler(async (event) => {
       throw error
     }
 
-    const errorMsg = getMessage('error', 'uploadFailed', lang, error.message)
     throw createError({
       statusCode: 500,
-      statusMessage: errorMsg?.title || 'Failed to check duplicates',
-      data: errorMsg,
+      statusMessage: t('upload.error.uploadFailed.title'),
+      data: {
+        title: t('upload.error.uploadFailed.title'),
+        message: error.message || t('upload.error.uploadFailed.message'),
+      },
     })
   }
 })
-

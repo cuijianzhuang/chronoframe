@@ -39,7 +39,7 @@ export function useUpload(options: UseUploadOptions = {}) {
     headers = {},
     speedSampleSize = 5,
     maxRetries = 3,
-    retryDelay = 1000
+    retryDelay = 1000,
   } = options
 
   // 响应式状态
@@ -49,20 +49,22 @@ export function useUpload(options: UseUploadOptions = {}) {
       loaded: 0,
       total: 0,
       percentage: 0,
-    }
+    },
   })
 
   // 当前的 XMLHttpRequest 实例
   let currentXHR: XMLHttpRequest | null = null
-  
+
   // 用于计算速度的数据点
   const speedSamples: Array<{ timestamp: number; loaded: number }> = []
 
   // 计算上传速度和剩余时间
-  const calculateSpeed = (loaded: number): { speed: number; timeRemaining?: number } => {
+  const calculateSpeed = (
+    loaded: number,
+  ): { speed: number; timeRemaining?: number } => {
     const now = Date.now()
     speedSamples.push({ timestamp: now, loaded })
-    
+
     // 保持样本数量在限制内
     if (speedSamples.length > speedSampleSize) {
       speedSamples.shift()
@@ -75,14 +77,14 @@ export function useUpload(options: UseUploadOptions = {}) {
     // 计算平均速度
     const firstSample = speedSamples[0]
     const lastSample = speedSamples[speedSamples.length - 1]
-    
+
     if (!firstSample || !lastSample) {
       return { speed: 0 }
     }
-    
+
     const timeDiff = (lastSample.timestamp - firstSample.timestamp) / 1000 // 转换为秒
     const bytesDiff = lastSample.loaded - firstSample.loaded
-    
+
     const speed = timeDiff > 0 ? bytesDiff / timeDiff : 0
 
     // 计算剩余时间
@@ -102,13 +104,13 @@ export function useUpload(options: UseUploadOptions = {}) {
   const updateProgress = (loaded: number, total: number) => {
     const percentage = total > 0 ? Math.round((loaded / total) * 100) : 0
     const { speed, timeRemaining } = calculateSpeed(loaded)
-    
+
     const progress: UploadProgress = {
       loaded,
       total,
       percentage,
       speed,
-      timeRemaining
+      timeRemaining,
     }
 
     updateStatus({ progress })
@@ -126,7 +128,7 @@ export function useUpload(options: UseUploadOptions = {}) {
       },
       error: undefined,
       startTime: undefined,
-      endTime: undefined
+      endTime: undefined,
     })
   }
 
@@ -135,7 +137,7 @@ export function useUpload(options: UseUploadOptions = {}) {
     file: File,
     signedUrl: string,
     callbacks: UploadCallbacks = {},
-    attempt: number = 1
+    attempt: number = 1,
   ): Promise<XMLHttpRequest> => {
     // 重置状态（仅在第一次尝试时）
     if (attempt === 1) {
@@ -181,38 +183,33 @@ export function useUpload(options: UseUploadOptions = {}) {
       xhr.addEventListener('error', () => {
         const endTime = Date.now()
         let errorMessage = ''
-        let suggestion = ''
-        
+
         if (xhr.status === 0) {
           // 状态码 0 通常表示网络连接失败、CORS 问题或服务器不可达
           errorMessage = '网络连接失败'
-          suggestion = '请检查网络连接或稍后重试。如果问题持续存在，可能是服务器配置问题。'
         } else if (xhr.status >= 400 && xhr.status < 500) {
           errorMessage = `客户端错误 (${xhr.status})`
-          suggestion = '请检查文件格式和大小是否符合要求。'
         } else if (xhr.status >= 500) {
           errorMessage = `服务器错误 (${xhr.status})`
-          suggestion = '服务器暂时不可用，请稍后重试。'
         } else {
           errorMessage = `网络错误 (状态码: ${xhr.status})`
-          suggestion = '请检查网络连接后重试。'
         }
-        
+
         // 检查是否可以重试
-        const canRetry = attempt < maxRetries && (
-          xhr.status === 0 || // 网络错误
-          xhr.status >= 500 || // 服务器错误
-          xhr.status === 429 // 频率限制
-        )
-        
+        const canRetry =
+          attempt < maxRetries &&
+          (xhr.status === 0 || // 网络错误
+            xhr.status >= 500 || // 服务器错误
+            xhr.status === 429) // 频率限制
+
         if (canRetry) {
-          updateStatus({ 
-            status: 'error', 
-            error: `${errorMessage} (尝试 ${attempt}/${maxRetries})`, 
-            endTime 
+          updateStatus({
+            status: 'error',
+            error: `${errorMessage} (尝试 ${attempt}/${maxRetries})`,
+            endTime,
           })
           callbacks.onRetry?.(attempt, maxRetries)
-          
+
           // 延迟后重试
           setTimeout(() => {
             uploadFile(file, signedUrl, callbacks, attempt + 1)
@@ -231,19 +228,18 @@ export function useUpload(options: UseUploadOptions = {}) {
       xhr.addEventListener('timeout', () => {
         const endTime = Date.now()
         const errorMessage = `上传超时 (${timeout}ms)`
-        const suggestion = '文件可能过大或网络较慢，请尝试：1) 检查网络连接；2) 稍后重试；3) 尝试上传较小的文件。'
-        
+
         // 检查是否可以重试（超时也可以重试）
         const canRetry = attempt < maxRetries
-        
+
         if (canRetry) {
-          updateStatus({ 
-            status: 'error', 
-            error: `${errorMessage} (尝试 ${attempt}/${maxRetries})`, 
-            endTime 
+          updateStatus({
+            status: 'error',
+            error: `${errorMessage} (尝试 ${attempt}/${maxRetries})`,
+            endTime,
           })
           callbacks.onRetry?.(attempt, maxRetries)
-          
+
           // 延迟后重试
           setTimeout(() => {
             uploadFile(file, signedUrl, callbacks, attempt + 1)
@@ -276,57 +272,45 @@ export function useUpload(options: UseUploadOptions = {}) {
           } else if (xhr.status >= 400) {
             const endTime = Date.now()
             let errorMessage = ''
-            let suggestion = ''
-            
+
             // 根据状态码提供更友好的错误信息
             switch (xhr.status) {
               case 400:
                 errorMessage = '请求格式错误'
-                suggestion = '请检查文件格式是否正确。'
                 break
               case 401:
                 errorMessage = '未授权访问'
-                suggestion = '请重新登录后再试。'
                 break
               case 403:
                 errorMessage = '访问被拒绝'
-                suggestion = '您没有权限执行此操作。'
                 break
               case 404:
                 errorMessage = '上传接口不存在'
-                suggestion = '请检查应用配置或联系管理员。'
                 break
               case 409:
                 errorMessage = '文件冲突'
-                suggestion = '文件已存在，请重命名后重新上传。'
                 break
               case 413:
                 errorMessage = '文件过大'
-                suggestion = '请选择更小的文件（建议小于 128MB）。'
                 break
               case 415:
                 errorMessage = '不支持的文件类型'
-                suggestion = '请上传支持的文件格式（JPEG、PNG、HEIC、MOV）。'
                 break
               case 429:
                 errorMessage = '上传频率过高'
-                suggestion = '请稍等片刻后再试。'
                 break
               case 500:
                 errorMessage = '服务器内部错误'
-                suggestion = '服务器暂时出现问题，请稍后重试。'
                 break
               case 502:
               case 503:
               case 504:
                 errorMessage = '服务器暂时不可用'
-                suggestion = '服务器正在维护中，请稍后重试。'
                 break
               default:
                 errorMessage = `HTTP 错误: ${xhr.status}`
-                suggestion = '请检查网络连接后重试。'
             }
-            
+
             // 尝试获取服务器返回的详细错误信息
             try {
               const responseText = xhr.responseText
@@ -335,7 +319,6 @@ export function useUpload(options: UseUploadOptions = {}) {
                   const responseData = JSON.parse(responseText)
                   if (responseData.data?.message) {
                     errorMessage = responseData.data.title || errorMessage
-                    suggestion = responseData.data.suggestion || suggestion
                   }
                 } catch {
                   // 如果不是 JSON，使用原始文本
@@ -357,8 +340,11 @@ export function useUpload(options: UseUploadOptions = {}) {
       xhr.open('PUT', signedUrl)
 
       // 设置请求头
-      xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream')
-      
+      xhr.setRequestHeader(
+        'Content-Type',
+        file.type || 'application/octet-stream',
+      )
+
       // 设置自定义请求头
       Object.entries(headers).forEach(([key, value]) => {
         xhr.setRequestHeader(key, value)
@@ -388,7 +374,7 @@ export function useUpload(options: UseUploadOptions = {}) {
   // 格式化时间
   const formatTime = (seconds: number): string => {
     if (!isFinite(seconds) || seconds < 0) return '计算中...'
-    
+
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
     const secs = Math.floor(seconds % 60)
@@ -412,14 +398,15 @@ export function useUpload(options: UseUploadOptions = {}) {
 
   // 格式化的进度信息
   const formattedProgress = computed(() => {
-    const { loaded, total, percentage, speed, timeRemaining } = uploadStatus.value.progress
+    const { loaded, total, percentage, speed, timeRemaining } =
+      uploadStatus.value.progress
     return {
       percentage,
       loadedText: formatBytes(loaded),
       totalText: formatBytes(total),
       speedText: speed ? `${formatBytes(speed)}/s` : '',
       timeRemainingText: timeRemaining ? formatTime(timeRemaining) : '',
-      progressText: `${formatBytes(loaded)} / ${formatBytes(total)} (${percentage}%)`
+      progressText: `${formatBytes(loaded)} / ${formatBytes(total)} (${percentage}%)`,
     }
   })
 
@@ -430,14 +417,12 @@ export function useUpload(options: UseUploadOptions = {}) {
       currentXHR = null
     })
   } catch {
-    // 忽略在非组件 setup 上下文中调用时的生命周期注册
+    /* empty */
   }
 
   return {
-    // 状态
     uploadStatus: readonly(uploadStatus),
-    
-    // 计算属性
+
     isUploading,
     isIdle,
     isSuccess,
@@ -445,12 +430,11 @@ export function useUpload(options: UseUploadOptions = {}) {
     isAborted,
     canAbort,
     formattedProgress,
-    
-    // 方法
+
     uploadFile,
     abortUpload,
     resetStatus,
     formatBytes,
-    formatTime
+    formatTime,
   }
 }

@@ -447,7 +447,9 @@ export class QueueManager {
             this.logger.warn(
               `No matching photo found for LivePhoto video: ${videoKey}`,
             )
-            throw new Error(`No matching photo found for LivePhoto video: ${videoKey}`)
+            throw new Error(
+              `No matching photo found for LivePhoto video: ${videoKey}`,
+            )
           }
 
           const livePhotoVideoUrl = storageProvider.getPublicUrl(videoKey)

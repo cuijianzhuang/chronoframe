@@ -45,55 +45,49 @@
 
 推荐使用预构建的 docker 镜像部署，[在 ghcr 上查看镜像](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe)
 
-部署前请先创建 `.env` 文件并配置环境变量。
+创建 `.env` 文件并配置。
 
-你可以复制示例文件开始：
-```bash
-cp env.example .env
-```
-
-然后编辑 `.env` 文件，填入你的配置。完整配置说明请参考 [env.example](./env.example)。
+下面是**最小化配置**示例，完整的配置项参考 [.env.example](./.env.example)：
 
 ```env
-# Admin user email (required)
+# 管理员邮箱 (必须)
 CFRAME_ADMIN_EMAIL=
-# Admin user name (default to Chronoframe, optional)
+# 管理员用户名 (可选, 默认 Chronoframe)
 CFRAME_ADMIN_NAME=
-# Admin user password (default to CF1234@!, optional)
+# 管理员密码 (可选, 默认 CF1234@!)
 CFRAME_ADMIN_PASSWORD=
 
-# 应用标题与口号
+# 站点标题 (可选)
 NUXT_PUBLIC_APP_TITLE=
+# 站点口号 (可选)
 NUXT_PUBLIC_APP_SLOGAN=
+# 站点作者 (可选)
 NUXT_PUBLIC_APP_AUTHOR=
+# 站点头像 URL (可选)
 NUXT_PUBLIC_APP_AVATAR_URL=
 
-# Mapbox access token for map features, Mapbox GL JS (Client-side, public)
+# Mapbox 访问令牌 (必须)
 NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
-# Mapbox secret access token for server-side, Mapbox Search API (Reverse Geocoding)
+# Mapbox 无 URL 限制访问令牌 (可选)
 NUXT_MAPBOX_ACCESS_TOKEN=
 
-# 存储提供者（s3/github/local）
-NUXT_STORAGE_PROVIDER=s3
+# 存储提供者 (local/s3, 选其一)
+NUXT_STORAGE_PROVIDER=local
+
 # S3 存储服务配置
 NUXT_PROVIDER_S3_ENDPOINT=
 NUXT_PROVIDER_S3_BUCKET=chronoframe
 NUXT_PROVIDER_S3_REGION=auto
 NUXT_PROVIDER_S3_ACCESS_KEY_ID=
 NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=
-NUXT_PROVIDER_S3_PREFIX=photos/
 NUXT_PROVIDER_S3_CDN_URL=
 
-# 会话密码（32 位随机字符串，必须设置）
+# Local 存储配置
+# (如果使用 local 存储, 请确保挂载了 /app/data 目录)
+NUXT_PROVIDER_LOCAL_PATH=/app/data/photos
+
+# 会话密码 (必须, 32 位随机字符串)
 NUXT_SESSION_PASSWORD=
-
-# GitHub OAuth
-NUXT_OAUTH_GITHUB_CLIENT_ID=
-NUXT_OAUTH_GITHUB_CLIENT_SECRET=
-
-# 上传文件类型白名单（可选）
-NUXT_UPLOAD_MIME_WHITELIST_ENABLED=true
-NUXT_UPLOAD_MIME_WHITELIST=image/jpeg,image/png,image/webp,image/gif,image/bmp,image/tiff,image/heic,image/heif,video/quicktime,video/mp4
 ```
 
 ### Docker
