@@ -25,14 +25,17 @@ export default defineConfig({
       {
         text: 'Configuration',
         items: [
-          { text: 'Storage Providers', link: '/guide/storage-providers' },
+          {
+            text: 'Storage Providers',
+            link: '/configuration/storage-providers',
+          },
         ],
       },
       {
         text: 'Development',
         items: [
-          { text: 'Contributing Guide', link: '/guide/contributing' },
-          { text: 'API Documentation', link: '/guide/api' },
+          { text: 'Contributing Guide', link: '/development/contributing' },
+          { text: 'API Documentation', link: '/development/api' },
         ],
       },
     ],

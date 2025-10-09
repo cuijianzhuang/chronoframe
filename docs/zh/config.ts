@@ -24,14 +24,14 @@ export default defineConfig({
       {
         text: '配置',
         items: [
-          { text: '存储提供器', link: '/zh/guide/storage-providers' },
+          { text: '存储提供器', link: '/zh/configuration/storage-providers' },
         ],
       },
       {
         text: '开发',
         items: [
-          { text: '贡献指南', link: '/zh/guide/contributing' },
-          { text: 'API 文档', link: '/zh/guide/api' },
+          { text: '贡献指南', link: '/zh/development/contributing' },
+          { text: 'API 文档', link: '/zh/development/api' },
         ],
       },
     ],
