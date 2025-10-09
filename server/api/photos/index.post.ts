@@ -1,6 +1,44 @@
+import path from 'path'
 import { useStorageProvider } from '~~/server/utils/useStorageProvider'
 import { eq } from 'drizzle-orm'
 import { generateSafePhotoId } from '~~/server/utils/file-utils'
+
+const VIDEO_EXTENSIONS = new Set([
+  '.mov',
+  '.mp4',
+])
+
+const IMAGE_EXTENSIONS = new Set([
+  '.avif',
+  '.bmp',
+  '.gif',
+  '.heic',
+  '.heif',
+  '.jpeg',
+  '.jpg',
+  '.png',
+  '.tif',
+  '.tiff',
+  '.webp',
+])
+
+const isVideoFile = (fileName: string, contentType?: string | null): boolean => {
+  if (contentType?.toLowerCase().startsWith('video/')) {
+    return true
+  }
+
+  const ext = path.extname(fileName).toLowerCase()
+  return ext !== '' && VIDEO_EXTENSIONS.has(ext)
+}
+
+const isLikelyImageKey = (storageKey?: string | null): boolean => {
+  if (!storageKey) {
+    return false
+  }
+
+  const ext = path.extname(storageKey).toLowerCase()
+  return ext !== '' && IMAGE_EXTENSIONS.has(ext)
+}
 
 export default eventHandler(async (event) => {
   await requireUserSession(event)
@@ -10,6 +48,7 @@ export default eventHandler(async (event) => {
 
   const body = await readBody(event)
   const { fileName, contentType, skipDuplicateCheck } = body
+  const isVideoUpload = fileName ? isVideoFile(fileName, contentType) : false
 
   if (!fileName) {
     throw createError({
@@ -42,6 +81,10 @@ export default eventHandler(async (event) => {
         .from(tables.photos)
         .where(eq(tables.photos.id, photoId))
         .get()
+
+      if (existingPhoto && isVideoUpload && isLikelyImageKey(existingPhoto.storageKey)) {
+        existingPhoto = null
+      }
 
       if (existingPhoto) {
         const checkMode = config.upload.duplicateCheck.mode || 'skip'

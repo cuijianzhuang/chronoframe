@@ -181,7 +181,7 @@ const uploadImage = async (file: File, existingFileId?: string) => {
                 type: isMovFile ? 'live-photo-video' : 'photo',
                 storageKey: signedUrlResponse.fileKey,
               },
-              priority: 0,
+              priority: isMovFile ? 0 : 1, // Live Photo 视频优先级更低，确保图片优先处理
               maxAttempts: 3,
             },
           })

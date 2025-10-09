@@ -270,7 +270,9 @@ export const processMotionPhotoFromXmp = async ({
       return null
     }
 
-    const targetKey = `motion-videos/${photoId}.mp4`
+    // todo: consider storing in a dedicated subfolder
+    // const targetKey = `motion-videos/${photoId}.mp4`
+    const targetKey = `${photoId}.mp4`
     let storedObject
     try {
       storedObject = await storageProvider.create(
