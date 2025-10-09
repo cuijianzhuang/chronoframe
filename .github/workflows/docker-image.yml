@@ -214,6 +214,31 @@ jobs:
           DOCKERHUB_BASE_RAW="${{ env.DOCKERHUB_IMAGE_NAME }}"
           GHCR_BASE=$(echo "$GHCR_BASE_RAW" | tr '[:upper:]' '[:lower:]')
           DOCKERHUB_BASE=$(echo "$DOCKERHUB_BASE_RAW" | tr '[:upper:]' '[:lower:]')
+
+          GHCR_REGISTRY=$(echo "$GHCR_BASE" | cut -d/ -f1)
+          GHCR_OWNER=$(echo "$GHCR_BASE" | cut -d/ -f2)
+          GHCR_REPO=$(echo "$GHCR_BASE" | cut -d/ -f3)
+          DOCKERHUB_REGISTRY="docker.io"
+          DOCKERHUB_OWNER=$(echo "$DOCKERHUB_BASE" | cut -d/ -f1)
+          DOCKERHUB_REPO=$(echo "$DOCKERHUB_BASE" | cut -d/ -f2)
+
+          insert_wbr() {
+            local input="$1"
+            local length=${#input}
+            if (( length <= 1 )); then
+              printf '%s' "$input"
+              return
+            fi
+            local midpoint=$(( (length + 1) / 2 ))
+            printf '%s<wbr>%s' "${input:0:midpoint}" "${input:midpoint}"
+          }
+
+          GHCR_OWNER_DISPLAY=$(insert_wbr "$GHCR_OWNER")
+          DOCKERHUB_OWNER_DISPLAY=$(insert_wbr "$DOCKERHUB_OWNER")
+
+          GHCR_DISPLAY="${GHCR_REGISTRY}/${GHCR_OWNER_DISPLAY}/${GHCR_REPO}"
+          DOCKERHUB_DISPLAY="${DOCKERHUB_REGISTRY}/${DOCKERHUB_OWNER_DISPLAY}/${DOCKERHUB_REPO}"
+
           echo "## 🚀 Docker Image Built and Pushed Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Tag:** \`${VERSION}\`" >> $GITHUB_STEP_SUMMARY
@@ -221,17 +246,17 @@ jobs:
           echo "**Images:**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### GitHub Container Registry" >> $GITHUB_STEP_SUMMARY
-          echo "- \`${GHCR_BASE}:${VERSION}\`" >> $GITHUB_STEP_SUMMARY
-           echo "- \`${GHCR_BASE}:nightly\`" >> $GITHUB_STEP_SUMMARY
+          echo "- <code>${GHCR_DISPLAY}:${VERSION}</code>" >> $GITHUB_STEP_SUMMARY
+          echo "- <code>${GHCR_DISPLAY}:nightly</code>" >> $GITHUB_STEP_SUMMARY
           if [[ "${IS_PRERELEASE}" != "true" ]]; then
-            echo "- \`${GHCR_BASE}:latest\`" >> $GITHUB_STEP_SUMMARY
+            echo "- <code>${GHCR_DISPLAY}:latest</code>" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Docker Hub" >> $GITHUB_STEP_SUMMARY
-          echo "- \`${DOCKERHUB_BASE}:${VERSION}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`${DOCKERHUB_BASE}:nightly\`" >> $GITHUB_STEP_SUMMARY
+          echo "- <code>${DOCKERHUB_DISPLAY}:${VERSION}</code>" >> $GITHUB_STEP_SUMMARY
+          echo "- <code>${DOCKERHUB_DISPLAY}:nightly</code>" >> $GITHUB_STEP_SUMMARY
           if [[ "${IS_PRERELEASE}" != "true" ]]; then
-            echo "- \`${DOCKERHUB_BASE}:latest\`" >> $GITHUB_STEP_SUMMARY
+            echo "- <code>${DOCKERHUB_DISPLAY}:latest</code>" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Platforms:** linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
