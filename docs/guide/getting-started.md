@@ -48,7 +48,7 @@ docker pull hoshinosuzumi/chronoframe:latest
 
 Below is the minimal configuration for running with local storage. For the complete list, see the [Configuration Guide](/guide/configuration).
 
-```env
+```bash
 # Admin email (required)
 CFRAME_ADMIN_EMAIL=
 # Admin username (optional, default Chronoframe)
@@ -77,7 +77,7 @@ NUXT_SESSION_PASSWORD=
 
 If you want to use S3 instead of local storage, replace the storage section with:
 
-```env
+```bash
 NUXT_STORAGE_PROVIDER=s3
 NUXT_PROVIDER_S3_ENDPOINT=
 NUXT_PROVIDER_S3_BUCKET=chronoframe
@@ -90,7 +90,7 @@ NUXT_PROVIDER_S3_CDN_URL=
 
 Optional GitHub OAuth variables:
 
-```env
+```bash
 NUXT_OAUTH_GITHUB_CLIENT_ID=
 NUXT_OAUTH_GITHUB_CLIENT_SECRET=
 ```
@@ -233,7 +233,7 @@ openssl rand -base64 32
 Make sure you are not accessing the site via raw IP:port. For security, cookies are set for the domain.
 
 If you must use IP + port (not recommended), add:
-```env
+```bash
 NUXT_ALLOW_INSECURE_COOKIE=true
 ```
 :::

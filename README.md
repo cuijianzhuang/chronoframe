@@ -46,7 +46,7 @@ Create a `.env` file and configure environment variables.
 
 Below is a **minimal configuration** example. For complete configuration options, see [.env.example](./.env.example):
 
-```env
+```bash
 # Admin email (required)
 CFRAME_ADMIN_EMAIL=
 # Admin username (optional, default Chronoframe)

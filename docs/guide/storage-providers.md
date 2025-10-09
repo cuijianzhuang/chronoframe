@@ -14,7 +14,7 @@ S3 compatible storage is the most recommended production environment option, sup
 
 ### Basic Configuration
 
-```env
+```bash
 # Set storage provider to S3
 NUXT_STORAGE_PROVIDER=s3
 
@@ -34,7 +34,7 @@ NUXT_PROVIDER_S3_CDN_URL=https://cdn.example.com
 
 #### AWS S3
 
-```env
+```bash
 NUXT_STORAGE_PROVIDER=s3
 NUXT_PROVIDER_S3_ENDPOINT=https://s3.amazonaws.com
 NUXT_PROVIDER_S3_BUCKET=my-chronoframe-bucket
@@ -46,7 +46,7 @@ NUXT_PROVIDER_S3_CDN_URL=https://d1234567890.cloudfront.net
 
 #### Cloudflare R2
 
-```env
+```bash
 NUXT_STORAGE_PROVIDER=s3
 NUXT_PROVIDER_S3_ENDPOINT=https://[account-id].r2.cloudflarestorage.com
 NUXT_PROVIDER_S3_BUCKET=chronoframe
@@ -58,7 +58,7 @@ NUXT_PROVIDER_S3_CDN_URL=https://photos.example.com
 
 #### Alibaba Cloud OSS
 
-```env
+```bash
 NUXT_STORAGE_PROVIDER=s3
 NUXT_PROVIDER_S3_ENDPOINT=https://oss-cn-hangzhou.aliyuncs.com
 NUXT_PROVIDER_S3_BUCKET=chronoframe-photos
@@ -70,7 +70,7 @@ NUXT_PROVIDER_S3_CDN_URL=https://cdn.example.com
 
 #### Tencent Cloud COS
 
-```env
+```bash
 NUXT_STORAGE_PROVIDER=s3
 NUXT_PROVIDER_S3_ENDPOINT=https://cos.ap-beijing.myqcloud.com
 NUXT_PROVIDER_S3_BUCKET=chronoframe-1234567890
@@ -81,7 +81,7 @@ NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=...
 
 #### MinIO Self-hosted
 
-```env
+```bash
 NUXT_STORAGE_PROVIDER=s3
 NUXT_PROVIDER_S3_ENDPOINT=https://minio.example.com
 NUXT_PROVIDER_S3_BUCKET=chronoframe
@@ -112,7 +112,7 @@ Recommended CORS configuration:
 
 GitHub storage stores photos in Git repositories, suitable for small-scale use.
 
-```env
+```bash
 # Set storage provider to GitHub (not yet implemented)
 NUXT_STORAGE_PROVIDER=github
 
@@ -128,7 +128,7 @@ NUXT_PROVIDER_GITHUB_TOKEN=ghp_...
 
 Local storage saves files in the server filesystem.
 
-```env
+```bash
 # Set storage provider to local (not yet implemented)
 NUXT_STORAGE_PROVIDER=local
 

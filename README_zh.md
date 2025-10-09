@@ -49,7 +49,7 @@
 
 下面是**最小化配置**示例，完整的配置项参考 [.env.example](./.env.example)：
 
-```env
+```bash
 # 管理员邮箱（必须）
 CFRAME_ADMIN_EMAIL=
 # 管理员用户名（可选，默认 ChronoFrame）

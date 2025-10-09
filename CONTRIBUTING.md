@@ -51,7 +51,7 @@ nano .env  # Or use your preferred editor
 
 #### Minimal Development Configuration
 
-```env
+```bash
 # === Admin Account ===
 CFRAME_ADMIN_EMAIL=dev@example.com
 CFRAME_ADMIN_NAME=Developer

@@ -244,7 +244,7 @@ openssl rand -base64 32
 首先请确保不是直接通过 IP 地址和端口号访问。出于安全考虑，请通过配置的域名访问。
 
 如果出于某些原因，您执意要通过 IP 端口访问，请在配置项中添加：
-```env
+```bash
 NUXT_ALLOW_INSECURE_COOKIE=true
 ```
 :::

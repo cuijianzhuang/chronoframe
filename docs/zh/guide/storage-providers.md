@@ -14,7 +14,7 @@ S3 兼容存储是最推荐的生产环境选项，支持所有主流云服务�
 
 ### 基础配置
 
-```env
+```bash
 # 设置存储提供器为 S3
 NUXT_STORAGE_PROVIDER=s3
 
@@ -34,7 +34,7 @@ NUXT_PROVIDER_S3_CDN_URL=https://cdn.example.com
 
 #### AWS S3
 
-```env
+```bash
 NUXT_STORAGE_PROVIDER=s3
 NUXT_PROVIDER_S3_ENDPOINT=https://s3.amazonaws.com
 NUXT_PROVIDER_S3_BUCKET=my-chronoframe-bucket
@@ -46,7 +46,7 @@ NUXT_PROVIDER_S3_CDN_URL=https://d1234567890.cloudfront.net
 
 #### Cloudflare R2
 
-```env
+```bash
 NUXT_STORAGE_PROVIDER=s3
 NUXT_PROVIDER_S3_ENDPOINT=https://[account-id].r2.cloudflarestorage.com
 NUXT_PROVIDER_S3_BUCKET=chronoframe
@@ -58,7 +58,7 @@ NUXT_PROVIDER_S3_CDN_URL=https://photos.example.com
 
 #### 阿里云 OSS
 
-```env
+```bash
 NUXT_STORAGE_PROVIDER=s3
 NUXT_PROVIDER_S3_ENDPOINT=https://oss-cn-hangzhou.aliyuncs.com
 NUXT_PROVIDER_S3_BUCKET=chronoframe-photos
@@ -70,7 +70,7 @@ NUXT_PROVIDER_S3_CDN_URL=https://cdn.example.com
 
 #### 腾讯云 COS
 
-```env
+```bash
 NUXT_STORAGE_PROVIDER=s3
 NUXT_PROVIDER_S3_ENDPOINT=https://cos.ap-beijing.myqcloud.com
 NUXT_PROVIDER_S3_BUCKET=chronoframe-1234567890
@@ -81,7 +81,7 @@ NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=...
 
 #### MinIO 自托管
 
-```env
+```bash
 NUXT_STORAGE_PROVIDER=s3
 NUXT_PROVIDER_S3_ENDPOINT=https://minio.example.com
 NUXT_PROVIDER_S3_BUCKET=chronoframe
@@ -112,7 +112,7 @@ NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=minioadmin
 
 GitHub 存储将照片存储在 Git 仓库中，适合小规模使用。
 
-```env
+```bash
 # 设置存储提供器为 GitHub（暂未实现）
 NUXT_STORAGE_PROVIDER=github
 
@@ -128,7 +128,7 @@ NUXT_PROVIDER_GITHUB_TOKEN=ghp_...
 
 本地存储将文件保存在服务器文件系统中。
 
-```env
+```bash
 # 设置存储提供器为本地（暂未实现）
 NUXT_STORAGE_PROVIDER=local
 
