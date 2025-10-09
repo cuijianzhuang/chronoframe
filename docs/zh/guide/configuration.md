@@ -16,7 +16,9 @@
 | NUXT_PUBLIC_COLOR_MODE_PREFERENCE    | 颜色模式偏好，可选 `light`、`dark`、`system`         | system                  | 否                                        |
 | NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN      | Mapbox 访问令牌(可限制 URL)，用于地图服务            | 无                      | 是                                        |
 | NUXT_MAPBOX_ACCESS_TOKEN             | Mapbox 访问令牌(无 URL 限制)，用于位置信息服务       | 无                      | 否                                        |
-| NUXT_STORAGE_PROVIDER                | 存储提供者，支持 `s3`、`github`、`local`             | `s3`                    | 是                                        |
+| NUXT_STORAGE_PROVIDER                | 存储提供者，支持 `local`、`s3`                       | `local`                 | 是                                        |
+| NUXT_PROVIDER_LOCAL_PATH             | 本地存储路径                                         | `/app/data/storage`     | 否                                        |
+| NUXT_PROVIDER_LOCAL_BASE_URL         | 本地存储的访问 URL                                   | `/storage`              | 否                                        |
 | NUXT_PROVIDER_S3_ENDPOINT            | S3 兼容存储服务的 Endpoint                           | 无                      | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
 | NUXT_PROVIDER_S3_BUCKET              | S3 存储桶名称                                        | `chronoframe`           | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
 | NUXT_PROVIDER_S3_REGION              | S3 存储桶区域                                        | `auto`                  | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
