@@ -38,7 +38,7 @@
 
 ### ☁️ 灵活的存储方案
 
-- **多存储后端** - 支持 S3 兼容存储、GitHub(WIP)、本地文件系统(WIP) 等
+- **多存储后端** - 支持 S3 兼容存储、本地文件系统
 - **CDN 加速** - 可配置 CDN 地址加速图片访问
 
 ## 🐳 部署
@@ -50,44 +50,44 @@
 下面是**最小化配置**示例，完整的配置项参考 [.env.example](./.env.example)：
 
 ```env
-# 管理员邮箱 (必须)
+# 管理员邮箱（必须）
 CFRAME_ADMIN_EMAIL=
-# 管理员用户名 (可选, 默认 Chronoframe)
+# 管理员用户名（可选，默认 ChronoFrame）
 CFRAME_ADMIN_NAME=
-# 管理员密码 (可选, 默认 CF1234@!)
+# 管理员密码（可选，默认 CF1234@!）
 CFRAME_ADMIN_PASSWORD=
 
-# 站点标题 (可选)
+# 站点信息（均可选）
 NUXT_PUBLIC_APP_TITLE=
-# 站点口号 (可选)
 NUXT_PUBLIC_APP_SLOGAN=
-# 站点作者 (可选)
 NUXT_PUBLIC_APP_AUTHOR=
-# 站点头像 URL (可选)
 NUXT_PUBLIC_APP_AVATAR_URL=
 
-# Mapbox 访问令牌 (必须)
+# Mapbox 公共访问令牌（地图 UI，必须）
 NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
-# Mapbox 无 URL 限制访问令牌 (可选)
+# Mapbox 无域名限制令牌（反向地理编码，可选）
 NUXT_MAPBOX_ACCESS_TOKEN=
 
-# 存储提供者 (local/s3, 选其一)
+# 存储提供者（local 或 s3）
 NUXT_STORAGE_PROVIDER=local
+NUXT_PROVIDER_LOCAL_PATH=/app/data/storage
 
-# S3 存储服务配置
-NUXT_PROVIDER_S3_ENDPOINT=
-NUXT_PROVIDER_S3_BUCKET=chronoframe
-NUXT_PROVIDER_S3_REGION=auto
-NUXT_PROVIDER_S3_ACCESS_KEY_ID=
-NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=
-NUXT_PROVIDER_S3_CDN_URL=
-
-# Local 存储配置
-# (如果使用 local 存储, 请确保挂载了 /app/data 目录)
-NUXT_PROVIDER_LOCAL_PATH=/app/data/photos
-
-# 会话密码 (必须, 32 位随机字符串)
+# 会话密码（必须，32 位随机字符串）
 NUXT_SESSION_PASSWORD=
+```
+
+### 拉取镜像
+
+我们推荐使用预构建的 Docker 镜像进行部署，镜像托管在 GHCR 和 Docker Hub，您可以根据网络情况选择合适的源。
+
+#### [GitHub Container Registry (GHCR)](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe)
+```bash
+docker pull ghcr.io/hoshinosuzumi/chronoframe:latest
+```
+
+#### [Docker Hub](https://hub.docker.com/r/hoshinosuzumi/chronoframe)
+```bash
+docker pull hoshinosuzumi/chronoframe:latest
 ```
 
 ### Docker
@@ -121,36 +121,6 @@ services:
 ```bash
 docker-compose up -d
 ```
-
-### 环境变量列表
-
-| 环境变量                           | 说明                                           | 默认值      | 必需                                      |
-| :--------------------------------- | :--------------------------------------------- | :---------- | :---------------------------------------- |
-| CFRAME_ADMIN_EMAIL                 | 初始管理员用户的邮箱                           | 无          | 是                                        |
-| CFRAME_ADMIN_NAME                  | 初始管理员用户的用户名                         | Chronoframe | 否                                        |
-| CFRAME_ADMIN_PASSWORD              | 初始管理员用户的密码                           | CF1234@!    | 否                                        |
-| NUXT_PUBLIC_APP_TITLE              | 应用标题                                       | ChronoFrame | 否                                        |
-| NUXT_PUBLIC_APP_SLOGAN             | 应用口号                                       | 无          | 否                                        |
-| NUXT_PUBLIC_APP_AUTHOR             | 应用作者                                       | 无          | 否                                        |
-| NUXT_PUBLIC_APP_AVATAR_URL         | 应用头像 URL                                   | 无          | 否                                        |
-| NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN    | Mapbox 访问令牌(可限制 URL)，用于地图服务      | 无          | 是                                        |
-| NUXT_MAPBOX_ACCESS_TOKEN           | Mapbox 访问令牌(无 URL 限制)，用于位置信息服务 | 无          | 否                                        |
-| NUXT_STORAGE_PROVIDER              | 存储提供者，支持 `s3`、`github`、`local`       | `s3`        | 是                                        |
-| NUXT_PROVIDER_S3_ENDPOINT          | S3 兼容存储服务的 Endpoint                     | 无          | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
-| NUXT_PROVIDER_S3_BUCKET            | S3 存储桶名称                                  | chronoframe | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
-| NUXT_PROVIDER_S3_REGION            | S3 存储桶区域                                  | auto        | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
-| NUXT_PROVIDER_S3_ACCESS_KEY_ID     | S3 访问密钥 ID                                 | 无          | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
-| NUXT_PROVIDER_S3_SECRET_ACCESS_KEY | S3 访问密钥                                    | 无          | 当 `NUXT_STORAGE_PROVIDER` 为 `s3` 时必需 |
-| NUXT_PROVIDER_S3_PREFIX            | S3 存储前缀                                    | photos/     | 否                                        |
-| NUXT_PROVIDER_S3_CDN_URL           | S3 存储的 CDN 地址                             | 无          | 否                                        |
-| NUXT_PUBLIC_OAUTH_GITHUB_ENABLED   | 是否启用 GitHub OAuth 登录                     | false       | 否                                        |
-| NUXT_OAUTH_GITHUB_CLIENT_ID        | GitHub OAuth 应用的 Client ID                  | 无          | 否(可选,用于 GitHub 登录)                 |
-| NUXT_OAUTH_GITHUB_CLIENT_SECRET    | GitHub OAuth 应用的 Client Secret              | 无          | 否(可选,用于 GitHub 登录)                 |
-| NUXT_SESSION_PASSWORD              | 用于加密会话的密码，32 位随机字符串            | 无          | 是                                        |
-| NUXT_PUBLIC_GTAG_ID                | Google Analytics 追踪 ID                       | 无          | 否                                        |
-| NUXT_PUBLIC_ANALYTICS_MATOMO_ENABLED | 是否启用 Matomo 分析                         | false       | 否                                        |
-| NUXT_PUBLIC_ANALYTICS_MATOMO_URL   | Matomo 实例 URL 地址                           | 无          | 否(启用 Matomo 时必需)                    |
-| NUXT_PUBLIC_ANALYTICS_MATOMO_SITE_ID | Matomo 站点 ID                               | 无          | 否(启用 Matomo 时必需)                    |
 
 ## 📖 使用指南
 

@@ -9,61 +9,74 @@
 ## 前置准备
 
 - 可用的 [Docker](https://docs.docker.com/get-docker/) 环境。
-- 一个支持 S3 协议的存储桶 *(GitHub 仓库存储和本地文件系统存储仍在开发中)*。
-  :::tip
-  使用 S3 存储时，你至少需要从服务商处获取以下信息：`ACCESS_KEY_ID`、`SECRET_ACCESS_KEY`、`ENDPOINT`、`BUCKET_NAME`、`REGION`，当存储桶的外链地址和 `ENDPOINT` 不同时，你还需要提供外链地址 `CDN_URL`。
-  :::
 - 两个 [Mapbox 访问令牌](https://console.mapbox.com/account/access-tokens/)。
   :::details 为什么需要两个 Token？
-  - 第一个 Token 用于前端显示地图，要求有 `styles:read` 权限。建议将此 Token 的 URL 限制为你的 ChronoFrame 实例域名以防止滥用。
-  - 第二个 Token 用于后端进行地理位置反向解析，此 Token **不能**有 URL 限制。这个 Token 是**可选**的。
+  - 第一个（前端）Token 用于 Mapbox GL JS 渲染地图，需要 `styles:read` 权限。建议将其域名限制为你的 ChronoFrame 实例，防止滥用。
+  - 第二个（服务端）Token 用于反向地理编码（Mapbox Search API），此 Token **不能** 有 URL 限制。如果不需要反向解析，可以不配置（可选）。
   :::
-- [GitHub OAuth 应用](https://github.com/settings/applications/new)的 `CLIENT_ID` 和 `CLIENT_SECRET` *(可选，用于启用 GitHub 登录)*。
-  :::tip
-  创建 OAuth 应用时，`Authorization callback URL` 应设置为 `http(s)://<你的域名>/api/auth/github`。
+- 存储后端：可以直接使用内置本地文件系统，也可以配置任意兼容 S3 协议的对象存储。详见 [存储提供者](/zh/guide/storage-providers)。
+  :::tip S3 参数清单
+  若使用 S3，请准备：`ACCESS_KEY_ID`、`SECRET_ACCESS_KEY`、`ENDPOINT`、`BUCKET_NAME`、`REGION`，以及（可选）当外链域名与 ENDPOINT 不同时的 `CDN_URL`。
+  :::
+- （可选）[GitHub OAuth 应用](https://github.com/settings/applications/new)（用于启用 GitHub 登录，需要 `CLIENT_ID` 与 `CLIENT_SECRET`）。
+  :::tip 回调地址
+  在 GitHub OAuth 应用中将 Authorization callback URL 设为：`http(s)://<你的域名>/api/auth/github`
   :::
   :::info
-  GitHub OAuth 凭据是**可选的**。如果不配置，您仍然可以使用默认管理员账号登录。
+  未配置 GitHub OAuth 也能使用默认管理员账号（首次启动自动创建）登录。
   :::
 
 ## 快速部署
 
-### 预建镜像
+### 拉取镜像
 
-我们推荐使用预构建的 Docker 镜像进行部署，镜像托管在 GitHub Container Registry：
+我们推荐使用预构建的 Docker 镜像进行部署，镜像托管在 GHCR 和 Docker Hub，您可以根据网络情况选择合适的源。
 
+#### [GitHub Container Registry (GHCR)](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe)
+```bash
+docker pull ghcr.io/hoshinosuzumi/chronoframe:latest
 ```
-ghcr.io/hoshinosuzumi/chronoframe:latest
-```
 
-[查看所有可用版本](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe)
+#### [Docker Hub](https://hub.docker.com/r/hoshinosuzumi/chronoframe)
+```bash
+docker pull hoshinosuzumi/chronoframe:latest
+```
 
 ### 创建配置文件
 
-事先在一个目录中创建 `.env` 文件。要查看所有的配置项，请查看 [配置说明](/zh/guide/configuration) 章节。
+创建 `.env` 文件。下面是使用本地存储的最小示例，完整配置请参阅 [配置说明](/zh/guide/configuration)。
 
-```env
-# Admin user email (required)
+```bash
+# 管理员邮箱（必须）
 CFRAME_ADMIN_EMAIL=
-# Admin username (default to Chronoframe, optional)
+# 管理员用户名（可选，默认 ChronoFrame）
 CFRAME_ADMIN_NAME=
-# Admin user password (default to CF1234@!, optional)
+# 管理员密码（可选，默认 CF1234@!）
 CFRAME_ADMIN_PASSWORD=
 
-# 应用标题与口号
+# 站点信息（均可选）
 NUXT_PUBLIC_APP_TITLE=
 NUXT_PUBLIC_APP_SLOGAN=
 NUXT_PUBLIC_APP_AUTHOR=
 NUXT_PUBLIC_APP_AVATAR_URL=
 
-# Mapbox access token for map features, Mapbox GL JS (Client-side, public)
+# Mapbox 公共访问令牌（地图 UI，必须）
 NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
-# Mapbox secret access token for server-side, Mapbox Search API (Reverse Geocoding)
+# Mapbox 无域名限制令牌（反向地理编码，可选）
 NUXT_MAPBOX_ACCESS_TOKEN=
 
-# 存储提供者（s3/github/local）
+# 存储提供者（local 或 s3）
+NUXT_STORAGE_PROVIDER=local
+NUXT_PROVIDER_LOCAL_PATH=/app/data/storage
+
+# 会话密码（必须，32 位随机字符串）
+NUXT_SESSION_PASSWORD=
+```
+
+若选择使用 S3，请将存储部分替换为：
+
+```bash
 NUXT_STORAGE_PROVIDER=s3
-# S3 存储服务配置
 NUXT_PROVIDER_S3_ENDPOINT=
 NUXT_PROVIDER_S3_BUCKET=chronoframe
 NUXT_PROVIDER_S3_REGION=auto
@@ -71,11 +84,11 @@ NUXT_PROVIDER_S3_ACCESS_KEY_ID=
 NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=
 NUXT_PROVIDER_S3_PREFIX=photos/
 NUXT_PROVIDER_S3_CDN_URL=
+```
 
-# 会话密码（32 位随机字符串，必须设置）
-NUXT_SESSION_PASSWORD=
+可选 GitHub OAuth 变量：
 
-# GitHub OAuth
+```bash
 NUXT_OAUTH_GITHUB_CLIENT_ID=
 NUXT_OAUTH_GITHUB_CLIENT_SECRET=
 ```
