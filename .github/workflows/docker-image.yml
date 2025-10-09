@@ -72,7 +72,6 @@ jobs:
           name: Release v${{ steps.version.outputs.version }}
           body: ${{ steps.changelog.outputs.changelog }}
           prerelease: ${{ contains(steps.version.outputs.version, '-') }}
-          discussion_category_name: announcements
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
