@@ -10,8 +10,16 @@ import { withRetry, RetryPresets, RetryConditions } from '../../utils/retry'
 
 const neededKeys: Array<keyof Tags | (string & {})> = [
   'Title',
+  'XPTitle',
   'Subject',
   'Keywords',
+  'XPKeywords',
+
+  'Description',
+  'ImageDescription',
+  'Caption-Abstract',
+  'XPComment',
+  'UserComment',
 
   'tz',
   'tzSource',
@@ -350,30 +358,94 @@ export const extractExifData = async (
   }
 }
 
+const normalizeText = (value: unknown): string | undefined => {
+  if (value === null || value === undefined) {
+    return undefined
+  }
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const normalized = normalizeText(item)
+      if (normalized) {
+        return normalized
+      }
+    }
+    return undefined
+  }
+
+  const text = String(value).trim()
+  return text.length > 0 ? text : undefined
+}
+
+const collectTextValues = (value: unknown, options?: { splitDelimited?: boolean }): string[] => {
+  const splitDelimited = options?.splitDelimited ?? false
+  const results: string[] = []
+
+  const append = (input: string) => {
+    if (splitDelimited) {
+      for (const part of input.split(/[;,]/)) {
+        const chunk = part.trim()
+        if (chunk.length > 0) {
+          results.push(chunk)
+        }
+      }
+    } else if (input.length > 0) {
+      results.push(input)
+    }
+  }
+
+  if (value === null || value === undefined) {
+    return results
+  }
+
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const normalized = normalizeText(item)
+      if (normalized) {
+        append(normalized)
+      }
+    }
+    return results
+  }
+
+  const normalized = normalizeText(value)
+  if (normalized) {
+    append(normalized)
+  }
+
+  return results
+}
+
+const pickFirstText = (...values: Array<unknown>): string | undefined => {
+  for (const value of values) {
+    const normalized = normalizeText(value)
+    if (normalized) {
+      return normalized
+    }
+  }
+
+  return undefined
+}
+
 export const extractPhotoInfo = (
   s3key: string,
   exifData?: NeededExif | null,
 ): PhotoInfo => {
   const fileName = path.basename(s3key, path.extname(s3key))
 
-  let title = fileName
   let dateTaken = new Date().toISOString()
-  let views = 0
-  let tags: string[] = []
+  const tagsSet = new Set<string>()
 
-  if (exifData?.Subject || exifData?.Keywords) {
-    tags = [
-      ...new Set([
-        ...(typeof exifData.Subject === 'string'
-          ? [exifData.Subject]
-          : exifData.Subject || []),
-        ...(typeof exifData.Keywords === 'string'
-          ? [exifData.Keywords]
-          : exifData.Keywords || []),
-      ]),
-    ]
-      .map((tag) => tag.trim())
-      .filter((tag) => tag.length > 0)
+  for (const tag of collectTextValues(exifData?.Subject)) {
+    tagsSet.add(tag)
+  }
+
+  for (const tag of collectTextValues(exifData?.Keywords)) {
+    tagsSet.add(tag)
+  }
+
+  for (const tag of collectTextValues(exifData?.XPKeywords, { splitDelimited: true })) {
+    tagsSet.add(tag)
   }
 
   if (exifData?.DateTimeOriginal) {
@@ -396,28 +468,38 @@ export const extractPhotoInfo = (
     }
   }
 
-  const viewsMatch = fileName.match(/(\d+)views?/i)
-  if (viewsMatch) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    views = Number.parseInt(viewsMatch[1])
-  }
+  const titleFromExif = pickFirstText(
+    exifData?.Title,
+    exifData?.XPTitle,
+    exifData?.Description,
+    exifData?.ImageDescription,
+    exifData?.CaptionAbstract,
+  )
 
-  title =
-    exifData?.Title ||
-    fileName
-      .replaceAll(/\d{4}-\d{2}-\d{2}[_-]?/g, '')
-      .replaceAll(/[_-]?\d+views?/gi, '')
-      .replaceAll(/[_-]+/g, ' ')
-      .trim()
+  let title = titleFromExif
+  const cleanedFileName = fileName
+    .replaceAll(/\d{4}-\d{2}-\d{2}[_-]?/g, '')
+    .replaceAll(/[_-]?\d+views?/gi, '')
+    .replaceAll(/[_-]+/g, ' ')
+    .trim()
 
   if (!title) {
-    title = path.basename(s3key, path.extname(s3key))
+    title = cleanedFileName || path.basename(s3key, path.extname(s3key))
   }
+
+  const description =
+    pickFirstText(
+      exifData?.Description,
+      exifData?.ImageDescription,
+      exifData?.CaptionAbstract,
+      exifData?.XPComment,
+      exifData?.UserComment,
+    ) || ''
 
   return {
     title,
     dateTaken,
-    tags,
-    description: '',
+    tags: [...tagsSet],
+    description,
   }
 }

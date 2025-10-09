@@ -473,7 +473,7 @@ const onTagClick = (tag: string) => {
       <!-- 照片描述 -->
       <div
         v-if="currentPhoto.description"
-        class="text-sm text-white"
+        class="text-sm text-white text-justify"
       >
         {{ currentPhoto.description }}
       </div>

@@ -2,8 +2,16 @@ import type { Tags } from 'exiftool-vendored'
 
 export interface NeededExif {
   Title?: string
+  XPTitle?: string
   Subject?: string[]
   Keywords?: string[]
+  XPKeywords?: string
+
+  Description?: Tags['Description']
+  ImageDescription?: Tags['ImageDescription']
+  CaptionAbstract?: Tags['Caption-Abstract']
+  XPComment?: Tags['XPComment']
+  UserComment?: Tags['UserComment']
 
   zone?: string
   tz?: string
