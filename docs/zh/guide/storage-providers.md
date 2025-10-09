@@ -2,11 +2,10 @@
 
 ChronoFrame 支持多种存储后端来保存您的照片和缩略图。本文档将详细介绍如何配置不同的存储提供器。
 
-| 提供器           | 支持 | 适用场景           | 成本           |
-| ---------------- | :------: | ------------------ | -------------- |
-| **S3 兼容**      | ✅       | 生产环境           | 视服务商而定   |
-| **GitHub**       | 🚧       | 小规模，版本控制   | 免费（有限制） |
-| **本地文件系统** | 🚧       | 测试环境，离线部署 | 免费           |
+| 提供器           | 支持 | 适用场景           | 成本         |
+| ---------------- | :--: | ------------------ | ------------ |
+| **S3 兼容**      |  ✅  | 生产环境           | 视服务商而定 |
+| **本地文件系统** |  ✅  | 测试环境，离线部署 | 免费         |
 
 ## S3 兼容存储
 
@@ -108,33 +107,17 @@ NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=minioadmin
 ]
 ```
 
-## GitHub 存储（开发中）
-
-GitHub 存储将照片存储在 Git 仓库中，适合小规模使用。
-
-```bash
-# 设置存储提供器为 GitHub（暂未实现）
-NUXT_STORAGE_PROVIDER=github
-
-# GitHub 存储配置
-NUXT_PROVIDER_GITHUB_OWNER=your-username
-NUXT_PROVIDER_GITHUB_REPOSITORY=chronoframe-photos
-NUXT_PROVIDER_GITHUB_BRANCH=main
-NUXT_PROVIDER_GITHUB_PATH=photos
-NUXT_PROVIDER_GITHUB_TOKEN=ghp_...
-```
-
-## 本地文件系统（开发中）
+## 本地文件系统
 
 本地存储将文件保存在服务器文件系统中。
 
 ```bash
-# 设置存储提供器为本地（暂未实现）
+# 设置存储提供器为本地
 NUXT_STORAGE_PROVIDER=local
 
 # 本地存储配置
-NUXT_PROVIDER_LOCAL_PATH=/app/storage
-NUXT_PROVIDER_LOCAL_BASE_URL=https://your-domain.com/storage
+NUXT_PROVIDER_LOCAL_PATH=/app/data/storage
+NUXT_PROVIDER_LOCAL_BASE_URL=/storage
 ```
 
 ## 常见问题

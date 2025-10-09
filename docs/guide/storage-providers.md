@@ -2,11 +2,10 @@
 
 ChronoFrame supports multiple storage backends to save your photos and thumbnails. This document will detail how to configure different storage providers.
 
-| Provider           | Support | Use Case               | Cost           |
-| ------------------ | :-----: | ---------------------- | -------------- |
-| **S3 Compatible**  | ✅      | Production environment | Varies by provider |
-| **GitHub**         | 🚧      | Small scale, version control | Free (with limits) |
-| **Local Filesystem** | 🚧    | Testing environment, offline deployment | Free |
+| Provider             | Support | Use Case                                | Cost               |
+| -------------------- | :-----: | --------------------------------------- | ------------------ |
+| **S3 Compatible**    |   ✅    | Production environment                  | Varies by provider |
+| **Local Filesystem** |   ✅    | Testing environment, offline deployment | Free               |
 
 ## S3 Compatible Storage
 
@@ -108,33 +107,17 @@ Recommended CORS configuration:
 ]
 ```
 
-## GitHub Storage (In Development)
-
-GitHub storage stores photos in Git repositories, suitable for small-scale use.
-
-```bash
-# Set storage provider to GitHub (not yet implemented)
-NUXT_STORAGE_PROVIDER=github
-
-# GitHub storage configuration
-NUXT_PROVIDER_GITHUB_OWNER=your-username
-NUXT_PROVIDER_GITHUB_REPOSITORY=chronoframe-photos
-NUXT_PROVIDER_GITHUB_BRANCH=main
-NUXT_PROVIDER_GITHUB_PATH=photos
-NUXT_PROVIDER_GITHUB_TOKEN=ghp_...
-```
-
-## Local Filesystem (In Development)
+## Local Filesystem
 
 Local storage saves files in the server filesystem.
 
 ```bash
-# Set storage provider to local (not yet implemented)
+# Set storage provider to local
 NUXT_STORAGE_PROVIDER=local
 
 # Local storage configuration
-NUXT_PROVIDER_LOCAL_PATH=/app/storage
-NUXT_PROVIDER_LOCAL_BASE_URL=https://your-domain.com/storage
+NUXT_PROVIDER_LOCAL_PATH=/app/data/storage
+NUXT_PROVIDER_LOCAL_BASE_URL=/storage
 ```
 
 ## Common Issues
