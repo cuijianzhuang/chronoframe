@@ -218,7 +218,6 @@ jobs:
           GHCR_REGISTRY=$(echo "$GHCR_BASE" | cut -d/ -f1)
           GHCR_OWNER=$(echo "$GHCR_BASE" | cut -d/ -f2)
           GHCR_REPO=$(echo "$GHCR_BASE" | cut -d/ -f3)
-          DOCKERHUB_REGISTRY="docker.io"
           DOCKERHUB_OWNER=$(echo "$DOCKERHUB_BASE" | cut -d/ -f1)
           DOCKERHUB_REPO=$(echo "$DOCKERHUB_BASE" | cut -d/ -f2)
 
@@ -237,7 +236,7 @@ jobs:
           DOCKERHUB_OWNER_DISPLAY=$(insert_wbr "$DOCKERHUB_OWNER")
 
           GHCR_DISPLAY="${GHCR_REGISTRY}/${GHCR_OWNER_DISPLAY}/${GHCR_REPO}"
-          DOCKERHUB_DISPLAY="${DOCKERHUB_REGISTRY}/${DOCKERHUB_OWNER_DISPLAY}/${DOCKERHUB_REPO}"
+          DOCKERHUB_DISPLAY="${DOCKERHUB_OWNER_DISPLAY}/${DOCKERHUB_REPO}"
 
           echo "## 🚀 Docker Image Built and Pushed Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -259,4 +258,4 @@ jobs:
             echo "- <code>${DOCKERHUB_DISPLAY}:latest</code>" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Platforms:** linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
+          echo "**Platforms:** \`linux/amd64\`, \`linux/arm64\`" >> $GITHUB_STEP_SUMMARY
