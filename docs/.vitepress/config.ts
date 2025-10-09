@@ -9,7 +9,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
-      { text: 'Development', link: '/guide/contributing' },
+      { text: 'Development', link: '/development/contributing' },
       { text: 'Demo', link: 'https://lens.bh8.ga' },
     ],
 

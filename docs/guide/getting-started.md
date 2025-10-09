@@ -14,7 +14,7 @@ The documentation is still being written; some sections may be incomplete.
   - The first token (frontend) is used by Mapbox GL JS to render maps. It needs `styles:read` permission. You should restrict this token to your ChronoFrame domain to avoid abuse.
   - The second token (server) is used for reverse geocoding (Mapbox Search API). It **must not** have URL restrictions. This token is **optional** if you don't need reverse geocoding.
   :::
-- A storage backend. You can start with the built‑in local filesystem storage or configure an S3‑compatible bucket. See the [Storage Providers](/guide/storage-providers) section for details.
+- A storage backend. You can start with the built‑in local filesystem storage or configure an S3‑compatible bucket. See the [Storage Providers](/configuration/storage-providers) section for details.
   :::tip S3 configuration checklist
   If using S3, collect: `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY`, `ENDPOINT`, `BUCKET_NAME`, `REGION`, and optionally a public CDN base URL (`CDN_URL`) if different from the endpoint.
   :::

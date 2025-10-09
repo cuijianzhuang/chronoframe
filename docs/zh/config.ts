@@ -8,7 +8,7 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: '指南', link: '/zh/guide/getting-started' },
-      { text: '开发文档', link: '/zh/guide/contributing' },
+      { text: '开发文档', link: '/zh/development/contributing' },
       { text: '演示', link: 'https://lens.bh8.ga' },
     ],
 
