@@ -148,17 +148,31 @@ export class S3StorageProvider implements StorageProvider {
   getPublicUrl(key: string): string {
     const { cdnUrl, bucket, region, endpoint } = this.config
 
+    // CDN URL
     if (cdnUrl) {
-      return `${cdnUrl}/${key}`
+      return `${cdnUrl.replace(/\/$/, '')}/${key}`
     }
 
+    // Default AWS S3 endpoint
     if (!endpoint) {
       return `https://${bucket}.s3.${region}.amazonaws.com/${key}`
     } else if (endpoint.includes('amazonaws.com')) {
       return `https://${bucket}.s3.${region}.amazonaws.com/${key}`
     }
 
-    return `${endpoint.replace(/\/+$/, '')}/${key}`
+    // Alibaba Cloud OSS
+    if (endpoint.includes('aliyuncs.com')) {
+      const baseUrl = endpoint.replace(/\/$/, '')
+      if (baseUrl.indexOf('//') === -1) {
+        throw new Error('Invalid endpoint URL')
+      }
+      const protocol = baseUrl.split('//')[0]
+      const remainder = baseUrl.split('//')[1]
+      return `${protocol}//${bucket}.${remainder}/${key}`
+    }
+
+    // Custom endpoint
+    return `${endpoint.replace(/\/$/, '')}/${bucket}/${key}`
   }
 
   async getSignedUrl(
