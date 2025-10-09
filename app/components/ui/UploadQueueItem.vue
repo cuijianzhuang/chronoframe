@@ -235,7 +235,8 @@ const generateParticleStyle = (index: number) => {
                 'text-green-600/80 dark:text-green-400/80':
                   statusColor === 'success',
                 'text-red-600/80 dark:text-red-400/80': statusColor === 'error',
-                'text-yellow-600/80 dark:text-yellow-400/80': statusColor === 'warning',
+                'text-yellow-600/80 dark:text-yellow-400/80':
+                  statusColor === 'warning',
                 'text-neutral-600/80 dark:text-neutral-400/80':
                   statusColor === 'neutral',
               }"
@@ -465,6 +466,7 @@ const generateParticleStyle = (index: number) => {
         :animate="{ opacity: 1, height: 'auto', y: 0 }"
         :exit="{ opacity: 0, height: 0, y: -10 }"
         :transition="{ duration: 0.3 }"
+        class="mt-3"
       >
         <UAlert
           :description="uploadingFile.error"
@@ -486,7 +488,7 @@ const generateParticleStyle = (index: number) => {
         :animate="{ opacity: 1, height: 'auto', y: 0 }"
         :exit="{ opacity: 0, height: 0, y: -10 }"
         :transition="{ duration: 0.3 }"
-        class="mt-2"
+        class="mt-3"
       >
         <UAlert
           description="大文件处理时间较长，为正常现象"
@@ -515,6 +517,7 @@ const generateParticleStyle = (index: number) => {
           duration: 0.6,
           ease: 'backOut',
         }"
+        class="mt-3"
       >
         <UAlert
           description="文件已成功上传并处理"
