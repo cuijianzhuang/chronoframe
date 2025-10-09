@@ -181,7 +181,7 @@ const uploadImage = async (file: File, existingFileId?: string) => {
                 type: isMovFile ? 'live-photo-video' : 'photo',
                 storageKey: signedUrlResponse.fileKey,
               },
-              priority: 0,
+              priority: isMovFile ? 0 : 1, // Live Photo 视频优先级更低，确保图片优先处理
               maxAttempts: 3,
             },
           })
@@ -832,13 +832,6 @@ const handleUpload = async () => {
   selectedFiles.value = []
 }
 
-const handleDelete = async (photoId: string) => {
-  await $fetch(`/api/photos/${photoId}`, {
-    method: 'DELETE',
-  })
-  refresh()
-}
-
 // LivePhoto 相关操作
 const handleViewLivePhoto = async (photoId: string) => {
   try {
@@ -938,8 +931,23 @@ const openInNewTab = (url: string) => {
   }
 }
 
+const isDeleteConfirmOpen = ref(false)
+const deleteMode = ref<'single' | 'batch'>('single')
+const deleteTargetPhotos = ref<Photo[]>([])
+const isDeleting = ref(false)
+
+const openDeleteConfirm = (mode: 'single' | 'batch', photos: Photo[]) => {
+  deleteMode.value = mode
+  deleteTargetPhotos.value = photos
+  isDeleteConfirmOpen.value = true
+}
+
+const handleSingleDeleteRequest = (photo: Photo) => {
+  openDeleteConfirm('single', [photo])
+}
+
 // 批量删除功能
-const handleBatchDelete = async () => {
+const handleBatchDelete = () => {
   const selectedRowModel = table.value?.tableApi?.getFilteredSelectedRowModel()
   const selectedPhotos =
     selectedRowModel?.rows.map((row: any) => row.original) || []
@@ -953,40 +961,84 @@ const handleBatchDelete = async () => {
     return
   }
 
-  try {
-    // 并发删除所有选中的照片
-    const deleteToast = toast.add({
-      title: '正在删除照片',
-      description: `正在删除 ${selectedPhotos.length} 张照片...`,
-      color: 'info',
-    })
-    await Promise.all(
-      selectedPhotos.map((photo: any) =>
-        $fetch(`/api/photos/${photo.id}`, {
-          method: 'DELETE',
-        }),
-      ),
-    )
+  openDeleteConfirm('batch', selectedPhotos)
+}
 
-    toast.update(deleteToast.id, {
-      title: '批量删除成功',
-      description: `已成功删除 ${selectedPhotos.length} 张照片`,
-      color: 'success',
-    })
-
-    // 清空选中状态
-    rowSelection.value = {}
-
-    // 刷新列表
-    refresh()
-  } catch (error: any) {
-    toast.add({
-      title: '批量删除失败',
-      description: error.message || '删除过程中发生错误',
-      color: 'error',
-    })
-    console.error('批量删除错误:', error)
+const confirmDelete = async () => {
+  if (deleteTargetPhotos.value.length === 0) {
+    isDeleteConfirmOpen.value = false
+    return
   }
+
+  const mode = deleteMode.value
+  const targetPhotos = [...deleteTargetPhotos.value]
+
+  let deleteToast: ReturnType<typeof toast.add> | null = null
+
+  isDeleting.value = true
+
+  try {
+    if (mode === 'batch') {
+      deleteToast = toast.add({
+        title: '正在删除照片',
+        description: `正在删除 ${targetPhotos.length} 张照片...`,
+        color: 'info',
+      })
+      await Promise.all(
+        targetPhotos.map((photo) =>
+          $fetch(`/api/photos/${photo.id}`, {
+            method: 'DELETE',
+          }),
+        ),
+      )
+
+      toast.update(deleteToast.id, {
+        title: '批量删除成功',
+        description: `已成功删除 ${targetPhotos.length} 张照片`,
+        color: 'success',
+      })
+
+      rowSelection.value = {}
+    } else {
+      const photo = targetPhotos[0]
+      if (!photo) {
+        throw new Error('未找到要删除的照片')
+      }
+      
+      await $fetch(`/api/photos/${photo.id}`, {
+        method: 'DELETE',
+      })
+
+      toast.add({
+        title: '删除成功',
+        description: '照片及其关联资源已被删除',
+        color: 'success',
+      })
+    }
+
+    await refresh()
+    isDeleteConfirmOpen.value = false
+    deleteTargetPhotos.value = []
+  } catch (error: any) {
+    console.error('删除照片失败:', error)
+    const message = error?.message || '删除过程中发生错误'
+
+    if (mode === 'batch' && deleteToast) {
+      toast.update(deleteToast.id, {
+        title: '批量删除失败',
+        description: message,
+        color: 'error',
+      })
+    } else {
+      toast.add({
+        title: '删除失败',
+        description: message,
+        color: 'error',
+      })
+    }
+  }
+
+  isDeleting.value = false
 }
 
 // 批量重新处理照片功能
@@ -1274,7 +1326,7 @@ onUnmounted(() => {
                     color: 'error',
                     label: '删除',
                     icon: 'tabler:trash',
-                    onSelect: () => handleDelete(row.original.id),
+                    onSelect: () => handleSingleDeleteRequest(row.original),
                   },
                 ],
               ]"
@@ -1329,6 +1381,52 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
+
+    <UModal v-model:open="isDeleteConfirmOpen">
+      <template #content>
+        <div class="p-6 space-y-4">
+          <div class="flex items-start gap-3">
+            <Icon
+              name="tabler:trash"
+              class="mt-1 size-6 shrink-0 text-error-500"
+            />
+            <div class="space-y-2">
+              <h3 class="text-lg font-semibold">
+                {{ deleteMode === 'single' ? '删除照片' : '批量删除照片' }}
+              </h3>
+              <p class="text-sm text-neutral-600 dark:text-neutral-400">
+                {{
+                  deleteMode === 'single'
+                    ? '确定要删除这张照片吗？'
+                    : `确定要删除选中的 ${deleteTargetPhotos.length} 张照片吗？`
+                }}
+              </p>
+              <p class="text-sm text-error-500 dark:text-error-400">
+                删除操作会同时移除原图、缩略图和实况视频，且无法恢复。
+              </p>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2">
+            <UButton
+              variant="ghost"
+              color="neutral"
+              :disabled="isDeleting"
+              @click="isDeleteConfirmOpen = false"
+            >
+              取消
+            </UButton>
+            <UButton
+              color="error"
+              icon="tabler:trash"
+              :loading="isDeleting"
+              @click="confirmDelete"
+            >
+              确认删除
+            </UButton>
+          </div>
+        </div>
+      </template>
+    </UModal>
 
     <!-- LivePhoto 预览模态框 -->
     <UModal v-model:open="isLivePhotoModalOpen">

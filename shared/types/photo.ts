@@ -76,6 +76,15 @@ export interface NeededExif {
   MPImageType?: Tags['MPImageType']
 
   Rating?: number
+
+  // Motion Photo (XMP) related fields
+  MotionPhoto?: Tags['MotionPhoto']
+  MotionPhotoVersion?: Tags['MotionPhotoVersion']
+  MotionPhotoPresentationTimestampUs?: Tags['MotionPhotoPresentationTimestampUs']
+  MicroVideo?: Tags['MicroVideo']
+  MicroVideoVersion?: Tags['MicroVideoVersion']
+  MicroVideoOffset?: Tags['MicroVideoOffset']
+  MicroVideoPresentationTimestampUs?: Tags['MicroVideoPresentationTimestampUs']
 }
 
 export interface PhotoInfo {

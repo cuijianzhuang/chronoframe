@@ -72,6 +72,7 @@ export const pipelineQueue = sqliteTable('pipeline_queue', {
       'metadata',
       'thumbnail',
       'exif',
+      'motion-photo',
       'reverse-geocoding',
       'live-photo',
     ],
