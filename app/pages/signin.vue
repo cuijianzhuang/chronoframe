@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 useHead({
-  title: 'Sign In',
+  title: $t('auth.form.signin.title'),
 })
 
 const { fetch: fetchUserSession } = useUserSession()
