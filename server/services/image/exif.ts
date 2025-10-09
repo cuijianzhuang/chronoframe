@@ -74,6 +74,15 @@ const neededKeys: Array<keyof Tags | (string & {})> = [
   'GPSLongitudeRef',
 
   'MPImageType',
+
+  // Motion Photo (XMP) related keys
+  'MotionPhoto',
+  'MotionPhotoVersion',
+  'MotionPhotoPresentationTimestampUs',
+  'MicroVideo',
+  'MicroVideoVersion',
+  'MicroVideoOffset',
+  'MicroVideoPresentationTimestampUs',
 ]
 
 const formatExifDate = (date: string | ExifDateTime | undefined) => {

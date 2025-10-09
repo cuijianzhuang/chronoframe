@@ -6,6 +6,7 @@ import type {
   PipelineQueueItem,
   Photo,
 } from '~~/server/utils/db'
+import { compressUint8Array } from '~~/shared/utils/u8array'
 import {
   preprocessImageWithJpegUpload,
   processImageMetadataAndSharp,
@@ -17,6 +18,7 @@ import {
   parseGPSCoordinates,
 } from '../location/geocoding'
 import { findLivePhotoVideoForImage } from '../video/livephoto'
+import { processMotionPhotoFromXmp } from '../video/motion-photo'
 import { getStorageManager } from '~~/server/plugins/storage'
 
 export class QueueManager {
@@ -319,22 +321,50 @@ export class QueueManager {
             }
           }
 
-          // STEP 6: LivePhoto 视频配对
+          // STEP 6: Motion Photo (XMP) 支持
+          await this.updateTaskStage(taskId, 'motion-photo')
+          this.logger.info(`[${taskId}:in-stage] motion photo detection`)
+          const motionPhotoInfo = imageBuffers.raw
+            ? await processMotionPhotoFromXmp({
+                photoId,
+                storageKey,
+                rawImageBuffer: imageBuffers.raw,
+                exifData,
+                storageProvider,
+                logger: this.logger,
+              })
+            : null
+
+          if (!imageBuffers.raw) {
+            this.logger.warn(
+              `[${taskId}:in-stage] motion photo detection skipped: missing raw buffer for ${storageKey}`,
+            )
+          }
+
+          // STEP 7: LivePhoto 视频配对（独立 MOV 文件）
           await this.updateTaskStage(taskId, 'live-photo')
           this.logger.info(`[${taskId}:in-stage] live photo detection`)
           let livePhotoInfo = null
-          const livePhotoVideo = await findLivePhotoVideoForImage(storageKey)
-          if (livePhotoVideo) {
+          if (!motionPhotoInfo?.isMotionPhoto) {
+            const livePhotoVideo = await findLivePhotoVideoForImage(storageKey)
+            if (livePhotoVideo) {
+              livePhotoInfo = {
+                isLivePhoto: 1,
+                livePhotoVideoUrl: storageProvider.getPublicUrl(
+                  livePhotoVideo.videoKey,
+                ),
+                livePhotoVideoKey: livePhotoVideo.videoKey,
+              }
+              this.logger.info(
+                `[${taskId}:in-stage] found LivePhoto video: ${livePhotoVideo.videoKey}`,
+              )
+            }
+          } else {
             livePhotoInfo = {
               isLivePhoto: 1,
-              livePhotoVideoUrl: storageProvider.getPublicUrl(
-                livePhotoVideo.videoKey,
-              ),
-              livePhotoVideoKey: livePhotoVideo.videoKey,
+              livePhotoVideoUrl: motionPhotoInfo.livePhotoVideoUrl || null,
+              livePhotoVideoKey: motionPhotoInfo.livePhotoVideoKey || null,
             }
-            this.logger.info(
-              `[${taskId}:in-stage] found LivePhoto video: ${livePhotoVideo.videoKey}`,
-            )
           }
 
           // 构建最终的 Photo 对象
@@ -368,9 +398,18 @@ export class QueueManager {
             city: locationInfo?.city || null,
             locationName: locationInfo?.locationName || null,
             // LivePhoto 相关字段
-            isLivePhoto: livePhotoInfo?.isLivePhoto || 0,
-            livePhotoVideoUrl: livePhotoInfo?.livePhotoVideoUrl || null,
-            livePhotoVideoKey: livePhotoInfo?.livePhotoVideoKey || null,
+            isLivePhoto:
+              motionPhotoInfo?.isMotionPhoto || livePhotoInfo?.isLivePhoto
+                ? 1
+                : 0,
+            livePhotoVideoUrl:
+              motionPhotoInfo?.livePhotoVideoUrl ||
+              livePhotoInfo?.livePhotoVideoUrl ||
+              null,
+            livePhotoVideoKey:
+              motionPhotoInfo?.livePhotoVideoKey ||
+              livePhotoInfo?.livePhotoVideoKey ||
+              null,
           }
 
           const db = useDB()
