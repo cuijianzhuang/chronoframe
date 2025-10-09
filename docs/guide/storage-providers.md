@@ -2,10 +2,10 @@
 
 ChronoFrame supports multiple storage backends to save your photos and thumbnails. This document will detail how to configure different storage providers.
 
-| Provider             | Support | Use Case                                | Cost               |
-| -------------------- | :-----: | --------------------------------------- | ------------------ |
-| **S3 Compatible**    |   ✅    | Production environment                  | Varies by provider |
-| **Local Filesystem** |   ✅    | Testing environment, offline deployment | Free               |
+| Provider                                    | Support | Use Case                                | Cost               |
+| ------------------------------------------- | :-----: | --------------------------------------- | ------------------ |
+| [**S3 Compatible**](#s3-compatible-storage) |   ✅    | Production environment, cloud storage   | Varies by provider |
+| [**Local Filesystem**](#local-filesystem)   |   ✅    | Testing environment, offline deployment | Free               |
 
 ## S3 Compatible Storage
 
