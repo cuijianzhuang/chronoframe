@@ -14,6 +14,7 @@ export type S3StorageConfig = {
   cdnUrl?: string
   accessKeyId?: string
   secretAccessKey?: string
+  forcePathStyle?: boolean
   maxKeys?: number
 }
 
