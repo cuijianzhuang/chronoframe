@@ -9,14 +9,18 @@ env:
   GHCR_REGISTRY: ghcr.io
   GHCR_IMAGE_NAME: ${{ github.repository }}
   DOCKERHUB_IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
+  TARGET_ARCHITECTURES: amd64 arm64
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
+  prepare:
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       packages: write
-
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+      changelog: ${{ steps.changelog.outputs.changelog }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,9 +31,13 @@ jobs:
       - name: Extract version from tag
         id: version
         run: |
-          # 提取标签中的版本号，去掉 v 前缀
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          if [[ "$VERSION" == *"-"* ]]; then
+            echo "prerelease=true" >> $GITHUB_OUTPUT
+          else
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
           echo "Version: $VERSION"
 
       - name: 📝 Generate changelog
@@ -41,10 +49,8 @@ jobs:
           git tag -l --sort=-version:refname
 
           if [[ "${{ steps.version.outputs.version }}" == *"-"* ]]; then
-            # 当前为预发布版本，取最近的一个版本
             PREVIOUS_TAG=$(git tag -l --sort=-version:refname | sed -n '2p')
           else
-            # 当前不为预发布版本，取最近的正式版 tag
             PREVIOUS_TAG=$(git tag -l --sort=-version:refname | grep -v '-' | sed -n '2p')
           fi
 
@@ -71,10 +77,26 @@ jobs:
           tag_name: v${{ steps.version.outputs.version }}
           name: Release v${{ steps.version.outputs.version }}
           body: ${{ steps.changelog.outputs.changelog }}
-          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+          prerelease: ${{ steps.version.outputs.prerelease == 'true' }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+  build-and-push:
+    needs: prepare
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      packages: write
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      IS_PRERELEASE: ${{ needs.prepare.outputs.prerelease }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -89,48 +111,126 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: |
-            ${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}
-            ${{ env.DOCKERHUB_IMAGE_NAME }}
-          tags: |
-            type=raw,value=${{ steps.version.outputs.version }}
-            type=raw,value=nightly
-            type=raw,value=latest,enable=${{ !contains(steps.version.outputs.version, '-') }}
+      - name: Build Docker image (${{ matrix.arch }})
+        run: |
+          set -euo pipefail
+          GHCR_BASE_RAW="${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}"
+          DOCKERHUB_BASE_RAW="${{ env.DOCKERHUB_IMAGE_NAME }}"
+          GHCR_BASE=$(echo "$GHCR_BASE_RAW" | tr '[:upper:]' '[:lower:]')
+          DOCKERHUB_BASE=$(echo "$DOCKERHUB_BASE_RAW" | tr '[:upper:]' '[:lower:]')
+          ARCH="${{ matrix.arch }}"
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+          docker build \
+            --tag "${GHCR_BASE}:${VERSION}-${ARCH}" \
+            --tag "${DOCKERHUB_BASE}:${VERSION}-${ARCH}" \
+            .
+
+          docker tag "${GHCR_BASE}:${VERSION}-${ARCH}" "${GHCR_BASE}:nightly-${ARCH}"
+          docker tag "${DOCKERHUB_BASE}:${VERSION}-${ARCH}" "${DOCKERHUB_BASE}:nightly-${ARCH}"
+
+          if [ "${IS_PRERELEASE}" != "true" ]; then
+            docker tag "${GHCR_BASE}:${VERSION}-${ARCH}" "${GHCR_BASE}:latest-${ARCH}"
+            docker tag "${DOCKERHUB_BASE}:${VERSION}-${ARCH}" "${DOCKERHUB_BASE}:latest-${ARCH}"
+          fi
+
+          for tag in "${GHCR_BASE}:${VERSION}-${ARCH}" "${GHCR_BASE}:nightly-${ARCH}"; do
+            docker push "$tag"
+          done
+
+          if [ "${IS_PRERELEASE}" != "true" ]; then
+            docker push "${GHCR_BASE}:latest-${ARCH}"
+          fi
+
+          for tag in "${DOCKERHUB_BASE}:${VERSION}-${ARCH}" "${DOCKERHUB_BASE}:nightly-${ARCH}"; do
+            docker push "$tag"
+          done
+
+          if [ "${IS_PRERELEASE}" != "true" ]; then
+            docker push "${DOCKERHUB_BASE}:latest-${ARCH}"
+          fi
+
+  manifest:
+    needs:
+      - prepare
+      - build-and-push
+    runs-on: ubuntu-24.04
+    permissions:
+      packages: write
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      IS_PRERELEASE: ${{ needs.prepare.outputs.prerelease }}
+    steps:
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          context: .
-          file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Publish multi-architecture manifests
+        run: |
+          set -euo pipefail
+          GHCR_BASE_RAW="${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}"
+          DOCKERHUB_BASE_RAW="${{ env.DOCKERHUB_IMAGE_NAME }}"
+          GHCR_BASE=$(echo "$GHCR_BASE_RAW" | tr '[:upper:]' '[:lower:]')
+          DOCKERHUB_BASE=$(echo "$DOCKERHUB_BASE_RAW" | tr '[:upper:]' '[:lower:]')
+          ARCHITECTURES=( $TARGET_ARCHITECTURES )
+
+          create_and_push_manifest() {
+            local registry_base=$1
+            local tag=$2
+            local refs=()
+            for arch in "${ARCHITECTURES[@]}"; do
+              refs+=("${registry_base}:${tag}-${arch}")
+            done
+            if docker manifest inspect "${registry_base}:${tag}" > /dev/null 2>&1; then
+              docker manifest rm "${registry_base}:${tag}"
+            fi
+            docker manifest create "${registry_base}:${tag}" "${refs[@]}"
+            docker manifest push "${registry_base}:${tag}"
+          }
+
+          create_and_push_manifest "${GHCR_BASE}" "${VERSION}"
+          create_and_push_manifest "${DOCKERHUB_BASE}" "${VERSION}"
+
+          create_and_push_manifest "${GHCR_BASE}" "nightly"
+          create_and_push_manifest "${DOCKERHUB_BASE}" "nightly"
+
+          if [ "${IS_PRERELEASE}" != "true" ]; then
+            create_and_push_manifest "${GHCR_BASE}" "latest"
+            create_and_push_manifest "${DOCKERHUB_BASE}" "latest"
+          fi
 
       - name: Generate summary
         run: |
+          GHCR_BASE_RAW="${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}"
+          DOCKERHUB_BASE_RAW="${{ env.DOCKERHUB_IMAGE_NAME }}"
+          GHCR_BASE=$(echo "$GHCR_BASE_RAW" | tr '[:upper:]' '[:lower:]')
+          DOCKERHUB_BASE=$(echo "$DOCKERHUB_BASE_RAW" | tr '[:upper:]' '[:lower:]')
           echo "## 🚀 Docker Image Built and Pushed Successfully!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Tag:** \`${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Tag:** \`${VERSION}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Images:**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### GitHub Container Registry" >> $GITHUB_STEP_SUMMARY
-          echo "- \`${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-          if [[ "${{ steps.version.outputs.version }}" != *"-"* ]]; then
-            echo "- \`${{ env.GHCR_REGISTRY }}/${{ env.GHCR_IMAGE_NAME }}:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`${GHCR_BASE}:${VERSION}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \\`${GHCR_BASE}:nightly\\`" >> $GITHUB_STEP_SUMMARY
+          if [[ "${IS_PRERELEASE}" != "true" ]]; then
+            echo "- \`${GHCR_BASE}:latest\`" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Docker Hub" >> $GITHUB_STEP_SUMMARY
-          echo "- \`${{ env.DOCKERHUB_IMAGE_NAME }}:${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-          if [[ "${{ steps.version.outputs.version }}" != *"-"* ]]; then
-            echo "- \`${{ env.DOCKERHUB_IMAGE_NAME }}:latest\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`${DOCKERHUB_BASE}:${VERSION}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`${DOCKERHUB_BASE}:nightly\`" >> $GITHUB_STEP_SUMMARY
+          if [[ "${IS_PRERELEASE}" != "true" ]]; then
+            echo "- \`${DOCKERHUB_BASE}:latest\`" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Platforms:** linux/amd64, linux/arm64" >> $GITHUB_STEP_SUMMARY
