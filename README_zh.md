@@ -3,10 +3,7 @@
 <p align="center">
   <img src="public/favicon.svg" alt="Chronoframe Logo" width="192">
   <br/>
-  <img src="https://i| NUXT_PROVIDER_S3_CDN_URL           | S3 存储的 CDN 地址                             | 无          | 否                                        |
-| NUXT_OAUTH_GITHUB_CLIENT_ID        | GitHub OAuth 应用的 Client ID                  | 无          | 否(可选,用于 GitHub 登录)                 |
-| NUXT_OAUTH_GITHUB_CLIENT_SECRET    | GitHub OAuth 应用的 Client Secret              | 无          | 否(可选,用于 GitHub 登录)                 |
-| NUXT_SESSION_PASSWORD              | 用于加密会话的密码,32 位随机字符串            | 无          | 是                                        |hields.io/badge/License-MIT-green.svg" alt="License">
+  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
   <img src="https://img.shields.io/badge/Nuxt-4.0+-00DC82.svg" alt="Nuxt">
   <img src="https://img.shields.io/badge/TypeScript-5.0+-3178C6.svg" alt="TypeScript">
   <img src="https://img.shields.io/badge/WebGL-2.0-FF6600.svg" alt="WebGL">
