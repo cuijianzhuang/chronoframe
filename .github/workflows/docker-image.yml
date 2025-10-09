@@ -190,9 +190,10 @@ jobs:
               refs+=("${registry_base}:${tag}-${arch}")
             done
             if docker manifest inspect "${registry_base}:${tag}" > /dev/null 2>&1; then
-              docker manifest rm "${registry_base}:${tag}"
+              docker manifest create --amend "${registry_base}:${tag}" "${refs[@]}"
+            else
+              docker manifest create "${registry_base}:${tag}" "${refs[@]}"
             fi
-            docker manifest create "${registry_base}:${tag}" "${refs[@]}"
             docker manifest push "${registry_base}:${tag}"
           }
 
@@ -221,7 +222,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### GitHub Container Registry" >> $GITHUB_STEP_SUMMARY
           echo "- \`${GHCR_BASE}:${VERSION}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \\`${GHCR_BASE}:nightly\\`" >> $GITHUB_STEP_SUMMARY
+           echo "- \`${GHCR_BASE}:nightly\`" >> $GITHUB_STEP_SUMMARY
           if [[ "${IS_PRERELEASE}" != "true" ]]; then
             echo "- \`${GHCR_BASE}:latest\`" >> $GITHUB_STEP_SUMMARY
           fi
