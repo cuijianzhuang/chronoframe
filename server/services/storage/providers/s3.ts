@@ -27,6 +27,7 @@ const createClient = (config: S3StorageConfig): S3Client => {
   const clientConfig: S3ClientConfig = {
     endpoint,
     region,
+    forcePathStyle: config.forcePathStyle,
     responseChecksumValidation: 'WHEN_REQUIRED',
     requestChecksumCalculation: 'WHEN_REQUIRED',
     credentials: {

@@ -68,6 +68,7 @@ export default defineNuxtConfig({
         secretAccessKey: '',
         prefix: '',
         cdnUrl: '',
+        forcePathStyle: false,
       },
       local: {
         localPath: './data/storage',

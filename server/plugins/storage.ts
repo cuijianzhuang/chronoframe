@@ -26,6 +26,7 @@ export default nitroPlugin(async (nitroApp) => {
       cdnUrl: config.provider.s3.cdnUrl,
       accessKeyId: config.provider.s3.accessKeyId,
       secretAccessKey: config.provider.s3.secretAccessKey,
+      forcePathStyle: config.provider.s3.forcePathStyle,
     },
     local: {
       provider: 'local',

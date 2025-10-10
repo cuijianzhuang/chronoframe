@@ -27,6 +27,7 @@ NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=your-secret-access-key
 # Optional configuration
 NUXT_PROVIDER_S3_PREFIX=photos/
 NUXT_PROVIDER_S3_CDN_URL=https://cdn.example.com
+NUXT_PROVIDER_S3_FORCE_PATH_STYLE=false
 ```
 
 ### Cloud Provider Configuration Examples
@@ -87,6 +88,8 @@ NUXT_PROVIDER_S3_BUCKET=chronoframe
 NUXT_PROVIDER_S3_REGION=us-east-1
 NUXT_PROVIDER_S3_ACCESS_KEY_ID=minioadmin
 NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=minioadmin
+# MinIO requires path-style access
+NUXT_PROVIDER_S3_FORCE_PATH_STYLE=true
 ```
 
 ### Bucket Configuration
