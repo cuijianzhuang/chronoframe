@@ -26,16 +26,16 @@ features:
     details: Deploy with one command using Docker, no database required (based on SQLite3).
   - title: Flexible Storage Solutions
     icon: 💾
-    details: Support multiple storage backends including S3-compatible storage, GitHub (in development), and local filesystem (in development).
+    details: Support multiple storage backends including S3-compatible storage and local filesystem.
   - title: Smart Geolocation
     icon: 🌍
     details: Automatically extract photo GPS information, use Mapbox for geocoding, display photo locations on map.
   - title: Responsive Design
     icon: 📱
     details: Perfect for desktop and mobile, support touch operations and gesture controls, native app-like experience.
-  - title: LivePhoto Support
+  - title: Live/Motion Photo Support
     icon: 🎬
-    details: Full support for Apple LivePhoto format, automatically detect and process MOV video files, preserve dynamic photo effects.
+    details: Full support for Apple LivePhoto format and Google-standard Motion Photo, automatically detect and process MOV video files, preserve dynamic photo effects.
 
 ---
 

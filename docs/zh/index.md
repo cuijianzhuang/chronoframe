@@ -26,16 +26,16 @@ features:
     details: 使用 Docker 一条命令即可部署，无需数据库（基于 SQLite3）。
   - title: 灵活的存储方案
     icon: 💾
-    details: 支持多种存储后端，包括兼容 S3 的存储、GitHub（开发中）和本地文件系统（开发中）。
+    details: 支持多种存储后端，包括兼容 S3 的存储和本地文件系统。
   - title: 智能地理位置
     icon: 🌍
     details: 自动提取照片 GPS 信息，使用 Mapbox 进行地理编码，在地图上展示照片拍摄位置。
   - title: 响应式设计
     icon: 📱
     details: 完美适配桌面端和移动端，支持触摸操作和手势控制，提供原生应用般的体验。
-  - title: LivePhoto 支持
+  - title: Live/Motion Photo 支持
     icon: 🎬
-    details: 完整支持 Apple LivePhoto 格式，自动检测和处理 MOV 视频文件，保留动态照片效果。
+    details: 完整支持 Apple LivePhoto 格式和 Google 标准的 Motion Photo，自动检测和处理 MOV 视频文件，保留动态照片效果。
 
 ---
 
