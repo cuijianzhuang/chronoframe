@@ -313,9 +313,11 @@ export class QueueManager {
           await this.updateTaskStage(taskId, 'reverse-geocoding')
           this.logger.info(`[${taskId}:in-stage] reverse geocoding`)
 
+          let coordinates = null
           let locationInfo = null
           if (exifData) {
             const { latitude, longitude } = parseGPSCoordinates(exifData)
+            coordinates = { latitude, longitude }
             if (latitude && longitude) {
               locationInfo = await extractLocationFromGPS(latitude, longitude)
             }
@@ -392,8 +394,8 @@ export class QueueManager {
               : null,
             exif: exifData,
             // 地理位置信息
-            latitude: locationInfo?.latitude || null,
-            longitude: locationInfo?.longitude || null,
+            latitude: coordinates?.latitude || null,
+            longitude: coordinates?.longitude || null,
             country: locationInfo?.country || null,
             city: locationInfo?.city || null,
             locationName: locationInfo?.locationName || null,
