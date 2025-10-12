@@ -65,9 +65,6 @@ importers:
       dayjs-nuxt:
         specifier: 2.1.11
         version: 2.1.11(magicast@0.3.5)
-      db0:
-        specifier: ^0.3.2
-        version: 0.3.2(better-sqlite3@12.3.0)(drizzle-orm@0.44.5(@cloudflare/workers-types@4.20250922.0)(@types/better-sqlite3@7.6.13)(better-sqlite3@12.3.0))
       drizzle-orm:
         specifier: ^0.44.4
         version: 0.44.5(@cloudflare/workers-types@4.20250922.0)(@types/better-sqlite3@7.6.13)(better-sqlite3@12.3.0)
