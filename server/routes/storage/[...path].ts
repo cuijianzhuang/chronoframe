@@ -40,7 +40,9 @@ export default defineEventHandler(async (event) => {
 
   const p = getRouterParam(event, 'path') || ''
   const relPathRaw = Array.isArray(p) ? p.join('/') : p
-  const relPath = relPathRaw.replace(/\\/g, '/').replace(/\/+/g, '/').replace(/^\/+/, '')
+  // handle CJK characters in URL
+  const decodedPath = decodeURIComponent(relPathRaw)
+  const relPath = decodedPath.replace(/\\/g, '/').replace(/\/+/g, '/').replace(/^\/+/, '')
 
   // 阻止路径穿越
   if (relPath.includes('..')) {
