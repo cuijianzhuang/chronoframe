@@ -27,7 +27,7 @@ const toBoolean = (value: unknown): boolean => {
   if (value === null || value === undefined) return false
   if (typeof value === 'boolean') return value
   if (typeof value === 'number') return value !== 0
-  if (typeof value === 'bigint') return value !== 0n
+  if (typeof value === 'bigint') return value !== BigInt(0)
   if (typeof value === 'string') {
     const normalized = value.trim().toLowerCase()
     return normalized === '1' || normalized === 'true' || normalized === 'yes'
