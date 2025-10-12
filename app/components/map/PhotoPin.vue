@@ -173,7 +173,7 @@ const onClick = () => {
                           {{ marker.city }}
                         </span>
                       </div>
-                      <span>·</span>
+                      <span v-if="marker.city">·</span>
                       <div v-if="marker.exif?.DateTimeOriginal">
                         <span class="truncate">
                           {{ dayjs(marker.exif.DateTimeOriginal).format('ll') }}
