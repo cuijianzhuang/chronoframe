@@ -28,7 +28,7 @@ defineOgImageComponent('Photo', {
     : config.public.app.slogan,
   thumbnailJpegUrl:
     currentPhoto.value && currentPhoto.value.thumbnailKey
-      ? `/thumb/${currentPhoto.value.thumbnailKey}`
+      ? `/thumb/${encodeURIComponent(currentPhoto.value.thumbnailUrl || '')}`
       : undefined,
   photo: currentPhoto.value || undefined,
 })

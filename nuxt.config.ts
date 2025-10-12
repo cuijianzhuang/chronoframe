@@ -153,7 +153,6 @@ export default defineNuxtConfig({
 
   ogImage: {
     fonts: ['Rubik:400', 'Rubik:700', 'Noto+Sans+SC:400', 'Noto+Sans+SC:700'],
-    googleFontMirror: true,
   },
 
   dayjs: {
