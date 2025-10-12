@@ -584,15 +584,20 @@ onUnmounted(() => {
             </p>
             <p
               v-if="photo.description"
-              class="text-xs opacity-80"
+              class="text-xs text-justify opacity-80 line-clamp-2"
             >
               {{ photo.description }}
             </p>
             <p
-              v-if="photo.dateTaken"
+              v-if="photo.dateTaken || photo.city"
               class="text-xs font-medium opacity-80"
             >
-              {{ $dayjs(photo.dateTaken).format('YYYY-MM-DD') }}
+              <span v-if="photo.dateTaken">
+                {{ $dayjs(photo.dateTaken).format('YYYY-MM-DD') }}
+              </span>
+              <span v-if="photo.city">
+                <span v-if="photo.dateTaken"> · </span>{{ photo.city }}
+              </span>
             </p>
           </div>
           <div
