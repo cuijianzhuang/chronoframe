@@ -49,6 +49,7 @@ export default defineNuxtConfig({
           style: ''
         },
         maplibre: {
+          token: '',
           style: '',
         }
       },

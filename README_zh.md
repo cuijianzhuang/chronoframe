@@ -44,7 +44,7 @@
 
 创建 `.env` 文件并配置。
 
-下面是**最小化配置**示例，完整的配置项参考 [.env.example](./.env.example)：
+下面是**最小化配置**示例，完整的配置项参考 [配置指南](https://chronoframe.bh8.ga/zh/guide/configuration.html)：
 
 ```bash
 # 管理员邮箱（必须）
@@ -60,8 +60,13 @@ NUXT_PUBLIC_APP_SLOGAN=
 NUXT_PUBLIC_APP_AUTHOR=
 NUXT_PUBLIC_APP_AVATAR_URL=
 
-# Mapbox 公共访问令牌（地图 UI，必须）
+# 地图提供器 (maplibre/mapbox)
+NUXT_PUBLIC_MAP_PROVIDER=maplibre
+# 使用 MapLibre 需要 MapTiler 访问令牌
+NUXT_PUBLIC_MAP_MAPLIBRE_TOKEN=
+# 使用 Mapbox 需要 Mapbox 访问令牌
 NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
+
 # Mapbox 无域名限制令牌（反向地理编码，可选）
 NUXT_MAPBOX_ACCESS_TOKEN=
 

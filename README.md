@@ -44,7 +44,7 @@ We recommend deploying with the prebuilt Docker image. [View the image on ghcr](
 
 Create a `.env` file and configure environment variables.
 
-Below is a **minimal configuration** example. For complete configuration options, see [.env.example](./.env.example):
+Below is a **minimal configuration** example. For complete configuration options, see [Configuration Guide](https://chronoframe.bh8.ga/guide/configuration.html):
 
 ```bash
 # Admin email (required)
@@ -60,8 +60,13 @@ NUXT_PUBLIC_APP_SLOGAN=
 NUXT_PUBLIC_APP_AUTHOR=
 NUXT_PUBLIC_APP_AVATAR_URL=
 
-# Mapbox public token (required for map UI)
+# Map provider (maplibre/mapbox)
+NUXT_PUBLIC_MAP_PROVIDER=maplibre
+# MapTiler access token for MapLibre
+NUXT_PUBLIC_MAP_MAPLIBRE_TOKEN=
+# Mapbox access token for Mapbox
 NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
+
 # Mapbox unrestricted token (optional, reverse geocoding)
 NUXT_MAPBOX_ACCESS_TOKEN=
 

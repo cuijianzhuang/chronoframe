@@ -40,11 +40,20 @@ const mapStyle = computed(() => {
   if (provider.value === 'mapbox') {
     return mapConfig.mapbox.style || `mapbox://styles/mapbox/standard`
   } else {
+    const styleConfig =
+      colorMode.value === 'dark' ? ChronoFrameDarkStyle : ChronoFrameLightStyle
     return (
       mapConfig.maplibre.style ||
-      ((colorMode.value === 'dark'
-        ? ChronoFrameDarkStyle
-        : ChronoFrameLightStyle) as StyleSpecification)
+      ({
+        ...styleConfig,
+        sources: {
+          openmaptiles: {
+            ...styleConfig.sources?.openmaptiles,
+            url: `https://api.maptiler.com/tiles/v3-openmaptiles/tiles.json?key=${mapConfig.maplibre.token}`,
+          },
+        },
+        glyphs: `https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=${mapConfig.maplibre.token}`,
+      } as StyleSpecification)
     )
   }
 })

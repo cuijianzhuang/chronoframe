@@ -57,6 +57,13 @@ NUXT_PUBLIC_APP_SLOGAN=
 NUXT_PUBLIC_APP_AUTHOR=
 NUXT_PUBLIC_APP_AVATAR_URL=
 
+# Map provider (maplibre/mapbox)
+NUXT_PUBLIC_MAP_PROVIDER=maplibre
+# MapTiler access token for MapLibre
+NUXT_PUBLIC_MAP_MAPLIBRE_TOKEN=
+# Mapbox access token for Mapbox
+NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
+
 # Storage provider (local or s3)
 NUXT_STORAGE_PROVIDER=local
 NUXT_PROVIDER_LOCAL_PATH=/app/data/storage

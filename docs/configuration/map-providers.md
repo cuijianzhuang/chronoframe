@@ -2,17 +2,18 @@
 
 ChronoFrame supports two types of map providers. You can choose the one that best fits your needs.
 
-| Provider              | Supported | Extra Configuration | Features                              |
-| ---------------------- | :-------: | ------------------- | ------------------------------------- |
-| [MapLibre](#maplibre) | ✅         | None                | Free and open-source, supports custom styles |
-| [Mapbox](#mapbox)     | ✅         | Mapbox Access Token | Free tier, better renderer performance |
+| Provider              | Supported | Extra Configuration   | Features                                     |
+| --------------------- | :-------: | --------------------- | -------------------------------------------- |
+| [MapLibre](#maplibre) |    ✅     | MapTiler Access Token | Free and open-source, supports custom styles |
+| [Mapbox](#mapbox)     |    ✅     | Mapbox Access Token   | Free tier, better renderer performance       |
 
 ## MapLibre
 
-To use MapLibre as the map provider, simply configure it as follows—no additional setup is required:
+To use MapLibre as the map provider, you need a [MapTiler Access Token](https://cloud.maptiler.com/account/keys/).
 
 ```bash
 NUXT_PUBLIC_MAP_PROVIDER=maplibre
+NUXT_PUBLIC_MAP_MAPLIBRE_TOKEN=your_maplibre_access_token
 ```
 
 ### Custom Styles
