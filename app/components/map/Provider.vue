@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import type { AttributionControlOptions, StyleSpecification } from 'maplibre-gl'
 import { twMerge } from 'tailwind-merge'
-import ChronoFrameLightStyle from '~/assets/mapStyles/chronoframe_light.json'
 import type { MapboxMap, MapInstance, MaplibreMap } from '~~/shared/types/map'
+
+import ChronoFrameLightStyle from '~/assets/mapStyles/chronoframe_light.json'
+import ChronoFrameDarkStyle from '~/assets/mapStyles/chronoframe_dark.json'
 
 const props = withDefaults(
   defineProps<{
@@ -33,13 +35,19 @@ const emit = defineEmits<{
 }>()
 
 const mapConfig = useRuntimeConfig().public.map
+const colorMode = useColorMode()
 
 const provider = computed(() => mapConfig.provider)
 const mapStyle = computed(() => {
   if (provider.value === 'mapbox') {
     return props.style || `mapbox://styles/mapbox/standard`
   } else {
-    return props.style || (ChronoFrameLightStyle as StyleSpecification)
+    return (
+      props.style ||
+      ((colorMode.value === 'dark'
+        ? ChronoFrameDarkStyle
+        : ChronoFrameLightStyle) as StyleSpecification)
+    )
   }
 })
 </script>
@@ -72,6 +80,12 @@ const mapStyle = computed(() => {
           interactive: interactive,
           attributionControl: attributionControl,
           language: language,
+          config: {
+            basemap: {
+              lightPreset: $colorMode.value === 'dark' ? 'night' : 'day',
+              colorThemes: 'faded',
+            },
+          },
         }"
         @load="emit('load', $event as MapboxMap)"
         @zoom="emit('zoom')"
