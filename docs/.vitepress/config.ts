@@ -4,6 +4,23 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'ChronoFrame',
   description: 'A Self-hosted photo gallery',
+  head: [
+    [
+      'script',
+      {
+        async: '',
+        src: 'https://www.googletagmanager.com/gtag/js?id=G-RQSZM9PP5F',
+      },
+    ],
+    [
+      'script',
+      {},
+      `window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-RQSZM9PP5F');`,
+    ],
+  ],
   lastUpdated: true,
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
