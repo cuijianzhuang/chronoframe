@@ -1,6 +1,6 @@
 {
   "version": 8,
-  "name": "ChronoFrame Basic",
+  "name": "ChronoFrame Light",
   "metadata": {
     "mapbox:autocomposite": false,
     "mapbox:type": "template",
@@ -9,7 +9,8 @@
     "openmaptiles:mapbox:owner": "openmaptiles",
     "openmaptiles:mapbox:source:url": "mapbox://openmaptiles.4qljc88t"
   },
-  "light": {"anchor": "viewport"},
+  "center": [116.4074, 39.9042],
+  "zoom": 2,
   "projection": {"type": "globe"},
   "sources": {
     "openmaptiles": {
@@ -727,7 +728,7 @@
       ],
       "layout": {
         "text-anchor": "center",
-        "text-field": "{name:latin}\n{name:nonlatin}",
+        "text-field": "{name:nonlatin}",
         "text-font": ["Noto Sans Regular"],
         "text-max-width": 6,
         "text-size": {"stops": [[6, 10], [12, 14]]},
@@ -741,17 +742,78 @@
       }
     },
     {
+      "id": "place_label_state",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "place",
+      "minzoom": 3,
+      "maxzoom": 16,
+      "filter": [
+        "all",
+        ["==", "$type", "Point"],
+        ["in", "class", "state", "region", "province"]
+      ],
+      "layout": {
+        "text-field": "{name:nonlatin}",
+        "text-font": ["Noto Sans Regular"],
+        "text-max-width": 10,
+        "text-size": {"stops": [[3, 14], [8, 20]]},
+        "symbol-sort-key": 10
+      },
+      "paint": {
+        "text-color": "hsl(0, 0%, 0%)",
+        "text-halo-blur": 0,
+        "text-halo-color": "hsla(0, 0%, 100%, 0.75)",
+        "text-halo-width": 2
+      }
+    },
+    {
+      "id": "place_label_state_tw",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "place",
+      "minzoom": 3,
+      "maxzoom": 16,
+      "filter": [
+        "all",
+        ["==", "$type", "Point"],
+        ["==", "class", "country"],
+        [
+          "any",
+          ["==", "iso_a2", "TW"],
+          ["==", "wikidata", "Q865"],
+          ["==", "name:en", "Taiwan"],
+          ["==", "name", "Taiwan"]
+        ]
+      ],
+      "layout": {
+        "text-field": "台湾省",
+        "text-font": ["Noto Sans Regular"],
+        "text-max-width": 10,
+        "text-size": {"stops": [[3, 14], [8, 20]]},
+        "symbol-sort-key": 10
+      },
+      "paint": {
+        "text-color": "hsl(0, 0%, 0%)",
+        "text-halo-blur": 0,
+        "text-halo-color": "hsla(0, 0%, 100%, 0.75)",
+        "text-halo-width": 2
+      }
+    },
+    {
       "id": "place_label_city",
       "type": "symbol",
       "source": "openmaptiles",
       "source-layer": "place",
+      "minzoom": 5,
       "maxzoom": 16,
       "filter": ["all", ["==", "$type", "Point"], ["==", "class", "city"]],
       "layout": {
-        "text-field": "{name:latin}\n{name:nonlatin}",
+        "text-field": "{name:nonlatin}",
         "text-font": ["Noto Sans Regular"],
         "text-max-width": 10,
-        "text-size": {"stops": [[3, 12], [8, 16]]}
+        "text-size": {"stops": [[6, 12], [10, 16]]},
+        "symbol-sort-key": 1
       },
       "paint": {
         "text-color": "hsl(0, 0%, 0%)",
@@ -796,7 +858,8 @@
         "all",
         ["==", "$type", "Point"],
         ["==", "class", "country"],
-        ["has", "iso_a2"]
+        ["has", "iso_a2"],
+        ["!=", "iso_a2", "TW"]
       ],
       "layout": {
         "text-field": "{name:latin}",
@@ -813,5 +876,6 @@
       }
     }
   ],
-  "id": "basic"
+  "id": "basic",
+  "owner": "ChronoFrame"
 }

@@ -1,14 +1,35 @@
 <script lang="ts" setup>
-import type { StyleSpecification } from 'maplibre-gl'
+import type { AttributionControlOptions, StyleSpecification } from 'maplibre-gl'
 import { twMerge } from 'tailwind-merge'
-import MaplibreBasicStyle from '~/assets/mapStyles/maplibre_basic.json'
+import ChronoFrameLightStyle from '~/assets/mapStyles/chronoframe_light.json'
+import type { MapboxMap, MapInstance, MaplibreMap } from '~~/shared/types/map'
 
-defineProps<{
-  class?: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    class?: string
+    mapId?: string
+    style?: StyleSpecification | string
+    center?: [number, number]
+    zoom?: number
+    interactive?: boolean
+    attributionControl?: false | AttributionControlOptions
+    language?: string
+  }>(),
+  {
+    class: undefined,
+    mapId: undefined,
+    style: undefined,
+    center: undefined,
+    zoom: 2,
+    interactive: true,
+    attributionControl: false,
+    language: undefined,
+  },
+)
 
 const emit = defineEmits<{
-  load: [map: any]
+  load: [map: MapInstance]
+  zoom: []
 }>()
 
 const mapConfig = useRuntimeConfig().public.map
@@ -16,9 +37,9 @@ const mapConfig = useRuntimeConfig().public.map
 const provider = computed(() => mapConfig.provider)
 const mapStyle = computed(() => {
   if (provider.value === 'mapbox') {
-    return `mapbox://styles/mapbox/standard`
+    return props.style || `mapbox://styles/mapbox/standard`
   } else {
-    return MaplibreBasicStyle as StyleSpecification
+    return props.style || (ChronoFrameLightStyle as StyleSpecification)
   }
 })
 </script>
@@ -28,17 +49,32 @@ const mapStyle = computed(() => {
     <ClientOnly>
       <MglMap
         v-if="provider === 'maplibre'"
-        :map-style="mapStyle"
-        @map:load="emit('load', $event.map)"
+        class="w-full h-full"
+        :map-key="mapId"
+        :map-style
+        :center
+        :zoom
+        :interactive
+        :attribution-control
+        @map:load="emit('load', $event.map as MaplibreMap)"
+        @map:zoom="emit('zoom')"
       >
         <slot />
       </MglMap>
       <MapboxMap
         v-else
+        class="w-full h-full"
+        :map-id="mapId || 'cframe-mapbox-map'"
         :options="{
           style: mapStyle,
+          center: center,
+          zoom: zoom,
+          interactive: interactive,
+          attributionControl: attributionControl,
+          language: language,
         }"
-        @load="emit('load', $event)"
+        @load="emit('load', $event as MapboxMap)"
+        @zoom="emit('zoom')"
       >
         <slot />
       </MapboxMap>

@@ -1,15 +1,7 @@
 <script lang="ts" setup>
-import type { Map as MaplibreMap } from 'maplibre-gl'
-import type { Map as MapboxMap } from 'mapbox-gl'
+import type { MapInstance } from '~~/shared/types/map'
 
-const mapInstance = ref<MaplibreMap | MapboxMap | null>(null)
-
-// function isMaplibreMap(map: any): map is MaplibreMap {
-//   return map && typeof map.getStyle === 'function' && typeof map.setStyle === 'function'
-// }
-// function isMapboxMap(map: any): map is MapboxMap {
-//   return map && typeof map.getStyle === 'function' && typeof map.setStyle === 'function'
-// }
+const mapInstance = ref<MapInstance | null>(null)
 
 watch(mapInstance, (newMap) => {
   if (newMap) {
@@ -32,7 +24,9 @@ const onMapLoaded = (map: any) => {
 
 <template>
   <div class="w-full h-screen">
-    <MapProvider @load="onMapLoaded"></MapProvider>
+    <MapProvider @load="onMapLoaded">
+      <slot />
+    </MapProvider>
   </div>
 </template>
 

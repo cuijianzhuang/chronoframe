@@ -46,11 +46,10 @@ const sizeDelta = computed(() => {
 </script>
 
 <template>
-  <MapboxDefaultMarker
+  <MapProviderMarker
     :key="`marker-cluster-${representativePhoto.id}`"
     :marker-id="`marker-cluster-${markerId || representativePhoto.id}`"
     :lnglat="props.clusterPoint.geometry.coordinates"
-    :options="{}"
   >
     <template #marker>
       <HoverCardRoot
@@ -261,7 +260,7 @@ const sizeDelta = computed(() => {
         </HoverCardPortal>
       </HoverCardRoot>
     </template>
-  </MapboxDefaultMarker>
+  </MapProviderMarker>
 </template>
 
 <style scoped></style>

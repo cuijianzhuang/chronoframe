@@ -243,22 +243,13 @@ onBeforeRouteLeave(() => {
     >
       <ClientOnly>
         <!-- mapbox://styles/hoshinosuzumi/cmev0eujf01dw01pje3g9cmlg -->
-        <MapboxMap
+        <MapProvider
           class="w-full h-full"
           :map-id="generateRandomKey()"
-          :options="{
-            style: 'mapbox://styles/mapbox/standard',
-            zoom: mapViewState.zoom,
-            center: [mapViewState.longitude, mapViewState.latitude],
-            config: {
-              basemap: {
-                lightPreset: $colorMode.value === 'dark' ? 'night' : 'day',
-                colorThemes: 'faded',
-              },
-            },
-            attributionControl: false,
-            language: $i18n.locale,
-          }"
+          :zoom="mapViewState.zoom"
+          :center="[mapViewState.longitude, mapViewState.latitude]"
+          :attribution-control="false"
+          :language="$i18n.locale"
           @load="onMapLoaded"
           @zoom="onMapZoom"
         >
@@ -288,7 +279,7 @@ onBeforeRouteLeave(() => {
               @close="onMarkerPinClose"
             />
           </template>
-        </MapboxMap>
+        </MapProvider>
 
         <template #fallback>
           <div class="w-full h-full flex items-center justify-center">
