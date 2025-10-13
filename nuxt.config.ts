@@ -22,6 +22,7 @@ export default defineNuxtConfig({
     'dayjs-nuxt',
     '@nuxtjs/i18n',
     'nuxt-mapbox',
+    'nuxt-maplibre',
     'nuxt-og-image',
     'nuxt-gtag',
   ],
@@ -41,6 +42,15 @@ export default defineNuxtConfig({
         slogan: '',
         author: '',
         avatarUrl: '',
+      },
+      map: {
+        provider: 'maplibre' as 'mapbox' | 'maplibre',
+        mapbox: {
+          style: ''
+        },
+        maplibre: {
+          style: '',
+        }
       },
       analytics: {
         matomo: {
@@ -122,17 +132,26 @@ export default defineNuxtConfig({
         'tailwind-merge',
         'thumbhash',
         'mapbox-gl',
+        'maplibre-gl',
+        '@indoorequal/vue-maplibre-gl',
         'file-type',
         'reka-ui',
         'es-toolkit',
         'tippy.js',
       ],
     },
+    ssr: {
+      noExternal: ['@indoorequal/vue-maplibre-gl'],
+    },
     css: {
       devSourcemap: true,
     },
     build: {
       sourcemap: false,
+      commonjsOptions: {
+        include: [/maplibre-gl/, /node_modules/],
+        transformMixedEsModules: true,
+      },
     },
   },
 

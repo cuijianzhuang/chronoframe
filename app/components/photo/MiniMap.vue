@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { motion } from 'motion-v'
+import { isMapboxMap, type MapInstance } from '~~/shared/types/map'
 
 const props = defineProps<{
   photo: Photo
@@ -9,12 +10,14 @@ const props = defineProps<{
 
 const MAPID = 'minimap-info-panel'
 
+const config = useRuntimeConfig()
+
 const loaded = ref(false)
 const isAnimating = ref(false)
-const mapInstance = ref<any>(null)
+const mapInstance = ref<MapInstance | null>(null)
 let animationTimer: ReturnType<typeof setTimeout> | null = null
 
-const onMapLoad = (map: any) => {
+const onMapLoad = (map: MapInstance) => {
   mapInstance.value = map
   map.setCenter([props.longitude, props.latitude])
   setTimeout(() => {
@@ -50,18 +53,20 @@ const moveMapTo = (newLat: number, newLng: number) => {
 
 watch([() => props.latitude, () => props.longitude], ([newLat, newLng]) => {
   moveMapTo(newLat, newLng)
-  if (mapInstance.value) {
+  const map = mapInstance.value
+  // Only available with Mapbox
+  if (map && isMapboxMap(map as any, config.public.map.provider)) {
     // 根据拍摄时间决定四种 lightPreset: dawn / day / dusk / night
     const photoDate = new Date(props.photo.dateTaken || 0)
     const hours = photoDate.getHours()
     if (hours >= 5 && hours < 7) {
-      mapInstance.value.setConfigProperty('basemap', 'lightPreset', 'dawn')
+      ;(map as any).setConfigProperty('basemap', 'lightPreset', 'dawn')
     } else if (hours >= 7 && hours < 17) {
-      mapInstance.value.setConfigProperty('basemap', 'lightPreset', 'day')
+      ;(map as any).setConfigProperty('basemap', 'lightPreset', 'day')
     } else if (hours >= 17 && hours < 21) {
-      mapInstance.value.setConfigProperty('basemap', 'lightPreset', 'dusk')
+      ;(map as any).setConfigProperty('basemap', 'lightPreset', 'dusk')
     } else {
-      mapInstance.value.setConfigProperty('basemap', 'lightPreset', 'night')
+      ;(map as any).setConfigProperty('basemap', 'lightPreset', 'night')
     }
   }
 })
@@ -71,10 +76,6 @@ onUnmounted(() => {
     clearTimeout(animationTimer)
     animationTimer = null
   }
-  if (mapInstance.value) {
-    mapInstance.value.remove()
-    mapInstance.value = null
-  }
 })
 </script>
 
@@ -82,21 +83,12 @@ onUnmounted(() => {
   <div
     class="relative w-full h-44 overflow-hidden rounded-lg border border-white/10 dark:border-white/10"
   >
-    <!-- mapbox://styles/hoshinosuzumi/cmev0eujf01dw01pje3g9cmlg -->
-    <MapboxMap
+    <MapProvider
       class="w-full h-full relative overflow-hidden"
       :map-id="MAPID"
-      :options="{
-        style: 'mapbox://styles/mapbox/standard',
-        zoom: 12,
-        config: {
-          basemap: {
-            colorThemes: 'faded',
-          },
-        },
-        interactive: false,
-        language: $i18n.locale,
-      }"
+      :zoom="12"
+      :interactive="false"
+      :language="$i18n.locale"
       @load="onMapLoad"
     >
       <AnimatePresence>
@@ -125,7 +117,7 @@ onUnmounted(() => {
           {{ $t('minimap.loading') }}
         </p>
       </div>
-    </MapboxMap>
+    </MapProvider>
   </div>
 </template>
 

@@ -30,12 +30,11 @@ const onClick = () => {
 </script>
 
 <template>
-  <MapboxDefaultMarker
+  <MapProviderMarker
     ref="markerRef"
     :key="`marker-single-${marker.id}`"
     :marker-id="`marker-single-${markerId || marker.id}`"
     :lnglat="props.clusterPoint.geometry.coordinates"
-    :options="{}"
   >
     <template #marker>
       <HoverCardRoot
@@ -244,7 +243,7 @@ const onClick = () => {
         </HoverCardPortal>
       </HoverCardRoot>
     </template>
-  </MapboxDefaultMarker>
+  </MapProviderMarker>
 </template>
 
 <style scoped></style>
