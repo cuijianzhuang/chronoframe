@@ -6,11 +6,10 @@ import type { MapboxMap, MapInstance, MaplibreMap } from '~~/shared/types/map'
 import ChronoFrameLightStyle from '~/assets/mapStyles/chronoframe_light.json'
 import ChronoFrameDarkStyle from '~/assets/mapStyles/chronoframe_dark.json'
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     class?: string
     mapId?: string
-    style?: StyleSpecification | string
     center?: [number, number]
     zoom?: number
     interactive?: boolean
@@ -20,7 +19,6 @@ const props = withDefaults(
   {
     class: undefined,
     mapId: undefined,
-    style: undefined,
     center: undefined,
     zoom: 2,
     interactive: true,
@@ -40,10 +38,10 @@ const colorMode = useColorMode()
 const provider = computed(() => mapConfig.provider)
 const mapStyle = computed(() => {
   if (provider.value === 'mapbox') {
-    return props.style || `mapbox://styles/mapbox/standard`
+    return mapConfig.mapbox.style || `mapbox://styles/mapbox/standard`
   } else {
     return (
-      props.style ||
+      mapConfig.maplibre.style ||
       ((colorMode.value === 'dark'
         ? ChronoFrameDarkStyle
         : ChronoFrameLightStyle) as StyleSpecification)

@@ -29,6 +29,7 @@ export default defineConfig({
             text: 'Storage Providers',
             link: '/configuration/storage-providers',
           },
+          { text: 'Map Providers', link: '/configuration/map-providers' },
         ],
       },
       {

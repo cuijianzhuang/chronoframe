@@ -9,11 +9,6 @@ The documentation is still being written; some sections may be incomplete.
 ## Prerequisites
 
 - A working [Docker](https://docs.docker.com/get-docker/) environment.
-- Two [Mapbox access tokens](https://console.mapbox.com/account/access-tokens/).
-  :::details Why two tokens?
-  - The first token (frontend) is used by Mapbox GL JS to render maps. It needs `styles:read` permission. You should restrict this token to your ChronoFrame domain to avoid abuse.
-  - The second token (server) is used for reverse geocoding (Mapbox Search API). It **must not** have URL restrictions. This token is **optional** if you don't need reverse geocoding.
-  :::
 - A storage backend. You can start with the built‑in local filesystem storage or configure an S3‑compatible bucket. See the [Storage Providers](/configuration/storage-providers) section for details.
   :::tip S3 configuration checklist
   If using S3, collect: `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY`, `ENDPOINT`, `BUCKET_NAME`, `REGION`, and optionally a public CDN base URL (`CDN_URL`) if different from the endpoint.
@@ -61,11 +56,6 @@ NUXT_PUBLIC_APP_TITLE=
 NUXT_PUBLIC_APP_SLOGAN=
 NUXT_PUBLIC_APP_AUTHOR=
 NUXT_PUBLIC_APP_AVATAR_URL=
-
-# Mapbox public token (required for map UI)
-NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
-# Mapbox unrestricted token (optional, reverse geocoding)
-NUXT_MAPBOX_ACCESS_TOKEN=
 
 # Storage provider (local or s3)
 NUXT_STORAGE_PROVIDER=local

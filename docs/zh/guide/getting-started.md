@@ -9,11 +9,6 @@
 ## 前置准备
 
 - 可用的 [Docker](https://docs.docker.com/get-docker/) 环境。
-- 两个 [Mapbox 访问令牌](https://console.mapbox.com/account/access-tokens/)。
-  :::details 为什么需要两个 Token？
-  - 第一个（前端）Token 用于 Mapbox GL JS 渲染地图，需要 `styles:read` 权限。建议将其域名限制为你的 ChronoFrame 实例，防止滥用。
-  - 第二个（服务端）Token 用于反向地理编码（Mapbox Search API），此 Token **不能** 有 URL 限制。如果不需要反向解析，可以不配置（可选）。
-  :::
 - 存储后端：可以直接使用内置本地文件系统，也可以配置任意兼容 S3 协议的对象存储。详见 [存储提供者](/zh/configuration/storage-providers)。
   :::tip S3 参数清单
   若使用 S3，请准备：`ACCESS_KEY_ID`、`SECRET_ACCESS_KEY`、`ENDPOINT`、`BUCKET_NAME`、`REGION`，以及（可选）当外链域名与 ENDPOINT 不同时的 `CDN_URL`。
@@ -59,11 +54,6 @@ NUXT_PUBLIC_APP_TITLE=
 NUXT_PUBLIC_APP_SLOGAN=
 NUXT_PUBLIC_APP_AUTHOR=
 NUXT_PUBLIC_APP_AVATAR_URL=
-
-# Mapbox 公共访问令牌（地图 UI，必须）
-NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=
-# Mapbox 无域名限制令牌（反向地理编码，可选）
-NUXT_MAPBOX_ACCESS_TOKEN=
 
 # 存储提供者（local 或 s3）
 NUXT_STORAGE_PROVIDER=local
