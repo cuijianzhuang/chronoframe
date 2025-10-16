@@ -87,7 +87,9 @@ export const pipelineQueue = sqliteTable('pipeline_queue', {
 // 照片表态表
 export const photoReactions = sqliteTable('photo_reactions', {
   id: integer('id').primaryKey({ autoIncrement: true }),
-  photoId: text('photo_id').notNull().references(() => photos.id, { onDelete: 'cascade' }),
+  photoId: text('photo_id')
+    .notNull()
+    .references(() => photos.id, { onDelete: 'cascade' }),
   reactionType: text('reaction_type', {
     enum: ['like', 'love', 'amazing', 'funny', 'wow', 'sad', 'fire', 'sparkle'],
   }).notNull(),
@@ -99,6 +101,37 @@ export const photoReactions = sqliteTable('photo_reactions', {
     .notNull()
     .default(sql`(unixepoch())`),
   updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+})
+
+// 相簿表
+export const albums = sqliteTable('albums', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  title: text('title').notNull(),
+  description: text('description'),
+  coverPhotoId: text('cover_photo_id').references(() => photos.id, {
+    onDelete: 'set null',
+  }),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`(unixepoch())`),
+})
+
+// 相簿-照片 多对多关系表
+export const albumPhotos = sqliteTable('album_photos', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  albumId: integer('album_id')
+    .notNull()
+    .references(() => albums.id, { onDelete: 'cascade' }),
+  photoId: text('photo_id')
+    .notNull()
+    .references(() => photos.id, { onDelete: 'cascade' }),
+  position: real('position').notNull().default(1000000),
+  addedAt: integer('added_at', { mode: 'timestamp' })
     .notNull()
     .default(sql`(unixepoch())`),
 })

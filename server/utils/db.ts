@@ -48,3 +48,11 @@ export type PipelineQueueItem = typeof schema.pipelineQueue.$inferSelect
 export type NewPipelineQueueItem = typeof schema.pipelineQueue.$inferInsert
 
 export type PhotoReaction = typeof schema.photoReactions.$inferSelect
+
+export type Album = typeof schema.albums.$inferSelect
+export type NewAlbum = typeof schema.albums.$inferInsert
+export type AlbumPhoto = typeof schema.albumPhotos.$inferSelect
+export type NewAlbumPhoto = typeof schema.albumPhotos.$inferInsert
+export type AlbumWithPhotos = Album & {
+  photos: Photo[]
+}
