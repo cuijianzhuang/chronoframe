@@ -50,6 +50,9 @@
       "globe": {
         "tooltip": "Globe"
       },
+      "home": {
+        "tooltip": "Back to Home"
+      },
       "share": {
         "tooltip": "Share Photo",
         "title": "Share Photo",
@@ -105,7 +108,31 @@
       "noPhotosTip": "Nno photos yet, upload some now!"
     },
     "livePhoto": "Live Photo",
-    "indexPanelCountCity":"and more other cities"
+    "indexPanelCountCity":"and more other cities",
+    "album": {
+      "noImage": "Empty Album",
+      "emptyAlbumTip": "Add photos to get started",
+      "noDescription": "No description"
+    }
+  },
+  "album": {
+    "notFound": "Album not found",
+    "noDateInfo": "No date info",
+    "noPhotosTip": "No photos in this album yet",
+    "emptyAlbumTitle": "This Album Is Empty",
+    "emptyAlbumDescription": "More wonderful moments will be presented here.",
+    "failedToLoadTitle": "Failed to Load Album",
+    "failedToLoadDescription": "An error occurred while loading this album.",
+    "failedToLoad": "Failed to load album",
+    "backToAlbums": "Back to Albums",
+    "noDescription": "No description provided",
+    "photo": "no photos | one photo | {count} photos",
+    "createdAt": "Created {time}",
+    "metadata": {
+      "photos": "Photos",
+      "dateRange": "Date Range",
+      "created": "Created"
+    }
   },
   "map": {
     "cluster": {
@@ -321,7 +348,8 @@
     "locations": "Locations",
     "globe": "Photo Globe",
     "queue": "Queue Management",
-    "logs": "System Logs"
+    "logs": "System Logs",
+    "albums": "Albums"
   },
   "auth": {
     "form": {
@@ -432,6 +460,81 @@
     }
   },
   "dashboard": {
+    "albums": {
+      "title": "Album Management",
+      "subtitle": "Create and manage your photo albums",
+      "createButton": "Create Album",
+      "noAlbums": "No albums yet",
+      "noAlbumsTip": "Create your first album to organize your photos",
+      "form": {
+        "title": "Title",
+        "titlePlaceholder": "Enter album title",
+        "titleRequired": "Please enter album title",
+        "description": "Description",
+        "descriptionPlaceholder": "Enter album description (optional)",
+        "coverPhoto": "Album Cover",
+        "addCoverPhoto": "Add cover photo",
+        "selectPhotos": "Select Photos",
+        "editPhotos": "Edit photo selection",
+        "selectedCount": "Selected {count} photos",
+        "clearAll": "Clear all"
+      },
+      "table": {
+        "columns": {
+          "cover": "Cover",
+          "title": "Title",
+          "description": "Description",
+          "photoCount": "Photos",
+          "createdAt": "Created at",
+          "actions": "Actions"
+        }
+      },
+      "modal": {
+        "selectPhotos": "Select Photos",
+        "totalPhotos": "Total {count} photos",
+        "selectedPhotos": "Selected {count} photos",
+        "searchPlaceholder": "Search photos...",
+        "searchResults": "Results: {current} / {total}",
+        "selectAll": "Select All",
+        "setCover": "Set as cover",
+        "noPhotos": "No photos",
+        "noResults": "No matching photos found",
+        "tryOtherKeywords": "Try other keywords",
+        "confirm": "Confirm ({count})",
+        "selectedInfo": "Selected:",
+        "coverSetInfo": "Cover set"
+      },
+      "slideover": {
+        "create": {
+          "title": "Create Album",
+          "description": "Create a new album to organize your photos"
+        },
+        "edit": {
+          "title": "Edit Album",
+          "description": "Modify album information and photos"
+        },
+        "submitCreate": "Create",
+        "submitEdit": "Save",
+        "cancel": "Cancel"
+      },
+      "delete": {
+        "title": "Delete Album",
+        "message": "Are you sure you want to delete the album \"{title}\"? Deleting the album will not delete the photos inside, only the album itself.",
+        "cancel": "Cancel",
+        "confirm": "Confirm Delete"
+      },
+      "messages": {
+        "createSuccess": "Album created successfully",
+        "updateSuccess": "Album updated successfully",
+        "deleteSuccess": "Album deleted successfully",
+        "createError": "Failed to create album",
+        "updateError": "Failed to update album",
+        "deleteError": "Failed to delete album",
+        "loadError": "Failed to load albums",
+        "loadDetailError": "Failed to load album details",
+        "loadPhotosError": "Failed to load photos"
+      }
+    },
     "overview": {
       "title": "Overview",
       "indicator": {

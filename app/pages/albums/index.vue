@@ -3,7 +3,14 @@ import { motion } from 'motion-v'
 
 const config = useRuntimeConfig()
 const { photos } = usePhotos()
-const { data: albums } = useAsyncData(() => $fetch('/api/albums'))
+const { data: albums } = useAsyncData(
+  'albums',
+  // @ts-nocheck
+  () => $fetch('/api/albums'),
+  {
+    watch: [],
+  },
+)
 
 // randomly pick 30 photos for waterfall
 const waterfallPhotos = computed(() =>
@@ -51,29 +58,31 @@ const getPhotoById = (photoId: string) => {
 }
 
 const getAlbumDisplayPhotos = (album: any) => {
-  if (!album.photos || album.photos.length === 0) return []
+  if (!album.photoIds || album.photoIds.length === 0) return []
 
   const displayPhotos = []
 
   // 第一张：优先使用封面照片
   if (album.coverPhotoId) {
-    const coverPhoto =
-      getPhotoById(album.coverPhotoId) ||
-      album.photos.find((p: any) => p.id === album.coverPhotoId)
+    const coverPhoto = getPhotoById(album.coverPhotoId)
     if (coverPhoto) {
       displayPhotos.push(coverPhoto)
     }
   }
 
   // 如果没有封面照片或封面照片不存在，使用第一张
-  if (displayPhotos.length === 0 && album.photos[0]) {
-    displayPhotos.push(album.photos[0])
+  if (displayPhotos.length === 0 && album.photoIds[0]) {
+    const firstPhoto = getPhotoById(album.photoIds[0])
+    if (firstPhoto) {
+      displayPhotos.push(firstPhoto)
+    }
   }
 
   // 添加其他照片（最多3张）
-  for (const photo of album.photos) {
+  for (const photoId of album.photoIds) {
     if (displayPhotos.length >= 3) break
-    if (!displayPhotos.find((p) => p.id === photo.id)) {
+    const photo = getPhotoById(photoId)
+    if (photo && !displayPhotos.find((p) => p.id === photo.id)) {
       displayPhotos.push(photo)
     }
   }
@@ -98,7 +107,7 @@ const getPhotoTransform = (index: number, isHover: boolean) => {
   }
 }
 
-const hoveredAlbum = ref<string | null>(null)
+const hoveredAlbum = ref<number | null>(null)
 </script>
 
 <template>
@@ -134,16 +143,18 @@ const hoveredAlbum = ref<string | null>(null)
                 :key="`${photo.id}-${groupIndex}-${photoIndex}`"
                 class="w-full overflow-hidden"
               >
-                <ThumbImage
-                  class="w-full h-auto object-cover saturate-50"
-                  :lazy="false"
-                  :src="photo.thumbnailUrl!"
-                  :thumbhash="photo.thumbnailHash"
-                  :alt="photo.exif?.ImageDescription || 'Photo'"
-                  :style="{
-                    aspectRatio: photo.aspectRatio || 1,
-                  }"
-                />
+                <ClientOnly>
+                  <ThumbImage
+                    class="w-full h-auto object-cover saturate-50"
+                    :lazy="false"
+                    :src="photo.thumbnailUrl!"
+                    :thumbhash="photo.thumbnailHash"
+                    :alt="photo.exif?.ImageDescription || 'Photo'"
+                    :style="{
+                      aspectRatio: photo.aspectRatio || 1,
+                    }"
+                  />
+                </ClientOnly>
               </div>
             </template>
           </div>
@@ -162,7 +173,7 @@ const hoveredAlbum = ref<string | null>(null)
           variant="ghost"
           color="neutral"
           icon="tabler:arrow-left"
-          label="Back to Home"
+          :label="$t('ui.action.home.tooltip')"
           size="sm"
           to="/"
         />
@@ -174,7 +185,7 @@ const hoveredAlbum = ref<string | null>(null)
       <h1
         class="font-black text-6xl sm:text-7xl drop-shadow-2xl bg-clip-text bg-gradient-to-br from-neutral-800 to-neutral-400 dark:from-white dark:to-neutral-500 text-transparent"
       >
-        {{ 'Albums'.toUpperCase() }}
+        {{ $t('title.albums').toUpperCase() }}
       </h1>
       <p
         class="mt-2 text-lg text-neutral-600 dark:text-neutral-400 font-medium font-[Pacifico]"
@@ -197,7 +208,7 @@ const hoveredAlbum = ref<string | null>(null)
           @mouseleave="hoveredAlbum = null"
         >
           <!-- Stacked Photos Card -->
-          <div class="relative h-48 mb-4">
+          <div class="relative h-48 mb-4 group">
             <!-- Photo Stack (3 layers) -->
             <motion.div
               v-for="(photo, index) in getAlbumDisplayPhotos(album)"
@@ -228,7 +239,7 @@ const hoveredAlbum = ref<string | null>(null)
             >
               <ThumbImage
                 class="w-full h-full object-cover"
-                :src="photo.thumbnailUrl"
+                :src="photo.thumbnailUrl!"
                 :thumbhash="photo.thumbnailHash"
                 :alt="album.title"
                 :style="{
@@ -247,12 +258,23 @@ const hoveredAlbum = ref<string | null>(null)
 
             <!-- Empty state -->
             <div
-              v-if="!album.photos || album.photos.length === 0"
-              class="absolute inset-0 rounded-xl shadow-lg bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center"
+              v-if="!album.photoIds || album.photoIds.length === 0"
+              class="absolute inset-0 rounded-xl shadow-lg bg-gradient-to-br from-neutral-100 to-neutral-50 dark:from-neutral-700 dark:to-neutral-800 flex flex-col items-center justify-center gap-3 border border-neutral-200 dark:border-neutral-600 group-hover:shadow-xl dark:group-hover:shadow-neutral-900/50 transition-shadow"
             >
-              <span class="text-neutral-500 dark:text-neutral-400">
-                No Image
-              </span>
+              <Icon
+                name="tabler:library-photo"
+                class="size-10 text-neutral-400 dark:text-neutral-500"
+              />
+              <div class="text-center">
+                <p
+                  class="text-sm font-medium text-neutral-700 dark:text-neutral-300"
+                >
+                  {{ $t('ui.album.noImage') }}
+                </p>
+                <!-- <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                  {{ $t('ui.album.emptyAlbumTip') }}
+                </p> -->
+              </div>
             </div>
           </div>
 
@@ -283,7 +305,7 @@ const hoveredAlbum = ref<string | null>(null)
               <p
                 class="text-sm text-neutral-600 dark:text-neutral-400 line-clamp-2"
               >
-                {{ album.description || 'No description' }}
+                {{ album.description || $t('ui.album.noDescription') }}
               </p>
             </div>
           </div>

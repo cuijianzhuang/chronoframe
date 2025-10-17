@@ -27,6 +27,7 @@ export default eventHandler(async (event) => {
     })
   }
 
+  // 获取相册中的照片
   const photos = await db
     // all fields from tables.photos
     .select({
@@ -41,8 +42,17 @@ export default eventHandler(async (event) => {
     .orderBy(asc(tables.albumPhotos.position))
     .all()
 
+  // 验证相册数据完整性
+  if (!photos || !Array.isArray(photos)) {
+    // 空相册也是合法的，只需要返回空数组
+    return {
+      ...album,
+      photos: [],
+    }
+  }
+
   return {
     ...album,
-    photos: photos || [],
+    photos,
   }
 })
