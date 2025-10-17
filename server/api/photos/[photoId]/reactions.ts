@@ -41,7 +41,7 @@ async function checkRateLimit(fingerprint: string): Promise<boolean> {
 }
 
 export default defineEventHandler(async (event) => {
-  const photoId = getRouterParam(event, 'id')
+  const photoId = getRouterParam(event, 'photoId')
   
   if (!photoId) {
     throw createError({

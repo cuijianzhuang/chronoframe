@@ -180,6 +180,7 @@
       "specification": "技術パラメータ",
       "rating": "評価",
       "tags": "キーワード",
+      "albums": "含まれたアルバム",
       "histogram": "ヒストグラム",
       "capture": {},
       "shooting": {

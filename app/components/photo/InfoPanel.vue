@@ -11,11 +11,30 @@ interface Props {
   onClose?: () => void
 }
 
+interface Album {
+  id: number
+  title: string
+  description: string | null
+  coverPhotoId: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
 const dayjs = useDayjs()
 const router = useRouter()
 const { localizeExif } = useExifLocalization()
 
 const props = defineProps<Props>()
+
+// 获取照片所属的相册
+const { data: _albums } = useFetch<Album[]>(
+  () => `/api/photos/${props.currentPhoto.id}/albums`,
+  {
+    watch: [() => props.currentPhoto.id],
+  },
+)
+
+const albums = computed(() => _albums.value || [])
 
 // 格式化曝光时间
 const formatExposureTime = (
@@ -111,7 +130,9 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.currentPhoto.storageKey
           ? {
               label: $t('exif.filename'),
-              value: props.currentPhoto.storageKey.split('/').pop() || props.currentPhoto.storageKey,
+              value:
+                props.currentPhoto.storageKey.split('/').pop() ||
+                props.currentPhoto.storageKey,
               icon: 'tabler:file',
             }
           : null,
@@ -329,7 +350,10 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.exifData?.ExposureProgram
           ? {
               label: $t('exif.exposure.program'),
-              value: localizeExif('exposureProgram', props.exifData.ExposureProgram),
+              value: localizeExif(
+                'exposureProgram',
+                props.exifData.ExposureProgram,
+              ),
               icon: 'tabler:exposure',
             }
           : null,
@@ -357,14 +381,20 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.exifData?.FlashMeteringMode
           ? {
               label: $t('exif.flash.meteringMode'),
-              value: localizeExif('meteringMode', props.exifData.FlashMeteringMode),
+              value: localizeExif(
+                'meteringMode',
+                props.exifData.FlashMeteringMode,
+              ),
               icon: 'material-symbols:flash-on-rounded',
             }
           : null,
         props.exifData?.SceneCaptureType
           ? {
               label: $t('exif.scene.captureType'),
-              value: localizeExif('sceneCaptureType', props.exifData.SceneCaptureType),
+              value: localizeExif(
+                'sceneCaptureType',
+                props.exifData.SceneCaptureType,
+              ),
               icon: 'material-symbols:scene',
             }
           : null,
@@ -387,7 +417,10 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
         props.exifData?.SensingMethod
           ? {
               label: $t('exif.sensing.method'),
-              value: localizeExif('sensingMethod', props.exifData.SensingMethod),
+              value: localizeExif(
+                'sensingMethod',
+                props.exifData.SensingMethod,
+              ),
               icon: 'tabler:photo-sensor',
             }
           : null,
@@ -417,6 +450,10 @@ const onTagClick = (tag: string) => {
     path: '/',
     query: { tag },
   })
+}
+
+const onAlbumClick = (albumId: number) => {
+  window.open(`/albums/${albumId}`)
 }
 </script>
 
@@ -505,6 +542,36 @@ const onTagClick = (tag: string) => {
           readonly
           size="sm"
         />
+      </div>
+
+      <!-- 相册 -->
+      <div
+        v-if="albums && albums.length > 0"
+        class="mt-4"
+      >
+        <h4
+          class="text-sm font-medium text-white/90 uppercase tracking-wide mb-2"
+        >
+          {{ $t('exif.sections.albums') }}
+        </h4>
+        <div class="space-y-2">
+          <div
+            v-for="album in albums"
+            :key="album.id"
+            class="p-3 bg-white/5 border border-white/10 rounded-lg cursor-pointer hover:bg-white/10 transition-colors"
+            @click="onAlbumClick(album.id)"
+          >
+            <p class="text-sm text-white font-medium line-clamp-1">
+              {{ album.title }}
+            </p>
+            <p
+              v-if="album.description"
+              class="text-xs text-white/60 line-clamp-1"
+            >
+              {{ album.description }}
+            </p>
+          </div>
+        </div>
       </div>
 
       <!-- 标签 -->
