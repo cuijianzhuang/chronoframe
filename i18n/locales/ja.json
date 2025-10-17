@@ -50,6 +50,9 @@
       "globe": {
         "tooltip": "グローブ"
       },
+      "home": {
+        "tooltip": "ホームに戻る"
+      },
       "share": {
         "tooltip": "写真を共有",
         "title": "写真を共有",
@@ -104,7 +107,31 @@
       "totalPhotosWithRange": "{range}、@:plural.photo 合計",
       "noPhotosTip": "まだ写真はありません。アップロードしてください！"
     },
-    "livePhoto": "Live Photo"
+    "livePhoto": "Live Photo",
+    "album": {
+      "noImage": "空のアルバム",
+      "emptyAlbumTip": "写真を追加して開始しましょう",
+      "noDescription": "説明がありません"
+    }
+  },
+  "album": {
+    "notFound": "アルバムが見つかりません",
+    "noDateInfo": "日付情報なし",
+    "noPhotosTip": "このアルバムにはまだ写真がありません",
+    "emptyAlbumTitle": "アルバムが空です",
+    "emptyAlbumDescription": "素敵な瞬間がここに表示されます。",
+    "failedToLoadTitle": "アルバムの読み込みに失敗しました",
+    "failedToLoadDescription": "このアルバムを読み込む際に問題が発生しました。",
+    "failedToLoad": "アルバムの読み込みに失敗しました",
+    "backToAlbums": "アルバムに戻る",
+    "noDescription": "説明がありません",
+    "photo": "写真がありません | 写真 {count} 枚",
+    "createdAt": "{time} に作成されました",
+    "metadata": {
+      "photos": "写真",
+      "dateRange": "日付範囲",
+      "created": "作成"
+    }
   },
   "map": {
     "cluster": {
@@ -320,7 +347,8 @@
     "locations": "場所",
     "globe": "写真グローブ",
     "queue": "キュー管理",
-    "logs": "システムログ"
+    "logs": "システムログ",
+    "albums": "アルバム"
   },
   "auth": {
     "form": {
@@ -375,6 +403,81 @@
     }
   },
   "dashboard": {
+    "albums": {
+      "title": "アルバム管理",
+      "subtitle": "写真アルバムを作成・管理する",
+      "createButton": "アルバムを作成",
+      "noAlbums": "アルバムがまだありません",
+      "noAlbumsTip": "最初のアルバムを作成して、写真を整理してください",
+      "form": {
+        "title": "タイトル",
+        "titlePlaceholder": "アルバムのタイトルを入力",
+        "titleRequired": "アルバムのタイトルを入力してください",
+        "description": "説明",
+        "descriptionPlaceholder": "アルバムの説明を入力（オプション）",
+        "coverPhoto": "アルバムカバー",
+        "addCoverPhoto": "カバー写真を追加",
+        "selectPhotos": "写真を選択",
+        "editPhotos": "写真の選択を編集",
+        "selectedCount": "{count}枚の写真を選択しました",
+        "clearAll": "すべてクリア"
+      },
+      "table": {
+        "columns": {
+          "cover": "カバー",
+          "title": "タイトル",
+          "description": "説明",
+          "photoCount": "写真数",
+          "createdAt": "作成時刻",
+          "actions": "操作"
+        }
+      },
+      "modal": {
+        "selectPhotos": "写真を選択",
+        "totalPhotos": "全{count}枚",
+        "selectedPhotos": "{count}枚選択中",
+        "searchPlaceholder": "写真を検索...",
+        "searchResults": "結果：{current} / {total}",
+        "selectAll": "すべて選択",
+        "setCover": "カバーに設定",
+        "noPhotos": "写真がありません",
+        "noResults": "一致する写真が見つかりません",
+        "tryOtherKeywords": "他のキーワードで検索してみてください",
+        "confirm": "確認 ({count})",
+        "selectedInfo": "選択済み：",
+        "coverSetInfo": "カバーが設定されました"
+      },
+      "slideover": {
+        "create": {
+          "title": "アルバムを作成",
+          "description": "写真を整理するための新しいアルバムを作成します"
+        },
+        "edit": {
+          "title": "アルバムを編集",
+          "description": "アルバムの情報と写真を変更"
+        },
+        "submitCreate": "作成",
+        "submitEdit": "保存",
+        "cancel": "キャンセル"
+      },
+      "delete": {
+        "title": "アルバムを削除",
+        "message": "アルバム\"{title}\"を削除してもよろしいですか？アルバムを削除しても、その中の写真は削除されず、アルバム自体のみが削除されます。",
+        "cancel": "キャンセル",
+        "confirm": "削除を確認"
+      },
+      "messages": {
+        "createSuccess": "アルバムが正常に作成されました",
+        "updateSuccess": "アルバムが正常に更新されました",
+        "deleteSuccess": "アルバムが正常に削除されました",
+        "createError": "アルバムの作成に失敗しました",
+        "updateError": "アルバムの更新に失敗しました",
+        "deleteError": "アルバムの削除に失敗しました",
+        "loadError": "アルバムの読み込みに失敗しました",
+        "loadDetailError": "アルバムの詳細の読み込みに失敗しました",
+        "loadPhotosError": "写真の読み込みに失敗しました"
+      }
+    },
     "overview": {
       "title": "概要",
       "indicator": {

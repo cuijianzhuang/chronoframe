@@ -54,6 +54,9 @@
       "globe": {
         "tooltip": "地球仪"
       },
+      "home": {
+        "tooltip": "返回首页"
+      },
       "share": {
         "tooltip": "分享照片",
         "title": "分享照片",
@@ -108,7 +111,31 @@
       "totalPhotosWithRange": "{range}, 共 @:plural.photo",
       "noPhotosTip": "还没有照片，快去上传一些吧！"
     },
-    "indexPanelCountCity":"等 {count} 个城市"
+    "indexPanelCountCity":"等 {count} 个城市",
+    "album": {
+      "noImage": "空相簿",
+      "emptyAlbumTip": "添加照片开始吧",
+      "noDescription": "无描述"
+    }
+  },
+  "album": {
+    "notFound": "相簿未找到",
+    "noDateInfo": "无日期信息",
+    "noPhotosTip": "该相簿中还没有照片",
+    "emptyAlbumTitle": "相簿是空的",
+    "emptyAlbumDescription": "更多精彩，将会呈现于此。",
+    "failedToLoadTitle": "加载相簿失败",
+    "failedToLoadDescription": "加载此相簿时出现问题。",
+    "failedToLoad": "加载相簿失败",
+    "backToAlbums": "返回相簿",
+    "noDescription": "无描述",
+    "photo": "无照片 | 一张照片 | {count} 张照片",
+    "createdAt": "创建于 {time}",
+    "metadata": {
+      "photos": "照片",
+      "dateRange": "日期范围",
+      "created": "创建"
+    }
   },
   "minimap": {
     "loading": "加载小地图..."
@@ -321,7 +348,8 @@
     "photos": "照片库",
     "globe": "照片地球仪",
     "queue": "队列管理",
-    "logs": "系统日志"
+    "logs": "系统日志",
+    "albums": "相簿"
   },
   "auth": {
     "form": {
@@ -432,6 +460,81 @@
     }
   },
   "dashboard": {
+    "albums": {
+      "title": "相簿管理",
+      "subtitle": "创建和管理您的照片相簿",
+      "createButton": "创建相簿",
+      "noAlbums": "还没有相簿",
+      "noAlbumsTip": "创建您的第一个相簿来组织您的照片",
+      "form": {
+        "title": "标题",
+        "titlePlaceholder": "输入相簿标题",
+        "titleRequired": "请输入相簿标题",
+        "description": "描述",
+        "descriptionPlaceholder": "输入相簿描述（可选）",
+        "coverPhoto": "相簿封面",
+        "addCoverPhoto": "添加封面照片",
+        "selectPhotos": "选择照片",
+        "editPhotos": "修改照片选择",
+        "selectedCount": "已选择 {count} 张照片",
+        "clearAll": "全部清除"
+      },
+      "table": {
+        "columns": {
+          "cover": "封面",
+          "title": "标题",
+          "description": "描述",
+          "photoCount": "照片数",
+          "createdAt": "创建时间",
+          "actions": "操作"
+        }
+      },
+      "modal": {
+        "selectPhotos": "选择照片",
+        "totalPhotos": "共 {count} 张",
+        "selectedPhotos": "已选 {count} 张",
+        "searchPlaceholder": "搜索照片...",
+        "searchResults": "结果：{current} / {total}",
+        "selectAll": "全选",
+        "setCover": "设为封面",
+        "noPhotos": "暂无照片",
+        "noResults": "未找到匹配的照片",
+        "tryOtherKeywords": "尝试使用其他关键词搜索",
+        "confirm": "确认 ({count})",
+        "selectedInfo": "已选择：",
+        "coverSetInfo": "已设置封面"
+      },
+      "slideover": {
+        "create": {
+          "title": "创建相簿",
+          "description": "创建一个新的相簿来组织您的照片"
+        },
+        "edit": {
+          "title": "编辑相簿",
+          "description": "修改相簿的信息和照片"
+        },
+        "submitCreate": "创建",
+        "submitEdit": "保存",
+        "cancel": "取消"
+      },
+      "delete": {
+        "title": "删除相簿",
+        "message": "确定要删除相簿\"{title}\"吗？删除相簿不会删除其中的照片，仅删除相簿本身。",
+        "cancel": "取消",
+        "confirm": "确认删除"
+      },
+      "messages": {
+        "createSuccess": "相簿创建成功",
+        "updateSuccess": "相簿更新成功",
+        "deleteSuccess": "相簿删除成功",
+        "createError": "创建相簿失败",
+        "updateError": "更新相簿失败",
+        "deleteError": "删除相簿失败",
+        "loadError": "加载相簿失败",
+        "loadDetailError": "加载相簿详情失败",
+        "loadPhotosError": "加载照片失败"
+      }
+    },
     "overview": {
       "title": "仪表板概览",
       "indicator": {

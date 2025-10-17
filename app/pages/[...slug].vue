@@ -9,8 +9,8 @@ const route = useRoute()
 const router = useRouter()
 const config = useRuntimeConfig()
 
-const { switchToIndex, closeViewer, openViewer } = useViewerState()
-const { currentPhotoIndex, isViewerOpen } = storeToRefs(useViewerState())
+const { switchToIndex, closeViewer, openViewer, clearReturnRoute } = useViewerState()
+const { currentPhotoIndex, isViewerOpen, returnRoute } = storeToRefs(useViewerState())
 
 const { photos } = usePhotos()
 
@@ -84,7 +84,18 @@ const handleIndexChange = (newIndex: number) => {
 
 const handleClose = () => {
   closeViewer()
-  router.replace('/')
+  
+  if (returnRoute.value) {
+    const destination = returnRoute.value
+    clearReturnRoute()
+    router.replace(destination)
+  } else {
+    if (window.history.length > 1) {
+      router.back()
+    } else {
+      router.replace('/')
+    }
+  }
 }
 </script>
 

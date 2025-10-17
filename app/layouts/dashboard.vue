@@ -14,6 +14,11 @@ const items = ref<NavigationMenuItem[]>([
     to: '/dashboard/photos',
   },
   {
+    label: $t('title.albums'),
+    icon: 'tabler:album',
+    to: '/dashboard/albums',
+  },
+  {
     label: $t('title.locations'),
     icon: 'tabler:map-pin-cog',
     to: '/dashboard/location',

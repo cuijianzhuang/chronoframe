@@ -11,6 +11,7 @@ const props = withDefaults(
     style?: CSSProperties
     threshold?: number | number[]
     rootMargin?: string
+    lazy?: boolean
   }>(),
   {
     thumbhash: null,
@@ -18,6 +19,7 @@ const props = withDefaults(
     style: undefined,
     threshold: 0.1,
     rootMargin: '50px',
+    lazy: true,
   },
 )
 
@@ -31,6 +33,12 @@ const isElemVisible = ref(false)
 const isLoaded = ref(false)
 const isError = ref(false)
 
+onMounted(() => {
+  if (!props.lazy) {
+    isElemVisible.value = true
+  }
+})
+
 const { stop } = useIntersectionObserver(
   elemRef,
   ([entry], _observerElement) => {
@@ -42,6 +50,7 @@ const { stop } = useIntersectionObserver(
   {
     threshold: props.threshold,
     rootMargin: props.rootMargin,
+    immediate: props.lazy,
   },
 )
 

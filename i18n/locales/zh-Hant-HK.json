@@ -54,6 +54,9 @@
       "globe": {
         "tooltip": "地球儀"
       },
+      "home": {
+        "tooltip": "返回首頁"
+      },
       "share": {
         "tooltip": "分享相片",
         "title": "分享相片",
@@ -107,6 +110,30 @@
     "stats": {
       "totalPhotosWithRange": "{range}，共 @:plural.photo",
       "noPhotosTip": "還沒有照片，快去上傳一些吧！"
+    },
+    "album": {
+      "noImage": "空相簿",
+      "emptyAlbumTip": "新增相片開始啦",
+      "noDescription": "無描述"
+    }
+  },
+  "album": {
+    "notFound": "搵唔到相簿",
+    "noDateInfo": "無日期資料",
+    "noPhotosTip": "呢個相簿仲冇相片",
+    "emptyAlbumTitle": "相簿係空的",
+    "emptyAlbumDescription": "更多精彩，將會喺呢度上映。",
+    "failedToLoadTitle": "載入相簿失敗",
+    "failedToLoadDescription": "載入呢個相簿嗰陣出咗問題。",
+    "failedToLoad": "載入相簿失敗",
+    "backToAlbums": "返回相簿",
+    "noDescription": "無描述",
+    "photo": "無相片 | 一張相片 | {count} 張相片",
+    "createdAt": "建立咗 {time}",
+    "metadata": {
+      "photos": "相片",
+      "dateRange": "日期範圍",
+      "created": "建立"
     }
   },
   "minimap": {
@@ -320,7 +347,8 @@
     "gallery": "相片集",
     "globe": "照片地球儀",
     "queue": "佇列管理",
-    "logs": "系統日誌"
+    "logs": "系統日誌",
+    "albums": "相簿"
   },
   "auth": {
     "form": {
@@ -375,6 +403,81 @@
     }
   },
   "dashboard": {
+    "albums": {
+      "title": "相簿管理",
+      "subtitle": "建立和管理您的照片相簿",
+      "createButton": "建立相簿",
+      "noAlbums": "還沒有相簿",
+      "noAlbumsTip": "建立您的第一個相簿來組織您的照片",
+      "form": {
+        "title": "標題",
+        "titlePlaceholder": "輸入相簿標題",
+        "titleRequired": "請輸入相簿標題",
+        "description": "描述",
+        "descriptionPlaceholder": "輸入相簿描述（可選）",
+        "coverPhoto": "相簿封面",
+        "addCoverPhoto": "新增封面相片",
+        "selectPhotos": "選擇相片",
+        "editPhotos": "修改相片選擇",
+        "selectedCount": "已選擇 {count} 張相片",
+        "clearAll": "全部清除"
+      },
+      "table": {
+        "columns": {
+          "cover": "封面",
+          "title": "標題",
+          "description": "描述",
+          "photoCount": "相片數",
+          "createdAt": "建立時間",
+          "actions": "操作"
+        }
+      },
+      "modal": {
+        "selectPhotos": "選擇相片",
+        "totalPhotos": "共 {count} 張",
+        "selectedPhotos": "已選 {count} 張",
+        "searchPlaceholder": "搜尋相片...",
+        "searchResults": "結果：{current} / {total}",
+        "selectAll": "全選",
+        "setCover": "設為封面",
+        "noPhotos": "暫無相片",
+        "noResults": "未找到相符的相片",
+        "tryOtherKeywords": "嘗試使用其他關鍵字搜尋",
+        "confirm": "確認 ({count})",
+        "selectedInfo": "已選擇：",
+        "coverSetInfo": "已設定封面"
+      },
+      "slideover": {
+        "create": {
+          "title": "建立相簿",
+          "description": "建立一個新的相簿來組織您的照片"
+        },
+        "edit": {
+          "title": "編輯相簿",
+          "description": "修改相簿的資訊和相片"
+        },
+        "submitCreate": "建立",
+        "submitEdit": "儲存",
+        "cancel": "取消"
+      },
+      "delete": {
+        "title": "刪除相簿",
+        "message": "確定要刪除相簿\"{title}\"嗎？刪除相簿不會刪除其中的相片，僅刪除相簿本身。",
+        "cancel": "取消",
+        "confirm": "確認刪除"
+      },
+      "messages": {
+        "createSuccess": "相簿建立成功",
+        "updateSuccess": "相簿更新成功",
+        "deleteSuccess": "相簿刪除成功",
+        "createError": "建立相簿失敗",
+        "updateError": "更新相簿失敗",
+        "deleteError": "刪除相簿失敗",
+        "loadError": "載入相簿失敗",
+        "loadDetailError": "載入相簿詳情失敗",
+        "loadPhotosError": "載入相片失敗"
+      }
+    },
     "overview": {
       "title": "儀表板概覽",
       "indicator": {

@@ -126,6 +126,16 @@ const isRepoLinkHovering = ref(false)
                 to="/globe"
               />
             </UTooltip>
+            <UTooltip :text="$t('ui.action.albums.tooltip')">
+              <UButton
+                variant="soft"
+                color="neutral"
+                class="bg-transparent rounded-full cursor-pointer"
+                icon="tabler:photo"
+                size="sm"
+                to="/albums"
+              />
+            </UTooltip>
             <UPopover>
               <UTooltip :text="$t('ui.action.filter.tooltip')">
                 <UChip
