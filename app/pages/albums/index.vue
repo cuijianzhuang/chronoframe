@@ -162,7 +162,7 @@ const hoveredAlbum = ref<number | null>(null)
       </div>
       <!-- Overlay -->
       <div
-        class="absolute inset-0 bg-gradient-to-b from-neutral-100/80 to-white dark:from-neutral-900/80 dark:to-neutral-900"
+        class="absolute -inset-1 bg-gradient-to-b from-neutral-100/80 to-white dark:from-neutral-900/80 dark:to-neutral-900"
       />
     </div>
 

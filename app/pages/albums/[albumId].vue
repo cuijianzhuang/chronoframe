@@ -145,15 +145,16 @@ onBeforeMount(() => {
       <!-- Backdrop layer -->
       <div
         v-if="coverPhoto"
-        class="absolute inset-0 h-[500px] overflow-hidden -z-10"
+        class="absolute inset-0 h-2/3 sm:h-[500px] overflow-hidden -z-10"
       >
-        <img
+        <ThumbImage
           :src="coverPhoto.thumbnailUrl || ''"
+          :thumbhash="coverPhoto.thumbnailHash"
           :alt="albumData.title"
-          class="w-full h-full object-cover blur-xl opacity-40 dark:opacity-20 scale-110"
+          class="w-full h-full object-cover opacity-40 dark:opacity-20 scale-110 saturate-150"
         />
         <div
-          class="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white dark:via-neutral-900/50 dark:to-neutral-900"
+          class="absolute -inset-1 bg-gradient-to-b from-transparent via-white/50 to-white dark:via-neutral-900/50 dark:to-neutral-900 backdrop-blur-xl sm:backdrop-blur-2xl"
         />
       </div>
 
@@ -237,7 +238,8 @@ onBeforeMount(() => {
                     class="size-4 -mt-0.5 text-neutral-400 dark:text-neutral-500"
                   />
                   <span class="text-neutral-700 dark:text-neutral-200">
-                    {{ $t('album.metadata.created') }} {{ $dayjs(albumData.createdAt).fromNow() }}
+                    {{ $t('album.metadata.created') }}
+                    {{ $dayjs(albumData.createdAt).fromNow() }}
                   </span>
                 </div>
               </div>
@@ -263,7 +265,9 @@ onBeforeMount(() => {
                 class="size-20 text-neutral-300 dark:text-neutral-600"
               />
               <div class="text-center">
-                <p class="text-xl font-normal text-neutral-800 dark:text-neutral-200 mb-2">
+                <p
+                  class="text-xl font-normal text-neutral-800 dark:text-neutral-200 mb-2"
+                >
                   {{ $t('album.emptyAlbumTitle') }}
                 </p>
               </div>
@@ -307,10 +311,14 @@ onBeforeMount(() => {
             class="size-20 text-red-400"
           />
           <div class="text-center">
-            <p class="text-2xl font-semibold text-neutral-800 dark:text-neutral-200 mb-2">
+            <p
+              class="text-2xl font-semibold text-neutral-800 dark:text-neutral-200 mb-2"
+            >
               {{ $t('album.failedToLoadTitle') }}
             </p>
-            <p class="text-base text-neutral-600 dark:text-neutral-400 max-w-md">
+            <p
+              class="text-base text-neutral-600 dark:text-neutral-400 max-w-md"
+            >
               {{ $t('album.failedToLoadDescription') }}
             </p>
           </div>
