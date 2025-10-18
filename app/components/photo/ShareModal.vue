@@ -363,6 +363,7 @@ defineShortcuts({
               </h3>
             </div>
             <UButton
+              class="cursor-pointer"
               size="sm"
               variant="ghost"
               color="neutral"
@@ -382,6 +383,7 @@ defineShortcuts({
               class="mb-4"
             >
               <UButton
+                class="cursor-pointer"
                 block
                 size="lg"
                 color="info"
@@ -410,6 +412,7 @@ defineShortcuts({
                     class="flex-1 truncate bg-transparent text-sm text-neutral-800 dark:text-neutral-200 resize-none"
                   />
                   <UButton
+                    class="cursor-pointer"
                     size="xs"
                     variant="ghost"
                     color="neutral"
@@ -430,6 +433,7 @@ defineShortcuts({
                     {{ $t('ui.action.share.ogImage.title') }}
                   </label>
                   <UButton
+                    class="cursor-pointer"
                     size="xs"
                     variant="ghost"
                     color="neutral"
@@ -498,7 +502,7 @@ defineShortcuts({
                   v-for="platform in socialPlatforms"
                   :key="platform.name"
                   type="button"
-                  class="flex flex-col items-center justify-center gap-2 rounded-xl border border-neutral-200/50 bg-white/50 p-4 transition-all hover:scale-105 hover:border-neutral-300/50 hover:bg-white/70 dark:border-neutral-700/50 dark:bg-neutral-800/50 dark:hover:border-neutral-600/50 dark:hover:bg-neutral-700/50"
+                  class="cursor-pointer flex flex-col items-center justify-center gap-2 rounded-xl border border-neutral-200/50 bg-white/50 p-4 transition-all hover:scale-105 hover:border-neutral-300/50 hover:bg-white/70 dark:border-neutral-700/50 dark:bg-neutral-800/50 dark:hover:border-neutral-600/50 dark:hover:bg-neutral-700/50"
                   @click="platform.action"
                 >
                   <Icon
