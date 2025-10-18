@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { motion } from 'motion-v'
 interface Props {
   photos: Photo[]
   columns?: number | 'auto'
@@ -81,10 +82,9 @@ const updateHeaderWidth = () => {
     return
   }
 
-  const columnElement =
-    masonryWrapper.value?.querySelector<HTMLElement>(
-      '.masonry-wall .masonry-column',
-    )
+  const columnElement = masonryWrapper.value?.querySelector<HTMLElement>(
+    '.masonry-wall .masonry-column',
+  )
 
   if (columnElement) {
     headerColumnWidth.value = columnElement.getBoundingClientRect().width
@@ -261,7 +261,9 @@ const updateDateRange = () => {
   } else if (uniqueCities.length <= 3) {
     visibleCities.value = uniqueCities.join('、')
   } else {
-    visibleCities.value = `${uniqueCities.slice(0, 2).join('、')} `+$t('ui.indexPanelCountCity',{ count: uniqueCities.length })
+    visibleCities.value =
+      `${uniqueCities.slice(0, 2).join('、')} ` +
+      $t('ui.indexPanelCountCity', { count: uniqueCities.length })
   }
 
   if (visibleDates.length === 0) {
@@ -296,6 +298,13 @@ const updateDateRange = () => {
 const handleScroll = () => {
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop
   showFloatingActions.value = scrollTop > 500
+}
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  })
 }
 
 onMounted(() => {
@@ -362,6 +371,28 @@ watch(currentPhotoIndex, (newIndex) => {
       :is-visible="!!dateRange && showFloatingActions"
       :is-mobile="isMobile"
     />
+
+    <!-- Back to Top Button -->
+    <motion.div
+      v-if="showFloatingActions"
+      class="fixed bottom-6 right-6 z-50"
+      :initial="{ opacity: 0, scale: 0.8 }"
+      :animate="{ opacity: 1, scale: 1 }"
+      :exit="{ opacity: 0, scale: 0.8 }"
+      :transition="{ duration: 0.2 }"
+    >
+      <UTooltip :text="$t('ui.action.backtotop.tooltip') || '回到顶部'">
+        <UButton
+          variant="soft"
+          color="neutral"
+          class="cursor-pointer bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm flex justify-center items-center rounded-full shadow-lg hover:bg-white dark:hover:bg-neutral-800 transition-all duration-300 border border-neutral-200/50 dark:border-neutral-700/50"
+          icon="tabler:arrow-up"
+          size="lg"
+          :aria-label="$t('ui.action.backtotop.ariaLabel') || '回到顶部'"
+          @click="scrollToTop"
+        />
+      </UTooltip>
+    </motion.div>
 
     <div
       class="lg:px-0 lg:pb-0"
@@ -433,8 +464,8 @@ watch(currentPhotoIndex, (newIndex) => {
   padding-top: var(--masonry-header-offset, 0px);
 }
 
-.masonry-wall-with-header :deep(.masonry-column:first-child .masonry-item:first-child) {
+.masonry-wall-with-header
+  :deep(.masonry-column:first-child .masonry-item:first-child) {
   margin-top: 0;
 }
 </style>
-
