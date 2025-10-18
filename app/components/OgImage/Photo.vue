@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { formatCameraInfo } from '~/utils/camera'
+
 const props = withDefaults(
   defineProps<{
     photo?: Photo
@@ -93,7 +95,7 @@ const description = computed(() => (props.description || '').slice(0, 200))
               mode="svg"
             />
             <span class="truncate">
-              {{ photo.exif?.Model }}
+              {{ formatCameraInfo(photo.exif.Make, photo.exif.Model) }}
             </span>
           </div>
         </div>
