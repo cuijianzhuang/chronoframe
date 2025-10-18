@@ -9,6 +9,11 @@ export default defineAppConfig({
       warning: 'amber',
       danger: 'rose',
     },
+    button: {
+      slots: {
+        base: 'cursor-pointer'
+      }
+    },
     popover: {
       slots: {
         content:

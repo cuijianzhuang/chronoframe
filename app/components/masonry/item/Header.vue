@@ -126,7 +126,7 @@ const isRepoLinkHovering = ref(false)
                 to="/globe"
               />
             </UTooltip>
-            <UTooltip :text="$t('ui.action.albums.tooltip')">
+            <UTooltip :text="$t('title.albums')">
               <UButton
                 variant="soft"
                 color="neutral"
