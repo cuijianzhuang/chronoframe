@@ -363,7 +363,6 @@ defineShortcuts({
               </h3>
             </div>
             <UButton
-              class="cursor-pointer"
               size="sm"
               variant="ghost"
               color="neutral"
@@ -383,7 +382,6 @@ defineShortcuts({
               class="mb-4"
             >
               <UButton
-                class="cursor-pointer"
                 block
                 size="lg"
                 color="info"
@@ -412,7 +410,6 @@ defineShortcuts({
                     class="flex-1 truncate bg-transparent text-sm text-neutral-800 dark:text-neutral-200 resize-none"
                   />
                   <UButton
-                    class="cursor-pointer"
                     size="xs"
                     variant="ghost"
                     color="neutral"
@@ -433,7 +430,6 @@ defineShortcuts({
                     {{ $t('ui.action.share.ogImage.title') }}
                   </label>
                   <UButton
-                    class="cursor-pointer"
                     size="xs"
                     variant="ghost"
                     color="neutral"
