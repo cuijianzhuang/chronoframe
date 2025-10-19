@@ -247,6 +247,41 @@ const uploadImage = async (file: File, existingFileId?: string) => {
 
 const toast = useToast()
 const selectedFiles = ref<File[]>([])
+const isUploadSlideoverOpen = ref(false)
+
+const hasSelectedFiles = computed(() => selectedFiles.value.length > 0)
+
+const selectedFilesTotalSize = computed(() =>
+  selectedFiles.value.reduce((total, file) => total + (file?.size || 0), 0),
+)
+
+const selectedFilesTotalSizeLabel = computed(() =>
+  selectedFilesTotalSize.value > 0
+    ? formatBytes(selectedFilesTotalSize.value)
+    : '0 B',
+)
+
+const selectedFilesSummary = computed(() => {
+  if (!selectedFiles.value.length) {
+    return '还未选择照片'
+  }
+
+  return `${selectedFiles.value.length} 个文件 · ${selectedFilesTotalSizeLabel.value}`
+})
+
+const clearSelectedFiles = () => {
+  selectedFiles.value = []
+}
+
+watch(isUploadSlideoverOpen, (open) => {
+  if (!open) {
+    clearSelectedFiles()
+  }
+})
+
+const openUploadSlideover = () => {
+  isUploadSlideoverOpen.value = true
+}
 
 // 表格多选状态
 const rowSelection = ref({})
@@ -830,6 +865,7 @@ const handleUpload = async () => {
 
   // 清空选中的文件
   selectedFiles.value = []
+  isUploadSlideoverOpen.value = false
 }
 
 // LivePhoto 相关操作
@@ -1004,7 +1040,7 @@ const confirmDelete = async () => {
       if (!photo) {
         throw new Error('未找到要删除的照片')
       }
-      
+
       await $fetch(`/api/photos/${photo.id}`, {
         method: 'DELETE',
       })
@@ -1137,39 +1173,194 @@ onUnmounted(() => {
       @go-to-queue="$router.push('/dashboard/queue')"
     />
 
-    <!-- 文件上传组件 -->
-    <div class="relative">
-      <UFileUpload
-        v-model="selectedFiles"
-        label="选择照片"
-        :description="`支持 JPEG、PNG、HEIC 格式照片，以及 MOV 格式 LivePhoto 视频，最大 ${MAX_FILE_SIZE}MB`"
-        layout="list"
-        size="xl"
-        accept="image/jpeg,image/png,image/heic,image/heif,video/quicktime,.mov"
-        multiple
+    <!-- 文件上传入口 -->
+    <div
+      class="relative overflow-hidden rounded-3xl border border-neutral-200/80 bg-gradient-to-br from-white via-white to-neutral-50 shadow-sm transition dark:border-neutral-800/70 dark:from-neutral-900 dark:via-neutral-900/80 dark:to-neutral-900"
+    >
+      <div
+        class="pointer-events-none absolute -left-32 top-[-6rem] h-[18rem] w-[18rem] rounded-full bg-primary-400/20 blur-3xl dark:bg-primary-500/20"
       />
-      <UButton
-        class="absolute top-3.5 right-3.5 hidden sm:flex"
-        variant="soft"
-        size="lg"
-        icon="tabler:upload"
-        :disabled="selectedFiles.length === 0"
-        @click="handleUpload"
-      >
-        上传照片
-      </UButton>
-      <!-- 移动端上传按钮 -->
-      <UButton
-        v-if="selectedFiles.length > 0"
-        class="mt-3 w-full sm:hidden"
-        variant="soft"
-        size="lg"
-        icon="tabler:upload"
-        @click="handleUpload"
-      >
-        上传 {{ selectedFiles.length }} 张照片
-      </UButton>
+      <div class="relative flex flex-col gap-6 p-5 sm:p-8">
+        <div
+          class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div class="space-y-4">
+            <div class="flex items-center gap-3">
+              <span
+                class="flex size-12 items-center justify-center rounded-2xl bg-primary-500/10 text-primary-600 dark:bg-primary-500/15 dark:text-primary-300"
+              >
+                <Icon
+                  name="tabler:cloud-upload"
+                  class="size-6"
+                />
+              </span>
+              <div>
+                <h2
+                  class="text-lg font-semibold text-neutral-800 dark:text-neutral-100"
+                >
+                  照片上传
+                </h2>
+                <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+                  上传后照片会自动处理并添加到库中。随后可以在
+                  <NuxtLink
+                    to="/dashboard/albums"
+                    class="text-primary font-medium"
+                  >
+                    相簿
+                  </NuxtLink>
+                  中组织您的照片。
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="flex flex-wrap items-center gap-1 text-xs font-medium text-neutral-500 dark:text-neutral-400"
+            >
+              <UBadge
+                variant="soft"
+                color="primary"
+                size="sm"
+              >
+                JPEG / PNG
+              </UBadge>
+              <UBadge
+                variant="soft"
+                color="primary"
+                size="sm"
+              >
+                HEIC
+              </UBadge>
+              <UBadge
+                variant="soft"
+                color="primary"
+                size="sm"
+              >
+                实况视频
+              </UBadge>
+              <UBadge
+                variant="soft"
+                color="primary"
+                size="sm"
+              >
+                Motion Photo
+              </UBadge>
+              <UBadge
+                variant="outline"
+                color="neutral"
+                size="sm"
+              >
+                最大 {{ MAX_FILE_SIZE }}MB
+              </UBadge>
+            </div>
+          </div>
+
+          <div class="flex gap-2 items-center">
+            <UButton
+              variant="soft"
+              size="lg"
+              class="w-full sm:w-auto"
+              icon="tabler:list-check"
+              @click="$router.push('/dashboard/queue')"
+            >
+              任务队列
+            </UButton>
+            <UButton
+              size="lg"
+              class="w-full sm:w-auto"
+              icon="tabler:cloud-upload"
+              @click="openUploadSlideover"
+            >
+              上传照片
+            </UButton>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <USlideover
+      v-model:open="isUploadSlideoverOpen"
+      title="上传照片"
+      description="拖拽或选择文件。上传后照片会自动处理并添加到库中。"
+      :ui="{
+        content: 'sm:max-w-xl',
+        body: 'p-2',
+        header: 'px-6 py-5 border-b border-neutral-200 dark:border-neutral-800',
+        footer: 'px-6 py-5 border-t border-neutral-200 dark:border-neutral-800',
+      }"
+    >
+      <template #body>
+        <UFileUpload
+          v-model="selectedFiles"
+          label="拖放或点击选择照片"
+          :description="`支持 JPEG、PNG、HEIC 格式照片，以及 MOV 格式 Live Photo 视频，单个文件最大 ${MAX_FILE_SIZE}MB`"
+          icon="tabler:cloud-upload"
+          layout="list"
+          size="xl"
+          accept="image/jpeg,image/png,image/heic,image/heif,video/quicktime,.mov"
+          multiple
+          highlight
+          dropzone
+          :file-delete="{ variant: 'soft', color: 'neutral' }"
+          :ui="{
+            root: 'w-full',
+            base: 'group relative flex flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-neutral-200/80 bg-white/90 px-6 py-12 text-center shadow-sm transition-all duration-300 hover:border-primary-400/80 hover:bg-primary-500/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/60 dark:border-neutral-700/70 dark:bg-neutral-900/80',
+            wrapper: 'flex flex-col items-center gap-2',
+            label:
+              'text-base font-semibold text-neutral-800 dark:text-neutral-100',
+            description: 'text-sm text-neutral-500 dark:text-neutral-400',
+            files: 'mt-2 flex w-full flex-col gap-2 overflow-y-auto',
+            file: 'flex items-center justify-between gap-3 rounded-2xl border border-neutral-200/80 bg-white/80 px-4 py-3 text-left shadow-sm shadow-black/5 backdrop-blur-sm dark:border-neutral-800/80 dark:bg-neutral-900/70',
+            fileLeadingAvatar: 'ring-1 ring-white/80 dark:ring-neutral-800',
+            fileWrapper: 'min-w-0 flex-1',
+            fileName:
+              'text-sm font-medium text-neutral-700 dark:text-neutral-100 truncate',
+            fileSize: 'text-xs text-neutral-500 dark:text-neutral-400',
+            fileTrailingButton: 'text-neutral-400 hover:text-error-500',
+          }"
+        />
+      </template>
+
+      <template #footer>
+        <div
+          class="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div
+            class="flex flex-col gap-1 text-sm text-neutral-500 dark:text-neutral-400"
+          >
+            <span>{{
+              hasSelectedFiles
+                ? `已准备 ${selectedFilesSummary}`
+                : '请选择要上传的照片'
+            }}</span>
+          </div>
+          <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <UButton
+              variant="soft"
+              color="neutral"
+              class="w-full sm:w-auto"
+              :disabled="!hasSelectedFiles"
+              @click="clearSelectedFiles"
+            >
+              清空选择
+            </UButton>
+            <UButton
+              color="primary"
+              size="lg"
+              class="w-full sm:w-auto"
+              icon="tabler:upload"
+              :disabled="!hasSelectedFiles"
+              @click="handleUpload"
+            >
+              {{
+                hasSelectedFiles
+                  ? `上传 ${selectedFiles.length} 个文件`
+                  : '开始上传'
+              }}
+            </UButton>
+          </div>
+        </div>
+      </template>
+    </USlideover>
 
     <!-- 工具栏 -->
     <div
