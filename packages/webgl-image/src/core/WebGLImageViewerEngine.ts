@@ -25,13 +25,31 @@ import {
 import { createProgram } from '../shaders'
 import ImageDecoderWorkerRaw from '../workers/image-decoder.worker?raw'
 
+interface Tile {
+  x: number
+  y: number
+  width: number
+  height: number
+  texture: WebGLTexture | null
+}
+
+const TILE_DEBUG_BORDER_PX = 2.4
+const TILE_DEBUG_BORDER_COLOR: [number, number, number, number] = [
+  0.4,
+  0.7,
+  0.9,
+  0.25,
+]
+
 export class WebGLImageViewerEngine {
   private canvas: HTMLCanvasElement
   private gl: WebGLRenderingContext
   private config: EngineConfig
-  private image: HTMLImageElement | null = null
+  private image: HTMLImageElement | HTMLCanvasElement | ImageBitmap | null = null
   private texture: WebGLTexture | null = null
   private program: WebGLProgram | null = null
+  private tiles: Tile[] = []
+  private useTiles = false
 
   // Web Workers
   private worker: Worker | null = null
@@ -63,6 +81,9 @@ export class WebGLImageViewerEngine {
   private matrixLocation: WebGLUniformLocation | null = null
   private resolutionLocation: WebGLUniformLocation | null = null
   private imageLocation: WebGLUniformLocation | null = null
+  private tileDebugLocation: WebGLUniformLocation | null = null
+  private tileBorderColorLocation: WebGLUniformLocation | null = null
+  private tileBorderWidthLocation: WebGLUniformLocation | null = null
 
   // 事件监听器
   private throttledRender: () => void
@@ -147,6 +168,15 @@ export class WebGLImageViewerEngine {
       'u_resolution',
     )
     this.imageLocation = gl.getUniformLocation(this.program, 'u_image')
+    this.tileDebugLocation = gl.getUniformLocation(this.program, 'u_debugTiles')
+    this.tileBorderColorLocation = gl.getUniformLocation(
+      this.program,
+      'u_tileBorderColor',
+    )
+    this.tileBorderWidthLocation = gl.getUniformLocation(
+      this.program,
+      'u_tileBorderWidth',
+    )
 
     // 创建缓冲区
     this.createBuffers()
@@ -188,14 +218,27 @@ export class WebGLImageViewerEngine {
   }
 
   private handleWorkerImageLoaded(payload: any) {
-    this.emitLoadingStateChange(true, LoadingState.TEXTURE_LOADING)
     const { imageBitmap } = payload
 
     try {
       this.image = imageBitmap
-      this.createTexture(imageBitmap)
-      // imageBitmap.close()
-      this.updatePositionBuffer()
+
+      const shouldUseTiles = this.shouldUseTiles(imageBitmap)
+      let usingTiles = false
+
+      if (shouldUseTiles) {
+        this.emitLoadingStateChange(true, LoadingState.TILE_LOADING)
+        usingTiles = this.createTiles(imageBitmap)
+      }
+
+      if (!usingTiles) {
+        this.emitLoadingStateChange(true, LoadingState.TEXTURE_LOADING)
+        this.createTexture(imageBitmap)
+      } else {
+        this.updatePositionBuffer()
+      }
+
+      this.useTiles = usingTiles
 
       if (this.config.centerOnInit) {
         this.centerImage()
@@ -343,6 +386,10 @@ export class WebGLImageViewerEngine {
   ): WebGLTexture | null {
     const { gl } = this
 
+    // 清理瓦片数据
+    this.cleanupTiles()
+    this.useTiles = false
+
     // 清理旧纹理
     if (this.texture) {
       gl.deleteTexture(this.texture)
@@ -417,7 +464,190 @@ export class WebGLImageViewerEngine {
     return this.texture
   }
 
-  private resize(): void {
+  private cleanupTiles(): void {
+    if (!this.tiles.length) return
+
+    const { gl } = this
+    for (const tile of this.tiles) {
+      if (tile.texture) {
+        gl.deleteTexture(tile.texture)
+      }
+    }
+
+    this.tiles = []
+  }
+
+  private shouldUseTiles(
+    source: { width: number; height: number } | null,
+  ): boolean {
+    if (!source) return false
+
+    const maxTextureSize = getMaxTextureSize(this.gl)
+    if (source.width > maxTextureSize || source.height > maxTextureSize) {
+      return true
+    }
+
+    if (!this.config.tileEnabled) return false
+
+    return (
+      source.width > this.config.tileSize || source.height > this.config.tileSize
+    )
+  }
+
+  private createTiles(
+    imageSource: HTMLCanvasElement | HTMLImageElement | ImageBitmap,
+  ): boolean {
+    const { gl } = this
+
+    // 清理旧资源
+    if (this.texture) {
+      gl.deleteTexture(this.texture)
+      this.texture = null
+    }
+    this.cleanupTiles()
+
+    const maxTextureSize = getMaxTextureSize(gl)
+    const baseTileSize = Math.max(
+      1,
+      Math.min(this.config.tileSize, maxTextureSize),
+    )
+
+    const width =
+      (imageSource as HTMLCanvasElement).width ??
+      (imageSource as HTMLImageElement).width ??
+      (imageSource as ImageBitmap).width
+    const height =
+      (imageSource as HTMLCanvasElement).height ??
+      (imageSource as HTMLImageElement).height ??
+      (imageSource as ImageBitmap).height
+
+    if (!width || !height) {
+      return false
+    }
+
+    const columns = Math.ceil(width / baseTileSize)
+    const rows = Math.ceil(height / baseTileSize)
+    const offscreen = document.createElement('canvas')
+    const tiles: Tile[] = []
+    const disposeTiles = () => {
+      for (const tile of tiles) {
+        if (tile.texture) {
+          gl.deleteTexture(tile.texture)
+        }
+      }
+    }
+
+    try {
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < columns; col++) {
+          const startX = col * baseTileSize
+          const startY = row * baseTileSize
+          const tileWidth = Math.min(baseTileSize, width - startX)
+          const tileHeight = Math.min(baseTileSize, height - startY)
+
+          if (tileWidth <= 0 || tileHeight <= 0) continue
+
+          offscreen.width = tileWidth
+          offscreen.height = tileHeight
+          const ctx = offscreen.getContext('2d')
+          if (!ctx) {
+            console.warn(
+              'Failed to acquire 2D context for tile rendering, falling back to single texture.',
+            )
+            disposeTiles()
+            this.cleanupTiles()
+            return false
+          }
+
+          ctx.clearRect(0, 0, tileWidth, tileHeight)
+          ctx.drawImage(
+            imageSource as CanvasImageSource,
+            startX,
+            startY,
+            tileWidth,
+            tileHeight,
+            0,
+            0,
+            tileWidth,
+            tileHeight,
+          )
+
+          const texture = gl.createTexture()
+          if (!texture) {
+            console.warn(
+              'Failed to create tile texture, falling back to single texture rendering.',
+            )
+            disposeTiles()
+            this.cleanupTiles()
+            return false
+          }
+
+          gl.bindTexture(gl.TEXTURE_2D, texture)
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+          gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGBA,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            offscreen,
+          )
+
+          tiles.push({
+            x: startX,
+            y: startY,
+            width: tileWidth,
+            height: tileHeight,
+            texture,
+          })
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to create tiles, falling back to single texture.', error)
+      disposeTiles()
+      this.cleanupTiles()
+      return false
+    } finally {
+      gl.bindTexture(gl.TEXTURE_2D, null)
+    }
+
+    this.tiles = tiles
+    this.useTiles = this.tiles.length > 0
+
+    return this.useTiles
+  }
+
+  private getVisibleTiles(): Tile[] {
+    if (!this.useTiles || !this.tiles.length) {
+      return []
+    }
+
+    const scale = this.transform.scale
+    if (!isFinite(scale) || scale <= 0) {
+      return this.tiles
+    }
+
+    const viewLeft = (-this.transform.translateX) / scale
+    const viewTop = (-this.transform.translateY) / scale
+    const viewRight = (this.canvas.width - this.transform.translateX) / scale
+    const viewBottom = (this.canvas.height - this.transform.translateY) / scale
+
+    return this.tiles.filter((tile) => {
+      const tileRight = tile.x + tile.width
+      const tileBottom = tile.y + tile.height
+      return (
+        tileRight >= viewLeft &&
+        tile.x <= viewRight &&
+        tileBottom >= viewTop &&
+        tile.y <= viewBottom
+      )
+    })
+  }
+
+  public resize(): void {
     const rect = this.canvas.getBoundingClientRect()
     const dpr = window.devicePixelRatio || 1
 
@@ -431,8 +661,22 @@ export class WebGLImageViewerEngine {
 
     this.gl.viewport(0, 0, this.canvas.width, this.canvas.height)
 
+    if (this.image) {
+      const prevTranslateX = this.transform.translateX
+      const prevTranslateY = this.transform.translateY
+
+      this.constrainToBounds()
+
+      if (
+        prevTranslateX !== this.transform.translateX ||
+        prevTranslateY !== this.transform.translateY
+      ) {
+        this.emitTransformChange()
+      }
+    }
+
     // 只有在图像已加载时才渲染
-    if (this.image && this.texture) {
+    if (this.image && (this.texture || this.useTiles)) {
       this.throttledRender()
     }
   }
@@ -531,35 +775,26 @@ export class WebGLImageViewerEngine {
   }
 
   private render(): void {
-    if (!this.program || !this.texture) return
+    if (!this.program) return
+    if (!this.texture && !this.useTiles) return
+    if (this.useTiles && !this.tiles.length) return
 
     const { gl } = this
 
     try {
-      // 检查 WebGL 上下文是否仍然有效
       if (gl.isContextLost()) {
         console.warn('WebGL context is lost, skipping render')
         return
       }
 
-      // 更新动画
       this.updateAnimation()
 
-      // 清除画布
       gl.clear(gl.COLOR_BUFFER_BIT)
-
-      // 使用着色器程序
       gl.useProgram(this.program)
 
-      // 设置统一变量
-      gl.uniform2f(
-        this.resolutionLocation,
-        this.canvas.width,
-        this.canvas.height,
-      )
+      gl.uniform2f(this.resolutionLocation, this.canvas.width, this.canvas.height)
       gl.uniform1i(this.imageLocation, 0)
 
-      // 设置变换矩阵
       const matrix = createTransformMatrix(
         this.transform.scale,
         this.transform.translateX,
@@ -567,24 +802,90 @@ export class WebGLImageViewerEngine {
       )
       gl.uniformMatrix3fv(this.matrixLocation, false, matrix)
 
-      // 绑定纹理
-      gl.activeTexture(gl.TEXTURE0)
-      gl.bindTexture(gl.TEXTURE_2D, this.texture)
+      if (!this.positionBuffer || !this.texCoordBuffer) {
+        return
+      }
 
-      // 设置位置属性
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer)
-      gl.enableVertexAttribArray(this.positionLocation)
-      gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0)
+      const showDebugBorder =
+        !!this.config.debug && (!!this.texture || this.useTiles)
 
-      // 设置纹理坐标属性
+      if (this.tileDebugLocation) {
+        gl.uniform1i(this.tileDebugLocation, showDebugBorder ? 1 : 0)
+      }
+
+      if (this.tileBorderColorLocation) {
+        const [r, g, b, a] = TILE_DEBUG_BORDER_COLOR
+        gl.uniform4f(this.tileBorderColorLocation, r, g, b, a)
+      }
+
+      if (!showDebugBorder && this.tileBorderWidthLocation) {
+        gl.uniform2f(this.tileBorderWidthLocation, 0, 0)
+      }
+
+      const borderWidthLocation = this.tileBorderWidthLocation
+
+      // 设置纹理坐标属性（瓦片和整体纹理共用）
       gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer)
       gl.enableVertexAttribArray(this.texCoordLocation)
       gl.vertexAttribPointer(this.texCoordLocation, 2, gl.FLOAT, false, 0, 0)
 
-      // 绘制
-      gl.drawArrays(gl.TRIANGLES, 0, 6)
+      // 设置位置属性缓冲
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer)
+      gl.enableVertexAttribArray(this.positionLocation)
+      gl.vertexAttribPointer(this.positionLocation, 2, gl.FLOAT, false, 0, 0)
 
-      // 检查 WebGL 错误
+      gl.activeTexture(gl.TEXTURE0)
+
+      if (this.useTiles) {
+        const visibleTiles = this.getVisibleTiles()
+        for (const tile of visibleTiles) {
+          if (!tile.texture) continue
+
+          if (showDebugBorder && borderWidthLocation) {
+            const tileWidth = Math.max(tile.width, 1)
+            const tileHeight = Math.max(tile.height, 1)
+            gl.uniform2f(
+              borderWidthLocation,
+              TILE_DEBUG_BORDER_PX / tileWidth,
+              TILE_DEBUG_BORDER_PX / tileHeight,
+            )
+          }
+
+          const positions = new Float32Array([
+            tile.x,
+            tile.y,
+            tile.x + tile.width,
+            tile.y,
+            tile.x,
+            tile.y + tile.height,
+            tile.x,
+            tile.y + tile.height,
+            tile.x + tile.width,
+            tile.y,
+            tile.x + tile.width,
+            tile.y + tile.height,
+          ])
+
+          gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer)
+          gl.bufferData(gl.ARRAY_BUFFER, positions, gl.DYNAMIC_DRAW)
+          gl.bindTexture(gl.TEXTURE_2D, tile.texture)
+          gl.drawArrays(gl.TRIANGLES, 0, 6)
+        }
+      } else {
+        if (showDebugBorder && borderWidthLocation && this.image) {
+          const imageWidth = Math.max(this.image.width, 1)
+          const imageHeight = Math.max(this.image.height, 1)
+          gl.uniform2f(
+            borderWidthLocation,
+            TILE_DEBUG_BORDER_PX / imageWidth,
+            TILE_DEBUG_BORDER_PX / imageHeight,
+          )
+        }
+
+        gl.bindTexture(gl.TEXTURE_2D, this.texture)
+        gl.drawArrays(gl.TRIANGLES, 0, 6)
+      }
+
       const error = gl.getError()
       if (error !== gl.NO_ERROR) {
         console.error('WebGL rendering error:', error)
@@ -947,8 +1248,23 @@ export class WebGLImageViewerEngine {
 
       // 如果有图像，重新加载
       if (this.image) {
-        this.createTexture(this.image)
-        this.updatePositionBuffer()
+        let usingTiles = this.useTiles
+
+        if (usingTiles) {
+          const recreated = this.createTiles(this.image)
+          if (!recreated) {
+            this.createTexture(this.image)
+            usingTiles = false
+          }
+        } else {
+          this.createTexture(this.image)
+        }
+
+        this.useTiles = usingTiles && this.tiles.length > 0
+
+        if (this.useTiles) {
+          this.updatePositionBuffer()
+        }
         this.render()
       }
     } catch (error) {
@@ -1097,6 +1413,12 @@ export class WebGLImageViewerEngine {
   public getDebugInfo(): DebugInfo | null {
     if (!this.image) return null
 
+    const visibleTiles = this.useTiles ? this.getVisibleTiles() : []
+    const imageSrc =
+      'src' in this.image && typeof this.image.src === 'string'
+        ? this.image.src
+        : ''
+
     return {
       scale: this.transform.scale,
       relativeScale: this.transform.scale / this.initialScale,
@@ -1111,7 +1433,12 @@ export class WebGLImageViewerEngine {
       isLoading: this.isLoadingTexture,
       loadingState: this.currentLoadingState,
       currentQuality: this.currentQuality,
-      imageSrc: this.image.src || '',
+      imageSrc,
+      tileEnabled: this.config.tileEnabled,
+      useTiles: this.useTiles,
+      totalTiles: this.tiles.length,
+      visibleTiles: visibleTiles.length,
+      tileSize: this.config.tileSize,
     }
   }
 
@@ -1146,7 +1473,7 @@ export class WebGLImageViewerEngine {
 
       canvas.width = this.image.width
       canvas.height = this.image.height
-      ctx.drawImage(this.image, 0, 0)
+      ctx.drawImage(this.image as CanvasImageSource, 0, 0)
 
       // 转换为 blob
       const blob = await new Promise<Blob | null>((resolve) => {
@@ -1182,6 +1509,8 @@ export class WebGLImageViewerEngine {
       gl.deleteTexture(this.texture)
       this.texture = null
     }
+    this.cleanupTiles()
+    this.useTiles = false
     if (this.positionBuffer) {
       gl.deleteBuffer(this.positionBuffer)
       this.positionBuffer = null
