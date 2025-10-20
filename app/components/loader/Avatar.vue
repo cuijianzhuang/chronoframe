@@ -3,12 +3,14 @@ const config = useRuntimeConfig()
 </script>
 
 <template>
-  <div class="relative size-20">
+  <div class="relative size-24">
     <div
-      class="absolute inset-0 rounded-full border-3 border-transparent border-x-primary border-y-secondary animate-spin"
+      class="absolute inset-0 rounded-full border-2 border-transparent border-x-primary-600 border-y-secondary-600 dark:border-x-primary-400 dark:border-y-secondary-400 animate-spin drop-shadow-xl drop-shadow-primary/10"
     ></div>
 
-    <div class="absolute inset-1 rounded-full overflow-hidden">
+    <div
+      class="absolute inset-1 rounded-full overflow-hidden drop-shadow-xl drop-shadow-primary/10 bg-neutral-100 dark:bg-neutral-800"
+    >
       <img
         v-if="config.public.app.avatarUrl"
         class="w-full h-full object-cover"
@@ -18,7 +20,7 @@ const config = useRuntimeConfig()
       <img
         v-else
         class="w-full h-full object-cover"
-        src="~/assets/images/avatar.webp"
+        src="/web-app-manifest-192x192.png"
         alt="Loading..."
       />
     </div>

@@ -57,6 +57,15 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
           class="size-8 inline-block shrink-0"
         />
       </div>
+      <!-- Logo -->
+      <!-- @note: this will not to be replaced with user avatar -->
+      <div class="mb-2">
+        <img
+          src="/web-app-manifest-192x192.png"
+          alt="App Logo"
+          class="size-24 rounded-full object-cover"
+        />
+      </div>
       <!-- Title -->
       <div
         v-if="title"

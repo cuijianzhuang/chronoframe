@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { motion, AnimatePresence } from 'motion-v'
-import avatarImage from '~/assets/images/avatar.webp'
 
 defineProps<{
   stats?: {
@@ -55,7 +54,7 @@ const isRepoLinkHovering = ref(false)
     <div
       class="absolute inset-0 -z-10 blur-3xl scale-110 bg-cover bg-center opacity-35"
       :style="{
-        backgroundImage: `url(${config.public.app.avatarUrl || avatarImage})`,
+        backgroundImage: `url(${config.public.app.avatarUrl || '/web-app-manifest-192x192.png'})`,
       }"
     ></div>
     <div
@@ -73,8 +72,8 @@ const isRepoLinkHovering = ref(false)
                 <Icon name="tabler:star-filled" />
               </div>
               <img
-                :src="config.public.app.avatarUrl || avatarImage"
-                class="size-12 rounded-full object-cover"
+                :src="config.public.app.avatarUrl || '/web-app-manifest-192x192.png'"
+                class="size-16 rounded-full object-cover"
                 :class="!loggedIn && 'cursor-pointer'"
                 alt="Author's avatar"
                 @click="!loggedIn && handleOpenLogin()"

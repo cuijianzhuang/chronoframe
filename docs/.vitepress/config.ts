@@ -5,6 +5,7 @@ export default defineConfig({
   title: 'ChronoFrame',
   description: 'A Self-hosted photo gallery',
   head: [
+    ['link', { rel: 'icon', href: '/favicon.ico' }],
     [
       'script',
       {

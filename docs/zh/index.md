@@ -6,6 +6,10 @@ hero:
   name: "ChronoFrame"
   text: "自部署个人画廊"
   tagline: "在线管理照片，多存储后端、LivePhoto、地球仪视图"
+  image:
+    src: /logo.png
+    alt: ChronoFrame
+    style: "filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.7)) drop-shadow(0 0 60px rgba(59, 130, 246, 0.5)) drop-shadow(0 0 100px rgba(168, 85, 247, 0.3)); width: 300px; height: 300px;"
   actions:
     - theme: brand
       text: 快速开始
