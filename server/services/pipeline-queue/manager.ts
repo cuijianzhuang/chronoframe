@@ -460,7 +460,7 @@ export class QueueManager {
             this.logger.warn(
               `[${taskId}:reverse-geocoding] photo ${photoId} not found`,
             )
-            return
+            throw new Error(`Photo ${photoId} not found`)
           }
 
           let latitude = payload.latitude ?? photo.latitude ?? undefined
@@ -498,7 +498,7 @@ export class QueueManager {
                 locationName: null,
               })
               .where(eq(tables.photos.id, photoId))
-            return
+            throw new Error(`Missing coordinates for photo ${photoId}`)
           }
 
           const locationInfo = await extractLocationFromGPS(
@@ -506,14 +506,18 @@ export class QueueManager {
             longitude!,
           )
 
+          if (!locationInfo) {
+            throw new Error(`Failed to extract location from GPS coordinates (${latitude}, ${longitude}), maybe network issue?`)
+          }
+
           await db
             .update(tables.photos)
             .set({
               latitude: latitude!,
               longitude: longitude!,
-              country: locationInfo?.country ?? null,
-              city: locationInfo?.city ?? null,
-              locationName: locationInfo?.locationName ?? null,
+              country: locationInfo.country ?? null,
+              city: locationInfo.city ?? null,
+              locationName: locationInfo.locationName ?? null,
             })
             .where(eq(tables.photos.id, photoId))
 
