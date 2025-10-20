@@ -735,6 +735,7 @@
         "priority": "優先級",
         "stage": "處理階段",
         "error": "錯誤資訊",
+        "errorMessage": "錯誤詳情",
         "createdAt": "建立時間",
         "completedAt": "完成時間",
         "actions": "操作"

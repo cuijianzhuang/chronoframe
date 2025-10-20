@@ -792,6 +792,7 @@
         "priority": "优先级",
         "stage": "处理阶段",
         "error": "错误信息",
+        "errorMessage": "错误详情",
         "createdAt": "创建时间",
         "completedAt": "完成时间",
         "actions": "操作"

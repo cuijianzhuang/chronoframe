@@ -735,6 +735,7 @@
         "priority": "優先度",
         "stage": "処理段階",
         "error": "エラー情報",
+        "errorMessage": "エラーメッセージ",
         "createdAt": "作成日時",
         "completedAt": "完了日時",
         "actions": "操作"

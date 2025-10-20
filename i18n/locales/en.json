@@ -792,6 +792,7 @@
         "priority": "Priority",
         "stage": "Stage",
         "error": "Error",
+        "errorMessage": "Error Message",
         "createdAt": "Created At",
         "completedAt": "Completed At",
         "actions": "Actions"

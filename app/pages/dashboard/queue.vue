@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { h, resolveComponent } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
+
+const UButton = resolveComponent('UButton')
 
 definePageMeta({
   layout: 'dashboard',
@@ -201,8 +204,27 @@ const typeOptions = [
   },
 ]
 
+// 展开行状态
+const expanded = ref<Record<string, boolean>>({})
+
 // 表格列定义
 const columns: TableColumn<any>[] = [
+  {
+    id: 'expand',
+    cell: ({ row }) => h(UButton, {
+      'color': 'neutral',
+      'variant': 'ghost',
+      'icon': 'tabler:chevron-down',
+      'square': true,
+      'aria-label': 'Expand',
+      'ui': {
+        leadingIcon: ['transition-transform', row.getIsExpanded() ? 'duration-200 rotate-180' : '']
+      },
+      'onClick': () => row.toggleExpanded()
+    }),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: 'id',
     header: $t('dashboard.queue.table.id'),
@@ -341,6 +363,7 @@ onBeforeUnmount(() => {
       <div class="space-y-4">
         <!-- 任务表格 -->
         <UTable
+          v-model:expanded="expanded"
           :data="queueData?.data || []"
           :columns="columns"
           :loading="isLoading"
@@ -435,55 +458,46 @@ onBeforeUnmount(() => {
               </span>
             </div>
           </template>
-        </UTable>
-      </div>
-    </UCard>
 
-    <!-- 错误信息显示 -->
-    <UCard
-      v-if="
-        queueData?.data?.some(
-          (task) => task.status === 'failed' && task.errorMessage,
-        )
-      "
-    >
-      <template #header>
-        <h3 class="font-semibold text-red-600">最近的错误信息</h3>
-      </template>
+          <!-- 展开行内容 -->
+          <template #expanded="{ row }">
+            <div class="px-2">
+              <div class="space-y-3">
+                <!-- 任务ID和类型 -->
+                <div class="flex gap-4">
+                  <div>
+                    <p class="text-xs text-neutral-500">PhotoId</p>
+                    <p class="text-sm capitalize">{{ row.original.payload.photoId || '-' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-neutral-500">{{ $t('dashboard.queue.table.id') }}</p>
+                    <p class="font-mono text-sm">{{ row.original.id }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-neutral-500">{{ $t('dashboard.queue.table.type') }}</p>
+                    <p class="text-sm capitalize">{{ row.original.payload.type }}</p>
+                  </div>
+                </div>
 
-      <div class="space-y-2 max-h-64 overflow-y-auto">
-        <div
-          v-for="task in queueData.data
-            .filter((t) => t.status === 'failed' && t.errorMessage)
-            .slice(0, 5)"
-          :key="task.id"
-          class="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-100 dark:border-red-900/30"
-        >
-          <div class="flex items-start justify-between gap-2 text-sm">
-            <div class="flex-1">
-              <p class="font-medium text-red-800 dark:text-red-200">
-                任务 #{{ task.id }} ({{
-                  $t(`dashboard.queue.types.${task.payload.type}`)
-                }})
-              </p>
-              <p class="text-red-600 dark:text-red-300 mt-1 text-xs break-all">
-                {{ task.errorMessage }}
-              </p>
-              <p class="text-red-500 dark:text-red-400 mt-1 text-xs">
-                {{ $dayjs(task.createdAt).format('MM-DD HH:mm:ss') }}
-              </p>
+                <!-- 错误信息（仅在失败状态显示） -->
+                <div v-if="row.original.status === 'failed' && row.original.errorMessage" class="mt-3">
+                  <p class="text-xs text-neutral-500 mb-1">{{ $t('dashboard.queue.table.errorMessage') }}</p>
+                  <div class="p-3 bg-red-50 dark:bg-red-950/20 rounded border border-red-100 dark:border-red-900/30">
+                    <p class="text-sm text-red-700 dark:text-red-300 break-words font-mono">
+                      {{ row.original.errorMessage }}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Payload 信息 -->
+                <div v-if="row.original.payload" class="mt-3">
+                  <p class="text-xs text-gray-500 mb-1">Payload</p>
+                  <pre class="text-xs bg-neutral-100/50 dark:bg-neutral-800/50 p-2 rounded overflow-x-auto text-neutral-700 dark:text-neutral-300">{{ JSON.stringify(row.original.payload, null, 2) }}</pre>
+                </div>
+              </div>
             </div>
-            <UButton
-              icon="tabler:refresh"
-              size="xs"
-              variant="soft"
-              color="warning"
-              @click="retryTask(task.id)"
-            >
-              重试
-            </UButton>
-          </div>
-        </div>
+          </template>
+        </UTable>
       </div>
     </UCard>
   </div>
