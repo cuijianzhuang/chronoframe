@@ -444,6 +444,7 @@
           "id": "照片 ID",
           "title": "照片標題",
           "tags": "關鍵字",
+          "rating": "評分",
           "isLivePhoto": "原況照片",
           "location": "位置",
           "dateTaken": "拍攝日期",
@@ -455,10 +456,15 @@
         },
         "cells": {
           "noTags": "無標籤",
+          "noRating": "未評分",
           "noGps": "沒有 GPS 資訊",
           "unknown": "未知",
           "staticPhoto": "靜態照片",
           "noReactions": "無反應"
+        },
+        "columnVisibility": {
+          "button": "列設定",
+          "description": "切換列的顯示/隱藏"
         }
       },
       "actions": {

@@ -501,6 +501,7 @@
           "id": "Photo ID",
           "title": "Photo Title",
           "tags": "Keywords",
+          "rating": "Rating",
           "isLivePhoto": "Live Photo",
           "location": "Location",
           "dateTaken": "Date Taken",
@@ -512,10 +513,15 @@
         },
         "cells": {
           "noTags": "No tags",
+          "noRating": "No rating",
           "noGps": "No GPS info",
           "unknown": "Unknown",
           "staticPhoto": "Static Photo",
           "noReactions": "No reactions"
+        },
+        "columnVisibility": {
+          "button": "Columns",
+          "description": "Toggle column visibility"
         }
       },
       "actions": {

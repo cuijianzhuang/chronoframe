@@ -6,6 +6,24 @@ import { Icon, UBadge } from '#components'
 import ThumbImage from '~/components/ui/ThumbImage.vue'
 
 const UCheckbox = resolveComponent('UCheckbox')
+const Rating = resolveComponent('Rating')
+
+// 列名显示映射
+const columnNameMap: Record<string, string> = {
+  thumbnailUrl: $t('dashboard.photos.table.columns.thumbnail.title'),
+  id: $t('dashboard.photos.table.columns.id'),
+  title: $t('dashboard.photos.table.columns.title'),
+  tags: $t('dashboard.photos.table.columns.tags'),
+  rating: $t('dashboard.photos.table.columns.rating'),
+  isLivePhoto: $t('dashboard.photos.table.columns.isLivePhoto'),
+  location: $t('dashboard.photos.table.columns.location'),
+  dateTaken: $t('dashboard.photos.table.columns.dateTaken'),
+  lastModified: $t('dashboard.photos.table.columns.lastModified'),
+  fileSize: $t('dashboard.photos.table.columns.fileSize'),
+  colorSpace: $t('dashboard.photos.table.columns.colorSpace'),
+  reactions: $t('dashboard.photos.table.columns.reactions'),
+  actions: $t('dashboard.photos.table.columns.actions'),
+}
 
 definePageMeta({
   layout: 'dashboard',
@@ -452,6 +470,23 @@ watch(isEditModalOpen, (open) => {
 const rowSelection = ref({})
 const table: any = useTemplateRef('table')
 
+// 列可见性状态
+const columnVisibility = ref({
+  thumbnailUrl: true,
+  id: true,
+  actions: true,
+  title: true,
+  tags: true,
+  rating: true,
+  isLivePhoto: true,
+  location: true,
+  dateTaken: true,
+  lastModified: true,
+  fileSize: true,
+  colorSpace: true,
+  reactions: true,
+})
+
 const selectedRowsCount = computed((): number => {
   return table.value?.tableApi?.getFilteredSelectedRowModel().rows.length || 0
 })
@@ -692,8 +727,10 @@ const columns: TableColumn<Photo>[] = [
           row.toggleSelected(!!value),
         'aria-label': 'Select row',
       }),
+    enableHiding: false,
   },
   {
+    id: 'thumbnailUrl',
     accessorKey: 'thumbnailUrl',
     header: $t('dashboard.photos.table.columns.thumbnail.title'),
     cell: ({ row }) => {
@@ -708,10 +745,13 @@ const columns: TableColumn<Photo>[] = [
         style: { cursor: url ? 'pointer' : 'default' },
       })
     },
+    enableHiding: false,
   },
   {
+    id: 'id',
     accessorKey: 'id',
     header: $t('dashboard.photos.table.columns.id'),
+    enableHiding: false,
   },
   {
     accessorKey: 'title',
@@ -739,6 +779,26 @@ const columns: TableColumn<Photo>[] = [
               'span',
               { class: 'text-neutral-400 text-xs' },
               $t('dashboard.photos.table.cells.noTags'),
+            ),
+      ])
+    },
+  },
+  {
+    accessorKey: 'rating',
+    header: $t('dashboard.photos.table.columns.rating'),
+    cell: ({ row }) => {
+      const rating = row.original.exif?.Rating
+      return h('div', { class: 'flex items-center' }, [
+        rating !== undefined && rating !== null
+          ? h(Rating, {
+              modelValue: rating,
+              readonly: true,
+              size: 'xs',
+            })
+          : h(
+              'span',
+              { class: 'text-neutral-400 text-xs' },
+              $t('dashboard.photos.table.cells.noRating'),
             ),
       ])
     },
@@ -837,6 +897,7 @@ const columns: TableColumn<Photo>[] = [
     cell: (info) => formatBytes(info.getValue() as number),
   },
   {
+    id: 'colorSpace',
     accessorFn: (row) => row.exif?.ColorSpace,
     header: $t('dashboard.photos.table.columns.colorSpace'),
   },
@@ -911,8 +972,10 @@ const columns: TableColumn<Photo>[] = [
     },
   },
   {
+    id: 'actions',
     accessorKey: 'actions',
     header: $t('dashboard.photos.table.columns.actions'),
+    enableHiding: false,
   },
 ]
 
@@ -1071,7 +1134,8 @@ const openMetadataEditor = (photo: Photo) => {
   editFormState.title = initialTitle
   editFormState.description = initialDescription
   editFormState.tags = [...initialTags]
-  editFormState.rating = typeof photo.exif?.Rating === 'number' ? photo.exif.Rating : null
+  editFormState.rating =
+    typeof photo.exif?.Rating === 'number' ? photo.exif.Rating : null
 
   const initialLocation = hasCoordinates
     ? {
@@ -1940,6 +2004,36 @@ onUnmounted(() => {
             $t('dashboard.photos.toolbar.refresh')
           }}</span>
         </UButton>
+
+        <!-- 列可见性按钮 -->
+        <UDropdownMenu
+          :items="table?.tableApi?.getAllColumns()
+            .filter((column: any) => column.getCanHide())
+            .map((column: any) => ({
+              label: columnNameMap[column.id] || column.id,
+              type: 'checkbox' as const,
+              checked: column.getIsVisible(),
+              disabled: !column.getCanHide() || (column.id === 'thumbnailUrl' || column.id === 'id' || column.id === 'actions'),
+              onUpdateChecked(checked: boolean) {
+                table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
+              },
+              onSelect(e: Event) {
+                e.preventDefault()
+              }
+            }))"
+          :content="{ align: 'end' }"
+        >
+          <UButton
+            label=""
+            color="neutral"
+            variant="outline"
+            size="sm"
+            icon="tabler:columns-3"
+            :title="$t('dashboard.photos.table.columnVisibility.description')"
+          >
+            <span class="hidden sm:inline">{{ $t('dashboard.photos.table.columnVisibility.button') }}</span>
+          </UButton>
+        </UDropdownMenu>
       </div>
     </div>
 
@@ -1950,6 +2044,7 @@ onUnmounted(() => {
       <UTable
         ref="table"
         v-model:row-selection="rowSelection"
+        v-model:column-visibility="columnVisibility"
         :column-pinning="{
           right: ['actions'],
         }"
@@ -2089,6 +2184,34 @@ onUnmounted(() => {
               </p>
             </div>
 
+            <div class="flex items-center justify-between space-y-2">
+              <label
+                class="text-sm font-medium text-neutral-700 dark:text-neutral-200"
+              >
+                {{ $t('dashboard.photos.editModal.fields.rating') }}
+              </label>
+              <div class="flex items-center gap-3">
+                <span
+                  v-if="editFormState.rating"
+                  class="text-sm text-neutral-600 dark:text-neutral-400"
+                >
+                  {{ editFormState.rating }} / 5
+                </span>
+                <span
+                  v-else
+                  class="text-sm text-neutral-500 dark:text-neutral-500"
+                >
+                  {{ $t('dashboard.photos.editModal.fields.noRating') }}
+                </span>
+                <Rating
+                  :model-value="editFormState.rating || 0"
+                  :allow-half="false"
+                  size="lg"
+                  @update:model-value="editFormState.rating = $event || null"
+                />
+              </div>
+            </div>
+
             <div class="space-y-3">
               <div class="flex items-center justify-between">
                 <label
@@ -2138,47 +2261,6 @@ onUnmounted(() => {
                   {{ $t('dashboard.photos.editModal.fields.noLocation') }}
                 </span>
               </div>
-            </div>
-
-            <div class="space-y-2">
-              <label
-                class="text-sm font-medium text-neutral-700 dark:text-neutral-200"
-              >
-                {{ $t('dashboard.photos.editModal.fields.rating') }}
-              </label>
-              <div class="flex items-center gap-2">
-                <div class="flex gap-1">
-                  <UButton
-                    v-for="star in 5"
-                    :key="star"
-                    variant="ghost"
-                    size="sm"
-                    :icon="
-                      star <= (editFormState.rating || 0)
-                        ? 'tabler:star-filled'
-                        : 'tabler:star'
-                    "
-                    :color="
-                      star <= (editFormState.rating || 0)
-                        ? 'warning'
-                        : 'neutral'
-                    "
-                    @click="
-                      editFormState.rating =
-                        editFormState.rating === star ? null : star
-                    "
-                  />
-                </div>
-                <span v-if="editFormState.rating" class="text-sm text-neutral-600 dark:text-neutral-400">
-                  {{ editFormState.rating }} / 5
-                </span>
-                <span v-else class="text-sm text-neutral-500 dark:text-neutral-500">
-                  {{ $t('dashboard.photos.editModal.fields.noRating') }}
-                </span>
-              </div>
-              <p class="text-xs text-neutral-500 dark:text-neutral-400">
-                {{ $t('dashboard.photos.editModal.fields.ratingHint') }}
-              </p>
             </div>
 
             <div
