@@ -635,7 +635,10 @@
           "locationHint": "点击地图选择或更新拍摄位置。",
           "clearLocation": "清除位置",
           "coordinates": "坐标",
-          "noLocation": "未选择位置"
+          "noLocation": "未选择位置",
+          "rating": "评分",
+          "ratingHint": "点击星星为照片设置评分（0-5 星）。",
+          "noRating": "未评分"
         },
         "actions": {
           "cancel": "取消",

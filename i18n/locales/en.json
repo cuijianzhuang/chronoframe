@@ -635,7 +635,10 @@
           "locationHint": "Click on the map to set the shooting location.",
           "clearLocation": "Clear location",
           "coordinates": "Coordinates",
-          "noLocation": "No location selected"
+          "noLocation": "No location selected",
+          "rating": "Rating",
+          "ratingHint": "Click on the stars to set the photo rating (0-5 stars).",
+          "noRating": "No rating"
         },
         "actions": {
           "cancel": "Cancel",

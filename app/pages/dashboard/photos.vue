@@ -101,6 +101,7 @@ interface EditFormState {
   title: string
   description: string
   tags: string[]
+  rating: number | null
 }
 
 const editingPhoto = ref<Photo | null>(null)
@@ -111,6 +112,7 @@ const editFormState = reactive<EditFormState>({
   title: '',
   description: '',
   tags: [],
+  rating: null,
 })
 
 const originalMetadata = ref<{
@@ -118,11 +120,13 @@ const originalMetadata = ref<{
   description: string
   tags: string[]
   location: { latitude: number; longitude: number } | null
+  rating: number | null
 }>({
   title: '',
   description: '',
   tags: [],
   location: null,
+  rating: null,
 })
 
 const locationSelection = ref<{ latitude: number; longitude: number } | null>(
@@ -195,12 +199,17 @@ const locationChanged = computed(() => {
   )
 })
 
+const ratingChanged = computed(
+  () => editFormState.rating !== originalMetadata.value.rating,
+)
+
 const isMetadataDirty = computed(
   () =>
     titleChanged.value ||
     descriptionChanged.value ||
     tagsChanged.value ||
-    locationChanged.value,
+    locationChanged.value ||
+    ratingChanged.value,
 )
 
 const formattedCoordinates = computed(() => {
@@ -426,11 +435,13 @@ watch(isEditModalOpen, (open) => {
     editFormState.title = ''
     editFormState.description = ''
     editFormState.tags = []
+    editFormState.rating = null
     originalMetadata.value = {
       title: '',
       description: '',
       tags: [],
       location: null,
+      rating: null,
     }
     locationSelection.value = null
     locationTouched.value = false
@@ -1060,6 +1071,7 @@ const openMetadataEditor = (photo: Photo) => {
   editFormState.title = initialTitle
   editFormState.description = initialDescription
   editFormState.tags = [...initialTags]
+  editFormState.rating = typeof photo.exif?.Rating === 'number' ? photo.exif.Rating : null
 
   const initialLocation = hasCoordinates
     ? {
@@ -1073,6 +1085,7 @@ const openMetadataEditor = (photo: Photo) => {
     description: initialDescription,
     tags: [...initialTags],
     location: initialLocation ? { ...initialLocation } : null,
+    rating: typeof photo.exif?.Rating === 'number' ? photo.exif.Rating : null,
   }
 
   locationSelection.value = initialLocation ? { ...initialLocation } : null
@@ -1102,6 +1115,7 @@ const saveMetadataChanges = async () => {
       description?: string
       tags?: string[]
       location?: { latitude: number; longitude: number } | null
+      rating?: number | null
     } = {}
 
     if (titleChanged.value) {
@@ -1123,6 +1137,10 @@ const saveMetadataChanges = async () => {
             longitude: locationSelection.value.longitude,
           }
         : null
+    }
+
+    if (ratingChanged.value) {
+      payload.rating = editFormState.rating
     }
 
     if (Object.keys(payload).length === 0) {
@@ -2120,6 +2138,47 @@ onUnmounted(() => {
                   {{ $t('dashboard.photos.editModal.fields.noLocation') }}
                 </span>
               </div>
+            </div>
+
+            <div class="space-y-2">
+              <label
+                class="text-sm font-medium text-neutral-700 dark:text-neutral-200"
+              >
+                {{ $t('dashboard.photos.editModal.fields.rating') }}
+              </label>
+              <div class="flex items-center gap-2">
+                <div class="flex gap-1">
+                  <UButton
+                    v-for="star in 5"
+                    :key="star"
+                    variant="ghost"
+                    size="sm"
+                    :icon="
+                      star <= (editFormState.rating || 0)
+                        ? 'tabler:star-filled'
+                        : 'tabler:star'
+                    "
+                    :color="
+                      star <= (editFormState.rating || 0)
+                        ? 'warning'
+                        : 'neutral'
+                    "
+                    @click="
+                      editFormState.rating =
+                        editFormState.rating === star ? null : star
+                    "
+                  />
+                </div>
+                <span v-if="editFormState.rating" class="text-sm text-neutral-600 dark:text-neutral-400">
+                  {{ editFormState.rating }} / 5
+                </span>
+                <span v-else class="text-sm text-neutral-500 dark:text-neutral-500">
+                  {{ $t('dashboard.photos.editModal.fields.noRating') }}
+                </span>
+              </div>
+              <p class="text-xs text-neutral-500 dark:text-neutral-400">
+                {{ $t('dashboard.photos.editModal.fields.ratingHint') }}
+              </p>
             </div>
 
             <div
