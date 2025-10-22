@@ -276,6 +276,7 @@ const uploadImage = async (file: File, existingFileId?: string) => {
       body: {
         fileName: file.name,
         contentType: file.type,
+        provider: storageProvider.value,
       },
     })
 
@@ -408,6 +409,7 @@ const uploadImage = async (file: File, existingFileId?: string) => {
 
 const toast = useToast()
 const selectedFiles = ref<File[]>([])
+const storageProvider = ref<'s3' | 'local' | 'openlist'>('s3')
 const isUploadSlideoverOpen = ref(false)
 
 const hasSelectedFiles = computed(() => selectedFiles.value.length > 0)
@@ -1844,6 +1846,21 @@ onUnmounted(() => {
             fileTrailingButton: 'text-neutral-400 hover:text-error-500',
           }"
         />
+        <div class="mt-3">
+          <UFormField :label="$t('dashboard.photos.uploader.provider')">
+            <USelectMenu
+              v-model="storageProvider"
+              :items="[
+                { label: 'S3', value: 's3', icon: 'tabler:cloud' },
+                { label: 'Local', value: 'local', icon: 'tabler:device-sd-card' },
+                { label: 'OpenList', value: 'openlist', icon: 'tabler:server-2' },
+              ]"
+              value-key="value"
+              label-key="label"
+              class="w-full"
+            />
+          </UFormField>
+        </div>
       </template>
 
       <template #footer>
