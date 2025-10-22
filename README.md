@@ -318,6 +318,8 @@ Thanks to the following open-source projects and libraries:
 - [TailwindCSS](https://tailwindcss.com/)
 - [Drizzle ORM](https://orm.drizzle.team/)
 
-## ⭐️ Stargazers
+## 📈 Trend
 
 [![Stargazers over time](https://starchart.cc/HoshinoSuzumi/chronoframe.svg?variant=adaptive)](https://starchart.cc/HoshinoSuzumi/chronoframe)
+
+<a href="https://www.producthunt.com/products/chronoframe?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-chronoframe" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1029556&theme=neutral&t=1761159404569" alt="ChronoFrame - Self&#0045;hosted&#0032;photo&#0032;gallery&#0032;for&#0032;photographers&#0046; | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
