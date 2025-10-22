@@ -100,12 +100,10 @@ export default eventHandler(async (event) => {
   const normalizedDescription =
     payload.description !== undefined ? payload.description.trim() : undefined
   const normalizedTags = normalizeTags(payload.tags)
-  let pendingReverseGeocode:
-    | {
-        latitude: number
-        longitude: number
-      }
-    | null = null
+  let pendingReverseGeocode: {
+    latitude: number
+    longitude: number
+  } | null = null
 
   const exifUpdates: Record<string, any> = {}
 
@@ -168,8 +166,12 @@ export default eventHandler(async (event) => {
     }
 
     const updatedBuffer = await readFile(tempFile)
+    const prefix =
+      storageProvider.config && 'prefix' in storageProvider.config
+        ? storageProvider.config.prefix
+        : ''
     await storageProvider.create(
-      photo.storageKey.replace(storageProvider.config?.prefix || '', ''),
+      photo.storageKey.replace(prefix || '', ''),
       updatedBuffer,
     )
 
