@@ -73,6 +73,9 @@ NUXT_PROVIDER_S3_SECRET_ACCESS_KEY=minioadmin
 # === Map Services (optional) ===
 NUXT_PUBLIC_MAPBOX_ACCESS_TOKEN=pk.your-development-token
 NUXT_MAPBOX_ACCESS_TOKEN=sk.your-development-token
+
+# === Enable Debug Info ===
+VITE_SHOW_DEBUG_INFO=true
 ```
 
 ## Project Architecture
