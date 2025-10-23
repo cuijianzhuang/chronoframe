@@ -75,19 +75,23 @@
           "downloadImage": "オリジナルをダウンロード",
           "generateShareImage": "共有画像を生成",
           "shareUrl": "共有URL",
-          "downloadOgImage": "プレビューをダウンロード"
+          "downloadOgImage": "プレビューをダウンロード",
+          "downloadOriginal": "オリジナルをダウンロード",
+          "downloadOriginalImage": "オリジナル画像をダウンロード"
         },
         "success": {
           "linkCopied": "リンクをクリップボードにコピーしました",
           "imageCopied": "画像をクリップボードにコピーしました",
-          "ogImageDownloaded": "プレビュー画像のダウンロードが完了しました"
+          "ogImageDownloaded": "プレビュー画像のダウンロードが完了しました",
+          "originalImageDownloaded": "オリジナル画像のダウンロードが完了しました"
         },
         "error": {
           "copyNotSupported": "このブラウザではコピー機能がサポートされていません",
           "shareFailed": "共有に失敗しました",
           "nativeShareFailed": "ネイティブ共有に失敗しました",
           "linkCopyFailed": "リンクのコピーに失敗しました",
-          "ogImageDownloadFailed": "プレビュー画像のダウンロードに失敗しました"
+          "ogImageDownloadFailed": "プレビュー画像のダウンロードに失敗しました",
+          "originalImageDownloadFailed": "オリジナル画像のダウンロードに失敗しました"
         },
         "ogImage": {
           "title": "共有プレビュー",

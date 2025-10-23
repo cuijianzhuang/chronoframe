@@ -79,19 +79,23 @@
           "downloadImage": "下載原圖",
           "generateShareImage": "產生分享圖片",
           "shareUrl": "分享連結",
-          "downloadOgImage": "下載預覽圖"
+          "downloadOgImage": "下載預覽圖",
+          "downloadOriginal": "下載原圖",
+          "downloadOriginalImage": "下載原圖"
         },
         "success": {
           "linkCopied": "連結已複製到剪貼簿",
           "imageCopied": "圖片已複製到剪貼簿",
-          "ogImageDownloaded": "預覽圖下載成功"
+          "ogImageDownloaded": "預覽圖下載成功",
+          "originalImageDownloaded": "原圖下載成功"
         },
         "error": {
           "copyNotSupported": "目前瀏覽器不支援複製功能",
           "shareFailed": "分享失敗",
           "nativeShareFailed": "原生分享失敗",
           "linkCopyFailed": "連結複製失敗",
-          "ogImageDownloadFailed": "預覽圖下載失敗"
+          "ogImageDownloadFailed": "預覽圖下載失敗",
+          "originalImageDownloadFailed": "原圖下載失敗"
         },
         "ogImage": {
           "title": "分享預覽圖",
