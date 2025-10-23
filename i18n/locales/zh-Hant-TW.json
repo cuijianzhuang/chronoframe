@@ -481,6 +481,7 @@
       "selection": {
         "selected": "已選擇 {count} / {total} 列",
         "batchReprocess": "批量重新處理",
+        "batchDownload": "批量下載",
         "batchDelete": "批量刪除"
       },
       "slideover": {
@@ -531,6 +532,17 @@
         "batchSelectRequired": "請選擇至少一張照片進行此操作",
         "noStorageKey": "無法處理：缺少儲存資訊",
         "batchNoStorageKey": "{count} 張照片缺少儲存資訊，無法處理",
+        "batchNoUrl": "沒有可用下載連結的照片",
+        "batchPartialUrl": "僅有 {count} 張照片（共 {total} 張）具有可用的下載連結",
+        "downloadStarted": "開始下載",
+        "downloadingCount": "正在下載 {count} 張照片...",
+        "batchDownloadSuccess": "批量下載完成",
+        "batchDownloadFailed": "批量下載失敗",
+        "batchDownloadPartial": "批量下載已完成，部分失敗",
+        "downloadedCount": "已下載 {count} 張照片",
+        "downloadFailedCount": "下載失敗 {count} 張照片",
+        "downloadPartialCount": "已下載 {success} 張照片，{failed} 張失敗",
+        "warning": "警告",
         "error": "發生錯誤",
         "deleteFailed": "刪除照片失敗",
         "batchDeleteFailed": "批量刪除失敗",

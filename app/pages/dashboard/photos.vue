@@ -1663,6 +1663,122 @@ const handleBatchReprocess = async () => {
   }
 }
 
+// 批量下载照片
+const handleBatchDownload = async () => {
+  const selectedRowModel = table.value?.tableApi?.getFilteredSelectedRowModel()
+  const selectedPhotos =
+    selectedRowModel?.rows.map((row: any) => row.original) || []
+
+  if (selectedPhotos.length === 0) {
+    toast.add({
+      title: $t('dashboard.photos.messages.batchSelectRequired'),
+      description: '',
+      color: 'warning',
+    })
+    return
+  }
+
+  // 检查所有选中照片是否都有 originalUrl
+  const photosWithUrl = selectedPhotos.filter(
+    (photo: Photo) => photo.originalUrl,
+  )
+  if (photosWithUrl.length === 0) {
+    toast.add({
+      title: $t('dashboard.photos.messages.error'),
+      description: $t('dashboard.photos.messages.batchNoUrl'),
+      color: 'error',
+    })
+    return
+  }
+
+  if (photosWithUrl.length !== selectedPhotos.length) {
+    toast.add({
+      title: $t('dashboard.photos.messages.warning'),
+      description: $t('dashboard.photos.messages.batchPartialUrl', {
+        count: photosWithUrl.length,
+        total: selectedPhotos.length,
+      }),
+      color: 'warning',
+    })
+  }
+
+  const downloadToast = toast.add({
+    title: $t('dashboard.photos.messages.downloadStarted'),
+    description: $t('dashboard.photos.messages.downloadingCount', {
+      count: photosWithUrl.length,
+    }),
+    color: 'info',
+  })
+
+  let successCount = 0
+  let failureCount = 0
+
+  try {
+    for (const photo of photosWithUrl) {
+      try {
+        const response = await fetch(photo.originalUrl!)
+        if (!response.ok) {
+          failureCount++
+          continue
+        }
+
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        const extension = photo.originalUrl!.split('.').pop() || 'jpg'
+        link.download = `${photo.title || `photo-${photo.id}`}.${extension}`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+        successCount++
+
+        // 为了避免浏览器限制，每个下载之间加入短延迟
+        await new Promise((resolve) => setTimeout(resolve, 200))
+      } catch (error) {
+        console.error(`Failed to download photo ${photo.id}:`, error)
+        failureCount++
+      }
+    }
+
+    // 更新提示信息
+    if (successCount === photosWithUrl.length) {
+      toast.update(downloadToast.id, {
+        title: $t('dashboard.photos.messages.batchDownloadSuccess'),
+        description: $t('dashboard.photos.messages.downloadedCount', {
+          count: successCount,
+        }),
+        color: 'success',
+      })
+    } else if (failureCount === photosWithUrl.length) {
+      toast.update(downloadToast.id, {
+        title: $t('dashboard.photos.messages.batchDownloadFailed'),
+        description: $t('dashboard.photos.messages.downloadFailedCount', {
+          count: failureCount,
+        }),
+        color: 'error',
+      })
+    } else {
+      toast.update(downloadToast.id, {
+        title: $t('dashboard.photos.messages.batchDownloadPartial'),
+        description: $t('dashboard.photos.messages.downloadPartialCount', {
+          success: successCount,
+          failed: failureCount,
+        }),
+        color: 'warning',
+      })
+    }
+  } catch (error: any) {
+    console.error('批量下载出错:', error)
+    toast.update(downloadToast.id, {
+      title: $t('dashboard.photos.messages.error'),
+      description: error.message || $t('dashboard.photos.messages.error'),
+      color: 'error',
+    })
+  }
+}
+
 watch(isImagePreviewOpen, (open) => {
   if (!open) {
     previewingPhoto.value = null
@@ -2106,6 +2222,17 @@ onUnmounted(() => {
               @click="handleBatchReprocess"
             >
               <span>{{ $t('dashboard.photos.selection.batchReprocess') }}</span>
+            </UButton>
+
+            <UButton
+              variant="soft"
+              color="primary"
+              size="xs"
+              icon="tabler:download"
+              class="flex-1 sm:flex-none"
+              @click="handleBatchDownload"
+            >
+              <span>{{ $t('dashboard.photos.selection.batchDownload') }}</span>
             </UButton>
 
             <UButton

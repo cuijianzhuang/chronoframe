@@ -481,6 +481,7 @@
       "selection": {
         "selected": "{count} / {total}行選択済み",
         "batchReprocess": "一括再処理",
+        "batchDownload": "一括ダウンロード",
         "batchDelete": "一括削除"
       },
       "slideover": {
@@ -531,6 +532,17 @@
         "batchSelectRequired": "この操作を実行するには、少なくとも1枚の写真を選択してください",
         "noStorageKey": "処理できません：ストレージ情報がありません",
         "batchNoStorageKey": "{count}枚の写真のストレージ情報がなく、処理できません",
+        "batchNoUrl": "ダウンロードURLが利用可能な写真がありません",
+        "batchPartialUrl": "{count}枚の写真（合計{total}枚）のみダウンロードURLが利用可能です",
+        "downloadStarted": "ダウンロード開始",
+        "downloadingCount": "{count}枚の写真をダウンロード中...",
+        "batchDownloadSuccess": "一括ダウンロード完了",
+        "batchDownloadFailed": "一括ダウンロードに失敗しました",
+        "batchDownloadPartial": "一括ダウンロードが完了しましたが、一部失敗しました",
+        "downloadedCount": "{count}枚の写真をダウンロードしました",
+        "downloadFailedCount": "{count}枚の写真のダウンロードに失敗しました",
+        "downloadPartialCount": "{success}枚の写真をダウンロードしました。{failed}枚失敗しました",
+        "warning": "警告",
         "error": "エラーが発生しました",
         "deleteFailed": "写真の削除に失敗しました",
         "batchDeleteFailed": "一括削除に失敗しました",

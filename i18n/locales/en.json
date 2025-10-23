@@ -538,6 +538,7 @@
       "selection": {
         "selected": "{count} / {total} rows selected",
         "batchReprocess": "Reprocess",
+        "batchDownload": "Download",
         "batchDelete": "Batch Delete"
       },
       "slideover": {
@@ -588,6 +589,17 @@
         "batchSelectRequired": "Please select at least one photo for this operation",
         "noStorageKey": "Unable to process: missing storage information",
         "batchNoStorageKey": "{count} photos are missing storage information and cannot be processed",
+        "batchNoUrl": "No photos with download URLs available",
+        "batchPartialUrl": "Only {count} out of {total} photos have download URLs available",
+        "downloadStarted": "Download started",
+        "downloadingCount": "Downloading {count} photo(s)...",
+        "batchDownloadSuccess": "Batch download completed successfully",
+        "batchDownloadFailed": "Batch download failed",
+        "batchDownloadPartial": "Batch download completed with some failures",
+        "downloadedCount": "Downloaded {count} photo(s)",
+        "downloadFailedCount": "Failed to download {count} photo(s)",
+        "downloadPartialCount": "Downloaded {success} photo(s), {failed} failed",
+        "warning": "Warning",
         "error": "An error occurred",
         "deleteFailed": "Failed to delete photo",
         "batchDeleteFailed": "Batch delete failed",
