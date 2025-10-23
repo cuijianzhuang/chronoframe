@@ -11,6 +11,7 @@ useHead({
 })
 
 const dayjs = useDayjs()
+const config = useRuntimeConfig()
 const { photos } = usePhotos()
 
 const { data: dashboardStats, refresh: refreshStats } =
@@ -123,6 +124,18 @@ const yearOptions = computed(() => {
 
   return options
 })
+
+const onShareSite = () => {
+  const discussionParams = new URLSearchParams({
+    category: 'showcases',
+    title: `Show: ${config.public.app.title}`,
+    body: `## Description / Motto\n\n${config.public.app.slogan}\n\n## URL\n\n[${window.location.origin}](${window.location.origin})`,
+  })
+  window.open(
+    `https://github.com/HoshinoSuzumi/chronoframe/discussions/new?${discussionParams}`,
+    '_blank',
+  )
+}
 </script>
 
 <template>
@@ -208,10 +221,14 @@ const yearOptions = computed(() => {
             :color="dashboardStats?.runningOn === 'docker' ? 'info' : 'success'"
             variant="soft"
           >
-            {{ $t(`dashboard.overview.section.runtimeInfo.systems.${dashboardStats?.runningOn || 'unknown'}`) }}
+            {{
+              $t(
+                `dashboard.overview.section.runtimeInfo.systems.${dashboardStats?.runningOn || 'unknown'}`,
+              )
+            }}
           </UBadge>
         </div>
-        <div>
+        <!-- <div>
           <p class="text-sm text-neutral-500 dark:text-neutral-400">
             {{ $t('dashboard.overview.section.runtimeInfo.lastUpdate') }}
           </p>
@@ -220,6 +237,23 @@ const yearOptions = computed(() => {
               {{ $dayjs().fromNow() }}
               <template #placeholder>--</template>
             </ClientOnly>
+          </p>
+        </div> -->
+        <div>
+          <p class="text-sm text-neutral-500 dark:text-neutral-400">
+            Share Your Site
+          </p>
+          <p class="text-lg font-bold">
+            <UButton
+              external
+              variant="subtle"
+              size="xs"
+              color="info"
+              trailing-icon="tabler:external-link"
+              @click="onShareSite"
+            >
+              分享你的站点
+            </UButton>
           </p>
         </div>
       </div>
