@@ -35,7 +35,8 @@
           "fileSizeAsc": "File Size (Ascending)",
           "fileSizeDesc": "File Size (Descending)",
           "titleAsc": "Title (Ascending)",
-          "titleDesc": "Title (Descending)"
+          "titleDesc": "Title (Descending)",
+          "shuffle": "Shuffle"
         }
       },
       "theme": {

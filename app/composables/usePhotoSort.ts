@@ -151,6 +151,28 @@ export function usePhotoSort() {
     return globalSortState.value.currentSort === 'dateTaken-desc'
   })
 
+  // 打乱照片顺序
+  const shufflePhotos = () => {
+    // 创建一个特殊的排序方式用于打乱
+    globalSortState.value.currentSort = 'shuffle'
+    
+    // 更新可用排序中的 shuffle 选项
+    const shuffleIndex = globalSortState.value.availableSorts.findIndex(
+      (sort) => sort.key === 'shuffle',
+    )
+    
+    if (shuffleIndex === -1) {
+      // 如果没有 shuffle 排序选项，则添加它
+      globalSortState.value.availableSorts.push({
+        key: 'shuffle',
+        labelI18n: 'ui.action.sort.options.shuffle',
+        icon: 'tabler:dice-3',
+        value: () => Math.random(),
+        order: 'asc',
+      })
+    }
+  }
+
   return {
     sortedPhotos,
     currentSortOption: readonly(currentSortOption),
@@ -161,5 +183,6 @@ export function usePhotoSort() {
     isDateSortDesc,
     setSortOption,
     toggleDateSortOrder,
+    shufflePhotos,
   }
 }

@@ -35,7 +35,8 @@
           "fileSizeAsc": "ファイルサイズ（昇順）",
           "fileSizeDesc": "ファイルサイズ（降順）",
           "titleAsc": "タイトル（昇順）",
-          "titleDesc": "タイトル（降順）"
+          "titleDesc": "タイトル（降順）",
+          "shuffle": "シャッフル"
         }
       },
       "theme": {

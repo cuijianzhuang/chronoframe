@@ -11,6 +11,8 @@ const {
   activeFilters,
 } = usePhotoFilters()
 
+const { shufflePhotos } = usePhotoSort()
+
 const currentTab = ref('labels')
 const isSearchMode = ref(false)
 
@@ -69,6 +71,10 @@ const tabItems = computed<TabsItem[]>(() => [
 const handleToggleFilter = (type: string, value: string | number) => {
   toggleFilter(type as any, value)
 }
+
+const onShuffle = () => {
+  shufflePhotos()
+}
 </script>
 
 <template>
@@ -84,16 +90,21 @@ const handleToggleFilter = (type: string, value: string | number) => {
           variant="ghost"
           color="neutral"
           icon="tabler:filter-x"
-          @click="() => {
-            clearAllFilters()
-            isSearchMode = false
-            searchQuery = ''
-          }"
+          @click="
+            () => {
+              clearAllFilters()
+              isSearchMode = false
+              searchQuery = ''
+            }
+          "
         >
           {{ $t('ui.action.filter.clearAll') }}
         </UButton>
         <!-- 搜索功能 -->
-        <div v-if="isSearchMode" class="flex items-center gap-1">
+        <div
+          v-if="isSearchMode"
+          class="flex items-center gap-1"
+        >
           <UInput
             v-model="searchQuery"
             size="sm"
@@ -107,7 +118,12 @@ const handleToggleFilter = (type: string, value: string | number) => {
             variant="ghost"
             color="neutral"
             icon="tabler:x"
-            @click="isSearchMode = false; searchQuery = ''"
+            @click="
+              () => {
+                isSearchMode = false
+                searchQuery = ''
+              }
+            "
           />
         </div>
         <UButton
@@ -118,6 +134,15 @@ const handleToggleFilter = (type: string, value: string | number) => {
           icon="tabler:search"
           @click="isSearchMode = true"
         />
+        <UTooltip text="打乱列表">
+          <UButton
+            size="sm"
+            variant="ghost"
+            color="neutral"
+            icon="tabler:dice-3"
+            @click="onShuffle"
+          />
+        </UTooltip>
       </div>
     </div>
     <!-- 标签页 -->

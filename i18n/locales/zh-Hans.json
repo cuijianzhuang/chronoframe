@@ -43,7 +43,8 @@
           "fileSizeAsc": "文件大小(升序)",
           "fileSizeDesc": "文件大小(降序)",
           "titleAsc": "标题(A-Z)",
-          "titleDesc": "标题(Z-A)"
+          "titleDesc": "标题(Z-A)",
+          "shuffle": "打乱顺序"
         },
         "title": "排序方式",
         "tooltip": "照片排序"
