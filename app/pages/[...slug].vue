@@ -9,8 +9,8 @@ const route = useRoute()
 const router = useRouter()
 const config = useRuntimeConfig()
 
-const { switchToIndex, closeViewer, openViewer, clearReturnRoute } = useViewerState()
-const { currentPhotoIndex, isViewerOpen, returnRoute } = storeToRefs(useViewerState())
+const { switchToIndex, closeViewer, openViewer } = useViewerState()
+const { isViewerOpen } = storeToRefs(useViewerState())
 
 const { photos } = usePhotos()
 
@@ -62,7 +62,8 @@ watch(
           title: currentPhotos[foundIndex]?.title || $t('title.fallback.photo'),
         })
         if (!isViewerOpen.value) {
-          openViewer(foundIndex)
+          // 直接访问照片详情页时，不设置 returnRoute（传入 null）
+          openViewer(foundIndex, null)
         } else {
           switchToIndex(foundIndex)
         }
@@ -76,39 +77,10 @@ watch(
   },
   { immediate: true },
 )
-
-const handleIndexChange = (newIndex: number) => {
-  switchToIndex(newIndex)
-  router.replace(`/${photos.value[newIndex]?.id}`)
-}
-
-const handleClose = () => {
-  closeViewer()
-  
-  if (returnRoute.value) {
-    const destination = returnRoute.value
-    clearReturnRoute()
-    router.replace(destination)
-  } else {
-    if (window.history.length > 1) {
-      router.back()
-    } else {
-      router.replace('/')
-    }
-  }
-}
 </script>
 
 <template>
-  <ClientOnly>
-    <PhotoViewer
-      :photos="photos"
-      :current-index="currentPhotoIndex"
-      :is-open="isViewerOpen"
-      @close="handleClose"
-      @index-change="handleIndexChange"
-    />
-  </ClientOnly>
+  <div />
 </template>
 
 <style scoped></style>
