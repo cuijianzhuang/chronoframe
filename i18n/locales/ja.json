@@ -474,10 +474,10 @@
       },
       "actions": {
         "reprocess": "再処理",
-        "viewLivePhoto": "ライブフォトプレビュー",
         "refreshLocation": "都市情報を再取得",
         "delete": "削除",
-        "editMetadata": "メタデータを編集"
+        "editMetadata": "メタデータを編集",
+        "previewPhoto": "プレビュー写真"
       },
       "selection": {
         "selected": "{count} / {total}行選択済み",

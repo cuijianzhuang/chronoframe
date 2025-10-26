@@ -474,10 +474,10 @@
       },
       "actions": {
         "reprocess": "重新處理",
-        "viewLivePhoto": "原況照片預覽",
         "refreshLocation": "重新取得城市",
         "delete": "刪除",
-        "editMetadata": "編輯資訊"
+        "editMetadata": "編輯資訊",
+        "previewPhoto": "照片預覽"
       },
       "selection": {
         "selected": "已選擇 {count} / {total} 列",

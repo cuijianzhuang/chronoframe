@@ -1251,37 +1251,6 @@ const handleEditSubmit = async (event: FormSubmitEvent<EditFormState>) => {
   await saveMetadataChanges()
 }
 
-// LivePhoto 相关操作
-const handleViewLivePhoto = async (photoId: string) => {
-  try {
-    const livePhotoInfo = await $fetch(`/api/photos/${photoId}/livephoto`)
-
-    if (livePhotoInfo.isLivePhoto && livePhotoInfo.livePhotoVideoUrl) {
-      // 设置模态框数据
-      selectedLivePhoto.value = {
-        id: livePhotoInfo.id,
-        title: livePhotoInfo.title,
-        originalUrl: livePhotoInfo.originalUrl || '',
-        videoUrl: livePhotoInfo.livePhotoVideoUrl,
-      }
-      isLivePhotoModalOpen.value = true
-    } else {
-      toast.add({
-        title: $t('dashboard.photos.messages.livePhotoNotFound'),
-        description: '',
-        color: 'warning',
-      })
-    }
-  } catch (error) {
-    console.error('获取 LivePhoto 信息失败:', error)
-    toast.add({
-      title: $t('dashboard.photos.messages.error'),
-      description: $t('dashboard.photos.messages.livePhotoLoadError'),
-      color: 'error',
-    })
-  }
-}
-
 const handleReverseGeocodeRequest = async (photo: Photo) => {
   if (!photo?.id) {
     return
@@ -1427,11 +1396,10 @@ const getRowActions = (photo: Photo) => {
         },
       },
       {
-        label: $t('dashboard.photos.actions.viewLivePhoto'),
-        icon: 'tabler:live-photo',
-        disabled: !photo.isLivePhoto,
+        label: $t('dashboard.photos.actions.previewPhoto'),
+        icon: 'tabler:photo',
         onSelect() {
-          handleViewLivePhoto(photo.id)
+          openImagePreview(photo)
         },
       },
     ],
@@ -1445,15 +1413,6 @@ const getRowActions = (photo: Photo) => {
     ],
   ]
 }
-
-// LivePhoto Modal
-const isLivePhotoModalOpen = ref(false)
-const selectedLivePhoto = ref<{
-  id: string
-  title: string | null
-  originalUrl: string
-  videoUrl: string
-} | null>(null)
 
 // 图片预览弹窗
 const isImagePreviewOpen = ref(false)
@@ -1808,10 +1767,10 @@ onUnmounted(() => {
 
     <!-- 文件上传入口 -->
     <div
-      class="relative overflow-hidden rounded-3xl border border-neutral-200/80 bg-gradient-to-br from-white via-white to-neutral-50 shadow-sm transition dark:border-neutral-800/70 dark:from-neutral-900 dark:via-neutral-900/80 dark:to-neutral-900"
+      class="relative overflow-hidden rounded-3xl border border-neutral-200/80 bg-linear-to-br from-white via-white to-neutral-50 shadow-sm transition dark:border-neutral-800/70 dark:from-neutral-900 dark:via-neutral-900/80 dark:to-neutral-900"
     >
       <div
-        class="pointer-events-none absolute -left-32 top-[-6rem] h-[18rem] w-[18rem] rounded-full bg-primary-400/20 blur-3xl dark:bg-primary-500/20"
+        class="pointer-events-none absolute -left-32 -top-24 h-72 w-[18rem] rounded-full bg-primary-400/20 blur-3xl dark:bg-primary-500/20"
       />
       <div class="relative flex flex-col gap-6 p-5 sm:p-8">
         <div
@@ -2123,20 +2082,29 @@ onUnmounted(() => {
 
         <!-- 列可见性按钮 -->
         <UDropdownMenu
-          :items="table?.tableApi?.getAllColumns()
-            .filter((column: any) => column.getCanHide())
-            .map((column: any) => ({
-              label: columnNameMap[column.id] || column.id,
-              type: 'checkbox' as const,
-              checked: column.getIsVisible(),
-              disabled: !column.getCanHide() || (column.id === 'thumbnailUrl' || column.id === 'id' || column.id === 'actions'),
-              onUpdateChecked(checked: boolean) {
-                table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
-              },
-              onSelect(e: Event) {
-                e.preventDefault()
-              }
-            }))"
+          :items="
+            table?.tableApi
+              ?.getAllColumns()
+              .filter((column: any) => column.getCanHide())
+              .map((column: any) => ({
+                label: columnNameMap[column.id] || column.id,
+                type: 'checkbox' as const,
+                checked: column.getIsVisible(),
+                disabled:
+                  !column.getCanHide() ||
+                  column.id === 'thumbnailUrl' ||
+                  column.id === 'id' ||
+                  column.id === 'actions',
+                onUpdateChecked(checked: boolean) {
+                  table?.tableApi
+                    ?.getColumn(column.id)
+                    ?.toggleVisibility(!!checked)
+                },
+                onSelect(e: Event) {
+                  e.preventDefault()
+                },
+              }))
+          "
           :content="{ align: 'end' }"
         >
           <UButton
@@ -2147,7 +2115,9 @@ onUnmounted(() => {
             icon="tabler:columns-3"
             :title="$t('dashboard.photos.table.columnVisibility.description')"
           >
-            <span class="hidden sm:inline">{{ $t('dashboard.photos.table.columnVisibility.button') }}</span>
+            <span class="hidden sm:inline">{{
+              $t('dashboard.photos.table.columnVisibility.button')
+            }}</span>
           </UButton>
         </UDropdownMenu>
       </div>
@@ -2170,8 +2140,7 @@ onUnmounted(() => {
         sticky
         class="h-[calc(100vh-25rem)] sm:h-[calc(100vh-24.5rem)]"
         :ui="{
-          separator:
-            'bg-(--ui-color-neutral-200) dark:bg-(--ui-color-neutral-700)',
+          separator: 'bg-neutral-200 dark:bg-neutral-700',
         }"
       >
         <template #actions-cell="{ row }">
@@ -2461,104 +2430,6 @@ onUnmounted(() => {
             >
               {{ $t('dashboard.photos.delete.buttons.confirm') }}
             </UButton>
-          </div>
-        </div>
-      </template>
-    </UModal>
-
-    <!-- LivePhoto 预览模态框 -->
-    <UModal v-model:open="isLivePhotoModalOpen">
-      <template #content>
-        <div class="p-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold">
-              {{
-                $t('dashboard.photos.livePhotoModal.title', {
-                  title: selectedLivePhoto?.title || 'Untitled',
-                })
-              }}
-            </h3>
-            <UButton
-              variant="ghost"
-              color="neutral"
-              size="sm"
-              icon="tabler:x"
-              @click="isLivePhotoModalOpen = false"
-            />
-          </div>
-
-          <div
-            v-if="selectedLivePhoto"
-            class="space-y-4"
-          >
-            <!-- 静态图片预览 -->
-            <div class="space-y-2">
-              <h4 class="font-medium text-sm text-gray-600 dark:text-gray-400">
-                {{ $t('dashboard.photos.livePhotoModal.staticImage') }}
-              </h4>
-              <div
-                class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 flex justify-center"
-              >
-                <img
-                  :src="selectedLivePhoto.originalUrl"
-                  :alt="selectedLivePhoto.title || 'Live Photo'"
-                  class="max-h-64 object-contain rounded"
-                />
-              </div>
-            </div>
-
-            <!-- 视频预览 -->
-            <div class="space-y-2">
-              <h4 class="font-medium text-sm text-gray-600 dark:text-gray-400">
-                {{ $t('dashboard.photos.livePhotoModal.livePhotoVideo') }}
-              </h4>
-              <div
-                class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 flex justify-center"
-              >
-                <video
-                  :src="selectedLivePhoto.videoUrl"
-                  controls
-                  autoplay
-                  loop
-                  muted
-                  class="max-h-64 object-contain rounded"
-                >
-                  {{ $t('dashboard.photos.livePhotoModal.notSupported') }}
-                </video>
-              </div>
-            </div>
-
-            <!-- 操作按钮 -->
-            <div class="flex justify-end gap-2 pt-4 border-t">
-              <UButton
-                variant="ghost"
-                color="neutral"
-                icon="tabler:external-link"
-                @click="
-                  () => {
-                    if (selectedLivePhoto)
-                      openInNewTab(selectedLivePhoto.videoUrl)
-                  }
-                "
-              >
-                {{ $t('dashboard.photos.livePhotoModal.buttons.openVideo') }}
-              </UButton>
-              <UButton
-                variant="soft"
-                color="info"
-                icon="tabler:download"
-                @click="
-                  () => {
-                    if (selectedLivePhoto)
-                      openInNewTab(selectedLivePhoto.videoUrl)
-                  }
-                "
-              >
-                {{
-                  $t('dashboard.photos.livePhotoModal.buttons.downloadVideo')
-                }}
-              </UButton>
-            </div>
           </div>
         </div>
       </template>

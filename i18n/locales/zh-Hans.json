@@ -119,7 +119,7 @@
       "totalPhotosWithRange": "{range}, 共 @:plural.photo",
       "noPhotosTip": "还没有照片，快去上传一些吧！"
     },
-    "indexPanelCountCity":"等 {count} 个城市",
+    "indexPanelCountCity": "等 {count} 个城市",
     "album": {
       "noImage": "空相簿",
       "emptyAlbumTip": "添加照片开始吧",
@@ -161,22 +161,22 @@
       "add": "表态",
       "change": "已表态",
       "count": "无表态 | {count} 个表态 | {count} 个表态",
-      "like":"点赞",
-      "love":"爱心",
-      "amazing":"花痴",
-      "funny":"笑哭了",
-      "wow":"吃惊",
-      "sad":"哭",
-      "fire":"火焰",
-      "sparkle":"星星"
+      "like": "点赞",
+      "love": "爱心",
+      "amazing": "花痴",
+      "funny": "笑哭了",
+      "wow": "吃惊",
+      "sad": "哭",
+      "fire": "火焰",
+      "sparkle": "星星"
     },
     "photoload": {
-      "loadError":"图片加载失败",
-      "loading":"正在加载图片",
-      "converting":"正在转换中...",
-      "loadingWebGL":"正在加载 WebGL...",
-      "loadingHEIC":"HEIC 图片加载中...",
-      "loadingTexture":"正在构建纹理"
+      "loadError": "图片加载失败",
+      "loading": "正在加载图片",
+      "converting": "正在转换中...",
+      "loadingWebGL": "正在加载 WebGL...",
+      "loadingHEIC": "HEIC 图片加载中...",
+      "loadingTexture": "正在构建纹理"
     }
   },
   "exif": {
@@ -531,10 +531,10 @@
       },
       "actions": {
         "reprocess": "重新处理",
-        "viewLivePhoto": "实况预览",
         "refreshLocation": "重新获取城市",
         "delete": "删除",
-        "editMetadata": "编辑信息"
+        "editMetadata": "编辑信息",
+        "previewPhoto": "预览照片"
       },
       "selection": {
         "selected": "{count} / {total} 行已选择",
