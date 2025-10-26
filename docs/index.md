@@ -53,6 +53,7 @@ Here are some well-running ChronoFrame instances built by developers and communi
 
 - **GitHub Issues**: [Report Issues](https://github.com/HoshinoSuzumi/chronoframe/issues)
 - **GitHub Discussions**: [Discussions](https://github.com/HoshinoSuzumi/chronoframe/discussions)
+- **Discord**: [Join Us](https://discord.gg/mDZjCwdQGk)
 
 ## 📄 License
 
