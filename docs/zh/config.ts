@@ -26,6 +26,7 @@ export default defineConfig({
         items: [
           { text: '存储提供器', link: '/zh/configuration/storage-providers' },
           { text: '地图提供器', link: '/zh/configuration/map-providers' },
+          { text: '位置提供器', link: '/zh/configuration/location-providers' },
         ],
       },
       {
