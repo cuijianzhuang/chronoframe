@@ -2,7 +2,7 @@ name: Announce GitHub Releases
 
 on:
   release:
-    types: [published, created]
+    types: [published]
 
 jobs:
   announce-to-discord:

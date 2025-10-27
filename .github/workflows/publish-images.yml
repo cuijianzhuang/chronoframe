@@ -270,3 +270,4 @@ jobs:
           name: Release v${{ env.VERSION }}
           body: ${{ needs.prepare.outputs.changelog }}
           prerelease: ${{ env.IS_PRERELEASE == 'true' }}
+          draft: true
