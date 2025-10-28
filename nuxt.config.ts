@@ -77,7 +77,7 @@ export default defineNuxtConfig({
       s3: {
         endpoint: '',
         bucket: '',
-        region: '',
+        region: 'auto',
         accessKeyId: '',
         secretAccessKey: '',
         prefix: '',
