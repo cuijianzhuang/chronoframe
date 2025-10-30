@@ -30,44 +30,23 @@ export class StorageProviderFactory {
 }
 
 export class StorageManager {
-  private providers: Map<string, StorageProvider>
-  private defaultKey: string
+  private provider: StorageProvider
 
   constructor(config: StorageConfig, logger?: Logger['storage']) {
-    this.providers = new Map()
-    this.defaultKey = config.provider
     logger?.info(`Creating storage provider: ${config.provider}`)
-    this.providers.set(
-      config.provider,
-      StorageProviderFactory.createProvider(config, logger),
-    )
+    this.provider = StorageProviderFactory.createProvider(config, logger)
   }
 
-  registerProvider(key: StorageConfig['provider'], config: StorageConfig, logger?: Logger['storage']) {
-    // key 用于请求时选择，通常与 config.provider 相同
-    this.providers.set(
-      key,
-      StorageProviderFactory.createProvider(config, logger),
-    )
+  registerProvider(config: StorageConfig, logger?: Logger['storage']) {
+    logger?.info(`Registering storage provider: ${config.provider}`)
+    this.provider = StorageProviderFactory.createProvider(config, logger)
   }
 
-  setDefault(key: string) {
-    if (!this.providers.has(key)) {
-      throw new Error(`Default storage provider '${key}' not registered`)
+  getProvider<T extends StorageProvider>() {
+    if (!this.provider) {
+      throw new Error(`Storage provider not registered`)
     }
-    this.defaultKey = key
-  }
 
-  getAvailableKeys(): string[] {
-    return Array.from(this.providers.keys())
-  }
-
-  getProvider<T extends StorageProvider>(key?: string) {
-    const k = key || this.defaultKey
-    const provider = this.providers.get(k)
-    if (!provider) {
-      throw new Error(`Storage provider '${k}' not registered`)
-    }
-    return provider as T
+    return this.provider as T
   }
 }

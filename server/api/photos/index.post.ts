@@ -45,9 +45,8 @@ export default eventHandler(async (event) => {
   const config = useRuntimeConfig(event)
   const t = await useTranslation(event)
 
-  // 先读取 body 以便后续根据 body.provider 选择存储提供器
   const body = await readBody(event)
-  const { fileName, contentType, skipDuplicateCheck, provider } = body as any
+  const { fileName, contentType, skipDuplicateCheck } = body
   const { storageProvider } = useStorageProvider(event)
   const isVideoUpload = fileName ? isVideoFile(fileName, contentType) : false
 
@@ -152,7 +151,7 @@ export default eventHandler(async (event) => {
     }
 
     // 否则回退到内部直传端点（需会话）
-    const internalUploadUrl = `/api/photos/upload?key=${encodeURIComponent(objectKey)}${provider ? `&provider=${encodeURIComponent(provider)}` : ''}`
+    const internalUploadUrl = `/api/photos/upload?key=${encodeURIComponent(objectKey)}`
     const response: any = {
       signedUrl: internalUploadUrl,
       fileKey: objectKey,

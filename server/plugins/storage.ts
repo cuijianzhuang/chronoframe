@@ -64,14 +64,6 @@ export default nitroPlugin(async (nitroApp) => {
     logger.storage,
   )
 
-  // 额外注册其余已配置的 provider，以便请求时可动态选择
-  ;(['s3', 'local', 'openlist'] as const).forEach((key) => {
-    if (key !== selectedProvider) {
-      storageManager.registerProvider(key, storageConfiguration[key], logger.storage)
-    }
-  })
-  storageManager.setDefault(selectedProvider)
-
   if (selectedProvider === 'openlist') {
     const openlistConfig = storageConfiguration.openlist as any
     if (!openlistConfig.baseUrl) {
