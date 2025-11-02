@@ -354,6 +354,9 @@ const onStorageDelete = async (storageId: number) => {
               name="storageConfigId"
               label="存储方案"
               required
+              :ui="{
+                container: 'w-full sm:max-w-sm *:w-full',
+              }"
             >
               <USelectMenu
                 v-model="storageSettingsState.storageConfigId"

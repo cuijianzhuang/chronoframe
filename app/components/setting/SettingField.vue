@@ -15,16 +15,16 @@ const emit = defineEmits<{
 
 const getComponentName = (uiType: FieldUIType): string => {
   const componentMap: Record<FieldUIType, string> = {
-    'input': 'UInput',
-    'password': 'UInput',
-    'url': 'UInput',
-    'textarea': 'UTextarea',
-    'select': 'USelectMenu',
-    'radio': 'URadioGroup',
-    'tabs': 'UTabs',
-    'toggle': 'UToggle',
-    'number': 'UInput',
-    'custom': 'UInput', // 默认降级到 input
+    input: 'UInput',
+    password: 'UInput',
+    url: 'UInput',
+    textarea: 'UTextarea',
+    select: 'USelectMenu',
+    radio: 'URadioGroup',
+    tabs: 'UTabs',
+    toggle: 'UToggle',
+    number: 'UInput',
+    custom: 'UInput', // 默认降级到 input
   }
 
   return componentMap[uiType] || 'UInput'
@@ -76,19 +76,25 @@ const getComponentProps = (): Record<string, any> => {
       propsMap.type = type
       break
     case 'select':
-      propsMap.items = props.field.ui.options ? Array.from(props.field.ui.options) : []
+      propsMap.items = props.field.ui.options
+        ? Array.from(props.field.ui.options)
+        : []
       propsMap['label-key'] = 'label'
       propsMap['value-key'] = 'value'
       break
     case 'radio':
-      propsMap.options = props.field.ui.options ? Array.from(props.field.ui.options) : []
+      propsMap.options = props.field.ui.options
+        ? Array.from(props.field.ui.options)
+        : []
       break
     case 'tabs':
-      propsMap.items = props.field.ui.options ? Array.from(props.field.ui.options).map((opt: any) => ({
-        label: $t(opt.label) || opt.label,
-        value: opt.value,
-        icon: opt.icon,
-      })) : []
+      propsMap.items = props.field.ui.options
+        ? Array.from(props.field.ui.options).map((opt: any) => ({
+            label: $t(opt.label) || opt.label,
+            value: opt.value,
+            icon: opt.icon,
+          }))
+        : []
       break
     case 'textarea':
       propsMap.rows = 3
@@ -129,6 +135,9 @@ const descriptionKey = computed(() => {
     :description="$t(descriptionKey)"
     :help="field.ui.help ? $t(field.ui.help) : undefined"
     :required="field.ui.required"
+    :ui="{
+      container: 'w-full sm:max-w-sm *:w-full',
+    }"
   >
     <!-- 动态渲染不同的组件 -->
     <component

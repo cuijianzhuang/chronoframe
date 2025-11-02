@@ -38,7 +38,6 @@ export default defineAppConfig({
     formField: {
       slots: {
         label: 'mb-1',
-        container: 'w-full sm:max-w-xs *:w-full',
         help: 'mt-0.5',
       },
     },
