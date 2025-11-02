@@ -360,7 +360,13 @@
     "queue": "队列管理",
     "logs": "系统日志",
     "albums": "相簿",
-    "siteAdministration": "站点设置"
+    "siteAdministration": "站点设置",
+    "generalSettings": "基本设置",
+    "appearanceSettings": "外观设置",
+    "storageSettings": "存储设置",
+    "systemSettings": "系统设置",
+    "mapAndLocation": "地图和位置",
+    "location": "位置服务"
   },
   "auth": {
     "form": {
@@ -859,6 +865,178 @@
         "all": "全部",
         "status": "按状态筛选",
         "type": "按类型筛选"
+      }
+    }
+  },
+  "settings": {
+    "app": {
+      "title": {
+        "label": "实例名称",
+        "description": "实例的标题"
+      },
+      "slogan": {
+        "label": "标语",
+        "description": "实例的标语",
+        "help": "标语显示在首页的标题下方"
+      },
+      "author": {
+        "label": "所有者",
+        "description": "实例的所有者名称"
+      },
+      "avatarUrl": {
+        "label": "头像 URL",
+        "description": "所有者头像的图片链接",
+        "help": "头像显示加载页面和首页头像中"
+      },
+      "appearance": {
+        "theme": {
+          "label": "主题",
+          "description": "选择应用主题",
+          "help": "用户可以在自己的浏览器中覆盖此项",
+          "light": "浅色",
+          "dark": "深色",
+          "system": "系统"
+        }
+      }
+    },
+    "map": {
+      "provider": {
+        "label": "地图服务商",
+        "description": "选择地图服务商提供者"
+      },
+      "mapbox": {
+        "token": {
+          "label": "Mapbox Token",
+          "description": "Mapbox API 访问令牌",
+          "help": "应当使用没有域名限制的令牌"
+        },
+        "style": {
+          "label": "Mapbox 样式",
+          "description": "Mapbox 地图样式 URL"
+        }
+      },
+      "maplibre": {
+        "token": {
+          "label": "MapTiler Token",
+          "description": "MapTiler API 访问令牌",
+          "help": "MapLibre 默认使用免费地图服务商 MapTiler"
+        },
+        "style": {
+          "label": "MapLibre 样式",
+          "description": "MapLibre 地图样式 URL"
+        }
+      }
+    },
+    "location": {
+      "mapbox": {
+        "token": {
+          "label": "Mapbox Token",
+          "description": "Mapbox API 访问令牌",
+          "help": "配置后将取代 Nominatim 作为位置信息服务"
+        }
+      },
+      "nominatim": {
+        "baseUrl": {
+          "label": "Nominatim 基础 URL",
+          "description": "Nominatim 反向地理编码 API 的基础 URL",
+          "help": "留空则默认使用公共 Nominatim 服务"
+        }
+      }
+    },
+    "storage": {
+      "s3": {
+        "bucket": {
+          "label": "存储桶名称",
+          "description": "用于存储照片的 S3 存储桶名称"
+        },
+        "region": {
+          "label": "区域",
+          "description": "S3 存储桶所在的 AWS 区域"
+        },
+        "endpoint": {
+          "label": "S3 端点",
+          "description": "自定义 S3 兼容端点 URL（例如 MinIO）"
+        },
+        "prefix": {
+          "label": "存储前缀",
+          "description": "存储桶中对象的前缀路径"
+        },
+        "cdnUrl": {
+          "label": "CDN URL",
+          "description": "用于访问图像的自定义 CDN URL"
+        },
+        "accessKeyId": {
+          "label": "访问密钥 ID",
+          "description": "AWS 访问密钥 ID 或等效项"
+        },
+        "secretAccessKey": {
+          "label": "秘密访问密钥",
+          "description": "AWS 秘密访问密钥或等效项"
+        },
+        "forcePathStyle": {
+          "label": "强制路径风格",
+          "description": "使用路径风格 URL 而不是虚拟主机风格"
+        },
+        "maxKeys": {
+          "label": "最大密钥数",
+          "description": "每个请求检索的最大密钥数"
+        }
+      },
+      "local": {
+        "basePath": {
+          "label": "存储基础路径",
+          "description": "用于存储照片的本地文件系统路径"
+        },
+        "baseUrl": {
+          "label": "基础 URL",
+          "description": "用于访问存储照片的公开 URL 基础"
+        },
+        "prefix": {
+          "label": "存储前缀",
+          "description": "用于在存储中组织照片的前缀路径"
+        }
+      },
+      "openlist": {
+        "baseUrl": {
+          "label": "OpenList 基础 URL",
+          "description": "OpenList 服务器的基础 URL"
+        },
+        "rootPath": {
+          "label": "根路径",
+          "description": "在 OpenList 中存储照片的根路径"
+        },
+        "token": {
+          "label": "身份验证令牌",
+          "description": "OpenList API 身份验证令牌"
+        },
+        "uploadEndpoint": {
+          "label": "上传端点",
+          "description": "用于上传文件的 API 端点（默认：/api/fs/put）"
+        },
+        "downloadEndpoint": {
+          "label": "下载端点",
+          "description": "用于下载文件的 API 端点（可选）"
+        },
+        "listEndpoint": {
+          "label": "列表端点",
+          "description": "用于列出文件的 API 端点（可选）"
+        },
+        "deleteEndpoint": {
+          "label": "删除端点",
+          "description": "用于删除文件的 API 端点（默认：/api/fs/remove）"
+        },
+        "metaEndpoint": {
+          "label": "元数据端点",
+          "description": "用于检索文件元数据的 API 端点（默认：/api/fs/get）"
+        },
+        "pathField": {
+          "label": "路径字段名称",
+          "description": "API 请求中文件路径的参数名称（默认：path）"
+        },
+        "cdnUrl": {
+          "label": "CDN URL",
+          "description": "用于访问图像的自定义 CDN URL"
+        }
       }
     }
   }

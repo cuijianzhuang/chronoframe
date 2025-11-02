@@ -1,9 +1,30 @@
-export { StorageProvider, StorageConfig, StorageObject } from './interfaces'
+export { StorageProvider, StorageObject } from './interfaces'
+
+export {
+  s3StorageConfigSchema,
+  localStorageConfigSchema,
+  openListStorageConfigSchema,
+  storageConfigSchema,
+} from '~~/shared/types/storage'
+
+export {
+  S3StorageConfig,
+  LocalStorageConfig,
+  OpenListStorageConfig,
+  StorageConfig,
+} from '~~/shared/types/storage'
 
 export { StorageProviderFactory, StorageManager } from './manager'
 
+export type { StorageManagerEventType, StorageManagerEventListener, StorageManagerEvent } from './manager'
+
 export { S3StorageProvider } from './providers/s3'
-export { HubR2StorageProvider } from './providers/hub-r2'
-export { GitHubStorageProvider } from './providers/github'
 export { LocalStorageProvider } from './providers/local'
 export { OpenListStorageProvider } from './providers/openlist'
+
+export {
+  setGlobalStorageManager,
+  getGlobalStorageManager,
+  isStorageManagerInitialized,
+} from './events'
+

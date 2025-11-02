@@ -359,7 +359,11 @@
     "queue": "キュー管理",
     "logs": "システムログ",
     "albums": "アルバム",
-    "siteAdministration": "サイト設定"
+    "siteAdministration": "サイト設定",
+    "generalSettings": "一般設定",
+    "appearanceSettings": "外観設定",
+    "mapAndLocation": "地図と場所",
+    "location": "位置情報サービス"
   },
   "auth": {
     "form": {
@@ -802,6 +806,178 @@
         "all": "すべて",
         "status": "ステータスでフィルター",
         "type": "タイプでフィルター"
+      }
+    }
+  },
+  "settings": {
+    "app": {
+      "title": {
+        "label": "インスタンス名",
+        "description": "インスタンスのタイトル"
+      },
+      "slogan": {
+        "label": "スローガン",
+        "description": "インスタンスのスローガン",
+        "help": "スローガンはホームページのタイトルの下に表示されます"
+      },
+      "author": {
+        "label": "オーナー",
+        "description": "インスタンスのオーナー名"
+      },
+      "avatarUrl": {
+        "label": "アバター URL",
+        "description": "オーナーのアバター画像へのリンク",
+        "help": "アバターはローディングページとホームページに表示されます"
+      },
+      "appearance": {
+        "theme": {
+          "label": "テーマ",
+          "description": "アプリケーションテーマを選択",
+          "help": "ユーザーは自分のブラウザでこれをオーバーライドできます",
+          "light": "ライト",
+          "dark": "ダーク",
+          "system": "システム"
+        }
+      }
+    },
+    "map": {
+      "provider": {
+        "label": "地図プロバイダー",
+        "description": "地図サービスプロバイダーを選択"
+      },
+      "mapbox": {
+        "token": {
+          "label": "Mapbox トークン",
+          "description": "Mapbox API アクセストークン",
+          "help": "ドメイン制限のないトークンを使用すべきです"
+        },
+        "style": {
+          "label": "Mapbox スタイル",
+          "description": "Mapbox 地図スタイル URL"
+        }
+      },
+      "maplibre": {
+        "token": {
+          "label": "MapTiler トークン",
+          "description": "MapTiler API アクセストークン",
+          "help": "MapLibre はデフォルトで無料の地図サービスプロバイダー MapTiler を使用します"
+        },
+        "style": {
+          "label": "MapLibre スタイル",
+          "description": "MapLibre 地図スタイル URL"
+        }
+      }
+    },
+    "location": {
+      "mapbox": {
+        "token": {
+          "label": "Mapbox トークン",
+          "description": "Mapbox API アクセストークン",
+          "help": "設定すると、位置情報サービスとして Nominatim に代わります"
+        }
+      },
+      "nominatim": {
+        "baseUrl": {
+          "label": "Nominatim ベース URL",
+          "description": "Nominatim リバースジオコーディング API のベース URL",
+          "help": "空のままにすると、デフォルトで公開 Nominatim サービスを使用します"
+        }
+      }
+    },
+    "storage": {
+      "s3": {
+        "bucket": {
+          "label": "バケット名",
+          "description": "S3 バケットの名前"
+        },
+        "region": {
+          "label": "リージョン",
+          "description": "S3 バケットが配置されている AWS リージョン"
+        },
+        "endpoint": {
+          "label": "エンドポイント",
+          "description": "S3 サービスのエンドポイント URL"
+        },
+        "prefix": {
+          "label": "プレフィックス",
+          "description": "S3 内の全ファイルのパスプレフィックス"
+        },
+        "cdnUrl": {
+          "label": "CDN URL",
+          "description": "ファイルにアクセスするための CDN アドレス"
+        },
+        "accessKeyId": {
+          "label": "アクセスキー ID",
+          "description": "AWS IAM アクセスキー ID"
+        },
+        "secretAccessKey": {
+          "label": "シークレットアクセスキー",
+          "description": "AWS IAM シークレットアクセスキー"
+        },
+        "forcePathStyle": {
+          "label": "パススタイルを強制",
+          "description": "仮想ホストスタイルではなく、パススタイル URL を使用"
+        },
+        "maxKeys": {
+          "label": "最大キー数",
+          "description": "S3 リスト操作ごとに返される最大オブジェクト数"
+        }
+      },
+      "local": {
+        "basePath": {
+          "label": "基本パス",
+          "description": "ローカルファイルシステムでファイルを保存するベースディレクトリパス"
+        },
+        "baseUrl": {
+          "label": "ベース URL",
+          "description": "ローカルストレージファイルにアクセスするためのベース URL"
+        },
+        "prefix": {
+          "label": "プレフィックス",
+          "description": "ローカルストレージ内の全ファイルのパスプレフィックス"
+        }
+      },
+      "openlist": {
+        "baseUrl": {
+          "label": "OpenList ベース URL",
+          "description": "OpenList サーバーのベース URL"
+        },
+        "rootPath": {
+          "label": "ルートパス",
+          "description": "OpenList で写真を保存するルートパス"
+        },
+        "token": {
+          "label": "認証トークン",
+          "description": "OpenList API の認証トークン"
+        },
+        "uploadEndpoint": {
+          "label": "アップロードエンドポイント",
+          "description": "ファイルをアップロードするための API エンドポイント（デフォルト：/api/fs/put）"
+        },
+        "downloadEndpoint": {
+          "label": "ダウンロードエンドポイント",
+          "description": "ファイルをダウンロードするための API エンドポイント（オプション）"
+        },
+        "listEndpoint": {
+          "label": "リストエンドポイント",
+          "description": "ファイルをリストアップするための API エンドポイント（オプション）"
+        },
+        "deleteEndpoint": {
+          "label": "削除エンドポイント",
+          "description": "ファイルを削除するための API エンドポイント（デフォルト：/api/fs/remove）"
+        },
+        "metaEndpoint": {
+          "label": "メタデータエンドポイント",
+          "description": "ファイルメタデータを取得するための API エンドポイント（デフォルト：/api/fs/get）"
+        },
+        "pathField": {
+          "label": "パスフィールド名",
+          "description": "API リクエストのファイルパスパラメータ名（デフォルト：path）"
+        },
+        "cdnUrl": {
+          "label": "CDN URL",
+          "description": "画像にアクセスするためのカスタム CDN URL"
+        }
       }
     }
   }

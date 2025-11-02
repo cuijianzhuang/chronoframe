@@ -1,7 +1,11 @@
 <script lang="ts" setup>
 import type { NavigationMenuItem } from '@nuxt/ui'
 
-const navItems = ref<NavigationMenuItem[][]>([
+const route = useRoute()
+const router = useRouter()
+const { loggedIn, user } = useUserSession()
+
+const navItems = computed<NavigationMenuItem[][]>(() => [
   [
     {
       label: $t('title.dashboard'),
@@ -31,8 +35,30 @@ const navItems = ref<NavigationMenuItem[][]>([
     {
       label: $t('title.siteAdministration'),
       icon: 'tabler:settings',
-      to: '/dashboard/site-administration',
-      disabled: true,
+      defaultOpen: route.path.startsWith('/dashboard/settings'),
+      children: [
+        {
+          label: $t('title.generalSettings'),
+          icon: 'tabler:settings-2',
+          to: '/dashboard/settings/general',
+        },
+        {
+          label: $t('title.storageSettings'),
+          icon: 'tabler:database',
+          to: '/dashboard/settings/storage',
+        },
+        {
+          label: $t('title.mapAndLocation'),
+          icon: 'tabler:map-pin',
+          to: '/dashboard/settings/map',
+        },
+        {
+          label: $t('title.systemSettings'),
+          icon: 'tabler:cpu',
+          to: '/dashboard/settings/system',
+          disabled: true,
+        },
+      ],
     },
   ],
   [
@@ -57,15 +83,10 @@ const navItems = ref<NavigationMenuItem[][]>([
   ],
 ])
 
-const route = useRoute()
-const router = useRouter()
-const config = useRuntimeConfig()
-const { loggedIn, user } = useUserSession()
-
 useHead({
   title: $t('title.dashboard'),
   titleTemplate: (title) =>
-    `${title ? title + ' | ' : ''}${config.public.app.title}`,
+    `${title ? title + ' | ' : ''}${getSetting('app:title')}`,
 })
 
 const handleLogin = () => {
@@ -128,7 +149,7 @@ const handleLogin = () => {
               to="/"
               class="text-lg font-medium line-clamp-1"
             >
-              {{ config.public.app.title || $t('title.dashboard') }}
+              {{ getSetting('app:title') || $t('title.dashboard') }}
             </NuxtLink>
           </div>
         </div>

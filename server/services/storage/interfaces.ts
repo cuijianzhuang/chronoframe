@@ -1,72 +1,11 @@
+import type { StorageConfig } from '.'
+
 export interface StorageObject {
   key: string
   size?: number
   etag?: string
   lastModified?: Date
 }
-
-export type S3StorageConfig = {
-  provider: 's3'
-  bucket?: string
-  region?: string
-  endpoint?: string
-  prefix?: string
-  cdnUrl?: string
-  accessKeyId?: string
-  secretAccessKey?: string
-  forcePathStyle?: boolean
-  maxKeys?: number
-}
-
-export type HubR2StorageConfig = {
-  provider: 'hub-r2'
-  prefix?: string
-  maxKeys?: number
-  cdnUrl?: string
-}
-
-export type GitHubStorageConfig = {
-  provider: 'github'
-  owner?: string
-  repository?: string
-  branch?: string
-  path?: string
-  prefix?: string
-  token?: string
-}
-
-export type LocalStorageConfig = {
-  provider: 'local'
-  /** Absolute directory where files are stored */
-  basePath: string
-  /** Public base URL to serve files, e.g. /storage or https://domain.com/storage */
-  baseUrl?: string
-  /** Optional prefix for logical keys within basePath */
-  prefix?: string
-}
-
-export type OpenListStorageConfig = {
-  provider: 'openlist'
-  baseUrl: string
-  rootPath: string
-  token: string
-  endpoints: {
-    upload: string
-    download: string
-    list: string
-    delete: string
-    meta: string
-  }
-  pathField?: string
-  cdnUrl?: string
-}
-
-export type StorageConfig =
-  | S3StorageConfig
-  | HubR2StorageConfig
-  | GitHubStorageConfig
-  | LocalStorageConfig
-  | OpenListStorageConfig
 
 export interface UploadOptions {
   contentType?: string
