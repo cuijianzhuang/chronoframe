@@ -54,6 +54,7 @@ export interface FieldUIConfig {
     label: string
     value: SettingValue
     icon?: string
+    description?: string
   }>
 
   // 验证规则（前端 UX 提示）
