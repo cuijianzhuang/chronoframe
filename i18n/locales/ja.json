@@ -885,6 +885,28 @@
       }
     },
     "storage": {
+      "name": {
+        "label": "設定名",
+        "description": "ストレージプロバイダー設定の名前"
+      },
+      "provider": {
+        "label": "ストレージプロバイダー",
+        "description": "ストレージサービスプロバイダーを選択",
+        "options": {
+          "local": {
+            "label": "ローカルストレージ",
+            "description": "写真をサーバーのファイルシステムに直接保存します。"
+          },
+          "s3": {
+            "label": "S3 互換",
+            "description": "AWS S3、Cloudflare R2、またはその他の S3 互換サービスを使用します。"
+          },
+          "openlist": {
+            "label": "OpenList",
+            "description": "Alist または OpenList インスタンスに接続して保存します。"
+          }
+        }
+      },
       "s3": {
         "bucket": {
           "label": "バケット名",
@@ -977,6 +999,26 @@
         "cdnUrl": {
           "label": "CDN URL",
           "description": "画像にアクセスするためのカスタム CDN URL"
+        }
+      }
+    }
+  },
+  "wizard": {
+    "admin": {
+      "username": { "label": "ユーザー名" },
+      "email": { "label": "メールアドレス" },
+      "password": { "label": "パスワード" },
+      "confirmPassword": { "label": "パスワード（確認）" }
+    },
+    "map": {
+      "provider": {
+        "mapbox": {
+          "label": "Mapbox",
+          "description": "豊富なスタイルオプションを備えた高性能マップ。"
+        },
+        "maplibre": {
+          "label": "MapLibre",
+          "description": "Mapbox GL JS のオープンソースフォーク。"
         }
       }
     }
