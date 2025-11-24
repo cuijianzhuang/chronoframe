@@ -5,8 +5,12 @@
 </p>
 
 <p align="center">
-  <img src="https://badgen.net/github/release/HoshinoSuzumi/chronoframe/stable?icon=docker&label=stable" alt="Latest Release">
-  <img src="https://badgen.net/github/release/HoshinoSuzumi/chronoframe?icon=docker&label=nightly" alt="Latest Nightly Release">
+  <a href="https://github.com/HoshinoSuzumi/chronoframe/releases/latest">
+    <img src="https://badgen.net/github/release/HoshinoSuzumi/chronoframe/stable?icon=docker&label=stable" alt="Latest Release">
+  </a>
+  <a href="https://github.com/HoshinoSuzumi/chronoframe/releases?q=beta&expanded=false">
+    <img src="https://badgen.net/github/release/HoshinoSuzumi/chronoframe?icon=docker&label=nightly" alt="Latest Nightly Release">
+  </a>
   <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
 </p>
 
