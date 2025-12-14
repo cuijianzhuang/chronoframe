@@ -139,7 +139,7 @@ services:
 Start:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## 📖 User Guide

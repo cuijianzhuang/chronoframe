@@ -137,7 +137,7 @@ services:
 启动：
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## 📖 使用指南
