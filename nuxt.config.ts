@@ -128,6 +128,7 @@ export default defineNuxtConfig({
         mode: 'skip' as 'warn' | 'block' | 'skip',
       },
     },
+    /** @deprecated Defaults to allow insecure cookies now */
     allowInsecureCookie: false,
   },
 

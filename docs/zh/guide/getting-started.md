@@ -245,12 +245,3 @@ openssl rand -base64 32
 [Convert]::ToBase64String((1..32|%{[byte](Get-Random -Max 256)}))
 ```
 :::
-
-:::details 登录后台认证成功后，跳转到首页且仍为未登录状态？
-首先请确保不是直接通过 IP 地址和端口号访问。出于安全考虑，请通过配置的域名访问。
-
-如果出于某些原因，您执意要通过 IP 端口访问，请在配置项中添加：
-```bash
-NUXT_ALLOW_INSECURE_COOKIE=true
-```
-:::

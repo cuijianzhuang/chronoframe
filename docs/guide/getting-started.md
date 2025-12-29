@@ -234,12 +234,3 @@ openssl rand -base64 32
 [Convert]::ToBase64String((1..32|%{[byte](Get-Random -Max 256)}))
 ```
 :::
-
-:::details Logged in successfully but redirected home still unauthenticated?
-Make sure you are not accessing the site via raw IP:port. For security, cookies are set for the domain.
-
-If you must use IP + port (not recommended), add:
-```bash
-NUXT_ALLOW_INSECURE_COOKIE=true
-```
-:::
