@@ -1,6 +1,6 @@
 {
   "extends": [
-"config:recommended"
+    "config:recommended"
   ],
   "schedule": [
     "before 5am on monday"
