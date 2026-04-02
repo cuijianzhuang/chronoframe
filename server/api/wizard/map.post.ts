@@ -12,13 +12,14 @@ export default eventHandler(async (event) => {
   )
 
   await settingsManager.set('map', 'provider', body.provider)
-  
+
   if (body.provider === 'mapbox') {
     await settingsManager.set('map', 'mapbox.token', body.token)
     if (body.style) await settingsManager.set('map', 'mapbox.style', body.style)
   } else {
     await settingsManager.set('map', 'maplibre.token', body.token)
-    if (body.style) await settingsManager.set('map', 'maplibre.style', body.style)
+    if (body.style)
+      await settingsManager.set('map', 'maplibre.style', body.style)
   }
 
   return { success: true }

@@ -21,7 +21,10 @@ defineProps<{
         <h1 class="text-3xl font-bold tracking-tight text-white">
           {{ title }}
         </h1>
-        <p v-if="description" class="text-lg text-neutral-400">
+        <p
+          v-if="description"
+          class="text-lg text-neutral-400"
+        >
           {{ description }}
         </p>
       </div>
@@ -35,7 +38,10 @@ defineProps<{
     </div>
 
     <!-- Footer -->
-    <div v-if="$slots.actions" class="shrink-0 px-6 lg:px-12 py-6 border-t border-white/10">
+    <div
+      v-if="$slots.actions"
+      class="shrink-0 px-6 lg:px-12 py-6 border-t border-white/10"
+    >
       <div class="max-w-2xl mx-auto flex items-center justify-end gap-4">
         <slot name="actions" />
       </div>

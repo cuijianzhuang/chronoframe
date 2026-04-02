@@ -1,4 +1,7 @@
-import type { FieldDescriptor, SettingsFieldsResponse } from '~~/shared/types/settings'
+import type {
+  FieldDescriptor,
+  SettingsFieldsResponse,
+} from '~~/shared/types/settings'
 
 /**
  * Settings Form Composable

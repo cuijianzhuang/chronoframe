@@ -4,7 +4,9 @@ import { useLocalStorage } from '@vueuse/core'
 export const useWizardStore = defineStore('wizard', () => {
   const admin = ref(useLocalStorage<Record<string, any>>('wizard-admin', {}))
   const site = ref(useLocalStorage<Record<string, any>>('wizard-site', {}))
-  const storage = ref(useLocalStorage<Record<string, any>>('wizard-storage', {}))
+  const storage = ref(
+    useLocalStorage<Record<string, any>>('wizard-storage', {}),
+  )
   const map = ref(useLocalStorage<Record<string, any>>('wizard-map', {}))
 
   const updateAdmin = (data: Record<string, any>) => {

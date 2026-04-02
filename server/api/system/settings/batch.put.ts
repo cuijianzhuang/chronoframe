@@ -34,17 +34,15 @@ export default eventHandler(async (event) => {
 
   const body = await readValidatedBody(
     event,
-    z
-      .object({
-        updates: z.array(
-          z.object({
-            namespace: z.enum([...settingNamespaces]),
-            key: z.enum([...settingKeys]),
-            value: z.any(),
-          }),
-        ),
-      })
-      .parse,
+    z.object({
+      updates: z.array(
+        z.object({
+          namespace: z.enum([...settingNamespaces]),
+          key: z.enum([...settingKeys]),
+          value: z.any(),
+        }),
+      ),
+    }).parse,
   )
 
   try {

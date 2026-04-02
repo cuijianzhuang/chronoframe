@@ -20,31 +20,35 @@ export default eventHandler(async (event) => {
     // Or throw error.
     // Let's throw error for now to be safe, or maybe just allow updating the first user if it matches.
     if (existingUser.email === email) {
-       // Update existing
-       await db.update(tables.users)
-         .set({
-           password: await hashPassword(password),
-           username,
-           isAdmin: 1
-         })
-         .where(eq(tables.users.id, existingUser.id))
-         .run()
-       return { success: true }
+      // Update existing
+      await db
+        .update(tables.users)
+        .set({
+          password: await hashPassword(password),
+          username,
+          isAdmin: 1,
+        })
+        .where(eq(tables.users.id, existingUser.id))
+        .run()
+      return { success: true }
     }
-    
+
     throw createError({
       statusCode: 400,
       message: 'User already exists',
     })
   }
 
-  await db.insert(tables.users).values({
-    email,
-    username,
-    password: await hashPassword(password),
-    isAdmin: 1,
-    createdAt: new Date(),
-  }).run()
+  await db
+    .insert(tables.users)
+    .values({
+      email,
+      username,
+      password: await hashPassword(password),
+      isAdmin: 1,
+      createdAt: new Date(),
+    })
+    .run()
 
   return { success: true }
 })

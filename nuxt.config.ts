@@ -45,12 +45,12 @@ export default defineNuxtConfig({
       map: {
         provider: 'maplibre' as 'mapbox' | 'maplibre',
         mapbox: {
-          style: ''
+          style: '',
         },
         maplibre: {
           token: '',
           style: '',
-        }
+        },
       },
       analytics: {
         matomo: {
@@ -102,18 +102,18 @@ export default defineNuxtConfig({
         pathField: 'path',
         cdnUrl: '',
       } as {
-        baseUrl: string;
-        rootPath: string;
-        token: string;
+        baseUrl: string
+        rootPath: string
+        token: string
         endpoints: {
-          upload: string;
-          download: string;
-          list: string;
-          delete: string;
-          meta: string;
-        };
-        pathField: string;
-        cdnUrl: string;
+          upload: string
+          download: string
+          list: string
+          delete: string
+          meta: string
+        }
+        pathField: string
+        cdnUrl: string
       },
     },
     upload: {

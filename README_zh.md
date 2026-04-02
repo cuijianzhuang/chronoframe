@@ -99,11 +99,13 @@ NUXT_SESSION_PASSWORD=
 我们推荐使用预构建的 Docker 镜像进行部署，镜像托管在 GHCR 和 Docker Hub，您可以根据网络情况选择合适的源。
 
 #### [GitHub Container Registry (GHCR)](https://github.com/HoshinoSuzumi/chronoframe/pkgs/container/chronoframe)
+
 ```bash
 docker pull ghcr.io/hoshinosuzumi/chronoframe:latest
 ```
 
 #### [Docker Hub](https://hub.docker.com/r/hoshinosuzumi/chronoframe)
+
 ```bash
 docker pull hoshinosuzumi/chronoframe:latest
 ```

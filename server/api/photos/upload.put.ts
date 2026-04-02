@@ -19,18 +19,22 @@ export default eventHandler(async (event) => {
     })
   }
 
-  const contentType = getHeader(event, 'content-type') || 'application/octet-stream'
-  
+  const contentType =
+    getHeader(event, 'content-type') || 'application/octet-stream'
+
   // MIME 类型白名单验证（可通过环境变量配置）
   const config = useRuntimeConfig(event)
   const whitelistEnabled = config.upload.mime.whitelistEnabled
-  
+
   if (whitelistEnabled) {
     const whitelistStr = config.upload.mime.whitelist
     const allowedTypes = whitelistStr
-      ? whitelistStr.split(',').map((type: string) => type.trim()).filter(Boolean)
+      ? whitelistStr
+          .split(',')
+          .map((type: string) => type.trim())
+          .filter(Boolean)
       : []
-    
+
     if (allowedTypes.length > 0 && !allowedTypes.includes(contentType)) {
       throw createError({
         statusCode: 415,
@@ -38,12 +42,14 @@ export default eventHandler(async (event) => {
         data: {
           title: t('upload.error.invalidType.title'),
           message: t('upload.error.invalidType.message', { type: contentType }),
-          suggestion: t('upload.error.invalidType.suggestion', { allowed: allowedTypes.join(', ') }),
+          suggestion: t('upload.error.invalidType.suggestion', {
+            allowed: allowedTypes.join(', '),
+          }),
         },
       })
     }
   }
-  
+
   // 使用流式处理而不是一次性读取整个文件到内存
   const raw = await readRawBody(event, false)
   if (!raw || !(raw instanceof Buffer)) {
@@ -56,7 +62,7 @@ export default eventHandler(async (event) => {
       },
     })
   }
-  
+
   // 简单大小限制（例如 128MB）
   const maxBytes = 128 * 1024 * 1024
   if (raw.byteLength > maxBytes) {
@@ -88,4 +94,3 @@ export default eventHandler(async (event) => {
 
   return { ok: true, key }
 })
-
