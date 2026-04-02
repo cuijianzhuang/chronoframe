@@ -84,7 +84,7 @@ const sizeDelta = computed(() => {
                 class="h-full w-full object-cover opacity-50"
               />
               <div
-                class="absolute inset-0 bg-gradient-to-br from-blue/40 to-purple/60 dark:from-blue/60 dark:to-purple/80"
+                class="absolute inset-0 bg-linear-to-br from-blue/40 to-purple/60 dark:from-blue/60 dark:to-purple/80"
               />
             </div>
 
@@ -102,7 +102,7 @@ const sizeDelta = computed(() => {
               }"
             >
               <div
-                class="absolute inset-0 rounded-full bg-gradient-to-br from-white/10 to-white/5"
+                class="absolute inset-0 rounded-full bg-linear-to-br from-white/10 to-white/5"
               />
 
               <!-- Cluster count -->
