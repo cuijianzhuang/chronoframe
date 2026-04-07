@@ -29,6 +29,12 @@ export const APP_SETTINGS_UI: Record<string, FieldUIConfig> = {
     placeholder: 'https://example.com/avatar.jpg',
     help: 'settings.app.avatarUrl.help',
   },
+  'upload.maxFileSize': {
+    type: 'number',
+    help: 'settings.app.upload.maxFileSize.help',
+    min: 1,
+    max: 10240,
+  },
   'appearance.theme': {
     type: 'tabs',
     options: [
