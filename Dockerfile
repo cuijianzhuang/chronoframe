@@ -16,14 +16,21 @@ COPY --from=deps /usr/src/app/packages/webgl-image/node_modules ./packages/webgl
 COPY . .
 RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm run build:deps
 RUN NODE_OPTIONS="--max-old-space-size=8192" pnpm run build
+RUN find ./.output -type f -name '*.map' -delete
 
-FROM node:22.22.2-alpine AS runtime
-RUN apk update && apk add --no-cache perl exiftool
+FROM alpine:3.22 AS runtime_deps
+RUN apk add --no-cache nodejs libstdc++ ca-certificates
+
+FROM scratch AS runtime
 WORKDIR /app
 
+COPY --from=runtime_deps /usr/bin/node /usr/bin/node
+COPY --from=runtime_deps /usr/lib /usr/lib
+COPY --from=runtime_deps /usr/share /usr/share
+COPY --from=runtime_deps /lib /lib
+COPY --from=runtime_deps /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+
 COPY --from=build /usr/src/app/.output ./.output
-COPY --from=build /usr/src/app/packages/webgl-image/dist ./packages/webgl-image/dist
-COPY --from=build /usr/src/app/scripts ./scripts
 COPY --from=build /usr/src/app/server/database/migrations ./server/database/migrations
 
 EXPOSE 3000
@@ -32,6 +39,6 @@ VOLUME ["/app/data"]
 ENV NODE_ENV=production
 ENV NITRO_PORT=3000
 ENV NITRO_HOST=0.0.0.0
+ENV DATABASE_URL=./data/app.sqlite3
 
-# node scripts/migrate.mjs first
-CMD ["sh", "-c", "node scripts/migrate.mjs && node .output/server/index.mjs"]
+CMD ["/usr/bin/node", ".output/server/index.mjs"]
