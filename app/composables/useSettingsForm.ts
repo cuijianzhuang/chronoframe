@@ -81,6 +81,9 @@ export function useSettingsForm(namespace: string) {
         body: { updates },
       })
 
+      // 刷新全局设置状态，确保所有使用 getSetting() 的地方都能获取到最新值
+      await refreshSettings()
+
       // 重新加载字段以获取最新值
       await fetchFields()
 
