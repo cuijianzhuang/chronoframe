@@ -31,13 +31,15 @@ const { Layout } = DefaultTheme
   width: 100%;
   border-radius: 8px;
   overflow: hidden;
-  background: #f1f1f1;
+  /* background: #f1f1f1; */
+  background-color: transparent;
   aspect-ratio: 16/9;
   z-index: 0;
 }
 
 .ads-box.deep {
-  background: #eaeaec;
+  /* background: #eaeaec; */
+  background-color: transparent;
 }
 
 /* .ads-box::after {
