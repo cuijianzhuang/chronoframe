@@ -10,7 +10,7 @@
   "labels": [
     "dependencies"
   ],
-  "dependencyDashboard": true,
+  "dependencyDashboard": false,
   "rebaseWhen": "conflicted",
   "ignoreDeps": [],
   "vulnerabilityAlerts": {
