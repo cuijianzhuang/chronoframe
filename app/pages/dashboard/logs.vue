@@ -6,28 +6,44 @@ definePageMeta({
 interface LogEntry {
   date: string
   args: string[]
+  message: string
+  messageLower: string
   type: string
   level: number
   tag: string
-  timestamp: Date
+  tagLower: string
   raw: string
 }
 
 const logs = ref<LogEntry[]>([])
 const searchQuery = ref('')
 const selectedLevels = ref<string[]>([])
+const selectedTags = ref<string[]>([])
 const autoScroll = ref(true)
 const isConnected = ref(false)
 const connectionStatus = ref('')
 const logContainer = ref<HTMLElement>()
 const isInitialLoading = ref(false)
 const loadingProgress = ref(0)
+const normalizedSearchQuery = computed(() =>
+  searchQuery.value.trim().toLowerCase(),
+)
+const scrollTop = ref(0)
+const containerHeight = ref(0)
 
 // 批处理队列
 const batchQueue = ref<LogEntry[]>([])
 const isBatchProcessing = ref(false)
-const BATCH_SIZE = 10 // 每批处理的日志条数
-const BATCH_DELAY = 16 // 每批处理间隔（毫秒）
+const MAX_LOG_LINES = 6000
+const TRIM_TO_LOG_LINES = 4000
+const BATCH_SIZE = 100 // 每批处理的日志条数
+const BATCH_DELAY = 8 // 每批处理间隔（毫秒）
+const INITIAL_LOG_LINES = 'all'
+const ROW_HEIGHT = 28
+const VIRTUAL_OVERSCAN = 20
+const VIRTUAL_BOTTOM_PADDING = 16
+
+let resizeObserver: ResizeObserver | null = null
 
 const logLevels = ['error', 'warn', 'info', 'success', 'debug']
 
@@ -65,14 +81,16 @@ const processBatch = async () => {
     logs.value.push(...batch)
 
     // 限制日志条数，避免内存泄漏
-    if (logs.value.length > 10000) {
-      logs.value = logs.value.slice(-5000)
+    if (logs.value.length > MAX_LOG_LINES) {
+      logs.value = logs.value.slice(-TRIM_TO_LOG_LINES)
     }
 
     // 更新加载进度（只在初始加载时显示）
     if (isInitialLoading.value) {
-      const totalProcessed = logs.value.length
-      loadingProgress.value = Math.min(100, (totalProcessed / 512) * 100)
+      loadingProgress.value = Math.min(
+        95,
+        loadingProgress.value + batch.length * 0.05,
+      )
     }
 
     // 自动滚动到底部
@@ -95,25 +113,37 @@ const processBatch = async () => {
 const parseLogLine = (line: string): LogEntry | null => {
   try {
     const logData = JSON.parse(line)
+    const args = Array.isArray(logData.args)
+      ? logData.args.map((arg: unknown) =>
+          typeof arg === 'string' ? arg : JSON.stringify(arg),
+        )
+      : []
+    const message = args.join(' ')
+    const tag = String(logData.tag || '')
+
     return {
       date: logData.date,
-      args: logData.args || [],
+      args,
+      message,
+      messageLower: message.toLowerCase(),
       type: logData.type || 'info',
       level: logData.level || 3,
-      tag: logData.tag || '',
-      timestamp: new Date(logData.date),
+      tag,
+      tagLower: tag.toLowerCase(),
       raw: line,
     }
-  } catch (error) {
+  } catch {
     // 如果解析失败，创建一个fallback日志条目
-    console.warn('Failed to parse log line:', line, error)
+    const message = line
     return {
       date: new Date().toISOString(),
       args: [line],
+      message,
+      messageLower: message.toLowerCase(),
       type: 'info',
       level: 3,
       tag: 'fallback',
-      timestamp: new Date(),
+      tagLower: 'fallback',
       raw: line,
     }
   }
@@ -131,17 +161,61 @@ const filteredLogs = computed(() => {
     })
   }
 
+  // 按标签过滤
+  if (selectedTags.value.length > 0) {
+    const selected = new Set(selectedTags.value)
+    filtered = filtered.filter((log) => selected.has(log.tag))
+  }
+
   // 按搜索词过滤
-  if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase()
+  if (normalizedSearchQuery.value) {
+    const query = normalizedSearchQuery.value
     filtered = filtered.filter((log) => {
-      const content = log.args.join(' ').toLowerCase()
-      const tag = log.tag.toLowerCase()
-      return content.includes(query) || tag.includes(query)
+      return log.messageLower.includes(query) || log.tagLower.includes(query)
     })
   }
 
   return filtered
+})
+
+const availableTags = computed(() => {
+  const tags = new Set<string>()
+  for (const log of logs.value) {
+    if (log.tag) {
+      tags.add(log.tag)
+    }
+  }
+
+  return Array.from(tags)
+    .sort((a, b) => a.localeCompare(b))
+    .map((tag) => ({
+      label: tag,
+      value: tag,
+    }))
+})
+
+const totalVirtualHeight = computed(
+  () => filteredLogs.value.length * ROW_HEIGHT + VIRTUAL_BOTTOM_PADDING,
+)
+
+const virtualStart = computed(() => {
+  const start = Math.floor(scrollTop.value / ROW_HEIGHT) - VIRTUAL_OVERSCAN
+  return Math.max(0, start)
+})
+
+const virtualEnd = computed(() => {
+  const visibleCount =
+    Math.ceil(containerHeight.value / ROW_HEIGHT) + VIRTUAL_OVERSCAN * 2
+  return Math.min(
+    filteredLogs.value.length,
+    virtualStart.value + Math.max(visibleCount, 1),
+  )
+})
+
+const virtualOffset = computed(() => virtualStart.value * ROW_HEIGHT)
+
+const visibleLogs = computed(() => {
+  return filteredLogs.value.slice(virtualStart.value, virtualEnd.value)
 })
 
 // 映射日志级别到 UBadge 颜色
@@ -201,21 +275,39 @@ const getConnectionStatusClass = () => {
   return 'text-warning'
 }
 
+const getConnectionStatusColor = ():
+  | 'error'
+  | 'info'
+  | 'success'
+  | 'primary'
+  | 'secondary'
+  | 'warning'
+  | 'neutral' => {
+  if (connectionStatus.value.includes('实时')) {
+    return 'success'
+  }
+  if (connectionStatus.value.includes('连接')) {
+    return 'info'
+  }
+  if (connectionStatus.value.includes('错误')) {
+    return 'error'
+  }
+  return 'warning'
+}
+
 // 高亮搜索结果
 const highlightSearch = (content: string) => {
-  if (!searchQuery.value.trim()) return content
+  if (!normalizedSearchQuery.value) return content
 
-  const query = searchQuery.value.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&') // 转义特殊字符
+  const query = normalizedSearchQuery.value.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    '\\$&',
+  ) // 转义特殊字符
   const regex = new RegExp(`(${query})`, 'gi')
   return content.replace(
     regex,
     '<mark class="bg-yellow-300 dark:bg-yellow-700 text-black dark:text-white rounded">$1</mark>',
   )
-}
-
-// 格式化日志参数
-const formatLogArgs = (args: string[]) => {
-  return args.join(' ')
 }
 
 // 切换自动滚动
@@ -238,9 +330,15 @@ const scrollToBottom = async () => {
 const handleScroll = () => {
   if (!logContainer.value) return
 
-  const { scrollTop, scrollHeight, clientHeight } = logContainer.value
-  const isNearBottom = scrollTop + clientHeight >= scrollHeight - 50 // 距离底部50px以内
-  const isAtTop = scrollTop + clientHeight < scrollHeight - 200 // 距离底部200px以上
+  const {
+    scrollTop: currentScrollTop,
+    scrollHeight,
+    clientHeight,
+  } = logContainer.value
+  scrollTop.value = currentScrollTop
+  containerHeight.value = clientHeight
+  const isNearBottom = currentScrollTop + clientHeight >= scrollHeight - 50 // 距离底部50px以内
+  const isAtTop = currentScrollTop + clientHeight < scrollHeight - 200 // 距离底部200px以上
 
   // 如果滚动到接近底部，自动开启自动滚动
   if (isNearBottom && !autoScroll.value) {
@@ -262,10 +360,10 @@ const connectLogStream = () => {
   logs.value = []
   batchQueue.value = []
   isInitialLoading.value = true
-  loadingProgress.value = 0
+  loadingProgress.value = 5
 
   connectionStatus.value = '正在连接...'
-  eventSource = new EventSource('/api/system/logs')
+  eventSource = new EventSource(`/api/system/logs?initial=${INITIAL_LOG_LINES}`)
 
   let initialLoadCompleteTimer: NodeJS.Timeout | null = null
   const MESSAGE_TIMEOUT = 2000 // 消息间隔超时时间（毫秒）
@@ -288,6 +386,7 @@ const connectLogStream = () => {
 
         if (isInitialLoading.value) {
           addLogEntry(logEntry)
+          loadingProgress.value = Math.min(90, loadingProgress.value + 0.2)
 
           // 设置新的定时器，如果在指定时间内没有新消息，认为初始加载完成
           initialLoadCompleteTimer = setTimeout(() => {
@@ -296,8 +395,9 @@ const connectLogStream = () => {
               // 让加载指示器显示完成状态后再隐藏
               setTimeout(() => {
                 isInitialLoading.value = false
-                loadingProgress.value = 0
-                toggleAutoScroll()
+                loadingProgress.value = 100
+                autoScroll.value = true
+                scrollToBottom()
               }, 500)
             }
           }, MESSAGE_TIMEOUT)
@@ -317,7 +417,7 @@ const connectLogStream = () => {
 }
 
 watch(
-  [selectedLevels, searchQuery],
+  [selectedLevels, selectedTags, searchQuery],
   () => {
     if (autoScroll.value) {
       scrollToBottom()
@@ -327,12 +427,29 @@ watch(
 )
 
 onMounted(() => {
+  if (logContainer.value) {
+    containerHeight.value = logContainer.value.clientHeight
+  }
+
+  if (typeof ResizeObserver !== 'undefined' && logContainer.value) {
+    resizeObserver = new ResizeObserver((entries) => {
+      const [entry] = entries
+      if (!entry) return
+      containerHeight.value = entry.contentRect.height
+    })
+    resizeObserver.observe(logContainer.value)
+  }
+
   connectLogStream()
 })
 
 onUnmounted(() => {
   if (eventSource) {
     eventSource.close()
+  }
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
   }
 })
 </script>
@@ -348,26 +465,60 @@ onUnmounted(() => {
         class="flex-1 overflow-hidden bg-neutral-100 dark:bg-neutral-950 rounded-md relative"
       >
         <div
-          class="px-4 py-2 border-b border-neutral-300 dark:border-neutral-900 flex items-center justify-between"
+          class="px-4 py-3 border-b border-neutral-300/80 dark:border-neutral-900 bg-linear-to-r from-neutral-50 to-neutral-100/60 dark:from-neutral-900 dark:to-neutral-950/80"
         >
-          <div>
-            <h2 class="text-lg font-medium text-blue-600">app.log</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              <span
-                v-if="connectionStatus"
-                :class="getConnectionStatusClass()"
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <UIcon
+                  name="tabler:file-text"
+                  class="w-4 h-4 text-blue-500"
+                />
+                <h2
+                  class="text-sm sm:text-base font-semibold text-blue-600 tracking-wide"
+                >
+                  app.log
+                </h2>
+                <UBadge
+                  v-if="connectionStatus"
+                  size="sm"
+                  variant="soft"
+                  :color="getConnectionStatusColor()"
+                >
+                  {{ connectionStatus }}
+                </UBadge>
+              </div>
+              <div
+                class="mt-1 flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400"
               >
-                {{ connectionStatus }}
-              </span>
-            </p>
+                <span
+                  >总条数/展示: {{ logs.length }}/{{
+                    filteredLogs.length
+                  }}</span
+                >
+                <span v-if="availableTags.length"
+                  >Tag: {{ availableTags.length }}</span
+                >
+              </div>
+            </div>
+            <span
+              v-if="connectionStatus"
+              :class="[
+                'text-xs font-medium hidden sm:inline',
+                getConnectionStatusClass(),
+              ]"
+            >
+              {{ connectionStatus }}
+            </span>
           </div>
-          <div class="flex items-center gap-2">
+
+          <div class="mt-3 flex flex-wrap items-center gap-2">
             <!-- Search -->
             <UInput
               v-model="searchQuery"
               placeholder="搜索日志内容..."
               size="sm"
-              class="w-48"
+              class="w-full sm:w-56 md:w-64"
               icon="tabler:search"
               :ui="{ trailing: 'pe-1' }"
             >
@@ -397,7 +548,16 @@ onUnmounted(() => {
               multiple
               size="sm"
               placeholder="过滤级别"
-              class="w-24"
+              class="w-28"
+              :clearable="false"
+            />
+            <USelect
+              v-model="selectedTags"
+              :items="availableTags"
+              multiple
+              size="sm"
+              placeholder="筛选 Tag"
+              class="w-40 sm:w-52"
               :clearable="false"
             />
             <!-- Auto scroll -->
@@ -406,6 +566,7 @@ onUnmounted(() => {
               color="neutral"
               size="sm"
               :variant="autoScroll ? 'outline' : 'soft'"
+              class="ms-auto sm:ms-0"
               @click="toggleAutoScroll"
             />
             <!-- Download raw log -->
@@ -453,55 +614,74 @@ onUnmounted(() => {
           class="h-[calc(100vh-10rem)] overflow-y-auto overflow-x-auto scroll-smooth font-mono text-sm relative"
           @scroll="handleScroll"
         >
-          <div class="p-2 space-y-1">
+          <div
+            class="relative"
+            :style="{ height: `${totalVirtualHeight}px` }"
+          >
             <div
-              v-for="(log, index) in filteredLogs"
-              :key="index"
-              :class="['px-2 py-0.5 rounded border-l-4', getLogLineStyle(log)]"
+              class="absolute left-0 right-0 px-2"
+              :style="{ transform: `translateY(${virtualOffset}px)` }"
             >
-              <div class="flex items-start space-x-3 text-sm">
-                <!-- 时间戳 -->
-                <span
-                  class="text-neutral-400 dark:text-neutral-500 text-xs whitespace-nowrap min-w-0 shrink-0 mt-0.5"
-                >
-                  {{ $dayjs(log.date).format('HH:mm:ss.SSS') }}
-                </span>
-
-                <!-- 日志级别 -->
-                <UBadge
-                  size="sm"
-                  :variant="log.level <= 1 ? 'solid' : 'soft'"
-                  :color="getBadgeColor(log.type || getLevelType(log.level))"
-                >
-                  {{
-                    (log.type || getLevelType(log.level))
-                      .toUpperCase()
-                      .slice(0, 4)
-                  }}
-                </UBadge>
-
-                <!-- 日志内容 -->
-                <div class="flex-1 min-w-0">
+              <div
+                v-for="(log, index) in visibleLogs"
+                :key="`${virtualStart + index}-${log.raw}`"
+                :class="[
+                  'px-2 py-0.5 rounded border-l-4',
+                  getLogLineStyle(log),
+                ]"
+                :style="{ height: `${ROW_HEIGHT}px` }"
+              >
+                <div class="flex items-center space-x-3 text-sm h-full">
+                  <!-- 时间戳 -->
                   <span
-                    class="whitespace-pre-wrap wrap-break-word"
-                    v-html="highlightSearch(formatLogArgs(log.args))"
-                  ></span>
-                </div>
+                    class="text-neutral-400 dark:text-neutral-500 text-xs whitespace-nowrap min-w-0 shrink-0"
+                  >
+                    {{ $dayjs(log.date).format('HH:mm:ss.SSS') }}
+                  </span>
 
-                <!-- 标签 -->
-                <span
-                  v-if="log.tag"
-                  class="text-xs whitespace-nowrap shrink-0 truncate text-neutral-400/80"
-                >
-                  {{ log.tag }}
-                </span>
+                  <!-- 日志级别 -->
+                  <UBadge
+                    size="sm"
+                    :variant="log.level <= 1 ? 'solid' : 'soft'"
+                    :color="getBadgeColor(log.type || getLevelType(log.level))"
+                  >
+                    {{
+                      (log.type || getLevelType(log.level))
+                        .toUpperCase()
+                        .slice(0, 4)
+                    }}
+                  </UBadge>
+
+                  <!-- 日志内容 -->
+                  <div class="flex-1 min-w-0">
+                    <span
+                      v-if="normalizedSearchQuery"
+                      class="block whitespace-nowrap overflow-hidden text-ellipsis"
+                      v-html="highlightSearch(log.message)"
+                    ></span>
+                    <span
+                      v-else
+                      class="block whitespace-nowrap overflow-hidden text-ellipsis"
+                    >
+                      {{ log.message }}
+                    </span>
+                  </div>
+
+                  <!-- 标签 -->
+                  <span
+                    v-if="log.tag"
+                    class="text-xs whitespace-nowrap shrink-0 truncate text-neutral-400/80"
+                  >
+                    {{ log.tag }}
+                  </span>
+                </div>
               </div>
             </div>
 
             <!-- 空状态 -->
             <div
               v-if="filteredLogs.length === 0"
-              class="text-center py-8 text-gray-500 dark:text-gray-400"
+              class="text-center py-8 text-gray-500 dark:text-gray-400 absolute inset-0"
             >
               <div v-if="logs.length === 0">等待日志数据...</div>
               <div v-else>没有匹配的日志条目</div>
