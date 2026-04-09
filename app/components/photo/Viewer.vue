@@ -408,40 +408,46 @@ const clearConfetti = useDebounceFn(() => {
   confettiIcon.value = null
 }, 1600)
 
+const decreaseReactionCountSafely = (reactionId: string) => {
+  const currentCount = reactionCounts.value[reactionId] || 0
+  reactionCounts.value[reactionId] = Math.max(0, currentCount - 1)
+}
+
 // Reaction handlers
 const handleReactionSelect = async (reactionId: string, iconName: string) => {
-  if (!currentPhoto.value) return
+  if (!currentPhoto.value || isLoadingReaction.value) return
+
+  const photoId = currentPhoto.value.id
+  const previousSelectedReaction = selectedReaction.value
+  const previousReactionCounts = { ...reactionCounts.value }
+  const isRemovingCurrentReaction = previousSelectedReaction === reactionId
 
   isLoadingReaction.value = true
+  showReactionPicker.value = false
+
+  // 乐观更新：先更新本地状态，再发送请求
+  if (isRemovingCurrentReaction) {
+    selectedReaction.value = null
+    decreaseReactionCountSafely(reactionId)
+  } else {
+    if (previousSelectedReaction) {
+      decreaseReactionCountSafely(previousSelectedReaction)
+    }
+    selectedReaction.value = reactionId
+    reactionCounts.value[reactionId] =
+      (reactionCounts.value[reactionId] || 0) + 1
+  }
 
   try {
-    if (selectedReaction.value === reactionId) {
-      // 取消表态
-      await $fetch(`/api/photos/${currentPhoto.value.id}/reactions`, {
+    if (isRemovingCurrentReaction) {
+      await $fetch(`/api/photos/${photoId}/reactions`, {
         method: 'DELETE',
       })
-      selectedReaction.value = null
-      // 减少计数
-      if (reactionCounts.value[reactionId]) {
-        reactionCounts.value[reactionId]--
-      }
     } else {
-      // 如果之前有表态，先减少旧表态的计数
-      const oldReaction = selectedReaction.value
-      if (oldReaction && reactionCounts.value[oldReaction] !== undefined) {
-        reactionCounts.value[oldReaction]--
-      }
-
-      // 添加或更新表态
-      await $fetch(`/api/photos/${currentPhoto.value.id}/reactions`, {
+      await $fetch(`/api/photos/${photoId}/reactions`, {
         method: 'POST',
         body: { reactionType: reactionId },
       })
-
-      selectedReaction.value = reactionId
-      // 增加计数
-      reactionCounts.value[reactionId] =
-        (reactionCounts.value[reactionId] || 0) + 1
 
       // 触发礼花效果
       confettiIcon.value = iconName
@@ -451,6 +457,10 @@ const handleReactionSelect = async (reactionId: string, iconName: string) => {
       clearConfetti()
     }
   } catch (error: any) {
+    // 请求失败时回滚乐观更新
+    selectedReaction.value = previousSelectedReaction
+    reactionCounts.value = previousReactionCounts
+
     console.error('Failed to update reaction:', error)
 
     // 显示错误提示
@@ -472,8 +482,6 @@ const handleReactionSelect = async (reactionId: string, iconName: string) => {
   } finally {
     isLoadingReaction.value = false
   }
-
-  showReactionPicker.value = false
 }
 
 const toggleReactionPicker = () => {
