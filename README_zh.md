@@ -317,17 +317,10 @@ pnpm preview
     目前不支持直接导入已有照片，未来计划支持通过指定目录扫描导入。
   </p>
 </details>
-<details>
-  <summary>本项目与 Afilmory 有何区别？</summary>
-  <p>
-    Afilmory 是一个非常优秀的项目，其部署方式是在本地或 CI 中处理存储中的照片并生成清单文件，然后前端通过读取清单文件来展示照片，属于静态部署。
-    ChronoFrame 则是一个动态的照片管理应用，提供在线上传、管理和浏览照片的功能，适合需要频繁更新照片的场景。
-  </p>
-</details>
 
 ## 🙏 致谢
 
-本项目受启发于 [Afilmory](https://github.com/Afilmory/afilmory)，同样优秀的个人相册项目。
+本项目受启发于 Afilmory，同样优秀的个人相册项目。
 
 感谢以下优秀的开源项目和库：
 
