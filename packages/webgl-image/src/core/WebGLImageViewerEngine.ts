@@ -115,6 +115,7 @@ export class WebGLImageViewerEngine {
   private currentQuality: 'high' | 'medium' | 'low' | 'unknown' = 'unknown'
   private isLoadingTexture = false
   private currentLoadingState: LoadingState = LoadingState.IDLE
+  private lastRequestedSrc: string | null = null
 
   constructor(canvas: HTMLCanvasElement, config: Partial<EngineConfig> = {}) {
     this.canvas = canvas
@@ -220,66 +221,155 @@ export class WebGLImageViewerEngine {
       const { type, payload } = event.data
       switch (type) {
         case 'loaded':
-          this.handleWorkerImageLoaded(payload)
+          void this.handleWorkerImageLoaded(payload)
           break
         case 'load-error':
-          this.handleWorkerImageLoadError(payload)
+          void this.handleWorkerImageLoadError(payload)
           break
       }
     }
 
     this.worker.onerror = (error) => {
       console.error('Worker error:', error)
+      void this.handleWorkerImageLoadError(error)
     }
   }
 
-  private handleWorkerImageLoaded(payload: any) {
+  private async handleWorkerImageLoaded(payload: any) {
     const { imageBitmap } = payload
 
     try {
-      this.image = imageBitmap
-
-      const shouldUseTiles = this.shouldUseTiles(imageBitmap)
-      let usingTiles = false
-
-      if (shouldUseTiles) {
-        this.emitLoadingStateChange(true, LoadingState.TILE_LOADING)
-        usingTiles = this.createTiles(imageBitmap)
+      const rendered = this.applyDecodedImage(imageBitmap)
+      if (!rendered) {
+        await this.renderWithMainThreadFallback(
+          new Error('Failed to render worker ImageBitmap'),
+        )
       }
 
-      if (!usingTiles) {
-        this.emitLoadingStateChange(true, LoadingState.TEXTURE_LOADING)
-        this.createTexture(imageBitmap)
-      } else {
-        this.updatePositionBuffer()
-      }
-
-      this.useTiles = usingTiles
-
-      if (this.config.centerOnInit) {
-        this.centerImage()
-      }
-
-      this.currentQuality = 'high'
-
-      this.emitLoadingStateChange(
-        false,
-        LoadingState.COMPLETE,
-        this.currentQuality,
-      )
-      this.render()
-      if (this.imageLoadingResolve) this.imageLoadingResolve()
+      this.resolvePendingImageLoad()
     } catch (err) {
-      console.error('Failed to create texture from ImageBitmap:', err)
-      this.emitLoadingStateChange(false, LoadingState.ERROR)
-      if (this.imageLoadingReject) this.imageLoadingReject(err as Error)
+      console.error('Failed to render worker image:', err)
+      this.rejectPendingImageLoad(err)
     }
   }
 
-  private handleWorkerImageLoadError(error: any) {
+  private async handleWorkerImageLoadError(error: any) {
     console.error('Image load error from worker:', error)
+
+    try {
+      await this.renderWithMainThreadFallback(error)
+      this.resolvePendingImageLoad()
+    } catch (fallbackError) {
+      this.rejectPendingImageLoad(fallbackError)
+    }
+  }
+
+  private applyDecodedImage(
+    imageSource: HTMLCanvasElement | HTMLImageElement | ImageBitmap,
+  ): boolean {
+    const originalDimensions = this.getSourceDimensions(imageSource)
+    if (!originalDimensions) {
+      return false
+    }
+
+    this.image = imageSource
+
+    const shouldUseTiles = this.shouldUseTiles(imageSource)
+    let usingTiles = false
+
+    if (shouldUseTiles) {
+      this.emitLoadingStateChange(true, LoadingState.TILE_LOADING)
+      usingTiles = this.createTiles(imageSource)
+    }
+
+    if (!usingTiles) {
+      this.emitLoadingStateChange(true, LoadingState.TEXTURE_LOADING)
+      const texture = this.createTexture(imageSource)
+      if (!texture) {
+        return false
+      }
+    } else {
+      this.updatePositionBuffer()
+    }
+
+    this.useTiles = usingTiles
+
+    if (this.config.centerOnInit) {
+      this.centerImage()
+    }
+
+    const finalWidth = this.image?.width ?? originalDimensions.width
+    const finalHeight = this.image?.height ?? originalDimensions.height
+    const widthRatio = finalWidth / originalDimensions.width
+    const heightRatio = finalHeight / originalDimensions.height
+    const minRatio = Math.min(widthRatio, heightRatio)
+
+    if (minRatio < 0.6) {
+      this.currentQuality = 'low'
+    } else if (minRatio < 0.9) {
+      this.currentQuality = 'medium'
+    } else {
+      this.currentQuality = 'high'
+    }
+
+    this.emitLoadingStateChange(false, LoadingState.COMPLETE, this.currentQuality)
+    this.render()
+
+    return true
+  }
+
+  private async decodeImageOnMainThread(src: string): Promise<HTMLImageElement> {
+    return await new Promise((resolve, reject) => {
+      const image = new Image()
+      image.crossOrigin = 'anonymous'
+      image.decoding = 'async'
+      image.onload = () => resolve(image)
+      image.onerror = () => {
+        reject(new Error('Failed to decode image on main thread'))
+      }
+      image.src = src
+    })
+  }
+
+  private async renderWithMainThreadFallback(reason: unknown): Promise<void> {
+    const src = this.lastRequestedSrc
+    if (!src) {
+      if (reason instanceof Error) {
+        throw reason
+      }
+      throw new Error('No image source available for fallback decode')
+    }
+
+    console.warn('Falling back to main-thread decode/render.', reason)
+    this.emitLoadingStateChange(true, LoadingState.IMAGE_LOADING)
+
+    const image = await this.decodeImageOnMainThread(src)
+    const rendered = this.applyDecodedImage(image)
+
+    if (!rendered) {
+      throw new Error('Main-thread decode succeeded but rendering still failed')
+    }
+  }
+
+  private resolvePendingImageLoad(): void {
+    const resolve = this.imageLoadingResolve
+    this.imageLoadingResolve = null
+    this.imageLoadingReject = null
+    resolve?.()
+  }
+
+  private rejectPendingImageLoad(error: unknown): void {
+    const reject = this.imageLoadingReject
+    this.imageLoadingResolve = null
+    this.imageLoadingReject = null
+
+    const normalizedError =
+      error instanceof Error
+        ? error
+        : new Error(typeof error === 'string' ? error : 'Unknown image load error')
+
     this.emitLoadingStateChange(false, LoadingState.ERROR)
-    if (this.imageLoadingReject) this.imageLoadingReject(error as Error)
+    reject?.(normalizedError)
   }
 
   private createBuffers(): void {
@@ -377,6 +467,7 @@ export class WebGLImageViewerEngine {
 
   public async loadImage(src: string): Promise<void> {
     console.log('Post load image:', src)
+    this.lastRequestedSrc = src
     this.emitLoadingStateChange(true, LoadingState.IMAGE_LOADING)
 
     return new Promise((resolve, reject) => {
@@ -392,11 +483,16 @@ export class WebGLImageViewerEngine {
             type: 'load',
             payload: { src: absolute.toString() },
           })
-        } catch {
-          this.worker.postMessage({ type: 'load', payload: { src } })
+        } catch (error) {
+          console.warn('Worker postMessage failed, using main-thread fallback.', error)
+          void this.renderWithMainThreadFallback(error)
+            .then(() => this.resolvePendingImageLoad())
+            .catch((fallbackError) => this.rejectPendingImageLoad(fallbackError))
         }
       } else {
-        reject(new Error('No worker available'))
+        void this.renderWithMainThreadFallback(new Error('No worker available'))
+          .then(() => this.resolvePendingImageLoad())
+          .catch((error) => this.rejectPendingImageLoad(error))
       }
     })
   }
@@ -415,73 +511,191 @@ export class WebGLImageViewerEngine {
       gl.deleteTexture(this.texture)
     }
 
+    const dimensions = this.getSourceDimensions(imageSource)
+    if (!dimensions) {
+      return null
+    }
+
     // 获取最大纹理尺寸并判断是否需要缩放
     const maxTextureSize = getMaxTextureSize(gl)
-    const srcWidth =
-      (imageSource as HTMLCanvasElement).width ??
-      (imageSource as HTMLImageElement).width ??
-      (imageSource as ImageBitmap).width
-    const srcHeight =
-      (imageSource as HTMLCanvasElement).height ??
-      (imageSource as HTMLImageElement).height ??
-      (imageSource as ImageBitmap).height
+    const maxTexturePixels = this.getTextureUploadPixelBudget(maxTextureSize)
+    const sourcePixels = dimensions.width * dimensions.height
+
+    let targetWidth = dimensions.width
+    let targetHeight = dimensions.height
+
+    if (
+      sourcePixels > maxTexturePixels ||
+      dimensions.width > maxTextureSize ||
+      dimensions.height > maxTextureSize
+    ) {
+      const pixelScale = Math.min(1, Math.sqrt(maxTexturePixels / sourcePixels))
+      const sizeScale = Math.min(
+        pixelScale,
+        maxTextureSize / dimensions.width,
+        maxTextureSize / dimensions.height,
+      )
+      targetWidth = Math.max(1, Math.floor(dimensions.width * sizeScale))
+      targetHeight = Math.max(1, Math.floor(dimensions.height * sizeScale))
+    }
 
     let finalSource: HTMLCanvasElement | HTMLImageElement | ImageBitmap =
       imageSource
-
-    // 如果超出最大纹理尺寸，使用离屏 canvas 等比缩放
     if (
-      typeof srcWidth === 'number' &&
-      typeof srcHeight === 'number' &&
-      (srcWidth > maxTextureSize || srcHeight > maxTextureSize)
+      targetWidth !== dimensions.width ||
+      targetHeight !== dimensions.height
     ) {
-      const scale = Math.min(
-        maxTextureSize / srcWidth,
-        maxTextureSize / srcHeight,
+      const resizedSource = this.resizeImageSource(
+        imageSource,
+        targetWidth,
+        targetHeight,
       )
-
-      const targetWidth = Math.max(1, Math.floor(srcWidth * scale))
-      const targetHeight = Math.max(1, Math.floor(srcHeight * scale))
-
-      const offscreen = document.createElement('canvas')
-      offscreen.width = targetWidth
-      offscreen.height = targetHeight
-      const ctx = offscreen.getContext('2d')
-      if (ctx) {
-        ctx.imageSmoothingEnabled = true
-
-        ctx.imageSmoothingQuality = 'high'
-        ctx.drawImage(imageSource as any, 0, 0, targetWidth, targetHeight)
-        finalSource = offscreen
-      } else {
-        finalSource = imageSource
+      if (resizedSource) {
+        finalSource = resizedSource
       }
     }
 
-    this.texture = gl.createTexture()
-    gl.bindTexture(gl.TEXTURE_2D, this.texture)
+    let uploadSuccess = false
+    let attempt = 0
 
-    // 设置纹理参数
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+    while (attempt < RENDER_CONFIG.TEXTURE_RETRY_LIMIT) {
+      this.texture = gl.createTexture()
+      if (!this.texture) {
+        break
+      }
 
-    // 上传图像数据（使用可能缩放后的来源）
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      finalSource,
-    )
+      gl.bindTexture(gl.TEXTURE_2D, this.texture)
+
+      // 设置纹理参数
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+
+      let uploadError: unknown = null
+      try {
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.RGBA,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          finalSource,
+        )
+      } catch (error) {
+        uploadError = error
+      }
+
+      const glError = gl.getError()
+      if (!uploadError && glError === gl.NO_ERROR) {
+        uploadSuccess = true
+        break
+      }
+
+      if (uploadError) {
+        console.warn('Texture upload error, retrying with smaller source.', {
+          attempt: attempt + 1,
+          error: uploadError,
+        })
+      } else {
+        console.warn('Texture upload failed, retrying with smaller source.', {
+          attempt: attempt + 1,
+          glError,
+        })
+      }
+
+      if (this.texture) {
+        gl.deleteTexture(this.texture)
+        this.texture = null
+      }
+
+      const currentDimensions = this.getSourceDimensions(finalSource)
+      if (!currentDimensions) {
+        break
+      }
+
+      const retryWidth = Math.max(
+        1,
+        Math.floor(
+          currentDimensions.width * RENDER_CONFIG.TEXTURE_RETRY_SCALE_FACTOR,
+        ),
+      )
+      const retryHeight = Math.max(
+        1,
+        Math.floor(
+          currentDimensions.height * RENDER_CONFIG.TEXTURE_RETRY_SCALE_FACTOR,
+        ),
+      )
+
+      if (
+        retryWidth >= currentDimensions.width &&
+        retryHeight >= currentDimensions.height
+      ) {
+        break
+      }
+
+      const resizedSource = this.resizeImageSource(
+        finalSource,
+        retryWidth,
+        retryHeight,
+      )
+      if (!resizedSource) {
+        break
+      }
+
+      finalSource = resizedSource
+      attempt += 1
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D, null)
+
+    if (!uploadSuccess || !this.texture) {
+      this.texture = null
+      return null
+    }
 
     // 更新内部 image 引用为最终用于渲染的尺寸
     this.image = finalSource as any
     this.updatePositionBuffer()
 
     return this.texture
+  }
+
+  private getSourceDimensions(source: {
+    width: number
+    height: number
+  }): { width: number; height: number } | null {
+    const { width, height } = source
+    if (!isFinite(width) || !isFinite(height) || width <= 0 || height <= 0) {
+      return null
+    }
+    return { width, height }
+  }
+
+  private getTextureUploadPixelBudget(maxTextureSize: number): number {
+    const maxTexturePixels = Math.max(1, maxTextureSize * maxTextureSize)
+    return Math.min(RENDER_CONFIG.MAX_TEXTURE_UPLOAD_PIXELS, maxTexturePixels)
+  }
+
+  private resizeImageSource(
+    source: CanvasImageSource,
+    targetWidth: number,
+    targetHeight: number,
+  ): HTMLCanvasElement | null {
+    const offscreen = document.createElement('canvas')
+    offscreen.width = targetWidth
+    offscreen.height = targetHeight
+    const ctx = offscreen.getContext('2d')
+    if (!ctx) {
+      return null
+    }
+
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
+    ctx.clearRect(0, 0, targetWidth, targetHeight)
+    ctx.drawImage(source, 0, 0, targetWidth, targetHeight)
+
+    return offscreen
   }
 
   private cleanupTiles(): void {
@@ -502,12 +716,17 @@ export class WebGLImageViewerEngine {
   ): boolean {
     if (!source) return false
 
+    if (!this.config.tileEnabled) return false
+
+    const sourcePixels = source.width * source.height
+    if (sourcePixels > RENDER_CONFIG.MAX_TILE_TOTAL_PIXELS) {
+      return false
+    }
+
     const maxTextureSize = getMaxTextureSize(this.gl)
     if (source.width > maxTextureSize || source.height > maxTextureSize) {
       return true
     }
-
-    if (!this.config.tileEnabled) return false
 
     return (
       source.width > this.config.tileSize ||
@@ -543,6 +762,10 @@ export class WebGLImageViewerEngine {
       (imageSource as ImageBitmap).height
 
     if (!width || !height) {
+      return false
+    }
+
+    if (width * height > RENDER_CONFIG.MAX_TILE_TOTAL_PIXELS) {
       return false
     }
 
@@ -1281,11 +1504,17 @@ export class WebGLImageViewerEngine {
         if (usingTiles) {
           const recreated = this.createTiles(this.image)
           if (!recreated) {
-            this.createTexture(this.image)
+            const texture = this.createTexture(this.image)
+            if (!texture) {
+              throw new Error('Failed to recreate texture after context restore')
+            }
             usingTiles = false
           }
         } else {
-          this.createTexture(this.image)
+          const texture = this.createTexture(this.image)
+          if (!texture) {
+            throw new Error('Failed to recreate texture after context restore')
+          }
         }
 
         this.useTiles = usingTiles && this.tiles.length > 0
