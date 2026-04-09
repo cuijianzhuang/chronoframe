@@ -125,6 +125,8 @@ const sizeDelta = computed(() => {
               side="top"
               align="center"
               :side-offset="8"
+              update-position-strategy="always"
+              sticky="always"
             >
               <motion.div
                 class="bg-white/50 dark:bg-black/50 backdrop-blur-md border border-neutral-100 dark:border-neutral-700 rounded-lg shadow-lg w-xs max-w-xs overflow-hidden relative"

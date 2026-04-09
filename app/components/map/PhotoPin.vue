@@ -23,6 +23,36 @@ const emit = defineEmits<{
 
 const dayjs = useDayjs()
 const marker = computed(() => props.clusterPoint.properties.marker!)
+const hoverOpen = ref(false)
+
+const hoverCardOpen = computed({
+  get: () => (props.isSelected ? true : hoverOpen.value),
+  set: (value: boolean) => {
+    // Keep selected marker card pinned open until parent clears selection.
+    if (props.isSelected) {
+      if (value) {
+        hoverOpen.value = true
+      }
+      return
+    }
+    hoverOpen.value = value
+  },
+})
+
+watch(
+  () => props.isSelected,
+  (isSelected, wasSelected) => {
+    if (isSelected) {
+      hoverOpen.value = true
+      return
+    }
+
+    // Clear stale local open state when leaving selected mode.
+    if (wasSelected) {
+      hoverOpen.value = false
+    }
+  },
+)
 
 const onClick = () => {
   emit('click', props.clusterPoint)
@@ -38,10 +68,9 @@ const onClick = () => {
   >
     <template #marker>
       <HoverCardRoot
-        :open="isSelected || undefined"
+        v-model:open="hoverCardOpen"
         :open-delay="isSelected ? 0 : 600"
         :close-delay="isSelected ? Number.MAX_SAFE_INTEGER : 100"
-        @close="$event.preventDefault()"
       >
         <HoverCardTrigger as-child>
           <motion.div
@@ -72,7 +101,7 @@ const onClick = () => {
                 class="h-full w-full object-cover opacity-50"
               />
               <div
-                class="absolute inset-0 bg-gradient-to-br from-green/40 to-emerald/60 dark:from-green/60 dark:to-emerald/80"
+                class="absolute inset-0 bg-linear-to-br from-green/40 to-emerald/60 dark:from-green/60 dark:to-emerald/80"
               />
             </div>
 
@@ -88,7 +117,7 @@ const onClick = () => {
               "
             >
               <div
-                class="absolute inset-0 rounded-full bg-gradient-to-br from-white/10 to-white/5"
+                class="absolute inset-0 rounded-full bg-linear-to-br from-white/10 to-white/5"
               />
               <Icon
                 name="tabler:photo"
@@ -107,6 +136,8 @@ const onClick = () => {
               side="top"
               align="center"
               :side-offset="8"
+              update-position-strategy="always"
+              sticky="always"
               @pointer-down-outside="
                 isSelected ? $event.preventDefault() : undefined
               "
