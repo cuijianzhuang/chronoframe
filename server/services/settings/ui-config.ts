@@ -29,12 +29,6 @@ export const APP_SETTINGS_UI: Record<string, FieldUIConfig> = {
     placeholder: 'https://example.com/avatar.jpg',
     help: 'settings.app.avatarUrl.help',
   },
-  'upload.maxFileSize': {
-    type: 'number',
-    help: 'settings.app.upload.maxFileSize.help',
-    min: 1,
-    max: 10240,
-  },
   'appearance.theme': {
     type: 'tabs',
     options: [
@@ -102,6 +96,47 @@ export const LOCATION_SETTINGS_UI: Record<string, FieldUIConfig> = {
     type: 'url',
     placeholder: 'https://nominatim.openstreetmap.org',
     help: 'settings.location.nominatim.baseUrl.help',
+  },
+}
+
+export const PRIVACY_SETTINGS_UI: Record<string, FieldUIConfig> = {
+  'upload.autoEraseLocation': {
+    type: 'toggle',
+    help: 'settings.privacy.upload.autoEraseLocation.help',
+  },
+}
+
+export const SYSTEM_SETTINGS_UI: Record<string, FieldUIConfig> = {
+  'upload.maxFileSize': {
+    type: 'number',
+    help: 'settings.app.upload.maxFileSize.help',
+    min: 1,
+    max: 10240,
+  },
+  'upload.duplicateCheck.enabled': {
+    type: 'toggle',
+    help: 'settings.system.upload.duplicateCheck.enabled.help',
+  },
+  'upload.duplicateCheck.mode': {
+    type: 'tabs',
+    options: [
+      {
+        label: 'settings.system.upload.duplicateCheck.mode.options.skip',
+        value: 'skip',
+        icon: 'tabler:player-track-next',
+      },
+      {
+        label: 'settings.system.upload.duplicateCheck.mode.options.warn',
+        value: 'warn',
+        icon: 'tabler:alert-triangle',
+      },
+      {
+        label: 'settings.system.upload.duplicateCheck.mode.options.block',
+        value: 'block',
+        icon: 'tabler:ban',
+      },
+    ],
+    help: 'settings.system.upload.duplicateCheck.mode.help',
   },
 }
 
@@ -276,6 +311,8 @@ export function getSettingUIConfig(
 ): FieldUIConfig | undefined {
   const uiConfigMap: Record<string, Record<string, FieldUIConfig>> = {
     app: APP_SETTINGS_UI,
+    system: SYSTEM_SETTINGS_UI,
+    privacy: PRIVACY_SETTINGS_UI,
     map: MAP_SETTINGS_UI,
     location: LOCATION_SETTINGS_UI,
     storage: STORAGE_SETTINGS_UI,

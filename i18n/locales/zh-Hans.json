@@ -364,6 +364,7 @@
     "generalSettings": "基本设置",
     "appearanceSettings": "外观设置",
     "storageSettings": "存储设置",
+    "privacySettings": "隐私设置",
     "systemSettings": "系统设置",
     "mapAndLocation": "地图和位置",
     "location": "位置服务"
@@ -391,6 +392,7 @@
   },
   "common": {
     "unknown": "未知",
+    "unsavedChanges": "存在未保存的更改。",
     "months": {
       "jan": "一月",
       "feb": "二月",
@@ -441,7 +443,7 @@
       "warn": {
         "title": "检测到重复文件",
         "message": "照片 \"{fileName}\" 已存在，继续上传将会覆盖现有照片",
-        "warning": "覆盖后，原有照片的所有信息（EXIF、标签、表态等）将被替换",
+        "warning": "覆盖已存在的照片文件",
         "info": "现有照片：{title}，拍摄于 {dateTaken}"
       }
     },
@@ -539,6 +541,7 @@
       "actions": {
         "reprocess": "重新处理",
         "refreshLocation": "重新获取城市",
+        "eraseLocationInfo": "抹除位置信息",
         "delete": "删除",
         "editMetadata": "编辑信息",
         "previewPhoto": "预览照片"
@@ -546,12 +549,27 @@
       "selection": {
         "selected": "{count} / {total} 行已选择",
         "batchReprocess": "重新处理",
+        "batchEraseLocation": "抹除位置信息",
         "batchDownload": "批量下载",
         "batchDelete": "批量删除"
       },
       "slideover": {
         "title": "上传照片",
         "description": "拖拽或选择文件。上传后照片会自动处理并添加到库中。",
+        "options": {
+          "eraseLocation": {
+            "label": "上传时抹除位置信息",
+            "description": "本次上传将覆盖系统默认值，可随时开启或关闭。"
+          },
+          "duplicateCheck": {
+            "label": "重复文件处理策略",
+            "descriptionEnabled": "当前已启用重复检测，上传时会按所选模式处理同名文件。",
+            "descriptionDisabled": "当前已关闭重复检测，同名文件将直接进入上传流程。",
+            "enabled": "检测已开启",
+            "disabled": "检测已关闭",
+            "currentMode": "当前模式：{mode}"
+          }
+        },
         "buttons": {
           "clear": "清空选择",
           "upload": "上传 {count} 个文件"
@@ -622,12 +640,19 @@
         "noChangesProvided": "没有可应用的修改",
         "queueUnavailable": "任务队列不可用",
         "reverseGeocodeQueued": "已加入重新获取城市任务",
-        "reverseGeocodeFailed": "重新获取城市任务添加失败"
+        "reverseGeocodeFailed": "重新获取城市任务添加失败",
+        "eraseLocationQueued": "已加入抹除位置信息任务",
+        "eraseLocationFailed": "抹除位置信息任务添加失败",
+        "batchEraseLocationQueued": "已加入 {count} 条抹除位置信息任务",
+        "batchEraseLocationFailed": "批量抹除位置信息任务添加失败"
       },
       "errors": {
         "noSelection": "请选择要上传的照片",
         "fileValidationFailed": "文件验证失败",
         "allFilesValidationFailed": "所有文件验证失败",
+        "allFilesTooLarge": "所选 {count} 个文件均超过最大大小限制（{maxSize}MB）。",
+        "filesTooLargeSkipped": "已跳过 {count} 个超大文件（上限 {maxSize}MB），其余文件继续上传。",
+        "filesUnsupportedSkipped": "已跳过 {count} 个不支持格式的文件，其余文件继续上传。",
         "unsupportedFormat": "不支持的文件格式: {type}。请选择 JPEG、PNG、HEIC 格式的图片或 MOV 格式的 Live Photo 视频。",
         "fileTooLarge": "文件太大: {size}MB。最大支持 {maxSize}MB。",
         "uploadFailed": "上传失败",
@@ -663,7 +688,7 @@
           "tagsHint": "按下 Enter 键添加每个标签。",
           "location": "拍摄位置",
           "locationHint": "点击地图选择或更新拍摄位置。",
-          "clearLocation": "清除位置",
+          "clearLocation": "抹除位置信息",
           "coordinates": "坐标",
           "noLocation": "未选择位置",
           "rating": "评分",
@@ -841,7 +866,8 @@
       "types": {
         "photo": "照片处理",
         "live-photo-video": "LivePhoto视频",
-        "photo-reverse-geocoding": "照片逆地理编码"
+        "photo-reverse-geocoding": "照片逆地理编码",
+        "photo-erase-location": "照片位置信息抹除"
       },
       "stages": {
         "preprocessing": "预处理",
@@ -849,7 +875,8 @@
         "thumbnail": "缩略图",
         "exif": "EXIF处理",
         "reverse-geocoding": "地理解析",
-        "live-photo": "LivePhoto处理"
+        "live-photo": "LivePhoto处理",
+        "location-erase": "位置信息抹除"
       },
       "buttons": {
         "retry": "重试",
@@ -908,6 +935,27 @@
         }
       }
     },
+    "system": {
+      "upload": {
+        "duplicateCheck": {
+          "enabled": {
+            "label": "上传时检测重复文件",
+            "description": "根据文件名检测重复照片并执行对应处理策略",
+            "help": "关闭后将不进行重复预检查，同名文件会直接进入上传流程"
+          },
+          "mode": {
+            "label": "重复文件处理模式",
+            "description": "检测到重复文件时的处理方式",
+            "help": "仅在开启重复文件检测时生效",
+            "options": {
+              "skip": "跳过",
+              "warn": "警告并覆盖",
+              "block": "阻止上传"
+            }
+          }
+        }
+      }
+    },
     "map": {
       "provider": {
         "label": "地图服务商",
@@ -949,6 +997,15 @@
           "label": "Nominatim 基础 URL",
           "description": "Nominatim 反向地理编码 API 的基础 URL",
           "help": "留空则默认使用公共 Nominatim 服务"
+        }
+      }
+    },
+    "privacy": {
+      "upload": {
+        "autoEraseLocation": {
+          "label": "上传时自动抹除位置信息",
+          "description": "上传和处理照片时自动抹除 EXIF GPS 信息并清空地理位置字段",
+          "help": "启用后会将抹除位置信息操作放入队列异步执行"
         }
       }
     },

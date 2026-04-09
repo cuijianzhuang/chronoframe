@@ -362,6 +362,7 @@
     "siteAdministration": "站點設置",
     "generalSettings": "基本設置",
     "appearanceSettings": "外觀設置",
+    "privacySettings": "隱私設置",
     "mapAndLocation": "地圖和位置",
     "location": "位置服務"
   },
@@ -382,6 +383,7 @@
     }
   },
   "common": {
+    "unsavedChanges": "目前有尚未儲存的變更。",
     "months": {
       "jan": "一月",
       "feb": "二月",
@@ -480,6 +482,7 @@
       "actions": {
         "reprocess": "重新處理",
         "refreshLocation": "重新取得城市",
+        "eraseLocationInfo": "抹除位置資訊",
         "delete": "刪除",
         "editMetadata": "編輯資訊",
         "previewPhoto": "照片預覽"
@@ -487,12 +490,19 @@
       "selection": {
         "selected": "已選擇 {count} / {total} 列",
         "batchReprocess": "批量重新處理",
+        "batchEraseLocation": "抹除位置資訊",
         "batchDownload": "批量下載",
         "batchDelete": "批量刪除"
       },
       "slideover": {
         "title": "上傳照片",
         "description": "拖曳或選擇檔案。照片會自動處理並新增到圖庫。",
+        "options": {
+          "eraseLocation": {
+            "label": "上傳時抹除位置資訊",
+            "description": "本次上傳可覆蓋系統預設值，您可隨時切換開啟或關閉。"
+          }
+        },
         "buttons": {
           "clear": "清除選擇",
           "upload": "上傳 {count} 個檔案"
@@ -563,12 +573,19 @@
         "noChangesProvided": "沒有可套用的變更",
         "queueUnavailable": "任務佇列不可用",
         "reverseGeocodeQueued": "已新增重新取得城市的任務",
-        "reverseGeocodeFailed": "重新取得城市任務新增失敗"
+        "reverseGeocodeFailed": "重新取得城市任務新增失敗",
+        "eraseLocationQueued": "已新增抹除位置資訊任務",
+        "eraseLocationFailed": "抹除位置資訊任務新增失敗",
+        "batchEraseLocationQueued": "已新增 {count} 條抹除位置資訊任務",
+        "batchEraseLocationFailed": "批量抹除位置資訊任務新增失敗"
       },
       "errors": {
         "noSelection": "請選擇照片進行上傳",
         "fileValidationFailed": "檔案驗證失敗",
         "allFilesValidationFailed": "所有檔案驗證失敗",
+        "allFilesTooLarge": "所選 {count} 個檔案皆超過最大大小限制（{maxSize}MB）。",
+        "filesTooLargeSkipped": "已略過 {count} 個過大檔案（上限 {maxSize}MB），其餘檔案將繼續上傳。",
+        "filesUnsupportedSkipped": "已略過 {count} 個不支援格式的檔案，其餘檔案將繼續上傳。",
         "unsupportedFormat": "不支援的檔案格式：{type}。請選擇 JPEG、PNG 或 HEIC 照片，或 MOV 格式的原況照片影片。",
         "fileTooLarge": "檔案過大：{size}MB。最大支援：{maxSize}MB。",
         "uploadFailed": "上傳失敗",
@@ -604,7 +621,7 @@
           "tagsHint": "按 Enter 鍵新增每個標籤。",
           "location": "拍攝位置",
           "locationHint": "點擊地圖選擇或更新拍攝位置。",
-          "clearLocation": "清除位置",
+          "clearLocation": "抹除位置資訊",
           "coordinates": "座標",
           "noLocation": "未選擇位置",
           "rating": "評分",
@@ -780,7 +797,8 @@
       "types": {
         "photo": "照片處理",
         "live-photo-video": "LivePhoto影片",
-        "photo-reverse-geocoding": "照片逆地理編碼"
+        "photo-reverse-geocoding": "照片逆地理編碼",
+        "photo-erase-location": "照片位置資訊抹除"
       },
       "stages": {
         "preprocessing": "預處理",
@@ -788,7 +806,8 @@
         "thumbnail": "縮圖",
         "exif": "EXIF處理",
         "reverse-geocoding": "地理解析",
-        "live-photo": "LivePhoto處理"
+        "live-photo": "LivePhoto處理",
+        "location-erase": "位置資訊抹除"
       },
       "buttons": {
         "retry": "重試",
@@ -847,6 +866,27 @@
         }
       }
     },
+    "system": {
+      "upload": {
+        "duplicateCheck": {
+          "enabled": {
+            "label": "上傳時偵測重複檔案",
+            "description": "依檔名偵測重複照片並套用對應策略",
+            "help": "關閉後將略過重複預檢，同名檔案會直接進入上傳流程"
+          },
+          "mode": {
+            "label": "重複檔案處理模式",
+            "description": "偵測到重複檔案時的處理方式",
+            "help": "僅在啟用重複檔案偵測時生效",
+            "options": {
+              "skip": "跳過",
+              "warn": "警告並覆蓋",
+              "block": "阻止上傳"
+            }
+          }
+        }
+      }
+    },
     "map": {
       "provider": {
         "label": "地圖服務商",
@@ -888,6 +928,15 @@
           "label": "Nominatim 基礎 URL",
           "description": "Nominatim 反向地理編碼 API 的基礎 URL",
           "help": "留空則預設使用公開 Nominatim 服務"
+        }
+      }
+    },
+    "privacy": {
+      "upload": {
+        "autoEraseLocation": {
+          "label": "上傳時自動抹除位置資訊",
+          "description": "在上傳與處理照片時自動抹除 EXIF GPS 資訊並清空地理位置欄位",
+          "help": "啟用後會將抹除位置資訊操作放入佇列非同步執行"
         }
       }
     },
