@@ -164,14 +164,14 @@
       "add": "React",
       "change": "Reacted",
       "count": "no reactions | {count} reaction | {count} reactions",
-      "like": "like",
-      "love": "love",
-      "amazing": "amazing",
-      "funny": "funny",
-      "wow": "wow",
-      "sad": "sad",
-      "fire": "fire",
-      "sparkle": "sparkle"
+      "like": "Great shot",
+      "love": "Love",
+      "amazing": "Stunning",
+      "funny": "Haha",
+      "wow": "Whoa",
+      "sad": "Touching",
+      "fire": "Hype",
+      "sparkle": "Shine"
     },
     "photoload": {
       "loadError": "Image loading failed",

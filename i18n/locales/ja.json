@@ -163,14 +163,14 @@
       "add": "リアクション",
       "change": "リアクション済み",
       "count": "リアクションなし | {count} 件のリアクション | {count} 件のリアクション",
-      "like": "いいね",
-      "love": "ハート",
-      "amazing": "憧れ",
+      "like": "ナイス",
+      "love": "好き",
+      "amazing": "すごい",
       "funny": "笑",
-      "wow": "驚",
-      "sad": "泣",
-      "fire": "炎",
-      "sparkle": "星"
+      "wow": "わお",
+      "sad": "感動",
+      "fire": "アツい",
+      "sparkle": "キラッ"
     },
     "photoload": {
       "loadError": "画像の読み込みに失敗しました",

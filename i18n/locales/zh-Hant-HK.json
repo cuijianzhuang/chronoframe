@@ -160,14 +160,14 @@
       "add": "表態",
       "change": "已表態",
       "count": "無表態 | {count} 個表態 | {count} 個表態",
-      "like": "讚好",
-      "love": "心心",
-      "amazing": "花癡",
-      "funny": "笑哭",
-      "wow": "驚訝",
-      "sad": "喊",
-      "fire": "火焰",
-      "sparkle": "星星"
+      "like": "影得好",
+      "love": "喜歡",
+      "amazing": "驚嘆",
+      "funny": "哈哈",
+      "wow": "嘩塞",
+      "sad": "感動",
+      "fire": "助火",
+      "sparkle": "閃耀"
     },
     "photoload": {
       "loadError": "圖片載入失敗",

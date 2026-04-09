@@ -12,6 +12,7 @@ import GalleryThumbnail from './GalleryThumbnail.vue'
 import InfoPanel from './InfoPanel.vue'
 import ReactionPicker from './ReactionPicker.vue'
 import ReactionConfetti from './ReactionConfetti.vue'
+import { REACTION_ICON_MAP } from './reaction-definitions'
 import type { LoadingIndicatorRef } from './LoadingIndicator.vue'
 
 interface Props {
@@ -49,20 +50,10 @@ const isLoadingReaction = ref(false)
 const confettiIcon = ref<string | null>(null)
 const confettiTriggerCount = ref(0)
 
-// 表态图标映射
-const reactionIcons: Record<string, string> = {
-  like: 'fluent-emoji-flat:thumbs-up',
-  love: 'fluent-emoji-flat:red-heart',
-  amazing: 'fluent-emoji-flat:smiling-face-with-heart-eyes',
-  funny: 'fluent-emoji-flat:face-with-tears-of-joy',
-  wow: 'fluent-emoji-flat:face-with-open-mouth',
-  sad: 'fluent-emoji-flat:crying-face',
-  fire: 'fluent-emoji-flat:fire',
-  sparkle: 'fluent-emoji-flat:sparkles',
-}
-
 const currentReactionIcon = computed(() => {
-  return selectedReaction.value ? reactionIcons[selectedReaction.value] : null
+  const reactionId = selectedReaction.value
+  if (!reactionId) return null
+  return REACTION_ICON_MAP[reactionId as keyof typeof REACTION_ICON_MAP] || null
 })
 
 // 计算总表态数

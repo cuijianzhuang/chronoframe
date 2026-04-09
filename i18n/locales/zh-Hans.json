@@ -161,14 +161,14 @@
       "add": "表态",
       "change": "已表态",
       "count": "无表态 | {count} 个表态 | {count} 个表态",
-      "like": "点赞",
-      "love": "爱心",
-      "amazing": "花痴",
-      "funny": "笑哭了",
-      "wow": "吃惊",
-      "sad": "哭",
-      "fire": "火焰",
-      "sparkle": "星星"
+      "like": "拍得好",
+      "love": "喜欢",
+      "amazing": "惊叹",
+      "funny": "哈哈",
+      "wow": "哇塞",
+      "sad": "感动",
+      "fire": "助火",
+      "sparkle": "闪耀"
     },
     "photoload": {
       "loadError": "图片加载失败",

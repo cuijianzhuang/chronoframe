@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { motion, AnimatePresence } from 'motion-v'
+import { REACTION_DEFINITIONS } from './reaction-definitions'
 
 interface Reaction {
   id: string
@@ -38,56 +39,14 @@ onClickOutside(
 )
 
 // 可用的表态选项
-const reactions = computed<Reaction[]>(() => [
-  {
-    id: 'like',
-    iconName: 'fluent-emoji-flat:thumbs-up',
-    label: $t('viewer.reaction.like'),
-    count: props.reactionCounts?.like || 0,
-  },
-  {
-    id: 'love',
-    iconName: 'fluent-emoji-flat:red-heart',
-    label: $t('viewer.reaction.love'),
-    count: props.reactionCounts?.love || 0,
-  },
-  {
-    id: 'amazing',
-    iconName: 'fluent-emoji-flat:smiling-face-with-heart-eyes',
-    label: $t('viewer.reaction.amazing'),
-    count: props.reactionCounts?.amazing || 0,
-  },
-  {
-    id: 'funny',
-    iconName: 'fluent-emoji-flat:face-with-tears-of-joy',
-    label: $t('viewer.reaction.funny'),
-    count: props.reactionCounts?.funny || 0,
-  },
-  {
-    id: 'wow',
-    iconName: 'fluent-emoji-flat:face-with-open-mouth',
-    label: $t('viewer.reaction.wow'),
-    count: props.reactionCounts?.wow || 0,
-  },
-  {
-    id: 'sad',
-    iconName: 'fluent-emoji-flat:crying-face',
-    label: $t('viewer.reaction.sad'),
-    count: props.reactionCounts?.sad || 0,
-  },
-  {
-    id: 'fire',
-    iconName: 'fluent-emoji-flat:fire',
-    label: $t('viewer.reaction.fire'),
-    count: props.reactionCounts?.fire || 0,
-  },
-  {
-    id: 'sparkle',
-    iconName: 'fluent-emoji-flat:sparkles',
-    label: $t('viewer.reaction.sparkle'),
-    count: props.reactionCounts?.sparkle || 0,
-  },
-])
+const reactions = computed<Reaction[]>(() =>
+  REACTION_DEFINITIONS.map((reaction) => ({
+    id: reaction.id,
+    iconName: reaction.iconName,
+    label: $t(reaction.labelKey),
+    count: props.reactionCounts?.[reaction.id] || 0,
+  })),
+)
 
 // 格式化数量显示
 const formatCount = (count?: number): string => {
