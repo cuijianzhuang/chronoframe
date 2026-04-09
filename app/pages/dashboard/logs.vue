@@ -41,7 +41,7 @@ const BATCH_DELAY = 8 // 每批处理间隔（毫秒）
 const INITIAL_LOG_LINES = 'all'
 const ROW_HEIGHT = 28
 const VIRTUAL_OVERSCAN = 20
-const VIRTUAL_BOTTOM_PADDING = 16
+const VIRTUAL_BOTTOM_PADDING = 8
 
 let resizeObserver: ResizeObserver | null = null
 
@@ -462,7 +462,7 @@ onUnmounted(() => {
 
     <template #body>
       <div
-        class="flex-1 overflow-hidden bg-neutral-100 dark:bg-neutral-950 rounded-md relative"
+        class="flex flex-col flex-1 overflow-hidden bg-neutral-100 dark:bg-neutral-950 rounded-md relative"
       >
         <div
           class="px-4 py-3 border-b border-neutral-300/80 dark:border-neutral-900 bg-linear-to-r from-neutral-50 to-neutral-100/60 dark:from-neutral-900 dark:to-neutral-950/80"
@@ -611,7 +611,7 @@ onUnmounted(() => {
 
         <div
           ref="logContainer"
-          class="h-[calc(100vh-10rem)] overflow-y-auto overflow-x-auto scroll-smooth font-mono text-sm relative"
+          class="flex-1 min-h-0 overflow-y-auto overflow-x-auto scroll-smooth font-mono text-sm relative"
           @scroll="handleScroll"
         >
           <div
