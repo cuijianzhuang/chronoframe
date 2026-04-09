@@ -41,6 +41,8 @@ const showZoomLevel = ref(false)
 const zoomLevelTimer = ref<NodeJS.Timeout | null>(null)
 
 const showReactionPicker = ref(false)
+const reactionButtonRef = ref<HTMLButtonElement | null>(null)
+const shouldCloseReactionPickerOnClick = ref(false)
 const selectedReaction = ref<string | null>(null)
 const reactionCounts = ref<Record<string, number>>({})
 const isLoadingReaction = ref(false)
@@ -484,7 +486,17 @@ const handleReactionSelect = async (reactionId: string, iconName: string) => {
 }
 
 const toggleReactionPicker = () => {
+  if (shouldCloseReactionPickerOnClick.value) {
+    showReactionPicker.value = false
+    shouldCloseReactionPickerOnClick.value = false
+    return
+  }
+
   showReactionPicker.value = !showReactionPicker.value
+}
+
+const handleReactionButtonPointerDown = () => {
+  shouldCloseReactionPickerOnClick.value = showReactionPicker.value
 }
 
 // 监听当前照片变化，加载表态数据
@@ -834,6 +846,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                           <!-- 表态选择器 -->
                           <ReactionPicker
                             :is-open="showReactionPicker"
+                            :trigger-el="reactionButtonRef"
                             :selected-reaction="selectedReaction"
                             :reaction-counts="reactionCounts"
                             @select="handleReactionSelect"
@@ -849,6 +862,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
 
                           <!-- 表态按钮 -->
                           <motion.button
+                            ref="reactionButtonRef"
                             type="button"
                             :initial="{ scale: 0.8, opacity: 0 }"
                             :animate="{
@@ -877,6 +891,7 @@ const swiperModules = [Navigation, Keyboard, Virtual]
                                 : 'bg-white/90 dark:bg-neutral-800/90 border-neutral-200/50 dark:border-white/10 text-neutral-700 dark:text-white/80 shadow-black/10 dark:shadow-black/30',
                               'hover:shadow-xl',
                             ]"
+                            @pointerdown="handleReactionButtonPointerDown"
                             @click="toggleReactionPicker"
                           >
                             <Icon

@@ -10,6 +10,7 @@ interface Reaction {
 
 interface Props {
   isOpen: boolean
+  triggerEl?: HTMLElement | null
   selectedReaction?: string | null
   reactionCounts?: Record<string, number>
 }
@@ -24,11 +25,17 @@ const emit = defineEmits<{
 const pickerRef = ref<HTMLElement | null>(null)
 
 // 点击外部时关闭
-onClickOutside(pickerRef, () => {
-  if (props.isOpen) {
-    emit('close')
-  }
-})
+onClickOutside(
+  pickerRef,
+  () => {
+    if (props.isOpen) {
+      emit('close')
+    }
+  },
+  {
+    ignore: computed(() => (props.triggerEl ? [props.triggerEl] : [])),
+  },
+)
 
 // 可用的表态选项
 const reactions = computed<Reaction[]>(() => [
@@ -117,10 +124,10 @@ const handleSelect = (id: string) => {
       @click.stop
     >
       <div
-        class="bg-white/90 dark:bg-neutral-800/90 backdrop-blur-xl rounded-2xl border border-neutral-200/50 dark:border-white/10 shadow-2xl shadow-black/10 dark:shadow-black/30 p-3"
+        class="bg-white/95 dark:bg-neutral-800/90 backdrop-blur-xl rounded-2xl border border-neutral-300/60 dark:border-white/10 shadow-2xl shadow-black/10 dark:shadow-black/30 p-3"
       >
         <!-- 表态网格 -->
-        <div class="grid grid-cols-4 gap-2 min-w-[220px]">
+        <div class="grid grid-cols-4 gap-2 min-w-55">
           <motion.button
             v-for="reaction in reactions"
             :key="reaction.id"
@@ -153,7 +160,7 @@ const handleSelect = (id: string) => {
               },
             }"
             :class="[
-              'relative aspect-square w-full min-w-[48px] rounded-xl flex items-center justify-center transition-colors cursor-pointer shrink-0 group',
+              'relative aspect-square w-full min-w-12 rounded-xl flex items-center justify-center transition-colors cursor-pointer shrink-0 group/reaction',
               'hover:bg-neutral-100/80 dark:hover:bg-white/10',
               'active:bg-neutral-200/80 dark:active:bg-white/20',
               selectedReaction === reaction.id
@@ -169,20 +176,27 @@ const handleSelect = (id: string) => {
               mode="svg"
             />
 
+            <!-- 表情 label：移动端常显，桌面端悬浮显示 -->
+            <span
+              class="absolute left-1/2 -bottom-1.5 -translate-x-1/2 pointer-events-none select-none whitespace-nowrap text-xs sm:text-[10px] font-medium leading-none text-neutral-600/70 md:text-neutral-500/85 dark:text-neutral-400/80 opacity-100 transition-opacity duration-200 md:opacity-0 md:group-hover/reaction:opacity-100"
+            >
+              {{ reaction.label }}
+            </span>
+
             <!-- 数量徽章 - 右上角 -->
             <motion.span
               v-if="reaction.count !== undefined && reaction.count > 0"
               :initial="{ scale: 0, opacity: 0 }"
               :animate="{ scale: 1, opacity: 1 }"
               :class="[
-                'absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1',
+                'absolute -top-1 -right-1 min-w-4.5 h-4.5 px-1',
                 'flex items-center justify-center',
                 'text-[9px] font-bold leading-none',
                 'rounded-full',
                 'shadow-sm',
                 selectedReaction === reaction.id
                   ? 'bg-blue-500 text-white'
-                  : 'bg-gradient-to-br from-neutral-100 to-neutral-200 dark:from-neutral-700 dark:to-neutral-600 text-neutral-700 dark:text-neutral-100',
+                  : 'bg-linear-to-br from-neutral-100 to-neutral-200 dark:from-neutral-700 dark:to-neutral-600 text-neutral-700 dark:text-neutral-100',
                 'border border-white/50 dark:border-neutral-800/50',
                 'group-hover:scale-110 transition-transform duration-150',
               ]"
