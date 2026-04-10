@@ -483,7 +483,7 @@ const onAlbumClick = (albumId: number) => {
     }"
   >
     <div
-      class="flex items-center justify-between px-4 py-3 border-b border-white/10 flex-shrink-0"
+      class="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0"
     >
       <h3 class="font-black text-white text-ellipsis line-clamp-1">
         {{ currentPhoto.title }}

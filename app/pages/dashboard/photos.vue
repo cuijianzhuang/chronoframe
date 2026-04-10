@@ -2460,7 +2460,7 @@ onUnmounted(() => {
           >
             <div
               v-if="selectedRowsCount > 0"
-              class="fixed bottom-8 left-1/2 -translate-x-1/2 px-2 py-1.5 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl shadow-xl rounded-full border border-neutral-200/80 dark:border-neutral-800/80 z-[60] flex items-center gap-3 sm:gap-6 shadow-black/5 dark:shadow-black/20"
+              class="fixed bottom-8 left-1/2 -translate-x-1/2 px-2 py-1.5 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl shadow-xl rounded-full border border-neutral-200/80 dark:border-neutral-800/80 z-60 flex items-center gap-3 sm:gap-6 shadow-black/5 dark:shadow-black/20"
             >
               <div
                 class="pl-4 pr-1 border-r border-neutral-200 dark:border-neutral-800 min-w-max"

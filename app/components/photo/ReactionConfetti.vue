@@ -59,7 +59,7 @@ const getParticlePosition = (angle: number, distance: number) => {
 
 <template>
   <div
-    class="absolute inset-0 pointer-events-none overflow-visible flex items-center justify-center z-[9999]"
+    class="absolute inset-0 pointer-events-none overflow-visible flex items-center justify-center z-9999"
   >
     <motion.div
       v-for="particle in particles"
@@ -83,7 +83,7 @@ const getParticlePosition = (angle: number, distance: number) => {
           ease: [0.25, 0.46, 0.45, 0.94],
         },
       }"
-      class="absolute z-[9999]"
+      class="absolute z-9999"
       style="transform-origin: center"
     >
       <Icon
