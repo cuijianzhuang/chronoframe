@@ -66,8 +66,8 @@ importers:
         specifier: ^1.45.1
         version: 1.45.1
       exiftool-vendored:
-        specifier: ^30.5.0
-        version: 30.5.0
+        specifier: ^35.15.1
+        version: 35.15.1
       file-type:
         specifier: ^21.3.4
         version: 21.3.4
@@ -2818,8 +2818,8 @@ packages:
     resolution: {integrity: sha512-m7X9U6BG2+J+R1lSOdCiITLLrxm+cWlNI3HUFA92oLO77ObGNzaKdh8pMLqdZcshtkKuV84olNNXDfMc4FezBQ==}
     engines: {node: '>=10'}
 
-  '@photostructure/tz-lookup@11.2.1':
-    resolution: {integrity: sha512-ugPtvpdLwGQ8IWezSGFgUCYOpO/XXetfKLNv+UN2jjTYyfIDq9dA21GydGyzXuoQ06nN3VGBd3JxmEu+ZtXScg==}
+  '@photostructure/tz-lookup@11.5.0':
+    resolution: {integrity: sha512-0DVFriinZ7TeOnm9ytXeSL3NMFU87ZqMjgbPNkd8LgHFLcPg1BDyM1eewFYs+pPM+62S4fSP9Mtgijmn+6y95w==}
 
   '@pinia/nuxt@0.11.3':
     resolution: {integrity: sha512-7WVNHpWx4qAEzOlnyrRC88kYrwnlR/PrThWT0XI1dSNyUAXu/KBv9oR37uCgYkZroqP5jn8DfzbkNF3BtKvE9w==}
@@ -4491,8 +4491,8 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  batch-cluster@15.0.1:
-    resolution: {integrity: sha512-eUmh0ld1AUPKTEmdzwGF9QTSexXAyt9rA1F5zDfW1wUi3okA3Tal4NLdCeFI6aiKpBenQhR6NmK9bW9tBHTGPQ==}
+  batch-cluster@17.3.1:
+    resolution: {integrity: sha512-/aWEgZKXgvEseV3WEIRyjDoFka9FTrpt5+FYCxn+giUgveGBKxWjz3cl26V3aD+1kvOBP3nmANZZfcXDmKzcAA==}
     engines: {node: '>=20'}
 
   better-sqlite3@12.8.0:
@@ -5357,17 +5357,17 @@ packages:
     resolution: {integrity: sha512-9Be3ZoN4LmYR90tUoVu2te2BsbzHfhJyfEiAVfz7N5/zv+jduIfLrV2xdQXOHbaD6KgpGdO9PRPM1Y4Q9QkPkA==}
     engines: {node: ^18.19.0 || >=20.5.0}
 
-  exiftool-vendored.exe@13.35.1:
-    resolution: {integrity: sha512-RlgXYbsFYJKw9ICYx31cnpJRr94CEhp6VaJVFHJz4WQaHnJNZ5WvQZ7sZBF8B4P+dx0nQrmCwiAm9GGUQBzluw==}
+  exiftool-vendored.exe@13.53.0:
+    resolution: {integrity: sha512-CX8w1iVDOdt6iitqoOmUCWLYVmfBVmd59htXGpns/+CItu8LBAT9qVHdBP+Jl0abZyCcDrZf0eaLsfXb9mZOcQ==}
     os: [win32]
 
-  exiftool-vendored.pl@13.35.0:
-    resolution: {integrity: sha512-8sooj1fkS2Zvb2uflcp/l21la3xKJbPz7MONlWyjBAp0wZA1xtbz8S9+DLvMNRV5udPi5e6mOrIsi5gRhTN8jQ==}
+  exiftool-vendored.pl@13.53.0:
+    resolution: {integrity: sha512-D/3yJymCPeMQPtQA9Q8ou/+vvEeQcTjrNt2jT7GS2A9tE0s0NiMNVc62HaKdwm5reQXQRbPrnp56sNxWpNCHKA==}
     os: ['!win32']
     hasBin: true
 
-  exiftool-vendored@30.5.0:
-    resolution: {integrity: sha512-m3fSrpFxmrT1VYl+/4mTyaYrgpe+key1QLmsWezDDkfJI3dF8ZrXn4gUuOctDBNKEKw6x4hGoQpIoWEsO6rxvQ==}
+  exiftool-vendored@35.15.1:
+    resolution: {integrity: sha512-ox+pcW9m52MGeXMMuZjbdaKgeha9WmWPE7HhVw6GNZ607a9Hx2HyiAUDQm+XdAzv6Y34sahLReCeJRmS9F70Ww==}
     engines: {node: '>=20.0.0'}
 
   expand-template@2.0.3:
@@ -11434,7 +11434,7 @@ snapshots:
 
   '@phc/format@1.0.0': {}
 
-  '@photostructure/tz-lookup@11.2.1': {}
+  '@photostructure/tz-lookup@11.5.0': {}
 
   '@pinia/nuxt@0.11.3(magicast@0.3.5)(pinia@3.0.4(typescript@5.9.3)(vue@3.5.32(typescript@5.9.3)))':
     dependencies:
@@ -13214,7 +13214,7 @@ snapshots:
 
   baseline-browser-mapping@2.10.16: {}
 
-  batch-cluster@15.0.1: {}
+  batch-cluster@17.3.1: {}
 
   better-sqlite3@12.8.0:
     dependencies:
@@ -14071,22 +14071,22 @@ snapshots:
       strip-final-newline: 4.0.0
       yoctocolors: 2.1.2
 
-  exiftool-vendored.exe@13.35.1:
+  exiftool-vendored.exe@13.53.0:
     optional: true
 
-  exiftool-vendored.pl@13.35.0:
+  exiftool-vendored.pl@13.53.0:
     optional: true
 
-  exiftool-vendored@30.5.0:
+  exiftool-vendored@35.15.1:
     dependencies:
-      '@photostructure/tz-lookup': 11.2.1
+      '@photostructure/tz-lookup': 11.5.0
       '@types/luxon': 3.7.1
-      batch-cluster: 15.0.1
+      batch-cluster: 17.3.1
       he: 1.2.0
       luxon: 3.7.2
     optionalDependencies:
-      exiftool-vendored.exe: 13.35.1
-      exiftool-vendored.pl: 13.35.0
+      exiftool-vendored.exe: 13.53.0
+      exiftool-vendored.pl: 13.53.0
 
   expand-template@2.0.3: {}
 

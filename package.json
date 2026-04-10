@@ -50,7 +50,7 @@
     "dayjs-nuxt": "2.1.11",
     "drizzle-orm": "^0.45.2",
     "es-toolkit": "^1.45.1",
-    "exiftool-vendored": "^30.5.0",
+    "exiftool-vendored": "^35.15.1",
     "file-type": "^21.3.4",
     "heic-convert": "^2.1.0",
     "maplibre-gl": "^5.22.0",
