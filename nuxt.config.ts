@@ -12,7 +12,6 @@ export default defineNuxtConfig({
     '@nuxt/ui',
     '@nuxt/fonts',
     '@nuxt/icon',
-    '@nuxt/image',
     '@nuxt/test-utils',
     '@pinia/nuxt',
     'motion-v/nuxt',
