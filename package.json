@@ -51,7 +51,7 @@
     "drizzle-orm": "^0.45.2",
     "es-toolkit": "^1.45.1",
     "exiftool-vendored": "^35.15.1",
-    "file-type": "^21.3.4",
+    "file-type": "^22.0.1",
     "heic-convert": "^2.1.0",
     "maplibre-gl": "^5.22.0",
     "motion-v": "^2.2.0",
