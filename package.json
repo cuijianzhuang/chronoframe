@@ -54,7 +54,7 @@
     "file-type": "^21.3.4",
     "heic-convert": "^2.1.0",
     "maplibre-gl": "^5.22.0",
-    "motion-v": "^1.10.3",
+    "motion-v": "^2.2.0",
     "nuxt": "^4.4.2",
     "nuxt-auth-utils": "0.5.29",
     "nuxt-gtag": "4.1.0",
