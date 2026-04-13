@@ -52,7 +52,7 @@ features:
 
 - **GitHub Issues**: [报告问题](https://github.com/HoshinoSuzumi/chronoframe/issues)
 - **GitHub Discussions**: [讨论分享](https://github.com/HoshinoSuzumi/chronoframe/discussions)
-- **Discord**: [加入我们](https://discord.gg/mDZjCwdQGk)
+- **Discord**: [加入我们](https://discord.gg/MM4ZK4Ed7s)
 
 ## 📄 开源协议
 

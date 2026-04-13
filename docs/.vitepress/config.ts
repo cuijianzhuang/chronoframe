@@ -73,7 +73,7 @@ export default defineConfig({
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/HoshinoSuzumi/chronoframe' },
-      { icon: 'discord', link: 'https://discord.gg/mDZjCwdQGk' },
+      { icon: 'discord', link: 'https://discord.gg/MM4ZK4Ed7s' },
     ],
 
     editLink: {

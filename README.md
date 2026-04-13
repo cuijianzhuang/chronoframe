@@ -15,8 +15,8 @@
 </p>
 
 <p align="center">
-  <a href="https://discord.gg/https://discord.gg/U4vQuydP2m">
-    <img src="https://dcbadge.limes.pink/api/server/https://discord.gg/U4vQuydP2m" alt="Discord Server" />
+  <a href="https://discord.gg/MM4ZK4Ed7s">
+    <img src="https://dcbadge.limes.pink/api/server/https://discord.gg/MM4ZK4Ed7s" alt="Discord Server" />
   </a>
 </p>
 

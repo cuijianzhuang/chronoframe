@@ -87,7 +87,7 @@ const navItems = computed<NavigationMenuItem[][]>(() => [
     {
       label: 'Discord',
       icon: 'tabler:brand-discord',
-      to: 'https://discord.gg/chronoframe',
+      to: 'https://discord.gg/MM4ZK4Ed7s',
       target: '_blank',
     },
   ],
