@@ -18,7 +18,7 @@ RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm run build:deps
 RUN NODE_OPTIONS="--max-old-space-size=8192" pnpm run build
 RUN find ./.output -type f -name '*.map' -delete
 
-FROM alpine:3.22 AS runtime_deps
+FROM alpine:3.23 AS runtime_deps
 RUN apk add --no-cache nodejs libstdc++ ca-certificates
 
 FROM scratch AS runtime
