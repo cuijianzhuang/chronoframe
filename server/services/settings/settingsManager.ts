@@ -294,22 +294,43 @@ export class SettingsManager {
   ): Promise<void> {
     try {
       // Dynamically import to avoid circular dependency issues
-      const { getGlobalStorageManager } =
+      const { getGlobalStorageManager, setGlobalStorageManager } =
         await import('~~/server/services/storage/events')
+      const { StorageManager } = await import('~~/server/services/storage')
       const loggerModule = await import('~~/server/utils/logger')
-
-      const storageManager = getGlobalStorageManager()
-      if (!storageManager) {
-        this._logger.warn(
-          'Storage manager not initialized, cannot switch provider',
-        )
-        return
-      }
 
       const newProvider = await this.storage.getProviderById(providerId)
       if (!newProvider) {
         this._logger.error(`Provider with ID ${providerId} not found`)
         return
+      }
+
+      let storageManager = getGlobalStorageManager()
+      if (!storageManager) {
+        this._logger.info(
+          `Storage manager not initialized, bootstrapping with provider: ${newProvider.name} (ID: ${providerId})`,
+        )
+        try {
+          storageManager = new StorageManager(
+            newProvider.config,
+            loggerModule.logger.dynamic('storage'),
+          )
+          setGlobalStorageManager(storageManager)
+
+          if (newProvider.config.provider === 'local') {
+            const fs = await import('node:fs/promises')
+            await fs.mkdir(newProvider.config.basePath, { recursive: true })
+          }
+
+          this._logger.info('Storage manager bootstrap completed')
+          return
+        } catch (bootstrapError) {
+          this._logger.error(
+            'Failed to bootstrap storage manager with new provider:',
+            bootstrapError,
+          )
+          return
+        }
       }
 
       this._logger.info(

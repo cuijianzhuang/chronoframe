@@ -1,4 +1,4 @@
-export { StorageProvider, StorageObject } from './interfaces'
+export type { StorageProvider, StorageObject } from './interfaces'
 
 export {
   s3StorageConfigSchema,
@@ -7,7 +7,7 @@ export {
   storageConfigSchema,
 } from '~~/shared/types/storage'
 
-export {
+export type {
   S3StorageConfig,
   LocalStorageConfig,
   OpenListStorageConfig,

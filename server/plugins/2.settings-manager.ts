@@ -86,41 +86,52 @@ async function migrateRuntimeConfigToSettings() {
         config.provider?.[storageProvider as keyof typeof config.provider]
 
       if (providerConfig) {
-        try {
-          // Check if a provider of the same type already exists
-          const existingProviders = await settingsManager.storage.getProviders()
-          const sameTypeProviderExists = existingProviders.some(
-            (provider) => provider.provider === storageProvider,
+        const normalizedConfig = normalizeProviderConfig(
+          storageProvider,
+          providerConfig,
+        )
+
+        if (!isRuntimeProviderConfigUsable(normalizedConfig)) {
+          _logger.info(
+            `Skipping storage migration for ${storageProvider}: runtime config is incomplete`,
           )
-
-          if (sameTypeProviderExists) {
-            _logger.info(
-              `Storage provider of type ${storageProvider} already exists, skipping creation`,
+        } else {
+          try {
+            // Check if a provider of the same type already exists
+            const existingProviders = await settingsManager.storage.getProviders()
+            const sameTypeProviderExists = existingProviders.some(
+              (provider) => provider.provider === storageProvider,
             )
-          } else {
-            // Create a storage provider from the current configuration
-            const providerName = `Migrated ${storageProvider} Provider`
 
-            const providerId = await settingsManager.storage.addProvider({
-              name: providerName,
-              provider: storageProvider as 's3' | 'local' | 'openlist',
-              config: normalizeProviderConfig(storageProvider, providerConfig),
-            })
+            if (sameTypeProviderExists) {
+              _logger.info(
+                `Storage provider of type ${storageProvider} already exists, skipping creation`,
+              )
+            } else {
+              // Create a storage provider from the current configuration
+              const providerName = `Migrated ${storageProvider} Provider`
 
-            // Set this as the active provider
-            await settingsManager.set(
-              'storage',
-              'provider',
-              providerId,
-              undefined,
-              true,
-            )
-            _logger.info(
-              `Storage provider migrated and set as active. Provider ID: ${providerId}`,
-            )
+              const providerId = await settingsManager.storage.addProvider({
+                name: providerName,
+                provider: storageProvider as 's3' | 'local' | 'openlist',
+                config: normalizedConfig,
+              })
+
+              // Set this as the active provider
+              await settingsManager.set(
+                'storage',
+                'provider',
+                providerId,
+                undefined,
+                true,
+              )
+              _logger.info(
+                `Storage provider migrated and set as active. Provider ID: ${providerId}`,
+              )
+            }
+          } catch (error) {
+            _logger.error('Failed to migrate storage provider:', error)
           }
-        } catch (error) {
-          _logger.error('Failed to migrate storage provider:', error)
         }
       }
     }
@@ -192,5 +203,27 @@ function normalizeProviderConfig(provider: string, config: any): any {
 
     default:
       return config
+  }
+}
+
+function isRuntimeProviderConfigUsable(config: any): boolean {
+  if (!config || !config.provider) {
+    return false
+  }
+
+  switch (config.provider) {
+    case 's3':
+      return Boolean(
+        config.endpoint &&
+          config.bucket &&
+          config.accessKeyId &&
+          config.secretAccessKey,
+      )
+    case 'local':
+      return Boolean(config.basePath)
+    case 'openlist':
+      return Boolean(config.baseUrl && config.rootPath && config.token)
+    default:
+      return false
   }
 }
