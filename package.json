@@ -11,7 +11,10 @@
   "scripts": {
     "db": "drizzle-kit",
     "db:push": "drizzle-kit push",
-    "db:drop": "drizzle-kit drop",
+    "db:pull": "drizzle-kit pull",
+    "db:studio": "drizzle-kit studio --port 3010",
+    "db:check": "drizzle-kit check",
+    "db:up": "drizzle-kit up",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "build": "NODE_OPTIONS=\"--max-old-space-size=8192\" nuxt build",
