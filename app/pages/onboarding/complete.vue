@@ -62,7 +62,8 @@ async function onComplete() {
     // Clear store
     store.clear()
 
-    // Force reload to apply settings
+    // Hard redirect to dashboard to reload settings from server
+    // (preserves session cookie set during submit)
     window.location.href = '/dashboard'
   } catch (error: any) {
     console.error(error)

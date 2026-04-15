@@ -33,6 +33,7 @@ export default eventHandler(async (event) => {
   const db = useDB()
 
   // 1. Handle Admin User
+  let adminUser: typeof tables.users.$inferSelect | undefined
   const existingUser = db.select().from(tables.users).limit(1).get()
   if (existingUser) {
     if (existingUser.email === body.admin.email) {
@@ -45,6 +46,7 @@ export default eventHandler(async (event) => {
         })
         .where(eq(tables.users.id, existingUser.id))
         .run()
+      adminUser = db.select().from(tables.users).where(eq(tables.users.id, existingUser.id)).get()
     } else {
       throw createError({
         statusCode: 400,
@@ -62,6 +64,7 @@ export default eventHandler(async (event) => {
         createdAt: new Date(),
       })
       .run()
+    adminUser = db.select().from(tables.users).where(eq(tables.users.email, body.admin.email)).get()
   }
 
   // 2. Handle Site Settings
@@ -97,6 +100,19 @@ export default eventHandler(async (event) => {
 
   // 5. Mark Complete
   await settingsManager.set('system', 'firstLaunch', false, undefined, true)
+
+  // 6. Auto-login the admin user
+  if (adminUser) {
+    await setUserSession(
+      event,
+      { user: adminUser },
+      {
+        cookie: {
+          secure: false,
+        },
+      },
+    )
+  }
 
   return { success: true }
 })
