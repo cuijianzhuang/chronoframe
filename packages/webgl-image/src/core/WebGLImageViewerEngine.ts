@@ -86,6 +86,7 @@ export class WebGLImageViewerEngine {
   // 事件监听器
   private throttledRender: () => void
   private resizeObserver: ResizeObserver | null = null
+  private resizeAnimationFrameId: number | null = null
 
   // 绑定的事件处理器（用于正确添加/移除全局事件监听器）
   private boundHandleMouseDown: (event: MouseEvent) => void
@@ -448,7 +449,13 @@ export class WebGLImageViewerEngine {
 
   private setupResizeObserver(): void {
     this.resizeObserver = new ResizeObserver(() => {
-      this.resize()
+      if (this.resizeAnimationFrameId) {
+        cancelAnimationFrame(this.resizeAnimationFrameId)
+      }
+      this.resizeAnimationFrameId = requestAnimationFrame(() => {
+        this.resizeAnimationFrameId = null
+        this.resize()
+      })
     })
     this.resizeObserver.observe(this.canvas)
   }
@@ -897,24 +904,66 @@ export class WebGLImageViewerEngine {
   public resize(): void {
     const rect = this.canvas.getBoundingClientRect()
     const dpr = window.devicePixelRatio || 1
+    const prevCanvasWidth = this.canvas.width
+    const prevCanvasHeight = this.canvas.height
+    const nextCanvasWidth = Math.max(1, Math.round(rect.width * dpr))
+    const nextCanvasHeight = Math.max(1, Math.round(rect.height * dpr))
 
     // 检查画布尺寸是否有效
     if (rect.width <= 0 || rect.height <= 0) {
       return
     }
 
-    this.canvas.width = rect.width * dpr
-    this.canvas.height = rect.height * dpr
+    if (
+      nextCanvasWidth === prevCanvasWidth &&
+      nextCanvasHeight === prevCanvasHeight
+    ) {
+      return
+    }
+
+    this.canvas.width = nextCanvasWidth
+    this.canvas.height = nextCanvasHeight
 
     this.gl.viewport(0, 0, this.canvas.width, this.canvas.height)
 
     if (this.image) {
+      const prevScale = this.transform.scale
       const prevTranslateX = this.transform.translateX
       const prevTranslateY = this.transform.translateY
+      const oldInitialScale = this.initialScale
+
+      if (
+        prevCanvasWidth > 0 &&
+        prevCanvasHeight > 0 &&
+        isFinite(prevScale) &&
+        prevScale > 0
+      ) {
+        const viewportCenterImageX =
+          (prevCanvasWidth / 2 - this.transform.translateX) / prevScale
+        const viewportCenterImageY =
+          (prevCanvasHeight / 2 - this.transform.translateY) / prevScale
+
+        const newInitialScale = this.getFitScale()
+        const relativeZoomLevel =
+          oldInitialScale > 0 ? prevScale / oldInitialScale : 1
+        const nextScale = this.clampScale(newInitialScale * relativeZoomLevel)
+
+        this.initialScale = newInitialScale
+        this.transform.scale = nextScale
+        this.transform.translateX =
+          this.canvas.width / 2 - viewportCenterImageX * nextScale
+        this.transform.translateY =
+          this.canvas.height / 2 - viewportCenterImageY * nextScale
+      }
 
       this.constrainToBounds()
 
+      if (prevScale !== this.transform.scale) {
+        this.emitZoomChange()
+      }
+
       if (
+        prevScale !== this.transform.scale ||
         prevTranslateX !== this.transform.translateX ||
         prevTranslateY !== this.transform.translateY
       ) {
@@ -931,27 +980,16 @@ export class WebGLImageViewerEngine {
   private centerImage(): void {
     if (!this.image || this.image.width <= 0 || this.image.height <= 0) return
 
-    const canvasAspect = this.canvas.width / this.canvas.height
-    const imageAspect = this.image.width / this.image.height
-
     // 避免除零错误
     if (this.canvas.width <= 0 || this.canvas.height <= 0) return
 
-    // 计算适合屏幕的初始缩放值
-    let initialScale: number
-    if (imageAspect > canvasAspect) {
-      initialScale = this.canvas.width / this.image.width
-    } else {
-      initialScale = this.canvas.height / this.image.height
-    }
-
     // 设置初始缩放（这是相对缩放的基准）
-    this.initialScale = initialScale
+    this.initialScale = this.getFitScale()
 
     // 基于相对缩放限制计算实际缩放值
     // 如果用户设置的相对缩放限制允许，我们使用初始缩放值
     // 否则使用限制后的值
-    const actualScale = this.clampScale(initialScale)
+    const actualScale = this.clampScale(this.initialScale)
 
     const scaledWidth = this.image.width * actualScale
     const scaledHeight = this.image.height * actualScale
@@ -1563,27 +1601,16 @@ export class WebGLImageViewerEngine {
       return { ...this.transform }
     }
 
-    const canvasAspect = this.canvas.width / this.canvas.height
-    const imageAspect = this.image.width / this.image.height
-
     // 避免除零错误
     if (this.canvas.width <= 0 || this.canvas.height <= 0) {
       return { ...this.transform }
     }
 
-    // 计算适合屏幕的初始缩放值
-    let initialScale: number
-    if (imageAspect > canvasAspect) {
-      initialScale = this.canvas.width / this.image.width
-    } else {
-      initialScale = this.canvas.height / this.image.height
-    }
-
     // 设置初始缩放（这是相对缩放的基准）
-    this.initialScale = initialScale
+    this.initialScale = this.getFitScale()
 
     // 基于相对缩放限制计算实际缩放值
-    const actualScale = this.clampScale(initialScale)
+    const actualScale = this.clampScale(this.initialScale)
 
     const scaledWidth = this.image.width * actualScale
     const scaledHeight = this.image.height * actualScale
@@ -1597,6 +1624,29 @@ export class WebGLImageViewerEngine {
 
   public getScale(): number {
     return this.transform.scale
+  }
+
+  private getFitScale(): number {
+    if (
+      !this.image ||
+      this.image.width <= 0 ||
+      this.image.height <= 0 ||
+      this.canvas.width <= 0 ||
+      this.canvas.height <= 0
+    ) {
+      return this.initialScale
+    }
+
+    const canvasAspect = this.canvas.width / this.canvas.height
+    const imageAspect = this.image.width / this.image.height
+
+    if (!isFinite(canvasAspect) || !isFinite(imageAspect)) {
+      return this.initialScale
+    }
+
+    return imageAspect > canvasAspect
+      ? this.canvas.width / this.image.width
+      : this.canvas.height / this.image.height
   }
 
   public getRelativeScale(): number {
@@ -1807,6 +1857,10 @@ export class WebGLImageViewerEngine {
     if (this.resizeObserver) {
       this.resizeObserver.disconnect()
       this.resizeObserver = null
+    }
+    if (this.resizeAnimationFrameId) {
+      cancelAnimationFrame(this.resizeAnimationFrameId)
+      this.resizeAnimationFrameId = null
     }
 
     // 重置状态
