@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { z } from 'zod'
@@ -154,7 +154,9 @@ export default eventHandler(async (event) => {
     exifUpdates.Rating = payload.rating !== null ? payload.rating : null
   }
 
-  const tempDir = await mkdtemp(path.join(tmpdir(), 'cframe-edit-'))
+  const tempRoot = tmpdir()
+  await mkdir(tempRoot, { recursive: true })
+  const tempDir = await mkdtemp(path.join(tempRoot, 'cframe-edit-'))
   const ext = path.extname(photo.storageKey) || '.jpg'
   const tempFile = path.join(tempDir, `edited${ext}`)
 

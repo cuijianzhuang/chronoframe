@@ -1,5 +1,5 @@
 import type { ConsolaInstance } from 'consola'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'path'
 import { asc, desc, eq, sql } from 'drizzle-orm'
@@ -641,7 +641,9 @@ export class QueueManager {
           throw new Error(`Photo file ${photo.storageKey} not found in storage`)
         }
 
-        const tempDir = await mkdtemp(path.join(tmpdir(), 'cframe-location-'))
+        const tempRoot = tmpdir()
+        await mkdir(tempRoot, { recursive: true })
+        const tempDir = await mkdtemp(path.join(tempRoot, 'cframe-location-'))
         const ext = path.extname(photo.storageKey) || '.jpg'
         const tempFile = path.join(tempDir, `erase-location${ext}`)
 
