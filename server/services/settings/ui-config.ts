@@ -142,6 +142,19 @@ export const SYSTEM_SETTINGS_UI: Record<string, FieldUIConfig> = {
     type: 'toggle',
     help: 'settings.system.webglImageViewerDebug.help',
   },
+  'auth.github.enabled': {
+    type: 'toggle',
+  },
+  'auth.github.clientId': {
+    type: 'input',
+    placeholder: 'Ov23li...',
+    visibleIf: { fieldKey: 'auth.github.enabled', value: true },
+  },
+  'auth.github.clientSecret': {
+    type: 'password',
+    placeholder: 'github_oauth_client_secret',
+    visibleIf: { fieldKey: 'auth.github.enabled', value: true },
+  },
 }
 
 export const STORAGE_SETTINGS_UI: Record<string, FieldUIConfig> = {

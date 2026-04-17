@@ -19,6 +19,9 @@ export default defineNitroPlugin(async (_nitroApp) => {
     // Migrate existing configurations from runtimeConfig
     // Note: Storage manager will be initialized in the next plugin (2_storage.ts)
     await migrateRuntimeConfigToSettings()
+
+    // Sync GitHub OAuth credentials from settings to process.env for auth-utils.
+    await syncGithubOAuthEnvFromSettings()
   } finally {
     _settingsManager.setInitializingFlag(false)
   }
@@ -28,7 +31,7 @@ export default defineNitroPlugin(async (_nitroApp) => {
  * Migrate existing configurations from runtimeConfig to the settings system
  */
 async function migrateRuntimeConfigToSettings() {
-  const config = useRuntimeConfig()
+  const config = useRuntimeConfig() as any
   const _logger = logger.dynamic('settings-migration')
 
   try {
@@ -73,6 +76,39 @@ async function migrateRuntimeConfigToSettings() {
           } catch (error) {
             _logger.warn(`Failed to migrate map.${key}:`, error)
           }
+        }
+      }
+    }
+
+    // Migrate auth settings (GitHub OAuth)
+    const githubOauthConfig = config.oauth?.github || {}
+    if (config.public?.oauth?.github?.enabled === true) {
+      try {
+        await settingsManager.set(
+          'system',
+          'auth.github.enabled' as any,
+          true,
+          undefined,
+          true,
+        )
+        _logger.debug('Migrated system.auth.github.enabled=true')
+      } catch (error) {
+        _logger.warn('Failed to migrate system.auth.github.enabled:', error)
+      }
+    }
+
+    const githubOauthSettings = {
+      'auth.github.clientId': githubOauthConfig.clientId || '',
+      'auth.github.clientSecret': githubOauthConfig.clientSecret || '',
+    }
+
+    for (const [key, value] of Object.entries(githubOauthSettings)) {
+      if (typeof value === 'string' && value.length > 0) {
+        try {
+          await settingsManager.set('system', key as any, value, undefined, true)
+          _logger.debug(`Migrated system.${key}`)
+        } catch (error) {
+          _logger.warn(`Failed to migrate system.${key}:`, error)
         }
       }
     }
@@ -139,6 +175,36 @@ async function migrateRuntimeConfigToSettings() {
     _logger.info('Configuration migration completed')
   } catch (error) {
     _logger.error('Failed to migrate configurations:', error)
+  }
+}
+
+async function syncGithubOAuthEnvFromSettings() {
+  const config = useRuntimeConfig() as any
+
+  const enabled = await settingsManager.get<boolean>(
+    'system',
+    'auth.github.enabled' as any,
+    Boolean(config.public?.oauth?.github?.enabled),
+  )
+  const clientId = await settingsManager.get<string>(
+    'system',
+    'auth.github.clientId' as any,
+    config.oauth?.github?.clientId || '',
+  )
+  const clientSecret = await settingsManager.get<string>(
+    'system',
+    'auth.github.clientSecret' as any,
+    config.oauth?.github?.clientSecret || '',
+  )
+
+  const canEnableGithubOauth = Boolean(enabled && clientId && clientSecret)
+
+  if (canEnableGithubOauth) {
+    process.env.NUXT_OAUTH_GITHUB_CLIENT_ID = clientId || ''
+    process.env.NUXT_OAUTH_GITHUB_CLIENT_SECRET = clientSecret || ''
+  } else {
+    delete process.env.NUXT_OAUTH_GITHUB_CLIENT_ID
+    delete process.env.NUXT_OAUTH_GITHUB_CLIENT_SECRET
   }
 }
 

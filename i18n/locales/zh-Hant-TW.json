@@ -869,6 +869,11 @@
       }
     },
     "system": {
+      "sections": {
+        "thirdPartyLogin": "第三方登入",
+        "fileProcessing": "檔案處理",
+        "debugSettings": "除錯設定"
+      },
       "upload": {
         "duplicateCheck": {
           "enabled": {
@@ -892,6 +897,22 @@
         "label": "WebGL Image Viewer 偵錯模式",
         "description": "控制 WebGL 圖片檢視器是否在正式環境也顯示偵錯資訊",
         "help": "啟用後，已登入使用者在任何環境都可看到 WebGL 偵錯面板；關閉後僅在開發環境生效"
+      },
+      "auth": {
+        "github": {
+          "enabled": {
+            "label": "啟用 GitHub 登入",
+            "description": "是否啟用 GitHub OAuth 登入"
+          },
+          "clientId": {
+            "label": "GitHub Client ID",
+            "description": "GitHub OAuth 應用的 Client ID"
+          },
+          "clientSecret": {
+            "label": "GitHub Client Secret",
+            "description": "GitHub OAuth 應用的 Client Secret"
+          }
+        }
       }
     },
     "map": {

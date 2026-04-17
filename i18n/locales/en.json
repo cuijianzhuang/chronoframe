@@ -934,6 +934,11 @@
       }
     },
     "system": {
+      "sections": {
+        "thirdPartyLogin": "Third-Party Login",
+        "fileProcessing": "File Processing",
+        "debugSettings": "Debug Settings"
+      },
       "upload": {
         "duplicateCheck": {
           "enabled": {
@@ -957,6 +962,22 @@
         "label": "WebGL Image Viewer debug mode",
         "description": "Control whether the WebGL image viewer shows debug info in production",
         "help": "When enabled, logged-in users can view the WebGL debug panel in any environment; when disabled, debug info is shown only in development"
+      },
+      "auth": {
+        "github": {
+          "enabled": {
+            "label": "Enable GitHub login",
+            "description": "Whether to enable GitHub OAuth login"
+          },
+          "clientId": {
+            "label": "GitHub Client ID",
+            "description": "Client ID of your GitHub OAuth app"
+          },
+          "clientSecret": {
+            "label": "GitHub Client Secret",
+            "description": "Client Secret of your GitHub OAuth app"
+          }
+        }
       }
     },
     "map": {

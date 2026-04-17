@@ -938,6 +938,11 @@
       }
     },
     "system": {
+      "sections": {
+        "thirdPartyLogin": "第三方登录",
+        "fileProcessing": "文件处理",
+        "debugSettings": "调试设置"
+      },
       "upload": {
         "duplicateCheck": {
           "enabled": {
@@ -961,6 +966,22 @@
         "label": "WebGL Image Viewer 调试模式",
         "description": "控制 WebGL 图片查看器是否在生产环境也显示调试信息",
         "help": "开启后，登录用户在任意环境都可看到 WebGL 调试面板；关闭后仅开发环境生效"
+      },
+      "auth": {
+        "github": {
+          "enabled": {
+            "label": "启用 GitHub 登录",
+            "description": "是否启用 GitHub OAuth 登录"
+          },
+          "clientId": {
+            "label": "GitHub Client ID",
+            "description": "GitHub OAuth 应用的 Client ID"
+          },
+          "clientSecret": {
+            "label": "GitHub Client Secret",
+            "description": "GitHub OAuth 应用的 Client Secret"
+          }
+        }
       }
     },
     "map": {

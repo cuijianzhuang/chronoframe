@@ -869,6 +869,11 @@
       }
     },
     "system": {
+      "sections": {
+        "thirdPartyLogin": "外部ログイン",
+        "fileProcessing": "ファイル処理",
+        "debugSettings": "デバッグ設定"
+      },
       "upload": {
         "duplicateCheck": {
           "enabled": {
@@ -892,6 +897,22 @@
         "label": "WebGL Image Viewer デバッグモード",
         "description": "WebGL 画像ビューアのデバッグ情報を本番環境でも表示するかを制御します",
         "help": "有効にすると、ログイン中のユーザーは環境を問わず WebGL デバッグパネルを表示できます。無効時は開発環境のみ表示されます"
+      },
+      "auth": {
+        "github": {
+          "enabled": {
+            "label": "GitHub ログインを有効化",
+            "description": "GitHub OAuth ログインを有効にするかどうか"
+          },
+          "clientId": {
+            "label": "GitHub Client ID",
+            "description": "GitHub OAuth アプリの Client ID"
+          },
+          "clientSecret": {
+            "label": "GitHub Client Secret",
+            "description": "GitHub OAuth アプリの Client Secret"
+          }
+        }
       }
     },
     "map": {

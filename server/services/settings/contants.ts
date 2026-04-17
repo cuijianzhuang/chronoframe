@@ -100,6 +100,32 @@ export const DEFAULT_SETTINGS = [
     description: 'settings.system.webglImageViewerDebug.description',
     isPublic: true,
   },
+  {
+    namespace: 'system',
+    key: 'auth.github.enabled',
+    type: 'boolean',
+    defaultValue: false,
+    label: 'settings.system.auth.github.enabled.label',
+    description: 'settings.system.auth.github.enabled.description',
+    isPublic: true,
+  },
+  {
+    namespace: 'system',
+    key: 'auth.github.clientId',
+    type: 'string',
+    defaultValue: '',
+    label: 'settings.system.auth.github.clientId.label',
+    description: 'settings.system.auth.github.clientId.description',
+  },
+  {
+    namespace: 'system',
+    key: 'auth.github.clientSecret',
+    type: 'string',
+    defaultValue: '',
+    label: 'settings.system.auth.github.clientSecret.label',
+    description: 'settings.system.auth.github.clientSecret.description',
+    isSecret: true,
+  },
   // NAMESPACE: privacy
   {
     namespace: 'privacy',

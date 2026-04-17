@@ -5,11 +5,21 @@ useHead({
 
 const { fetch: fetchUserSession } = useUserSession()
 const config = useRuntimeConfig()
+const settingsStore = useSettingsStore()
 const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 
 const isLoading = ref(false)
+
+const githubOauthEnabled = computed(() => {
+  const settingsValue = settingsStore.getSetting('system:auth.github.enabled')
+  if (typeof settingsValue === 'boolean') {
+    return settingsValue
+  }
+
+  return Boolean(config.public.oauth.github.enabled)
+})
 
 const onAuthSubmit = async (event: any) => {
   isLoading.value = true
@@ -46,7 +56,7 @@ const onAuthSubmit = async (event: any) => {
       :subtitle="$t('auth.form.signin.subtitle', [config.public.app.title])"
       :loading="isLoading"
       :providers="[
-        config.public.oauth.github.enabled && {
+        githubOauthEnabled && {
           icon: 'tabler:brand-github',
           size: 'lg',
           color: 'neutral',
