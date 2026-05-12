@@ -380,6 +380,12 @@
         "email": "メール",
         "password": "パスワード"
       }
+    },
+    "messages": {
+      "loginFailed": {
+        "title": "ログインに失敗しました",
+        "description": "予期しないエラーが発生しました。もう一度お試しください。"
+      }
     }
   },
   "common": {
@@ -633,6 +639,40 @@
         "actions": {
           "cancel": "キャンセル",
           "save": "変更を保存"
+        }
+      },
+      "uploadQueueItem": {
+        "status": {
+          "waiting": "アップロード待機",
+          "preparing": "準備中",
+          "uploading": "アップロード中 {0}%",
+          "pendingProcessing": "処理待ち",
+          "completed": "完了",
+          "error": "エラー",
+          "skipped": "スキップ",
+          "blocked": "ブロック",
+          "unknown": "不明"
+        },
+        "stage": {
+          "preprocessing": "前処理中",
+          "metadata": "メタデータ抽出",
+          "thumbnail": "サムネイル生成",
+          "exif": "EXIF 処理",
+          "reverseGeocoding": "逆ジオコーディング",
+          "livePhoto": "Live Photo 検出"
+        },
+        "actions": {
+          "abort": "中止",
+          "clear": "クリア"
+        },
+        "progress": {
+          "upload": "アップロード進捗",
+          "remainingTime": "残り時間: {0}",
+          "processing": "処理状態"
+        },
+        "alerts": {
+          "longProcessing": "大きなファイルは処理に時間がかかることがあります。",
+          "success": "ファイルのアップロードと処理が完了しました"
         }
       }
     },
@@ -1113,6 +1153,122 @@
           "description": "Mapbox GL JS のオープンソースフォーク。"
         }
       }
+    }
+  },
+  "onboarding": {
+    "layout": {
+      "steps": {
+        "welcome": "ようこそ",
+        "admin": "管理者アカウント",
+        "site": "サイト情報",
+        "storage": "ストレージ設定",
+        "map": "地図サービス",
+        "complete": "完了"
+      },
+      "current": "進行中",
+      "stepCounter": "ステップ {0} / {1}"
+    },
+    "actions": {
+      "next": "次へ",
+      "completeSetup": "設定を完了"
+    },
+    "welcome": {
+      "title": "ChronoFrame へようこそ",
+      "description": "ウィザードに従って、数分でギャラリーを設定できます。",
+      "intro": "ChronoFrame は多機能な個人ギャラリーアプリです。写真をアップロードする前に、いくつかの項目を設定しましょう。",
+      "cards": {
+        "admin": {
+          "title": "管理者アカウント",
+          "description": "管理コンソールへのログインに使用します"
+        },
+        "site": {
+          "title": "サイト情報",
+          "description": "ギャラリーをパーソナライズします"
+        },
+        "storage": {
+          "title": "ストレージ",
+          "description": "写真をローカルまたはクラウドに保存します"
+        },
+        "map": {
+          "title": "地図サービス",
+          "description": "位置の可視化と撮影地点の表示"
+        }
+      },
+      "privacyNotice": "ChronoFrame はあなたのデータを収集しません。",
+      "start": "はじめる"
+    },
+    "admin": {
+      "title": "管理者アカウント",
+      "description": "管理者アカウントを作成します"
+    },
+    "site": {
+      "title": "サイト情報",
+      "description": "サイトの基本情報を設定します"
+    },
+    "storage": {
+      "title": "ストレージ設定",
+      "description": "写真の保存先を選択します"
+    },
+    "map": {
+      "title": "地図サービス",
+      "description": "グローブ表示と写真詳細のミニマップ向けに地図サービスを設定します"
+    },
+    "complete": {
+      "title": "まもなく完了です！",
+      "description": "ChronoFrame ギャラリーの準備ができました。",
+      "body": "基本設定はすべて完了しました。管理者アカウントでログインして写真のアップロードを開始できます。",
+      "goToDashboard": "ダッシュボードへ",
+      "setupFailedTitle": "セットアップ失敗",
+      "setupFailedDescription": "セットアップの完了に失敗しました"
+    }
+  },
+  "globe": {
+    "analysis": {
+      "annotation": "撮影パラメータ注釈",
+      "annotationDescription": "撮影パラメータ別に地理分布を表示",
+      "mode": {
+        "none": {
+          "label": "デフォルト",
+          "description": "注釈を無効化"
+        },
+        "focalLength": {
+          "label": "焦点距離",
+          "description": "広角 / 標準 / 望遠"
+        },
+        "shutterSpeed": {
+          "label": "シャッター速度",
+          "description": "高速 / 中速 / 低速"
+        },
+        "altitude": {
+          "label": "標高",
+          "description": "低 / 中 / 高標高"
+        }
+      },
+      "legend": {
+        "focalLength": {
+          "title": "焦点距離分布",
+          "wide": "広角",
+          "standard": "標準",
+          "telephoto": "望遠"
+        },
+        "shutterSpeed": {
+          "title": "シャッター速度分布",
+          "fast": "高速",
+          "medium": "中速",
+          "slow": "低速"
+        },
+        "altitude": {
+          "title": "標高分布",
+          "low": "低標高",
+          "medium": "中標高",
+          "high": "高標高"
+        }
+      }
+    },
+    "timeline": {
+      "toggle": "タイムラインの有効/無効",
+      "playPause": "タイムライン再生/一時停止",
+      "title": "タイムライン"
     }
   }
 }

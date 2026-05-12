@@ -68,8 +68,8 @@ async function onComplete() {
   } catch (error: any) {
     console.error(error)
     toast.add({
-      title: 'Setup Failed',
-      description: error.data?.message || 'Failed to complete setup',
+      title: $t('onboarding.complete.setupFailedTitle'),
+      description: error.data?.message || $t('onboarding.complete.setupFailedDescription'),
       color: 'error',
     })
   } finally {
@@ -80,8 +80,8 @@ async function onComplete() {
 
 <template>
   <WizardStep
-    title="即将完成！"
-    description="您的 ChronoFrame 画廊已准备好使用。"
+    :title="$t('onboarding.complete.title')"
+    :description="$t('onboarding.complete.description')"
   >
     <div
       class="flex flex-col items-center justify-center py-12 space-y-8 text-center"
@@ -102,7 +102,7 @@ async function onComplete() {
 
       <div class="max-w-md text-neutral-300 text-lg">
         <p>
-          您已完成了所有基本配置。现在可以使用管理员账户登录并开始上传照片。
+          {{ $t('onboarding.complete.body') }}
         </p>
       </div>
 
@@ -113,7 +113,7 @@ async function onComplete() {
         class="px-6 py-3 text-base font-bold shadow-xl shadow-primary-500/20 hover:shadow-primary-500/40 transition-all duration-300"
         @click="onComplete"
       >
-        前往仪表盘
+        {{ $t('onboarding.complete.goToDashboard') }}
       </WizardButton>
     </div>
   </WizardStep>

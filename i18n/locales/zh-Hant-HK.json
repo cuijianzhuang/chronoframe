@@ -380,6 +380,12 @@
         "email": "電子郵箱",
         "password": "密碼"
       }
+    },
+    "messages": {
+      "loginFailed": {
+        "title": "登入失敗",
+        "description": "發生未預期錯誤，請稍後再試。"
+      }
     }
   },
   "common": {
@@ -633,6 +639,40 @@
         "actions": {
           "cancel": "取消",
           "save": "儲存變更"
+        }
+      },
+      "uploadQueueItem": {
+        "status": {
+          "waiting": "等待上傳",
+          "preparing": "準備中",
+          "uploading": "上傳中 {0}%",
+          "pendingProcessing": "等待處理",
+          "completed": "完成",
+          "error": "錯誤",
+          "skipped": "已跳過",
+          "blocked": "已阻止",
+          "unknown": "未知"
+        },
+        "stage": {
+          "preprocessing": "預處理中",
+          "metadata": "擷取中繼資料",
+          "thumbnail": "產生縮圖",
+          "exif": "處理 EXIF",
+          "reverseGeocoding": "地理解析",
+          "livePhoto": "偵測 Live Photo"
+        },
+        "actions": {
+          "abort": "中止",
+          "clear": "清除"
+        },
+        "progress": {
+          "upload": "上傳進度",
+          "remainingTime": "剩餘時間: {0}",
+          "processing": "處理狀態"
+        },
+        "alerts": {
+          "longProcessing": "大型檔案處理時間較長，屬正常現象。",
+          "success": "檔案已成功上傳並完成處理"
         }
       }
     },
@@ -1113,6 +1153,122 @@
           "description": "Mapbox GL JS 的開源分支。"
         }
       }
+    }
+  },
+  "onboarding": {
+    "layout": {
+      "steps": {
+        "welcome": "歡迎",
+        "admin": "管理員帳號",
+        "site": "站點資訊",
+        "storage": "存儲設定",
+        "map": "地圖服務",
+        "complete": "完成"
+      },
+      "current": "進行中",
+      "stepCounter": "第 {0} 步 / 共 {1} 步"
+    },
+    "actions": {
+      "next": "下一步",
+      "completeSetup": "完成設定"
+    },
+    "welcome": {
+      "title": "歡迎使用 ChronoFrame",
+      "description": "跟著精靈，在幾分鐘內完成畫廊設定。",
+      "intro": "ChronoFrame 是多功能個人畫廊應用程式。開始上傳照片前，請先完成以下設定：",
+      "cards": {
+        "admin": {
+          "title": "管理員帳號",
+          "description": "用於登入管理後台"
+        },
+        "site": {
+          "title": "站點資訊",
+          "description": "打造你的專屬畫廊"
+        },
+        "storage": {
+          "title": "存儲",
+          "description": "將照片存儲在本機或雲端"
+        },
+        "map": {
+          "title": "地圖服務",
+          "description": "位置可視化與拍攝地標記"
+        }
+      },
+      "privacyNotice": "ChronoFrame 不會收集你的任何資料。",
+      "start": "開始吧"
+    },
+    "admin": {
+      "title": "管理員帳號",
+      "description": "建立管理員帳號"
+    },
+    "site": {
+      "title": "站點資訊",
+      "description": "設定站點基本資訊"
+    },
+    "storage": {
+      "title": "存儲設定",
+      "description": "選擇照片存儲位置"
+    },
+    "map": {
+      "title": "地圖服務",
+      "description": "為地球儀檢視與照片詳情小地圖設定地圖服務"
+    },
+    "complete": {
+      "title": "即將完成！",
+      "description": "你的 ChronoFrame 畫廊已可使用。",
+      "body": "你已完成所有基本設定。現在可使用管理員帳號登入並開始上傳照片。",
+      "goToDashboard": "前往儀表板",
+      "setupFailedTitle": "設定失敗",
+      "setupFailedDescription": "完成設定失敗"
+    }
+  },
+  "globe": {
+    "analysis": {
+      "annotation": "拍攝參數標註",
+      "annotationDescription": "依拍攝參數查看地理分布",
+      "mode": {
+        "none": {
+          "label": "預設",
+          "description": "關閉標註"
+        },
+        "focalLength": {
+          "label": "焦段",
+          "description": "廣角 / 標準 / 長焦"
+        },
+        "shutterSpeed": {
+          "label": "快門",
+          "description": "高速 / 中速 / 低速"
+        },
+        "altitude": {
+          "label": "海拔",
+          "description": "低 / 中 / 高海拔"
+        }
+      },
+      "legend": {
+        "focalLength": {
+          "title": "焦段分布",
+          "wide": "廣角",
+          "standard": "標準",
+          "telephoto": "長焦"
+        },
+        "shutterSpeed": {
+          "title": "快門分布",
+          "fast": "高速",
+          "medium": "中速",
+          "slow": "低速"
+        },
+        "altitude": {
+          "title": "海拔分布",
+          "low": "低海拔",
+          "medium": "中海拔",
+          "high": "高海拔"
+        }
+      }
+    },
+    "timeline": {
+      "toggle": "啟用/關閉時間回溯",
+      "playPause": "播放/暫停時間回溯",
+      "title": "時間回溯"
     }
   }
 }

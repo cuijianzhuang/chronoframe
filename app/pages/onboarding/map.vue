@@ -44,8 +44,8 @@ function onSubmit() {
 
 <template>
   <WizardStep
-    title="地图服务"
-    description="为地球仪视图以及照片详情中的小地图配置地图服务"
+    :title="$t('onboarding.map.title')"
+    :description="$t('onboarding.map.description')"
   >
     <div
       v-if="fetchingSchema"
@@ -117,7 +117,7 @@ function onSubmit() {
         :disabled="fetchingSchema"
         trailing-icon="tabler:arrow-right"
       >
-        完成设置
+        {{ $t('onboarding.actions.completeSetup') }}
       </WizardButton>
     </template>
   </WizardStep>

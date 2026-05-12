@@ -35,10 +35,8 @@ const onAuthSubmit = async (event: any) => {
       console.error('Login error:', error)
       toast.add({
         color: 'error',
-        title: 'Login Failed',
-        description:
-          error?.data?.message ||
-          'An unexpected error occurred. Please try again.',
+        title: $t('auth.messages.loginFailed.title'),
+        description: error?.data?.message || $t('auth.messages.loginFailed.description'),
       })
     })
     .finally(() => {

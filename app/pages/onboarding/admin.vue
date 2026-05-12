@@ -38,8 +38,8 @@ function onSubmit() {
 
 <template>
   <WizardStep
-    title="管理员账户"
-    description="创建一个管理员账户"
+    :title="$t('onboarding.admin.title')"
+    :description="$t('onboarding.admin.description')"
   >
     <div
       v-if="fetchingSchema"
@@ -88,7 +88,7 @@ function onSubmit() {
         :disabled="fetchingSchema"
         trailing-icon="tabler:arrow-right"
       >
-        下一步
+        {{ $t('onboarding.actions.next') }}
       </WizardButton>
     </template>
   </WizardStep>

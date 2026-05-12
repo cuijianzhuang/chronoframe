@@ -6,14 +6,13 @@ definePageMeta({
 
 <template>
   <WizardStep
-    title="欢迎使用 ChronoFrame"
-    description="跟随向导，在几分钟内设置好您的画廊。"
+    :title="$t('onboarding.welcome.title')"
+    :description="$t('onboarding.welcome.description')"
   >
     <div class="space-y-6">
       <div class="text-neutral-300 text-base leading-relaxed">
         <p>
-          ChronoFrame
-          是一款多功能个人画廊应用程序。在您开始上传照片之前，我们需要先配置一些内容：
+          {{ $t('onboarding.welcome.intro') }}
         </p>
       </div>
 
@@ -30,8 +29,8 @@ definePageMeta({
             />
           </div>
           <div>
-            <h3 class="font-medium text-white">管理员账户</h3>
-            <p class="text-sm text-neutral-400 mt-1">用于登录管理后台</p>
+            <h3 class="font-medium text-white">{{ $t('onboarding.welcome.cards.admin.title') }}</h3>
+            <p class="text-sm text-neutral-400 mt-1">{{ $t('onboarding.welcome.cards.admin.description') }}</p>
           </div>
         </div>
 
@@ -47,8 +46,8 @@ definePageMeta({
             />
           </div>
           <div>
-            <h3 class="font-medium text-white">站点信息</h3>
-            <p class="text-sm text-neutral-400 mt-1">个性化您的画廊</p>
+            <h3 class="font-medium text-white">{{ $t('onboarding.welcome.cards.site.title') }}</h3>
+            <p class="text-sm text-neutral-400 mt-1">{{ $t('onboarding.welcome.cards.site.description') }}</p>
           </div>
         </div>
 
@@ -64,9 +63,9 @@ definePageMeta({
             />
           </div>
           <div>
-            <h3 class="font-medium text-white">存储</h3>
+            <h3 class="font-medium text-white">{{ $t('onboarding.welcome.cards.storage.title') }}</h3>
             <p class="text-sm text-neutral-400 mt-1">
-              将您的照片存储在本地或云端
+              {{ $t('onboarding.welcome.cards.storage.description') }}
             </p>
           </div>
         </div>
@@ -83,9 +82,9 @@ definePageMeta({
             />
           </div>
           <div>
-            <h3 class="font-medium text-white">地图服务</h3>
+            <h3 class="font-medium text-white">{{ $t('onboarding.welcome.cards.map.title') }}</h3>
             <p class="text-sm text-neutral-400 mt-1">
-              位置可视化、照片拍摄地标记
+              {{ $t('onboarding.welcome.cards.map.description') }}
             </p>
           </div>
         </div>
@@ -95,7 +94,7 @@ definePageMeta({
     <template #actions>
       <div class="w-full flex justify-between items-center">
         <p class="text-xs text-neutral-500 font-medium">
-          ChronoFrame 不会收集您的任何数据。
+          {{ $t('onboarding.welcome.privacyNotice') }}
         </p>
         <WizardButton
           to="/onboarding/admin"
@@ -103,7 +102,7 @@ definePageMeta({
           size="lg"
           trailing-icon="tabler:arrow-right"
         >
-          开始吧
+          {{ $t('onboarding.welcome.start') }}
         </WizardButton>
       </div>
     </template>

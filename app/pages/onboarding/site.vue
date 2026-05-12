@@ -30,8 +30,8 @@ function onSubmit() {
 
 <template>
   <WizardStep
-    title="站点信息"
-    description="配置站点基本信息"
+    :title="$t('onboarding.site.title')"
+    :description="$t('onboarding.site.description')"
   >
     <div
       v-if="fetchingSchema"
@@ -80,7 +80,7 @@ function onSubmit() {
         :disabled="fetchingSchema"
         trailing-icon="tabler:arrow-right"
       >
-        下一步
+        {{ $t('onboarding.actions.next') }}
       </WizardButton>
     </template>
   </WizardStep>
