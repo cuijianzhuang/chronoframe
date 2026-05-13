@@ -237,7 +237,7 @@ const analysisMode = ref<'none' | 'focalLength' | 'shutterSpeed' | 'altitude'>(
 )
 const parameterAnnotationOpen = ref(false)
 
-const analysisModeOptions = [
+const analysisModeOptions = computed(() => [
   {
     value: 'none',
     label: $t('globe.analysis.mode.none.label'),
@@ -262,7 +262,7 @@ const analysisModeOptions = [
     icon: 'tabler:mountain',
     description: $t('globe.analysis.mode.altitude.description'),
   },
-] as const
+] as const)
 
 const analysisLegend = computed(() => {
   if (analysisMode.value === 'focalLength') {
