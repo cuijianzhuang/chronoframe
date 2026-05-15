@@ -67,8 +67,8 @@ function onSubmit() {
 
 <template>
   <WizardStep
-    title="存储配置"
-    description="选择将您的照片存储在何处"
+    :title="$t('onboarding.storage.title')"
+    :description="$t('onboarding.storage.description')"
   >
     <div
       v-if="fetchingSchema"
@@ -146,7 +146,7 @@ function onSubmit() {
         :disabled="fetchingSchema"
         trailing-icon="tabler:arrow-right"
       >
-        下一步
+        {{ $t('onboarding.actions.next') }}
       </WizardButton>
     </template>
   </WizardStep>

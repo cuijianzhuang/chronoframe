@@ -386,6 +386,12 @@
         "email": "Email",
         "password": "Password"
       }
+    },
+    "messages": {
+      "loginFailed": {
+        "title": "Login Failed",
+        "description": "An unexpected error occurred. Please try again."
+      }
     }
   },
   "common": {
@@ -698,6 +704,40 @@
         "actions": {
           "cancel": "Cancel",
           "save": "Save changes"
+        }
+      },
+      "uploadQueueItem": {
+        "status": {
+          "waiting": "Waiting",
+          "preparing": "Preparing",
+          "uploading": "Uploading {0}%",
+          "pendingProcessing": "Waiting to process",
+          "completed": "Completed",
+          "error": "Error",
+          "skipped": "Skipped",
+          "blocked": "Blocked",
+          "unknown": "Unknown"
+        },
+        "stage": {
+          "preprocessing": "Preprocessing",
+          "metadata": "Extracting metadata",
+          "thumbnail": "Generating thumbnail",
+          "exif": "Processing EXIF",
+          "reverseGeocoding": "Reverse geocoding",
+          "livePhoto": "Detecting Live Photo"
+        },
+        "actions": {
+          "abort": "Abort",
+          "clear": "Clear"
+        },
+        "progress": {
+          "upload": "Upload Progress",
+          "remainingTime": "Time remaining: {0}",
+          "processing": "Processing Status"
+        },
+        "alerts": {
+          "longProcessing": "Large files may take longer to process, which is expected.",
+          "success": "File uploaded and processed successfully"
         }
       }
     },
@@ -1178,6 +1218,122 @@
           "description": "Open-source fork of Mapbox GL JS."
         }
       }
+    }
+  },
+  "onboarding": {
+    "layout": {
+      "steps": {
+        "welcome": "Welcome",
+        "admin": "Admin Account",
+        "site": "Site Info",
+        "storage": "Storage",
+        "map": "Map Service",
+        "complete": "Complete"
+      },
+      "current": "In Progress",
+      "stepCounter": "Step {0} / {1}"
+    },
+    "actions": {
+      "next": "Next",
+      "completeSetup": "Complete Setup"
+    },
+    "welcome": {
+      "title": "Welcome to ChronoFrame",
+      "description": "Follow the wizard to set up your gallery in a few minutes.",
+      "intro": "ChronoFrame is a versatile personal gallery app. Before uploading photos, we need to configure a few essentials:",
+      "cards": {
+        "admin": {
+          "title": "Admin Account",
+          "description": "Used to sign in to the admin console"
+        },
+        "site": {
+          "title": "Site Info",
+          "description": "Personalize your gallery"
+        },
+        "storage": {
+          "title": "Storage",
+          "description": "Store your photos locally or in the cloud"
+        },
+        "map": {
+          "title": "Map Service",
+          "description": "Visualize locations and mark shooting spots"
+        }
+      },
+      "privacyNotice": "ChronoFrame does not collect any of your data.",
+      "start": "Get Started"
+    },
+    "admin": {
+      "title": "Admin Account",
+      "description": "Create an administrator account"
+    },
+    "site": {
+      "title": "Site Info",
+      "description": "Configure basic site information"
+    },
+    "storage": {
+      "title": "Storage",
+      "description": "Choose where your photos are stored"
+    },
+    "map": {
+      "title": "Map Service",
+      "description": "Configure map service for globe view and photo minimap"
+    },
+    "complete": {
+      "title": "Almost Done!",
+      "description": "Your ChronoFrame gallery is ready to use.",
+      "body": "You have completed all essential setup steps. You can now sign in with your admin account and start uploading photos.",
+      "goToDashboard": "Go to Dashboard",
+      "setupFailedTitle": "Setup Failed",
+      "setupFailedDescription": "Failed to complete setup"
+    }
+  },
+  "globe": {
+    "analysis": {
+      "annotation": "Shooting Parameter Annotation",
+      "annotationDescription": "View geographic distribution by shooting parameters",
+      "mode": {
+        "none": {
+          "label": "Default",
+          "description": "Disable annotation"
+        },
+        "focalLength": {
+          "label": "Focal Length",
+          "description": "Wide / Standard / Telephoto"
+        },
+        "shutterSpeed": {
+          "label": "Shutter Speed",
+          "description": "Fast / Medium / Slow"
+        },
+        "altitude": {
+          "label": "Altitude",
+          "description": "Low / Medium / High"
+        }
+      },
+      "legend": {
+        "focalLength": {
+          "title": "Focal Length Distribution",
+          "wide": "Wide",
+          "standard": "Standard",
+          "telephoto": "Telephoto"
+        },
+        "shutterSpeed": {
+          "title": "Shutter Speed Distribution",
+          "fast": "Fast",
+          "medium": "Medium",
+          "slow": "Slow"
+        },
+        "altitude": {
+          "title": "Altitude Distribution",
+          "low": "Low Altitude",
+          "medium": "Mid Altitude",
+          "high": "High Altitude"
+        }
+      }
+    },
+    "timeline": {
+      "toggle": "Enable/Disable Timeline",
+      "playPause": "Play/Pause Timeline",
+      "title": "Timeline"
     }
   }
 }

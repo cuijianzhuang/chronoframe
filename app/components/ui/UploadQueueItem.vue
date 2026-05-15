@@ -78,37 +78,39 @@ const statusColor = computed(() => {
 const statusText = computed(() => {
   switch (props.uploadingFile.status) {
     case 'waiting':
-      return '等待上传'
+      return $t('dashboard.photos.uploadQueueItem.status.waiting')
     case 'preparing':
-      return '准备中'
+      return $t('dashboard.photos.uploadQueueItem.status.preparing')
     case 'uploading':
-      return `上传中 ${props.uploadingFile.progress || 0}%`
+      return $t('dashboard.photos.uploadQueueItem.status.uploading', [
+        props.uploadingFile.progress || 0,
+      ])
     case 'processing':
       return props.uploadingFile.stage
         ? getStageText(props.uploadingFile.stage)
-        : '等待处理'
+        : $t('dashboard.photos.uploadQueueItem.status.pendingProcessing')
     case 'completed':
-      return '完成'
+      return $t('dashboard.photos.uploadQueueItem.status.completed')
     case 'error':
-      return '错误'
+      return $t('dashboard.photos.uploadQueueItem.status.error')
     case 'skipped':
-      return '已跳过'
+      return $t('dashboard.photos.uploadQueueItem.status.skipped')
     case 'blocked':
-      return '被阻止'
+      return $t('dashboard.photos.uploadQueueItem.status.blocked')
     default:
-      return '未知'
+      return $t('dashboard.photos.uploadQueueItem.status.unknown')
   }
 })
 
 // 获取处理阶段文本
 const getStageText = (stage: string) => {
   const stageMap: Record<string, string> = {
-    preprocessing: '预处理中',
-    metadata: '提取元数据',
-    thumbnail: '生成缩略图',
-    exif: '处理 EXIF',
-    'reverse-geocoding': '地理解析',
-    'live-photo': '检测 LivePhoto',
+    preprocessing: $t('dashboard.photos.uploadQueueItem.stage.preprocessing'),
+    metadata: $t('dashboard.photos.uploadQueueItem.stage.metadata'),
+    thumbnail: $t('dashboard.photos.uploadQueueItem.stage.thumbnail'),
+    exif: $t('dashboard.photos.uploadQueueItem.stage.exif'),
+    'reverse-geocoding': $t('dashboard.photos.uploadQueueItem.stage.reverseGeocoding'),
+    'live-photo': $t('dashboard.photos.uploadQueueItem.stage.livePhoto'),
   }
   return stageMap[stage] || stage
 }
@@ -356,7 +358,7 @@ const generateParticleStyle = (index: number) => {
             icon="tabler:x"
             @click="uploadingFile.abortUpload?.()"
           >
-            中止
+            {{ $t('dashboard.photos.uploadQueueItem.actions.abort') }}
           </UButton>
         </motion.div>
 
@@ -379,7 +381,7 @@ const generateParticleStyle = (index: number) => {
             icon="tabler:x"
             @click="emit('removeFile', fileId)"
           >
-            清除
+            {{ $t('dashboard.photos.uploadQueueItem.actions.clear') }}
           </UButton>
         </motion.div>
       </div>
@@ -405,7 +407,7 @@ const generateParticleStyle = (index: number) => {
         >
           <div class="flex justify-between items-center">
             <span class="text-xs text-neutral-600 dark:text-neutral-400">
-              上传进度
+              {{ $t('dashboard.photos.uploadQueueItem.progress.upload') }}
             </span>
             <span
               class="text-xs font-mono text-neutral-600 dark:text-neutral-400"
@@ -430,7 +432,7 @@ const generateParticleStyle = (index: number) => {
             v-if="uploadingFile.uploadProgress?.timeRemainingText"
             class="text-xs text-neutral-500 dark:text-neutral-400"
           >
-            剩余时间: {{ uploadingFile.uploadProgress.timeRemainingText }}
+            {{ $t('dashboard.photos.uploadQueueItem.progress.remainingTime', [uploadingFile.uploadProgress.timeRemainingText]) }}
           </div>
         </div>
 
@@ -441,7 +443,7 @@ const generateParticleStyle = (index: number) => {
         >
           <div class="flex justify-between items-center">
             <span class="text-xs text-neutral-600 dark:text-neutral-400">
-              处理状态
+              {{ $t('dashboard.photos.uploadQueueItem.progress.processing') }}
             </span>
             <motion.span
               class="text-xs text-info-600 dark:text-info-400"
@@ -546,7 +548,7 @@ const generateParticleStyle = (index: number) => {
         class="mt-3"
       >
         <UAlert
-          description="大文件处理时间较长，为正常现象"
+          :description="$t('dashboard.photos.uploadQueueItem.alerts.longProcessing')"
           color="info"
           variant="soft"
           icon="tabler:info-circle"
@@ -575,7 +577,7 @@ const generateParticleStyle = (index: number) => {
         class="mt-3"
       >
         <UAlert
-          description="文件已成功上传并处理"
+          :description="$t('dashboard.photos.uploadQueueItem.alerts.success')"
           color="success"
           variant="soft"
           icon="tabler:circle-check"

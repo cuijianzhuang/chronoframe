@@ -3,17 +3,17 @@ import { motion } from 'motion-v'
 
 const route = useRoute()
 
-const steps = [
-  { label: '欢迎', route: 'onboarding' },
-  { label: '管理员账户', route: 'onboarding-admin' },
-  { label: '站点信息', route: 'onboarding-site' },
-  { label: '存储配置', route: 'onboarding-storage' },
-  { label: '地图服务', route: 'onboarding-map' },
-  { label: '完成', route: 'onboarding-complete' },
-]
+const steps = computed(() => [
+  { label: $t('onboarding.layout.steps.welcome'), route: 'onboarding' },
+  { label: $t('onboarding.layout.steps.admin'), route: 'onboarding-admin' },
+  { label: $t('onboarding.layout.steps.site'), route: 'onboarding-site' },
+  { label: $t('onboarding.layout.steps.storage'), route: 'onboarding-storage' },
+  { label: $t('onboarding.layout.steps.map'), route: 'onboarding-map' },
+  { label: $t('onboarding.layout.steps.complete'), route: 'onboarding-complete' },
+])
 
 const currentStepIndex = computed(() => {
-  return steps.findIndex((s) => s.route === route.name)
+  return steps.value.findIndex((s) => s.route === route.name)
 })
 </script>
 
@@ -185,7 +185,7 @@ const currentStepIndex = computed(() => {
                   v-if="index === currentStepIndex"
                   class="text-xs text-primary-400/80 font-medium"
                 >
-                  当前进行
+                  {{ $t('onboarding.layout.current') }}
                 </span>
               </div>
             </div>
@@ -215,7 +215,7 @@ const currentStepIndex = computed(() => {
             <span class="font-bold">ChronoFrame</span>
           </div>
           <div class="text-sm text-neutral-400">
-            Step {{ currentStepIndex + 1 }}/{{ steps.length }}
+            {{ $t('onboarding.layout.stepCounter', [currentStepIndex + 1, steps.length]) }}
           </div>
         </div>
 
