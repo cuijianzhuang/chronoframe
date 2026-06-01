@@ -106,7 +106,7 @@ const onError = () => {
         class="size-6 text-neutral-400"
       />
       <p class="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
-        加载图片失败
+        {{ $t('ui.photo.loadError') }}
       </p>
     </div>
   </div>

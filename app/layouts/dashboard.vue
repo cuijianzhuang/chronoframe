@@ -79,7 +79,7 @@ const navItems = computed<NavigationMenuItem[][]>(() => [
       target: '_blank',
     },
     {
-      label: 'Documentation',
+      label: $t('dashboard.nav.documentation'),
       icon: 'tabler:book',
       to: 'https://chronoframe.bh8.ga/',
       target: '_blank',
@@ -119,11 +119,11 @@ const handleLogin = () => {
     <p class="text-gray-500 text-center">
       {{
         !user?.isAdmin
-          ? 'Please login to view dashboard'
-          : 'Sorry, you do not have access to this page.'
+          ? $t('dashboard.access.pleaseLogin')
+          : $t('dashboard.access.noAccess')
       }}
     </p>
-    <UButton @click="handleLogin">Sign In</UButton>
+    <UButton @click="handleLogin">{{ $t('auth.form.signin.title') }}</UButton>
   </div>
   <UDashboardGroup v-else>
     <UDashboardSidebar

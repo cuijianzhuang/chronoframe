@@ -101,7 +101,7 @@ const handleLocationSettingsSubmit = async () => {
             {{ $t('title.mapAndLocation') }}
           </h2>
           <p class="text-sm text-neutral-600 dark:text-neutral-400">
-            配置地图展示与地理编码服务。地图服务商会影响地图样式与访问凭证。
+            {{ $t('settings.map.sectionDescription') }}
           </p>
         </section>
 
@@ -152,7 +152,7 @@ const handleLocationSettingsSubmit = async () => {
                 :disabled="!isMapDirty"
                 @click="resetMapSettings"
               >
-                重置
+                {{ $t('common.actions.reset') }}
               </UButton>
             <UButton
               :loading="mapLoading"
@@ -161,7 +161,7 @@ const handleLocationSettingsSubmit = async () => {
               :disabled="!isMapDirty"
               icon="tabler:device-floppy"
             >
-              保存设置
+              {{ $t('common.actions.saveSettings') }}
             </UButton>
             </div>
           </footer>
@@ -214,7 +214,7 @@ const handleLocationSettingsSubmit = async () => {
                 :disabled="!isLocationDirty"
                 @click="resetLocationSettings"
               >
-                重置
+                {{ $t('common.actions.reset') }}
               </UButton>
             <UButton
               :loading="locationLoading"
@@ -223,7 +223,7 @@ const handleLocationSettingsSubmit = async () => {
               :disabled="!isLocationDirty"
               icon="tabler:device-floppy"
             >
-              保存设置
+              {{ $t('common.actions.saveSettings') }}
             </UButton>
             </div>
           </footer>

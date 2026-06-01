@@ -467,15 +467,15 @@ const handleReactionSelect = async (reactionId: string, iconName: string) => {
     if (error?.statusCode === 429) {
       toast.add({
         icon: 'tabler:alert-circle',
-        title: '表态失败',
-        description: '操作过于频繁，请稍后再试',
+        title: $t('viewer.reaction.error.title'),
+        description: $t('viewer.reaction.error.rateLimited'),
         color: 'warning',
       })
     } else {
       toast.add({
         icon: 'tabler:alert-circle',
-        title: '表态失败',
-        description: error instanceof Error ? error.message : '未知错误',
+        title: $t('viewer.reaction.error.title'),
+        description: error instanceof Error ? error.message : $t('common.unknownError'),
         color: 'warning',
       })
     }

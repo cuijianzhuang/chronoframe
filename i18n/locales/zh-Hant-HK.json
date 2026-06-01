@@ -2,7 +2,12 @@
   "map": {
     "cluster": {
       "details": "點擊圖片查看詳情",
-      "nearbyPhotos": "附近有 {0} 張相片"
+      "nearbyPhotos": "附近有 {0} 張相片",
+      "altFallback": "叢集 {id}"
+    },
+    "photo": {
+      "altFallback": "相片 {id}",
+      "unknownCoord": "未知"
     }
   },
   "ui": {
@@ -31,7 +36,9 @@
         },
         "title": "篩選相片",
         "tooltip": "篩選相片",
-        "clearAll": "全部清除"
+        "clearAll": "全部清除",
+        "searchPlaceholder": "搜尋檔名等...",
+        "shuffleTooltip": "打亂清單"
       },
       "logout": {
         "tooltip": "登出"
@@ -126,7 +133,23 @@
       "noDescription": "無描述"
     },
     "loading": "載入中",
-    "indexPanelCountCity": "等 {count} 個城市"
+    "indexPanelCountCity": "等 {count} 個城市",
+    "photo": {
+      "untitled": "未命名",
+      "altFallback": "相片",
+      "loadError": "載入圖片失敗"
+    },
+    "authForm": {
+      "logoAlt": "應用程式標誌"
+    },
+    "histogram": {
+      "rendering": "繪製中",
+      "loadError": "直方圖載入失敗"
+    },
+    "calendarHeatmap": {
+      "on": "於",
+      "contributions": "項貢獻"
+    }
   },
   "album": {
     "notFound": "搵唔到相簿",
@@ -145,7 +168,8 @@
       "photos": "相片",
       "dateRange": "日期範圍",
       "created": "建立"
-    }
+    },
+    "createdTooltip": "建立於：{date}"
   },
   "minimap": {
     "loading": "載入小地圖..."
@@ -170,7 +194,11 @@
       "wow": "嘩塞",
       "sad": "感動",
       "fire": "助火",
-      "sparkle": "閃耀"
+      "sparkle": "閃耀",
+      "error": {
+        "title": "表態失敗",
+        "rateLimited": "操作過於頻繁，請稍後再試"
+      }
     },
     "photoload": {
       "loadError": "圖片載入失敗",
@@ -345,7 +373,8 @@
         "uncalibrated": "未校正",
         "rgb": "RGB"
       }
-    }
+    },
+    "iso": "ISO"
   },
   "plural": {
     "photo": "沒有相片 | 一張相片 | {count} 張相片"
@@ -434,7 +463,16 @@
         "noData": "{0}冇相"
       }
     },
-    "unknown": "未知"
+    "unknown": "未知",
+    "actions": {
+      "save": "儲存",
+      "saveSettings": "儲存設定",
+      "reset": "重設",
+      "cancel": "取消",
+      "continue": "繼續",
+      "delete": "刪除"
+    },
+    "unknownError": "未知錯誤"
   },
   "dashboard": {
     "photos": {
@@ -494,7 +532,10 @@
         "columnVisibility": {
           "button": "列設定",
           "description": "切換列的顯示/隱藏"
-        }
+        },
+        "selectAllAria": "全選",
+        "selectRowAria": "選擇列",
+        "thumbnailAlt": "相片縮圖"
       },
       "actions": {
         "reprocess": "重新處理",
@@ -696,7 +737,25 @@
           "longProcessing": "大型檔案處理時間較長，屬正常現象。",
           "success": "檔案已成功上傳並完成處理"
         }
-      }
+      },
+      "uploadQueuePanel": {
+        "title": "檔案上傳佇列",
+        "stats": {
+          "waiting": "等待",
+          "active": "進行中",
+          "completed": "完成",
+          "error": "失敗",
+          "skipped": "跳過",
+          "blocked": "被阻止"
+        },
+        "summary": "{completed} 完成, {error} 失敗, {skipped} 跳過, {blocked} 阻止",
+        "actions": {
+          "clearCompleted": "清除已完成",
+          "clearAll": "清除全部",
+          "goToQueue": "佇列管理"
+        }
+      },
+      "previewTitle": "相片預覽"
     },
     "albums": {
       "title": "相簿管理",
@@ -773,7 +832,8 @@
         "loadError": "載入相簿失敗",
         "loadDetailError": "載入相簿詳情失敗",
         "loadPhotosError": "載入相片失敗"
-      }
+      },
+      "photoCount": "{count} 張"
     },
     "overview": {
       "title": "儀表板概覽",
@@ -822,7 +882,12 @@
           "totalFailed": "失敗計數",
           "avgSuccessRate": "成功率"
         }
-      }
+      },
+      "shareSite": {
+        "label": "分享你的網站",
+        "button": "分享你的網站"
+      },
+      "memoryUnavailable": "無法取得記憶體資訊"
     },
     "queue": {
       "title": "隊列管理",
@@ -852,7 +917,12 @@
         "errorMessage": "錯誤詳情",
         "createdAt": "創建時間",
         "completedAt": "完成時間",
-        "actions": "操作"
+        "actions": "操作",
+        "expandAria": "展開",
+        "detail": {
+          "photoId": "相片 ID",
+          "payload": "酬載"
+        }
       },
       "status": {
         "pending": "等待中",
@@ -871,6 +941,7 @@
         "metadata": "元數據",
         "thumbnail": "縮略圖",
         "exif": "EXIF處理",
+        "motion-photo": "動態相片處理",
         "reverse-geocoding": "地理解析",
         "live-photo": "LivePhoto處理",
         "location-erase": "位置資訊抹除"
@@ -882,16 +953,53 @@
       "messages": {
         "noTasks": "沒有找到任務",
         "retrySuccess": "任務重試成功",
+        "retryFailed": "重試任務失敗",
         "deleteSuccess": "任務刪除成功",
         "batchRetrySuccess": "批量重試成功",
         "clearSuccess": "清理完成",
-        "operationFailed": "操作失敗"
+        "operationFailed": "操作失敗",
+        "clearSuccessDescription": "已清除 {count} 個任務",
+        "clearFailed": "清理任務失敗",
+        "batchRetrySuccessDescription": "已重試 {count} 個任務",
+        "batchRetryFailed": "批次重試失敗",
+        "deleteFailed": "刪除任務失敗"
       },
       "filters": {
         "all": "全部",
         "status": "按狀態篩選",
         "type": "按類型篩選"
+      },
+      "taskListTitle": "佇列任務列表"
+    },
+    "logs": {
+      "connectionStatus": {
+        "idle": "未連線",
+        "connecting": "連線中...",
+        "loadingHistory": "載入歷史紀錄...",
+        "live": "即時",
+        "error": "連線錯誤"
+      },
+      "search": {
+        "placeholder": "搜尋日誌內容...",
+        "clearAriaLabel": "清除搜尋內容"
+      },
+      "filter": {
+        "levelPlaceholder": "篩選等級",
+        "tagPlaceholder": "篩選 Tag"
+      },
+      "countLabel": "總筆數/顯示: {total}/{shown}",
+      "tagCount": "Tag: {count}",
+      "empty": {
+        "waiting": "等待日誌資料...",
+        "noMatch": "沒有符合的日誌條目"
       }
+    },
+    "access": {
+      "pleaseLogin": "請登入以檢視儀表板",
+      "noAccess": "抱歉，您沒有存取此頁面的權限。"
+    },
+    "nav": {
+      "documentation": "文件"
     }
   },
   "settings": {
@@ -977,7 +1085,8 @@
             "description": "GitHub OAuth 應用嘅 Client Secret"
           }
         }
-      }
+      },
+      "sectionDescription": "設定系統級行為參數。這裡的修改會影響全域上傳和服務行為。"
     },
     "map": {
       "provider": {
@@ -1005,7 +1114,8 @@
           "label": "MapLibre 樣式",
           "description": "MapLibre 地圖樣式 URL"
         }
-      }
+      },
+      "sectionDescription": "設定地圖展示與地理編碼服務。地圖服務商會影響地圖樣式與存取憑證。"
     },
     "location": {
       "language": {
@@ -1035,7 +1145,8 @@
           "description": "在上傳與處理照片時自動抹除 EXIF GPS 資訊並清空地理位置欄位",
           "help": "啟用後會將抹除位置資訊操作放入佇列非同步執行"
         }
-      }
+      },
+      "sectionDescription": "管理相片上傳時的資料隱私策略。建議在公開站點啟用位置資訊抹除。"
     },
     "storage": {
       "name": {
@@ -1153,7 +1264,59 @@
           "label": "CDN URL",
           "description": "用於訪問圖像嘅自訂 CDN URL"
         }
+      },
+      "sectionDescription": "管理預設儲存方案與可用儲存提供者。此頁面的設定僅影響後續上傳檔案。",
+      "table": {
+        "columns": {
+          "name": "儲存名稱",
+          "type": "儲存類型",
+          "actions": "操作"
+        }
+      },
+      "messages": {
+        "saved": "設定已儲存",
+        "saveError": "儲存設定時發生錯誤",
+        "created": "儲存方案已建立",
+        "createError": "建立儲存方案時發生錯誤",
+        "deleted": "儲存方案已刪除",
+        "deleteError": "刪除儲存方案失敗"
+      },
+      "providers": {
+        "s3": "AWS S3 相容儲存",
+        "local": "本地儲存",
+        "openlist": "OpenList"
+      },
+      "sections": {
+        "currentDefault": "目前預設儲存",
+        "management": "儲存方案管理"
+      },
+      "form": {
+        "schemeLabel": "儲存方案",
+        "schemePlaceholder": "選擇儲存方案",
+        "typeLabel": "儲存類型",
+        "typePlaceholder": "選擇儲存類型",
+        "nameLabel": "儲存名稱"
+      },
+      "changeModal": {
+        "title": "變更儲存方案",
+        "alertTitle": "注意",
+        "alertDescription": "變更儲存方案之後上傳的檔案將會儲存到新的儲存方案中，原方案中已有檔案不會被遷移。"
+      },
+      "slideover": {
+        "title": "建立儲存方案"
+      },
+      "actions": {
+        "add": "新增儲存",
+        "create": "建立儲存"
       }
+    },
+    "general": {
+      "description": "管理站點基礎資訊與展示外觀。更改會立即影響控制台和前台展示。"
+    },
+    "form": {
+      "loadFailed": "載入設定失敗",
+      "saveSuccess": "設定已儲存",
+      "saveFailed": "儲存設定失敗"
     }
   },
   "wizard": {
@@ -1182,6 +1345,9 @@
           "description": "Mapbox GL JS 的開源分支。"
         }
       }
+    },
+    "form": {
+      "loadSchemaFailed": "嚮導配置載入失敗"
     }
   },
   "onboarding": {
@@ -1195,7 +1361,8 @@
         "complete": "完成"
       },
       "current": "進行中",
-      "stepCounter": "第 {0} 步 / 共 {1} 步"
+      "stepCounter": "第 {0} 步 / 共 {1} 步",
+      "logoAlt": "ChronoFrame 標誌"
     },
     "actions": {
       "next": "下一步",
@@ -1348,6 +1515,35 @@
         "title": "上傳失敗",
         "message": "上傳過程中發生錯誤，請稍後再試"
       }
+    },
+    "runtimeError": {
+      "networkFailed": "網絡連線失敗",
+      "clientError": "客戶端錯誤 ({status})",
+      "serverError": "伺服器錯誤 ({status})",
+      "networkError": "網絡錯誤 (狀態碼: {status})",
+      "timeout": "上傳逾時 ({timeout}ms)",
+      "aborted": "上傳已中止",
+      "badRequest": "請求格式錯誤",
+      "unauthorized": "未授權訪問",
+      "forbidden": "訪問被拒絕",
+      "notFound": "上傳介面不存在",
+      "conflict": "檔案衝突",
+      "fileTooLarge": "檔案過大",
+      "unsupportedType": "不支援的檔案類型",
+      "rateLimited": "上傳頻率過高",
+      "internalServerError": "伺服器內部錯誤",
+      "serviceUnavailable": "伺服器暫時不可用",
+      "httpError": "HTTP 錯誤: {status}",
+      "retrying": "{message} (嘗試 {attempt}/{max})"
+    },
+    "progress": {
+      "calculating": "計算中...",
+      "seconds": "{seconds}秒"
+    }
+  },
+  "photo": {
+    "image": {
+      "loadError": "圖片載入失敗"
     }
   }
 }

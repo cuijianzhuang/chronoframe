@@ -62,7 +62,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       <div class="mb-2">
         <img
           src="/web-app-manifest-192x192.png"
-          alt="App Logo"
+          :alt="$t('ui.authForm.logoAlt')"
           class="size-24 rounded-full object-cover"
         />
       </div>

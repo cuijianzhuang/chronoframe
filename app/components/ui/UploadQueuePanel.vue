@@ -176,7 +176,7 @@ const clearAllFiles = () => {
               <h3
                 class="font-semibold text-sm text-neutral-900 dark:text-neutral-100"
               >
-                文件上传队列
+                {{ $t('dashboard.photos.uploadQueuePanel.title') }}
                 <span class="text-neutral-500 dark:text-neutral-400">
                   ({{ stats.total }})
                 </span>
@@ -189,37 +189,37 @@ const clearAllFiles = () => {
                   v-if="stats.waiting > 0"
                   class="text-neutral-600 dark:text-neutral-400"
                 >
-                  {{ stats.waiting }} 等待
+                  {{ stats.waiting }} {{ $t('dashboard.photos.uploadQueuePanel.stats.waiting') }}
                 </span>
                 <span
                   v-if="stats.active > 0"
                   class="text-blue-600 dark:text-blue-400"
                 >
-                  {{ stats.active }} 进行中
+                  {{ stats.active }} {{ $t('dashboard.photos.uploadQueuePanel.stats.active') }}
                 </span>
                 <span
                   v-if="stats.completed > 0"
                   class="text-green-600 dark:text-green-400"
                 >
-                  {{ stats.completed }} 完成
+                  {{ stats.completed }} {{ $t('dashboard.photos.uploadQueuePanel.stats.completed') }}
                 </span>
                 <span
                   v-if="stats.error > 0"
                   class="text-red-600 dark:text-red-400"
                 >
-                  {{ stats.error }} 失败
+                  {{ stats.error }} {{ $t('dashboard.photos.uploadQueuePanel.stats.error') }}
                 </span>
                 <span
                   v-if="stats.skipped > 0"
                   class="text-yellow-600 dark:text-yellow-400"
                 >
-                  {{ stats.skipped }} 跳过
+                  {{ stats.skipped }} {{ $t('dashboard.photos.uploadQueuePanel.stats.skipped') }}
                 </span>
                 <span
                   v-if="stats.blocked > 0"
                   class="text-red-600 dark:text-red-400"
                 >
-                  {{ stats.blocked }} 被阻止
+                  {{ stats.blocked }} {{ $t('dashboard.photos.uploadQueuePanel.stats.blocked') }}
                 </span>
               </div>
             </div>
@@ -309,9 +309,7 @@ const clearAllFiles = () => {
         >
           <div class="flex items-center justify-between gap-2">
             <div class="text-xs text-neutral-500 dark:text-neutral-400">
-              {{ stats.completed }} 完成, {{ stats.error }} 失败, {{
-                stats.skipped
-              }} 跳过, {{ stats.blocked }} 阻止
+              {{ $t('dashboard.photos.uploadQueuePanel.summary', { completed: stats.completed, error: stats.error, skipped: stats.skipped, blocked: stats.blocked }) }}
             </div>
 
             <div class="flex items-center gap-0.5">
@@ -322,7 +320,7 @@ const clearAllFiles = () => {
                 color="neutral"
                 @click="clearCompletedFiles"
               >
-                清除已完成
+                {{ $t('dashboard.photos.uploadQueuePanel.actions.clearCompleted') }}
               </UButton>
 
               <UButton
@@ -332,7 +330,7 @@ const clearAllFiles = () => {
                 icon="tabler:trash"
                 @click="clearAllFiles"
               >
-                清除全部
+                {{ $t('dashboard.photos.uploadQueuePanel.actions.clearAll') }}
               </UButton>
 
               <UButton
@@ -342,7 +340,7 @@ const clearAllFiles = () => {
                 icon="tabler:list-check"
                 @click="emit('goToQueue')"
               >
-                队列管理
+                {{ $t('dashboard.photos.uploadQueuePanel.actions.goToQueue') }}
               </UButton>
             </div>
           </div>

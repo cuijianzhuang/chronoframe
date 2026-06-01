@@ -203,7 +203,7 @@ const copyLink = async () => {
   } catch (error) {
     toast.add({
       title: $t('ui.action.share.error.linkCopyFailed'),
-      description: (error as Error)?.message || 'Unknown error',
+      description: (error as Error)?.message || $t('common.unknownError'),
       color: 'error',
       icon: 'tabler:x',
       duration: 3000,
@@ -255,7 +255,7 @@ const downloadOgImage = async () => {
   } catch (error) {
     toast.add({
       title: $t('ui.action.share.error.ogImageDownloadFailed'),
-      description: (error as Error)?.message || 'Unknown error',
+      description: (error as Error)?.message || $t('common.unknownError'),
       color: 'error',
       icon: 'tabler:x',
       duration: 3000,
@@ -293,7 +293,7 @@ const downloadOriginalImage = async () => {
   } catch (error) {
     toast.add({
       title: $t('ui.action.share.error.originalImageDownloadFailed'),
-      description: (error as Error)?.message || 'Unknown error',
+      description: (error as Error)?.message || $t('common.unknownError'),
       color: 'error',
       icon: 'tabler:x',
       duration: 3000,

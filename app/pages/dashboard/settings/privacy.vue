@@ -59,7 +59,7 @@ const handlePrivacySettingsSubmit = async () => {
             {{ $t('title.privacySettings') }}
           </h2>
           <p class="text-sm text-neutral-600 dark:text-neutral-400">
-            管理照片上传时的数据隐私策略。建议在公开站点启用位置信息抹除。
+            {{ $t('settings.privacy.sectionDescription') }}
           </p>
         </section>
 
@@ -108,7 +108,7 @@ const handlePrivacySettingsSubmit = async () => {
                 :disabled="!isPrivacyDirty"
                 @click="resetPrivacySettings"
               >
-                重置
+                {{ $t('common.actions.reset') }}
               </UButton>
             <UButton
               :loading="privacyLoading"
@@ -117,7 +117,7 @@ const handlePrivacySettingsSubmit = async () => {
               :disabled="!isPrivacyDirty"
               icon="tabler:device-floppy"
             >
-              保存设置
+              {{ $t('common.actions.saveSettings') }}
             </UButton>
             </div>
           </footer>

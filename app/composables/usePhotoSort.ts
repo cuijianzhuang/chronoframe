@@ -133,7 +133,7 @@ export function usePhotoSort() {
 
   // 获取当前排序的显示标签
   const currentSortLabel = computed(
-    () => currentSortOption.value?.labelI18n || '拍摄时间（新到旧）',
+    () => currentSortOption.value?.labelI18n || 'ui.action.sort.options.dateTakenDesc',
   )
 
   // 获取当前排序的显示图标

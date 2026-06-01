@@ -15,6 +15,7 @@ export const useImageLoader = (
   updateHighResImageRendered?: (isRendered: boolean) => void,
   onImageLoaded?: () => void,
 ) => {
+  const { t } = useI18n()
   if (highResLoaded || !isCurrentImage || error) return null
 
   const loaderManager = new ImageLoaderManager()
@@ -45,7 +46,7 @@ export const useImageLoader = (
       loadingIndicatorRef?.updateLoadingState({
         isVisible: true,
         isError: true,
-        message: '载入图片失败',
+        message: t('viewer.photoload.loadError'),
       })
     }
   }

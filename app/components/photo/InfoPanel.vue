@@ -248,7 +248,7 @@ const formatedExifData = computed<Record<string, KVData[]>>(() => {
           : null,
         props.exifData?.ISO
           ? {
-              label: 'ISO',
+              label: $t('exif.iso'),
               value: props.exifData.ISO.toString(),
               icon: 'tabler:sun-electricity',
             }

@@ -24,7 +24,9 @@
         "rating": {
           "showAll": "すべての写真を表示",
           "showStarsAndAbove": "{count} 星以上の写真を表示"
-        }
+        },
+        "searchPlaceholder": "ファイル名などで検索...",
+        "shuffleTooltip": "リストをシャッフル"
       },
       "sort": {
         "tooltip": "写真の並び替え",
@@ -123,7 +125,23 @@
       "noDescription": "説明がありません"
     },
     "loading": "読み込み中",
-    "indexPanelCountCity": "他 {count} 都市"
+    "indexPanelCountCity": "他 {count} 都市",
+    "photo": {
+      "untitled": "無題",
+      "altFallback": "写真",
+      "loadError": "画像の読み込みに失敗しました"
+    },
+    "authForm": {
+      "logoAlt": "アプリのロゴ"
+    },
+    "histogram": {
+      "rendering": "レンダリング中",
+      "loadError": "ヒストグラムの読み込みに失敗しました"
+    },
+    "calendarHeatmap": {
+      "on": "に",
+      "contributions": "件"
+    }
   },
   "album": {
     "notFound": "アルバムが見つかりません",
@@ -142,12 +160,18 @@
       "photos": "写真",
       "dateRange": "日付範囲",
       "created": "作成"
-    }
+    },
+    "createdTooltip": "作成日：{date}"
   },
   "map": {
     "cluster": {
       "details": "クリックして詳細を見る",
-      "nearbyPhotos": "近くに {0} 枚の写真"
+      "nearbyPhotos": "近くに {0} 枚の写真",
+      "altFallback": "クラスタ {id}"
+    },
+    "photo": {
+      "altFallback": "写真 {id}",
+      "unknownCoord": "不明"
     }
   },
   "minimap": {
@@ -173,7 +197,11 @@
       "wow": "わお",
       "sad": "感動",
       "fire": "アツい",
-      "sparkle": "キラッ"
+      "sparkle": "キラッ",
+      "error": {
+        "title": "リアクション失敗",
+        "rateLimited": "操作が頻繁すぎます。しばらくしてからもう一度お試しください"
+      }
     },
     "photoload": {
       "loadError": "画像の読み込みに失敗しました",
@@ -348,7 +376,8 @@
         "uncalibrated": "未調整",
         "rgb": "RGB"
       }
-    }
+    },
+    "iso": "ISO"
   },
   "title": {
     "gallery": "ギャラリー",
@@ -434,7 +463,16 @@
         "noData": "{0}は写真がありません"
       }
     },
-    "unknown": "不明"
+    "unknown": "不明",
+    "actions": {
+      "save": "保存",
+      "saveSettings": "設定を保存",
+      "reset": "リセット",
+      "cancel": "キャンセル",
+      "continue": "続行",
+      "delete": "削除"
+    },
+    "unknownError": "不明なエラー"
   },
   "dashboard": {
     "photos": {
@@ -494,7 +532,10 @@
         "columnVisibility": {
           "button": "列設定",
           "description": "列の表示/非表示を切り替える"
-        }
+        },
+        "selectAllAria": "すべて選択",
+        "selectRowAria": "行を選択",
+        "thumbnailAlt": "写真サムネイル"
       },
       "actions": {
         "reprocess": "再処理",
@@ -696,7 +737,25 @@
           "longProcessing": "大きなファイルは処理に時間がかかることがあります。",
           "success": "ファイルのアップロードと処理が完了しました"
         }
-      }
+      },
+      "uploadQueuePanel": {
+        "title": "ファイルアップロードキュー",
+        "stats": {
+          "waiting": "待機",
+          "active": "処理中",
+          "completed": "完了",
+          "error": "失敗",
+          "skipped": "スキップ",
+          "blocked": "ブロック"
+        },
+        "summary": "{completed} 完了, {error} 失敗, {skipped} スキップ, {blocked} ブロック",
+        "actions": {
+          "clearCompleted": "完了済みを削除",
+          "clearAll": "すべて削除",
+          "goToQueue": "キュー管理"
+        }
+      },
+      "previewTitle": "写真プレビュー"
     },
     "albums": {
       "title": "アルバム管理",
@@ -773,7 +832,8 @@
         "loadError": "アルバムの読み込みに失敗しました",
         "loadDetailError": "アルバムの詳細の読み込みに失敗しました",
         "loadPhotosError": "写真の読み込みに失敗しました"
-      }
+      },
+      "photoCount": "{count} 枚"
     },
     "overview": {
       "title": "概要",
@@ -822,7 +882,12 @@
           "totalFailed": "障害カウント",
           "avgSuccessRate": "成功率"
         }
-      }
+      },
+      "shareSite": {
+        "label": "サイトを共有",
+        "button": "サイトを共有"
+      },
+      "memoryUnavailable": "メモリ情報を取得できません"
     },
     "queue": {
       "title": "キュー管理",
@@ -852,7 +917,12 @@
         "errorMessage": "エラーメッセージ",
         "createdAt": "作成日時",
         "completedAt": "完了日時",
-        "actions": "操作"
+        "actions": "操作",
+        "expandAria": "展開",
+        "detail": {
+          "photoId": "写真ID",
+          "payload": "ペイロード"
+        }
       },
       "status": {
         "pending": "待機中",
@@ -871,6 +941,7 @@
         "metadata": "メタデータ",
         "thumbnail": "サムネイル",
         "exif": "EXIF処理",
+        "motion-photo": "モーションフォト処理",
         "reverse-geocoding": "地理解析",
         "live-photo": "LivePhoto処理",
         "location-erase": "位置情報の抹消"
@@ -882,16 +953,53 @@
       "messages": {
         "noTasks": "タスクが見つかりません",
         "retrySuccess": "タスクの再試行が成功しました",
+        "retryFailed": "タスクの再試行に失敗しました",
         "deleteSuccess": "タスクの削除が成功しました",
         "batchRetrySuccess": "バッチ再試行が成功しました",
         "clearSuccess": "クリア完了",
-        "operationFailed": "操作に失敗しました"
+        "operationFailed": "操作に失敗しました",
+        "clearSuccessDescription": "{count} 件のタスクをクリアしました",
+        "clearFailed": "タスクのクリアに失敗しました",
+        "batchRetrySuccessDescription": "{count} 件のタスクを再試行しました",
+        "batchRetryFailed": "一括再試行に失敗しました",
+        "deleteFailed": "タスクの削除に失敗しました"
       },
       "filters": {
         "all": "すべて",
         "status": "ステータスでフィルター",
         "type": "タイプでフィルター"
+      },
+      "taskListTitle": "タスクキュー"
+    },
+    "logs": {
+      "connectionStatus": {
+        "idle": "未接続",
+        "connecting": "接続中...",
+        "loadingHistory": "履歴を読み込み中...",
+        "live": "リアルタイム",
+        "error": "接続エラー"
+      },
+      "search": {
+        "placeholder": "ログ内容を検索...",
+        "clearAriaLabel": "検索入力をクリア"
+      },
+      "filter": {
+        "levelPlaceholder": "レベルで絞り込む",
+        "tagPlaceholder": "タグで絞り込む"
+      },
+      "countLabel": "合計/表示: {total}/{shown}",
+      "tagCount": "タグ: {count}",
+      "empty": {
+        "waiting": "ログデータを待機中...",
+        "noMatch": "一致するログエントリがありません"
       }
+    },
+    "access": {
+      "pleaseLogin": "ダッシュボードを表示するにはログインしてください",
+      "noAccess": "申し訳ありませんが、このページにアクセスする権限がありません。"
+    },
+    "nav": {
+      "documentation": "ドキュメント"
     }
   },
   "settings": {
@@ -977,7 +1085,8 @@
             "description": "GitHub OAuth アプリの Client Secret"
           }
         }
-      }
+      },
+      "sectionDescription": "システムレベルの動作パラメーターを設定します。ここでの変更はグローバルなアップロードとサービスの動作に影響します。"
     },
     "map": {
       "provider": {
@@ -1005,7 +1114,8 @@
           "label": "MapLibre スタイル",
           "description": "MapLibre 地図スタイル URL"
         }
-      }
+      },
+      "sectionDescription": "地図の表示と地理コーディングサービスを設定します。地図プロバイダーは地図のスタイルとアクセス認証情報に影響します。"
     },
     "location": {
       "language": {
@@ -1035,7 +1145,8 @@
           "description": "アップロード処理中に EXIF の GPS 情報と地理位置フィールドを自動的に削除します",
           "help": "有効化すると、位置情報抹消はキューで非同期に実行されます"
         }
-      }
+      },
+      "sectionDescription": "写真アップロード時のデータプライバシーポリシーを管理します。公開サイトでは位置情報の削除を有効にすることをお勧めします。"
     },
     "storage": {
       "name": {
@@ -1153,7 +1264,59 @@
           "label": "CDN URL",
           "description": "画像にアクセスするためのカスタム CDN URL"
         }
+      },
+      "sectionDescription": "デフォルトのストレージ構成と利用可能なストレージプロバイダーを管理します。このページの設定は以降のファイルアップロードにのみ影響します。",
+      "table": {
+        "columns": {
+          "name": "ストレージ名",
+          "type": "ストレージ種別",
+          "actions": "操作"
+        }
+      },
+      "messages": {
+        "saved": "設定を保存しました",
+        "saveError": "設定の保存中にエラーが発生しました",
+        "created": "ストレージ構成を作成しました",
+        "createError": "ストレージ構成の作成中にエラーが発生しました",
+        "deleted": "ストレージ構成を削除しました",
+        "deleteError": "ストレージ構成の削除に失敗しました"
+      },
+      "providers": {
+        "s3": "AWS S3 互換ストレージ",
+        "local": "ローカルストレージ",
+        "openlist": "OpenList"
+      },
+      "sections": {
+        "currentDefault": "現在のデフォルトストレージ",
+        "management": "ストレージ構成管理"
+      },
+      "form": {
+        "schemeLabel": "ストレージ構成",
+        "schemePlaceholder": "ストレージ構成を選択",
+        "typeLabel": "ストレージ種別",
+        "typePlaceholder": "ストレージ種別を選択",
+        "nameLabel": "ストレージ名"
+      },
+      "changeModal": {
+        "title": "ストレージ構成を変更",
+        "alertTitle": "注意",
+        "alertDescription": "ストレージ構成を変更した後にアップロードされたファイルは新しいストレージ構成に保存されます。元の構成にある既存のファイルは移行されません。"
+      },
+      "slideover": {
+        "title": "ストレージ構成を作成"
+      },
+      "actions": {
+        "add": "ストレージを追加",
+        "create": "ストレージを作成"
       }
+    },
+    "general": {
+      "description": "サイトの基本情報と表示外観を管理します。変更はダッシュボードと公開側の表示に即時反映されます。"
+    },
+    "form": {
+      "loadFailed": "設定の読み込みに失敗しました",
+      "saveSuccess": "設定が保存されました",
+      "saveFailed": "設定の保存に失敗しました"
     }
   },
   "wizard": {
@@ -1182,6 +1345,9 @@
           "description": "Mapbox GL JS のオープンソースフォーク。"
         }
       }
+    },
+    "form": {
+      "loadSchemaFailed": "ウィザードスキーマの読み込みに失敗しました"
     }
   },
   "onboarding": {
@@ -1195,7 +1361,8 @@
         "complete": "完了"
       },
       "current": "進行中",
-      "stepCounter": "ステップ {0} / {1}"
+      "stepCounter": "ステップ {0} / {1}",
+      "logoAlt": "ChronoFrame ロゴ"
     },
     "actions": {
       "next": "次へ",
@@ -1348,6 +1515,35 @@
         "title": "アップロードに失敗しました",
         "message": "アップロード中にエラーが発生しました。しばらくしてから再試行してください"
       }
+    },
+    "runtimeError": {
+      "networkFailed": "ネットワーク接続に失敗しました",
+      "clientError": "クライアントエラー ({status})",
+      "serverError": "サーバーエラー ({status})",
+      "networkError": "ネットワークエラー (ステータス: {status})",
+      "timeout": "アップロードがタイムアウトしました ({timeout}ms)",
+      "aborted": "アップロードが中止されました",
+      "badRequest": "リクエスト形式エラー",
+      "unauthorized": "認証されていません",
+      "forbidden": "アクセスが拒否されました",
+      "notFound": "アップロードエンドポイントが見つかりません",
+      "conflict": "ファイルが競合しています",
+      "fileTooLarge": "ファイルが大きすぎます",
+      "unsupportedType": "サポートされていないファイル形式",
+      "rateLimited": "アップロード頻度が高すぎます",
+      "internalServerError": "サーバー内部エラー",
+      "serviceUnavailable": "サーバーが一時的に利用できません",
+      "httpError": "HTTPエラー: {status}",
+      "retrying": "{message}（試行 {attempt}/{max}）"
+    },
+    "progress": {
+      "calculating": "計算中...",
+      "seconds": "{seconds}秒"
+    }
+  },
+  "photo": {
+    "image": {
+      "loadError": "画像の読み込み失敗"
     }
   }
 }

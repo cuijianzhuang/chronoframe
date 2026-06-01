@@ -90,7 +90,7 @@ const getComponentProps = (): Record<string, any> => {
     case 'tabs':
       propsMap.items = props.field.ui.options
         ? Array.from(props.field.ui.options).map((opt: any) => ({
-            label: $t(opt.label) || opt.label,
+            label: $t(opt.label),
             value: opt.value,
             icon: opt.icon,
           }))

@@ -88,7 +88,7 @@ const handleAppearanceSettingsSubmit = async () => {
             {{ $t('title.generalSettings') }}
           </h2>
           <p class="text-sm text-neutral-600 dark:text-neutral-400">
-            管理站点基础信息与展示外观。更改会立即影响控制台和前台展示。
+            {{ $t('settings.general.description') }}
           </p>
         </section>
 
@@ -141,7 +141,7 @@ const handleAppearanceSettingsSubmit = async () => {
                 :disabled="!isAppDirty"
                 @click="resetAppSettings"
               >
-                重置
+                {{ $t('common.actions.reset') }}
               </UButton>
             <UButton
               :loading="loading"
@@ -150,7 +150,7 @@ const handleAppearanceSettingsSubmit = async () => {
               :disabled="!isAppDirty"
               icon="tabler:device-floppy"
             >
-              保存设置
+              {{ $t('common.actions.saveSettings') }}
             </UButton>
             </div>
           </footer>
@@ -201,7 +201,7 @@ const handleAppearanceSettingsSubmit = async () => {
                 :disabled="!isAppearanceDirty"
                 @click="resetAppearanceSettings"
               >
-                重置
+                {{ $t('common.actions.reset') }}
               </UButton>
             <UButton
               :loading="loading"
@@ -210,7 +210,7 @@ const handleAppearanceSettingsSubmit = async () => {
               :disabled="!isAppearanceDirty"
               icon="tabler:device-floppy"
             >
-              保存设置
+              {{ $t('common.actions.saveSettings') }}
             </UButton>
             </div>
           </footer>

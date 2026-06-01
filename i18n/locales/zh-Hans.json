@@ -2,7 +2,12 @@
   "map": {
     "cluster": {
       "details": "点击图片查看详情",
-      "nearbyPhotos": "附近有 {0} 张照片"
+      "nearbyPhotos": "附近有 {0} 张照片",
+      "altFallback": "聚类 {id}"
+    },
+    "photo": {
+      "altFallback": "照片 {id}",
+      "unknownCoord": "未知"
     }
   },
   "ui": {
@@ -31,7 +36,9 @@
         },
         "title": "筛选照片",
         "tooltip": "筛选照片",
-        "clearAll": "清除全部"
+        "clearAll": "清除全部",
+        "searchPlaceholder": "搜索文件名等...",
+        "shuffleTooltip": "打乱列表"
       },
       "logout": {
         "tooltip": "登出"
@@ -126,7 +133,23 @@
       "emptyAlbumTip": "添加照片开始吧",
       "noDescription": "无描述"
     },
-    "loading": "加载中"
+    "loading": "加载中",
+    "photo": {
+      "untitled": "未命名",
+      "altFallback": "照片",
+      "loadError": "加载图片失败"
+    },
+    "authForm": {
+      "logoAlt": "应用 Logo"
+    },
+    "histogram": {
+      "rendering": "渲染中",
+      "loadError": "直方图加载失败"
+    },
+    "calendarHeatmap": {
+      "on": "于",
+      "contributions": "项贡献"
+    }
   },
   "album": {
     "notFound": "相簿未找到",
@@ -145,7 +168,8 @@
       "photos": "照片",
       "dateRange": "日期范围",
       "created": "创建"
-    }
+    },
+    "createdTooltip": "创建于：{date}"
   },
   "minimap": {
     "loading": "加载小地图..."
@@ -170,7 +194,11 @@
       "wow": "哇塞",
       "sad": "感动",
       "fire": "助火",
-      "sparkle": "闪耀"
+      "sparkle": "闪耀",
+      "error": {
+        "title": "表态失败",
+        "rateLimited": "操作过于频繁，请稍后再试"
+      }
     },
     "photoload": {
       "loadError": "图片加载失败",
@@ -345,7 +373,8 @@
         "uncalibrated": "未校准",
         "rgb": "RGB"
       }
-    }
+    },
+    "iso": "ISO"
   },
   "plural": {
     "photo": "没有照片 | 一张照片 | {count} 张照片"
@@ -434,7 +463,16 @@
         "data": "{0}拍摄了 {1} 张照片",
         "noData": "{0}没有照片"
       }
-    }
+    },
+    "actions": {
+      "save": "保存",
+      "saveSettings": "保存设置",
+      "reset": "重置",
+      "cancel": "取消",
+      "continue": "继续",
+      "delete": "删除"
+    },
+    "unknownError": "未知错误"
   },
   "upload": {
     "duplicate": {
@@ -484,6 +522,30 @@
         "title": "上传失败",
         "message": "上传过程中发生错误，请稍后重试"
       }
+    },
+    "runtimeError": {
+      "networkFailed": "网络连接失败",
+      "clientError": "客户端错误 ({status})",
+      "serverError": "服务器错误 ({status})",
+      "networkError": "网络错误 (状态码: {status})",
+      "timeout": "上传超时 ({timeout}ms)",
+      "aborted": "上传已中止",
+      "badRequest": "请求格式错误",
+      "unauthorized": "未授权访问",
+      "forbidden": "访问被拒绝",
+      "notFound": "上传接口不存在",
+      "conflict": "文件冲突",
+      "fileTooLarge": "文件过大",
+      "unsupportedType": "不支持的文件类型",
+      "rateLimited": "上传频率过高",
+      "internalServerError": "服务器内部错误",
+      "serviceUnavailable": "服务器暂时不可用",
+      "httpError": "HTTP 错误: {status}",
+      "retrying": "{message} (尝试 {attempt}/{max})"
+    },
+    "progress": {
+      "calculating": "计算中...",
+      "seconds": "{seconds}秒"
     }
   },
   "dashboard": {
@@ -544,7 +606,10 @@
         "columnVisibility": {
           "button": "列设置",
           "description": "切换列的显示/隐藏"
-        }
+        },
+        "selectAllAria": "全选",
+        "selectRowAria": "选择行",
+        "thumbnailAlt": "照片缩略图"
       },
       "actions": {
         "reprocess": "重新处理",
@@ -746,7 +811,25 @@
           "longProcessing": "大文件处理时间较长，为正常现象",
           "success": "文件已成功上传并处理"
         }
-      }
+      },
+      "uploadQueuePanel": {
+        "title": "文件上传队列",
+        "stats": {
+          "waiting": "等待",
+          "active": "进行中",
+          "completed": "完成",
+          "error": "失败",
+          "skipped": "跳过",
+          "blocked": "被阻止"
+        },
+        "summary": "{completed} 完成, {error} 失败, {skipped} 跳过, {blocked} 阻止",
+        "actions": {
+          "clearCompleted": "清除已完成",
+          "clearAll": "清除全部",
+          "goToQueue": "队列管理"
+        }
+      },
+      "previewTitle": "照片预览"
     },
     "albums": {
       "title": "相簿管理",
@@ -823,7 +906,8 @@
         "loadError": "加载相簿失败",
         "loadDetailError": "加载相簿详情失败",
         "loadPhotosError": "加载照片失败"
-      }
+      },
+      "photoCount": "{count} 张"
     },
     "overview": {
       "title": "仪表板概览",
@@ -872,7 +956,12 @@
           "totalFailed": "失败计数",
           "avgSuccessRate": "成功率"
         }
-      }
+      },
+      "shareSite": {
+        "label": "分享你的站点",
+        "button": "分享你的站点"
+      },
+      "memoryUnavailable": "无法获取内存信息"
     },
     "queue": {
       "title": "队列管理",
@@ -902,7 +991,12 @@
         "errorMessage": "错误详情",
         "createdAt": "创建时间",
         "completedAt": "完成时间",
-        "actions": "操作"
+        "actions": "操作",
+        "expandAria": "展开",
+        "detail": {
+          "photoId": "照片 ID",
+          "payload": "负载"
+        }
       },
       "status": {
         "pending": "等待中",
@@ -921,6 +1015,7 @@
         "metadata": "元数据",
         "thumbnail": "缩略图",
         "exif": "EXIF处理",
+        "motion-photo": "动态照片处理",
         "reverse-geocoding": "地理解析",
         "live-photo": "LivePhoto处理",
         "location-erase": "位置信息抹除"
@@ -932,16 +1027,53 @@
       "messages": {
         "noTasks": "没有找到任务",
         "retrySuccess": "任务重试成功",
+        "retryFailed": "重试任务失败",
         "deleteSuccess": "任务删除成功",
         "batchRetrySuccess": "批量重试成功",
         "clearSuccess": "清理完成",
-        "operationFailed": "操作失败"
+        "operationFailed": "操作失败",
+        "clearSuccessDescription": "清除了 {count} 个任务",
+        "clearFailed": "清理任务失败",
+        "batchRetrySuccessDescription": "重试了 {count} 个任务",
+        "batchRetryFailed": "批量重试失败",
+        "deleteFailed": "删除任务失败"
       },
       "filters": {
         "all": "全部",
         "status": "按状态筛选",
         "type": "按类型筛选"
+      },
+      "taskListTitle": "队列任务列表"
+    },
+    "logs": {
+      "connectionStatus": {
+        "idle": "未连接",
+        "connecting": "正在连接...",
+        "loadingHistory": "加载历史日志...",
+        "live": "实时",
+        "error": "连接错误"
+      },
+      "search": {
+        "placeholder": "搜索日志内容...",
+        "clearAriaLabel": "清除搜索内容"
+      },
+      "filter": {
+        "levelPlaceholder": "过滤级别",
+        "tagPlaceholder": "筛选 Tag"
+      },
+      "countLabel": "总条数/展示: {total}/{shown}",
+      "tagCount": "Tag: {count}",
+      "empty": {
+        "waiting": "等待日志数据...",
+        "noMatch": "没有匹配的日志条目"
       }
+    },
+    "access": {
+      "pleaseLogin": "请登录以查看仪表盘",
+      "noAccess": "抱歉，您没有访问此页面的权限。"
+    },
+    "nav": {
+      "documentation": "文档"
     }
   },
   "settings": {
@@ -1027,7 +1159,8 @@
             "description": "GitHub OAuth 应用的 Client Secret"
           }
         }
-      }
+      },
+      "sectionDescription": "配置系统级行为参数。这里的修改会影响全局上传和服务行为。"
     },
     "map": {
       "provider": {
@@ -1055,7 +1188,8 @@
           "label": "MapLibre 样式",
           "description": "MapLibre 地图样式 URL"
         }
-      }
+      },
+      "sectionDescription": "配置地图展示与地理编码服务。地图服务商会影响地图样式与访问凭证。"
     },
     "location": {
       "language": {
@@ -1085,7 +1219,8 @@
           "description": "上传和处理照片时自动抹除 EXIF GPS 信息并清空地理位置字段",
           "help": "启用后会将抹除位置信息操作放入队列异步执行"
         }
-      }
+      },
+      "sectionDescription": "管理照片上传时的数据隐私策略。建议在公开站点启用位置信息抹除。"
     },
     "storage": {
       "name": {
@@ -1203,7 +1338,59 @@
           "label": "CDN URL",
           "description": "用于访问图像的自定义 CDN URL"
         }
+      },
+      "sectionDescription": "管理默认存储方案与可用存储提供者。此页面的设置仅影响后续上传文件。",
+      "table": {
+        "columns": {
+          "name": "存储名称",
+          "type": "存储类型",
+          "actions": "操作"
+        }
+      },
+      "messages": {
+        "saved": "设置已保存",
+        "saveError": "保存设置时出错",
+        "created": "存储方案已创建",
+        "createError": "创建存储方案时出错",
+        "deleted": "存储方案已删除",
+        "deleteError": "删除存储方案失败"
+      },
+      "providers": {
+        "s3": "AWS S3 兼容存储",
+        "local": "本地存储",
+        "openlist": "OpenList"
+      },
+      "sections": {
+        "currentDefault": "当前默认存储",
+        "management": "存储方案管理"
+      },
+      "form": {
+        "schemeLabel": "存储方案",
+        "schemePlaceholder": "选择存储方案",
+        "typeLabel": "存储类型",
+        "typePlaceholder": "选择存储类型",
+        "nameLabel": "存储名称"
+      },
+      "changeModal": {
+        "title": "变更存储方案",
+        "alertTitle": "注意",
+        "alertDescription": "变更存储方案之后上传的文件将会存储到新的存储方案中，原方案中已有文件不会被迁移。"
+      },
+      "slideover": {
+        "title": "创建存储方案"
+      },
+      "actions": {
+        "add": "添加存储",
+        "create": "创建存储"
       }
+    },
+    "general": {
+      "description": "管理站点基础信息与展示外观。更改会立即影响控制台和前台展示。"
+    },
+    "form": {
+      "loadFailed": "加载设置失败",
+      "saveSuccess": "设置已保存",
+      "saveFailed": "保存设置失败"
     }
   },
   "wizard": {
@@ -1232,6 +1419,9 @@
           "description": "Mapbox GL JS 的开源分支。"
         }
       }
+    },
+    "form": {
+      "loadSchemaFailed": "向导配置加载失败"
     }
   },
   "onboarding": {
@@ -1245,7 +1435,8 @@
         "complete": "完成"
       },
       "current": "当前进行",
-      "stepCounter": "第 {0} 步 / 共 {1} 步"
+      "stepCounter": "第 {0} 步 / 共 {1} 步",
+      "logoAlt": "ChronoFrame 标志"
     },
     "actions": {
       "next": "下一步",
@@ -1348,6 +1539,11 @@
       "toggle": "启用/关闭时间回溯",
       "playPause": "播放/暂停时间回溯",
       "title": "时间回溯"
+    }
+  },
+  "photo": {
+    "image": {
+      "loadError": "图片加载失败"
     }
   }
 }
