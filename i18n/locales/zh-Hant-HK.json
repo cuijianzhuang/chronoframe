@@ -112,7 +112,8 @@
         }
       },
       "backtotop": {
-        "tooltip": "回到頂部"
+        "tooltip": "回到頂部",
+        "ariaLabel": "回到頂部"
       }
     },
     "stats": {
@@ -123,7 +124,9 @@
       "noImage": "空相簿",
       "emptyAlbumTip": "新增相片開始啦",
       "noDescription": "無描述"
-    }
+    },
+    "loading": "載入中",
+    "indexPanelCountCity": "等 {count} 個城市"
   },
   "album": {
     "notFound": "搵唔到相簿",
@@ -364,7 +367,9 @@
     "appearanceSettings": "外觀設置",
     "privacySettings": "隱私設置",
     "mapAndLocation": "地圖和位置",
-    "location": "位置服務"
+    "location": "位置服務",
+    "storageSettings": "儲存設定",
+    "systemSettings": "系統設定"
   },
   "auth": {
     "form": {
@@ -374,11 +379,16 @@
       },
       "action": {
         "or": "或",
-        "continue": "繼續"
+        "continue": "繼續",
+        "backToHome": "回到首頁"
       },
       "labels": {
         "email": "電子郵箱",
         "password": "密碼"
+      },
+      "errors": {
+        "invalidPassword": "密碼至少需要 6 個字元",
+        "invalidEmail": "無效的電郵地址"
       }
     },
     "messages": {
@@ -423,7 +433,8 @@
         "data": "{0}拍咗 {1} 張相",
         "noData": "{0}冇相"
       }
-    }
+    },
+    "unknown": "未知"
   },
   "dashboard": {
     "photos": {
@@ -507,6 +518,14 @@
           "eraseLocation": {
             "label": "上傳時抹除位置資訊",
             "description": "本次上傳可覆蓋系統預設值，您可隨時切換開啟或關閉。"
+          },
+          "duplicateCheck": {
+            "label": "重複檔案處理策略",
+            "descriptionEnabled": "目前已啟用重複偵測，上傳時會按所選模式處理同名檔案。",
+            "descriptionDisabled": "目前已關閉重複偵測，同名檔案將直接進入上傳流程。",
+            "enabled": "偵測已開啟",
+            "disabled": "偵測已關閉",
+            "currentMode": "目前模式：{mode}"
           }
         },
         "buttons": {
@@ -585,7 +604,10 @@
         "eraseLocationQueued": "已新增抹除位置資訊任務",
         "eraseLocationFailed": "抹除位置資訊任務新增失敗",
         "batchEraseLocationQueued": "已新增 {count} 條抹除位置資訊任務",
-        "batchEraseLocationFailed": "批量抹除位置資訊任務新增失敗"
+        "batchEraseLocationFailed": "批量抹除位置資訊任務新增失敗",
+        "taskSubmitFailed": "提交任務失敗",
+        "taskStatusCheckFailed": "檢查任務狀態失敗",
+        "uploadFailed": "上傳失敗"
       },
       "errors": {
         "noSelection": "請選擇相片進行上傳",
@@ -693,7 +715,9 @@
         "selectPhotos": "選擇相片",
         "editPhotos": "修改相片選擇",
         "selectedCount": "已選擇 {count} 張相片",
-        "clearAll": "全部清除"
+        "clearAll": "全部清除",
+        "isHidden": "隱藏相簿",
+        "isHiddenHint": "隱藏相簿中的照片不會在首頁顯示"
       },
       "table": {
         "columns": {
@@ -1274,6 +1298,56 @@
       "toggle": "啟用/關閉時間回溯",
       "playPause": "播放/暫停時間回溯",
       "title": "時間回溯"
+    }
+  },
+  "upload": {
+    "duplicate": {
+      "block": {
+        "title": "檔案已存在",
+        "message": "相片「{fileName}」已存在，無法上傳重複檔案",
+        "suggestion": "您可以：1) 重新命名檔案後再次上傳；2) 在設定中切換為「警告模式」以允許覆寫"
+      },
+      "skip": {
+        "title": "已跳過重複檔案",
+        "message": "相片「{fileName}」已存在，已自動跳過上傳",
+        "info": "現有相片拍攝於 {dateTaken}"
+      },
+      "warn": {
+        "title": "偵測到重複檔案",
+        "message": "相片「{fileName}」已存在，繼續上傳將會覆寫現有相片",
+        "warning": "覆寫已存在的相片檔案",
+        "info": "現有相片：{title}，拍攝於 {dateTaken}"
+      }
+    },
+    "success": {
+      "upload": {
+        "single": "相片已成功上傳，正在處理中...",
+        "multiple": "已成功上傳 {count} 張相片，正在處理中..."
+      },
+      "check": {
+        "title": "檢查完成",
+        "message": "已檢查 {total} 個檔案，發現 {duplicates} 個重複檔案"
+      }
+    },
+    "error": {
+      "required": {
+        "title": "缺少必填參數",
+        "message": "請提供 {field} 參數"
+      },
+      "invalidType": {
+        "title": "不支援的檔案類型",
+        "message": "不支援的媒體類型：{type}",
+        "suggestion": "允許的類型：{allowed}"
+      },
+      "tooLarge": {
+        "title": "檔案太大",
+        "message": "檔案大小 {size}MB 超過限制",
+        "suggestion": "最大允許 {maxSize}MB"
+      },
+      "uploadFailed": {
+        "title": "上傳失敗",
+        "message": "上傳過程中發生錯誤，請稍後再試"
+      }
     }
   }
 }

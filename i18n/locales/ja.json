@@ -108,7 +108,8 @@
         }
       },
       "backtotop": {
-        "tooltip": "ページの先頭に戻る"
+        "tooltip": "ページの先頭に戻る",
+        "ariaLabel": "トップへ戻る"
       }
     },
     "stats": {
@@ -120,7 +121,9 @@
       "noImage": "空のアルバム",
       "emptyAlbumTip": "写真を追加して開始しましょう",
       "noDescription": "説明がありません"
-    }
+    },
+    "loading": "読み込み中",
+    "indexPanelCountCity": "他 {count} 都市"
   },
   "album": {
     "notFound": "アルバムが見つかりません",
@@ -364,7 +367,9 @@
     "appearanceSettings": "外観設定",
     "privacySettings": "プライバシー設定",
     "mapAndLocation": "地図と場所",
-    "location": "位置情報サービス"
+    "location": "位置情報サービス",
+    "storageSettings": "ストレージ設定",
+    "systemSettings": "システム設定"
   },
   "auth": {
     "form": {
@@ -374,11 +379,16 @@
       },
       "action": {
         "or": "または",
-        "continue": "続く"
+        "continue": "続く",
+        "backToHome": "ホームに戻る"
       },
       "labels": {
         "email": "メール",
         "password": "パスワード"
+      },
+      "errors": {
+        "invalidPassword": "パスワードは6文字以上で入力してください",
+        "invalidEmail": "無効なメールアドレスです"
       }
     },
     "messages": {
@@ -423,7 +433,8 @@
         "data": "{0}が{1}枚の写真を撮影しました",
         "noData": "{0}は写真がありません"
       }
-    }
+    },
+    "unknown": "不明"
   },
   "dashboard": {
     "photos": {
@@ -507,6 +518,14 @@
           "eraseLocation": {
             "label": "アップロード時に位置情報を抹消",
             "description": "このアップロードではシステム既定値を上書きでき、いつでもオン/オフを切り替えできます。"
+          },
+          "duplicateCheck": {
+            "label": "重複ファイルの処理方法",
+            "descriptionEnabled": "重複検出が有効です。アップロード時に同名ファイルは選択した処理モードに従います。",
+            "descriptionDisabled": "重複検出が無効です。同名ファイルはそのままアップロードされます。",
+            "enabled": "検出が有効",
+            "disabled": "検出が無効",
+            "currentMode": "現在のモード：{mode}"
           }
         },
         "buttons": {
@@ -585,7 +604,10 @@
         "eraseLocationQueued": "位置情報の抹消タスクをキューに追加しました",
         "eraseLocationFailed": "位置情報の抹消タスクの追加に失敗しました",
         "batchEraseLocationQueued": "{count} 件の位置情報抹消タスクをキューに追加しました",
-        "batchEraseLocationFailed": "位置情報抹消タスクの一括追加に失敗しました"
+        "batchEraseLocationFailed": "位置情報抹消タスクの一括追加に失敗しました",
+        "taskSubmitFailed": "タスクの送信に失敗しました",
+        "taskStatusCheckFailed": "タスク状態の確認に失敗しました",
+        "uploadFailed": "アップロードに失敗しました"
       },
       "errors": {
         "noSelection": "アップロードする写真を選択してください",
@@ -693,7 +715,9 @@
         "selectPhotos": "写真を選択",
         "editPhotos": "写真の選択を編集",
         "selectedCount": "{count}枚の写真を選択しました",
-        "clearAll": "すべてクリア"
+        "clearAll": "すべてクリア",
+        "isHidden": "アルバムを非表示",
+        "isHiddenHint": "非表示のアルバム内の写真はホームページに表示されません"
       },
       "table": {
         "columns": {
@@ -1274,6 +1298,56 @@
       "toggle": "タイムラインの有効/無効",
       "playPause": "タイムライン再生/一時停止",
       "title": "タイムライン"
+    }
+  },
+  "upload": {
+    "duplicate": {
+      "block": {
+        "title": "ファイルは既に存在します",
+        "message": "写真「{fileName}」は既に存在し、重複アップロードは許可されていません",
+        "suggestion": "対処方法：1) ファイル名を変更して再アップロードする 2) 設定で「警告モード」に切り替えて上書きを許可する"
+      },
+      "skip": {
+        "title": "重複ファイルをスキップしました",
+        "message": "写真「{fileName}」は既に存在するため、自動的にスキップされました",
+        "info": "既存の写真の撮影日：{dateTaken}"
+      },
+      "warn": {
+        "title": "重複ファイルを検出しました",
+        "message": "写真「{fileName}」は既に存在します。続行すると既存の写真を上書きします",
+        "warning": "既存の写真ファイルを上書きします",
+        "info": "既存の写真：{title}、撮影日：{dateTaken}"
+      }
+    },
+    "success": {
+      "upload": {
+        "single": "写真のアップロードが完了しました。処理中...",
+        "multiple": "{count} 枚の写真のアップロードが完了しました。処理中..."
+      },
+      "check": {
+        "title": "チェック完了",
+        "message": "{total} 個のファイルをチェックし、{duplicates} 個の重複が見つかりました"
+      }
+    },
+    "error": {
+      "required": {
+        "title": "必須パラメータがありません",
+        "message": "{field} パラメータを指定してください"
+      },
+      "invalidType": {
+        "title": "サポートされていないファイル形式",
+        "message": "サポートされていないメディアタイプ：{type}",
+        "suggestion": "許可されている形式：{allowed}"
+      },
+      "tooLarge": {
+        "title": "ファイルサイズが大きすぎます",
+        "message": "ファイルサイズ {size}MB が上限を超えています",
+        "suggestion": "最大許容サイズ：{maxSize}MB"
+      },
+      "uploadFailed": {
+        "title": "アップロードに失敗しました",
+        "message": "アップロード中にエラーが発生しました。しばらくしてから再試行してください"
+      }
     }
   }
 }

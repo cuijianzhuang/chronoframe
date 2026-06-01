@@ -108,7 +108,8 @@
         }
       },
       "backtotop": {
-        "tooltip": "Back to Top"
+        "tooltip": "Back to Top",
+        "ariaLabel": "Back to top"
       }
     },
     "stats": {
@@ -121,7 +122,8 @@
       "noImage": "Empty Album",
       "emptyAlbumTip": "Add photos to get started",
       "noDescription": "No description"
-    }
+    },
+    "loading": "Loading"
   },
   "album": {
     "notFound": "Album not found",
@@ -365,13 +367,15 @@
     "generalSettings": "General Settings",
     "appearanceSettings": "Appearance Settings",
     "privacySettings": "Privacy Settings",
-    "mapAndLocation": "Map & Location"
+    "mapAndLocation": "Map & Location",
+    "storageSettings": "Storage Settings",
+    "systemSettings": "System Settings"
   },
   "auth": {
     "form": {
       "errors": {
         "invalidEmail": "Invalid email address",
-        "invalidPassword": ""
+        "invalidPassword": "Password must be at least 6 characters"
       },
       "signin": {
         "title": "Sign In",
@@ -650,7 +654,10 @@
         "eraseLocationQueued": "Erase location info task queued",
         "eraseLocationFailed": "Failed to queue erase location info task",
         "batchEraseLocationQueued": "Queued {count} erase-location task(s)",
-        "batchEraseLocationFailed": "Failed to queue batch erase-location tasks"
+        "batchEraseLocationFailed": "Failed to queue batch erase-location tasks",
+        "taskSubmitFailed": "Failed to submit task",
+        "taskStatusCheckFailed": "Failed to check task status",
+        "uploadFailed": "Upload failed"
       },
       "errors": {
         "noSelection": "Please select photos to upload",
@@ -758,7 +765,9 @@
         "selectPhotos": "Select Photos",
         "editPhotos": "Edit photo selection",
         "selectedCount": "Selected {count} photos",
-        "clearAll": "Clear all"
+        "clearAll": "Clear all",
+        "isHidden": "Hide album",
+        "isHiddenHint": "Photos in hidden albums are not shown on the home page"
       },
       "table": {
         "columns": {
