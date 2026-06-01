@@ -52,12 +52,21 @@ const { data, refresh, status } = await useFetch(() => apiEndpoint.value, {
 const photos = computed(() => (data.value as Photo[]) || [])
 
 const { switchToIndex, closeViewer, clearReturnRoute } = useViewerState()
-const { currentPhotoIndex, isViewerOpen, returnRoute, isDirectAccess } =
-  storeToRefs(useViewerState())
+const {
+  currentPhotoIndex,
+  isViewerOpen,
+  returnRoute,
+  isDirectAccess,
+  scopedPhotos,
+} = storeToRefs(useViewerState())
+
+// The photo collection the viewer actually navigates: the scoped list (e.g. an
+// album) when present, otherwise the global list.
+const viewerPhotos = computed(() => scopedPhotos.value ?? photos.value)
 
 const handleIndexChange = (newIndex: number) => {
   switchToIndex(newIndex)
-  router.replace(`/${photos.value[newIndex]?.id}`)
+  router.replace(`/${viewerPhotos.value[newIndex]?.id}`)
 }
 
 const handleClose = () => {
@@ -117,7 +126,7 @@ provide(
       </NuxtLayout>
       <ClientOnly>
         <PhotoViewer
-          :photos="photos"
+          :photos="viewerPhotos"
           :current-index="currentPhotoIndex"
           :is-open="isViewerOpen"
           @close="handleClose"
