@@ -33,7 +33,12 @@ export interface UseUploadOptions {
 }
 
 export function useUpload(options: UseUploadOptions = {}) {
-  const { t } = useI18n()
+  // useUpload() is invoked from within an async upload handler (outside the
+  // synchronous setup context), so useI18n() would throw "Must be called at
+  // the top of a `setup` function". Use the Nuxt-global i18n instead, which is
+  // safe to access outside setup (see useExifLocalization).
+  const { $i18n } = useNuxtApp()
+  const t = $i18n.t
   const {
     timeout = 0,
     withCredentials = false,
