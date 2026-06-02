@@ -7,7 +7,7 @@ definePageMeta({
 })
 
 useHead({
-  title: $t('title.albums'),
+  title: () => $t('title.albums'),
 })
 
 interface AlbumItem extends Album {
@@ -378,7 +378,7 @@ const submitButtonLabel = computed(() => {
     : $t('dashboard.albums.slideover.submitCreate')
 })
 
-const columns: any[] = [
+const columns = computed<any[]>(() => [
   {
     id: 'coverPhoto',
     accessorKey: 'coverPhoto',
@@ -408,7 +408,7 @@ const columns: any[] = [
     id: 'actions',
     header: $t('dashboard.albums.table.columns.actions'),
   },
-]
+])
 </script>
 
 <template>
@@ -943,7 +943,7 @@ const columns: any[] = [
                         >
                           <ThumbImage
                             :src="photo.thumbnailUrl || ''"
-                            :alt="photo.title || 'Photo'"
+                            :alt="photo.title || $t('ui.photo.altFallback')"
                             class="h-full w-full object-cover"
                           />
                           <div
@@ -1011,7 +1011,7 @@ const columns: any[] = [
                     >
                       <ThumbImage
                         :src="photo.thumbnailUrl || ''"
-                        :alt="photo.title || 'Photo'"
+                        :alt="photo.title || $t('ui.photo.altFallback')"
                         class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                       />
 

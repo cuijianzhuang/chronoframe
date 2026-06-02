@@ -13,7 +13,7 @@ definePageMeta({
 })
 
 useHead({
-  title: $t('title.storageSettings'),
+  title: () => $t('title.storageSettings'),
 })
 
 const toast = useToast()
@@ -40,7 +40,8 @@ const PROVIDER_ICON = {
   openlist: 'tabler:cloud',
 }
 
-const availableStorageColumns: TableColumn<SettingStorageProvider>[] = [
+const availableStorageColumns = computed<TableColumn<SettingStorageProvider>[]>(
+  () => [
   {
     accessorKey: 'status',
     header: '',
@@ -86,7 +87,8 @@ const availableStorageColumns: TableColumn<SettingStorageProvider>[] = [
       ])
     },
   },
-]
+  ],
+)
 
 const storageSettingsState = reactive<{
   storageConfigId?: number

@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 useHead({
-  title: $t('title.privacySettings'),
+  title: () => $t('title.privacySettings'),
 })
 
 const {

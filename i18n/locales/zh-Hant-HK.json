@@ -137,7 +137,8 @@
     "photo": {
       "untitled": "未命名",
       "altFallback": "相片",
-      "loadError": "載入圖片失敗"
+      "loadError": "載入圖片失敗",
+      "avatarAlt": "作者頭像"
     },
     "authForm": {
       "logoAlt": "應用程式標誌"

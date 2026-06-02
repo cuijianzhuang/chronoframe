@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 useHead({
-  title: $t('title.generalSettings'),
+  title: () => $t('title.generalSettings'),
 })
 
 const colorMode = useColorMode()

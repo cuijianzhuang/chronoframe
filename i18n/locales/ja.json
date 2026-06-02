@@ -129,7 +129,8 @@
     "photo": {
       "untitled": "無題",
       "altFallback": "写真",
-      "loadError": "画像の読み込みに失敗しました"
+      "loadError": "画像の読み込みに失敗しました",
+      "avatarAlt": "作者のアバター"
     },
     "authForm": {
       "logoAlt": "アプリのロゴ"

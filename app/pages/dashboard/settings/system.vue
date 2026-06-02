@@ -6,7 +6,7 @@ definePageMeta({
 })
 
 useHead({
-  title: $t('title.systemSettings'),
+  title: () => $t('title.systemSettings'),
 })
 
 const {

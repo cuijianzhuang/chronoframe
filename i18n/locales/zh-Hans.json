@@ -137,7 +137,8 @@
     "photo": {
       "untitled": "未命名",
       "altFallback": "照片",
-      "loadError": "加载图片失败"
+      "loadError": "加载图片失败",
+      "avatarAlt": "作者头像"
     },
     "authForm": {
       "logoAlt": "应用 Logo"

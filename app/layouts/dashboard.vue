@@ -94,7 +94,7 @@ const navItems = computed<NavigationMenuItem[][]>(() => [
 ])
 
 useHead({
-  title: $t('title.dashboard'),
+  title: () => $t('title.dashboard'),
   titleTemplate: (title) => `${title ? `${title} | ` : ''}${appTitle.value}`,
 })
 

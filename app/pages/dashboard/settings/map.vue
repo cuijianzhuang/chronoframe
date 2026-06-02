@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 useHead({
-  title: $t('title.mapAndLocation'),
+  title: () => $t('title.mapAndLocation'),
 })
 
 const {

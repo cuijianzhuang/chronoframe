@@ -501,7 +501,7 @@ onUnmounted(() => {
       >
         <ThumbImage
           :src="photo.thumbnailUrl || ''"
-          :alt="photo.title || 'Photo thumbnail'"
+          :alt="photo.title || $t('ui.photo.altFallback')"
           :thumbhash="photo.thumbnailHash || ''"
           class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           @load="handleImageLoad"

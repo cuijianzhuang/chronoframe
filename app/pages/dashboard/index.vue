@@ -7,7 +7,7 @@ definePageMeta({
 })
 
 useHead({
-  title: $t('title.dashboard'),
+  title: () => $t('title.dashboard'),
 })
 
 const dayjs = useDayjs()

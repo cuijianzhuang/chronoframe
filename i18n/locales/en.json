@@ -129,7 +129,8 @@
     "photo": {
       "untitled": "Untitled",
       "altFallback": "Photo",
-      "loadError": "Failed to load image"
+      "loadError": "Failed to load image",
+      "avatarAlt": "Author's avatar"
     },
     "authForm": {
       "logoAlt": "App Logo"

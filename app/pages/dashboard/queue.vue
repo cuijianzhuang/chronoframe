@@ -9,7 +9,7 @@ definePageMeta({
 })
 
 useHead({
-  title: $t('dashboard.queue.title'),
+  title: () => $t('dashboard.queue.title'),
 })
 
 const toast = useToast()
@@ -182,16 +182,16 @@ const getStatusColor = (
 }
 
 // 状态选项
-const statusOptions = [
+const statusOptions = computed(() => [
   { label: $t('dashboard.queue.filters.all'), value: 'all' },
   { label: $t('dashboard.queue.status.pending'), value: 'pending' },
   { label: $t('dashboard.queue.status.in-stages'), value: 'in-stages' },
   { label: $t('dashboard.queue.status.completed'), value: 'completed' },
   { label: $t('dashboard.queue.status.failed'), value: 'failed' },
-]
+])
 
 // 类型选项
-const typeOptions = [
+const typeOptions = computed(() => [
   { label: $t('dashboard.queue.filters.all'), value: 'all' },
   { label: $t('dashboard.queue.types.photo'), value: 'photo' },
   {
@@ -206,13 +206,13 @@ const typeOptions = [
     label: $t('dashboard.queue.types.photo-erase-location'),
     value: 'photo-erase-location',
   },
-]
+])
 
 // 展开行状态
 const expanded = ref<Record<string, boolean>>({})
 
 // 表格列定义
-const columns: TableColumn<any>[] = [
+const columns = computed<TableColumn<any>[]>(() => [
   {
     id: 'expand',
     cell: ({ row }) =>
@@ -266,7 +266,7 @@ const columns: TableColumn<any>[] = [
     id: 'actions',
     header: $t('dashboard.queue.table.actions'),
   },
-]
+])
 
 // 自动刷新
 const refreshInterval = setInterval(refreshData, 10000) // 每10秒刷新一次

@@ -9,7 +9,7 @@ const UCheckbox = resolveComponent('UCheckbox')
 const Rating = resolveComponent('Rating')
 
 // 列名显示映射
-const columnNameMap: Record<string, string> = {
+const columnNameMap = computed<Record<string, string>>(() => ({
   thumbnailUrl: $t('dashboard.photos.table.columns.thumbnail.title'),
   id: $t('dashboard.photos.table.columns.id'),
   title: $t('dashboard.photos.table.columns.title'),
@@ -23,14 +23,14 @@ const columnNameMap: Record<string, string> = {
   colorSpace: $t('dashboard.photos.table.columns.colorSpace'),
   reactions: $t('dashboard.photos.table.columns.reactions'),
   actions: $t('dashboard.photos.table.columns.actions'),
-}
+}))
 
 definePageMeta({
   layout: 'dashboard',
 })
 
 useHead({
-  title: $t('title.photos'),
+  title: () => $t('title.photos'),
 })
 
 const maxFileSizeMB = computed(() => {
@@ -790,7 +790,7 @@ const clearAllUploads = () => {
   }
 }
 
-const columns: TableColumn<Photo>[] = [
+const columns = computed<TableColumn<Photo>[]>(() => [
   {
     id: 'select',
     header: ({ table }) =>
@@ -1059,7 +1059,7 @@ const columns: TableColumn<Photo>[] = [
     header: $t('dashboard.photos.table.columns.actions'),
     enableHiding: false,
   },
-]
+])
 
 // 文件验证函数
 const validateFile = (

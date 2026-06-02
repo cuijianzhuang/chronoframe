@@ -3,7 +3,7 @@ import { motion } from 'motion-v'
 import { clusterMarkers, photosToMarkers } from '~/utils/clustering'
 
 useHead({
-  title: $t('title.globe'),
+  title: () => $t('title.globe'),
 })
 
 const route = useRoute()
