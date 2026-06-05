@@ -9,7 +9,7 @@ const route = useRoute()
 const router = useRouter()
 
 const { switchToIndex, closeViewer, openViewer } = useViewerState()
-const { isViewerOpen } = storeToRefs(useViewerState())
+const { isViewerOpen, scopedPhotos } = storeToRefs(useViewerState())
 
 const { photos } = usePhotos()
 
@@ -51,27 +51,39 @@ watch(
 
 watch(
   [photoId, photos],
-  ([currentPhotoId, currentPhotos]) => {
-    if (currentPhotoId && currentPhotos.length > 0) {
-      const foundIndex = currentPhotos.findIndex(
-        (photo) => photo.id === currentPhotoId,
-      )
-      if (foundIndex !== -1) {
-        useHead({
-          title: currentPhotos[foundIndex]?.title || $t('title.fallback.photo'),
-        })
-        if (!isViewerOpen.value) {
-          // 直接访问照片详情页时，不设置 returnRoute（传入 null）
-          openViewer(foundIndex, null)
-        } else {
-          switchToIndex(foundIndex)
-        }
-      }
-    } else if (!currentPhotoId) {
+  ([currentPhotoId, globalPhotos]) => {
+    if (!currentPhotoId) {
       closeViewer()
       useHead({
         title: '',
       })
+      return
+    }
+
+    // An already-open session (album browsing, prev/next) keeps its current
+    // photo scope; a fresh open (direct access or global gallery click) always
+    // starts from the global list, and openViewer resets the scope.
+    const activePhotos =
+      isViewerOpen.value && scopedPhotos.value
+        ? scopedPhotos.value
+        : globalPhotos
+
+    if (activePhotos.length === 0) return
+
+    const foundIndex = activePhotos.findIndex(
+      (photo) => photo.id === currentPhotoId,
+    )
+    if (foundIndex === -1) return
+
+    useHead({
+      title: activePhotos[foundIndex]?.title || $t('title.fallback.photo'),
+    })
+
+    if (!isViewerOpen.value) {
+      // Direct access to a photo detail page: don't set a returnRoute (pass null)
+      openViewer(foundIndex, null)
+    } else {
+      switchToIndex(foundIndex)
     }
   },
   { immediate: true },

@@ -96,7 +96,9 @@ const handleOpenViewer = (index: number) => {
   if (photos && photos[index]) {
     const { openViewer } = useViewerState()
     const albumRoute = `/albums/${albumId.value}`
-    openViewer(0, albumRoute)
+    // Scope the viewer to the album's photos so prev/next stays within this album.
+    // The fetched photos are serialized rows of the same shape as Photo.
+    openViewer(index, albumRoute, photos as Photo[])
     router.push(`/${photos[index].id}`)
   }
 }
