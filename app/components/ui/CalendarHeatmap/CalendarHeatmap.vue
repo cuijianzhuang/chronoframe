@@ -35,7 +35,7 @@ const props = withDefaults(defineProps<Props>(), {
   rangeColor: undefined,
   locale: undefined,
   tooltip: true,
-  tooltipUnit: 'contributions',
+  tooltipUnit: undefined,
   tooltipFormatter: undefined,
   vertical: false,
   tooltipNoDataFormatter: undefined,
@@ -52,26 +52,39 @@ interface Emits {
 
 const emit = defineEmits<Emits>()
 
-const DEFAULT_LOCALE: Locale = {
+const { t } = useI18n()
+
+const i18nLocale = computed<Locale>(() => ({
   months: [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
+    t('common.months.jan'),
+    t('common.months.feb'),
+    t('common.months.mar'),
+    t('common.months.apr'),
+    t('common.months.may'),
+    t('common.months.jun'),
+    t('common.months.jul'),
+    t('common.months.aug'),
+    t('common.months.sep'),
+    t('common.months.oct'),
+    t('common.months.nov'),
+    t('common.months.dec'),
   ],
-  days: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-  on: 'on',
-  less: 'Less',
-  more: 'More',
-}
+  days: [
+    t('common.days.sun'),
+    t('common.days.mon'),
+    t('common.days.tue'),
+    t('common.days.wed'),
+    t('common.days.thu'),
+    t('common.days.fri'),
+    t('common.days.sat'),
+  ],
+  on: t('ui.calendarHeatmap.on'),
+  less: t('common.heatmap.legend.less'),
+  more: t('common.heatmap.legend.more'),
+}))
+
+const effectiveTooltipUnit = computed(() => props.tooltipUnit ?? t('ui.calendarHeatmap.contributions'))
+
 const BASE_SQUARE_SIZE = 10
 const DAYS_IN_WEEK = 7
 
@@ -101,7 +114,7 @@ const legendViewbox = ref('0 0 0 0')
 const daysLabelWrapperTransform = ref('')
 const monthsLabelWrapperTransform = ref('')
 const legendWrapperTransform = ref('')
-const lo = ref<Locale>(DEFAULT_LOCALE)
+const lo = ref<Locale>(i18nLocale.value)
 
 const rangeColor = ref<string[]>(
   props.rangeColor || [
@@ -131,13 +144,13 @@ function tooltipOptions(day: CalendarItem): string | undefined {
   if (props.tooltip) {
     if (day.count !== undefined) {
       if (props.tooltipFormatter) {
-        return props.tooltipFormatter(day, props.tooltipUnit)
+        return props.tooltipFormatter(day, effectiveTooltipUnit.value)
       }
-      return `<b>${day.count} ${props.tooltipUnit}</b> ${lo.value.on} ${lo.value.months[day.date.getMonth()]} ${day.date.getDate()}, ${day.date.getFullYear()}`
+      return `<b>${day.count} ${effectiveTooltipUnit.value}</b> ${lo.value.on} ${lo.value.months[day.date.getMonth()]} ${day.date.getDate()}, ${day.date.getFullYear()}`
     } else if (props.tooltipNoDataFormatter) {
       return props.tooltipNoDataFormatter(day.date)
     } else {
-      return `<b>No ${props.tooltipUnit}</b> ${lo.value.on} ${lo.value.months[day.date.getMonth()]} ${day.date.getDate()}, ${day.date.getFullYear()}`
+      return `<b>No ${effectiveTooltipUnit.value}</b> ${lo.value.on} ${lo.value.months[day.date.getMonth()]} ${day.date.getDate()}, ${day.date.getFullYear()}`
     }
   }
   return undefined
@@ -280,9 +293,9 @@ watch(
 )
 
 watch(
-  () => props.locale,
-  (l) => {
-    lo.value = l ? { ...DEFAULT_LOCALE, ...l } : DEFAULT_LOCALE
+  [() => props.locale, i18nLocale],
+  ([l, base]) => {
+    lo.value = l ? { ...base, ...l } : base
   },
   { immediate: true },
 )
@@ -298,7 +311,7 @@ watch(
 watch(
   [
     () => props.values,
-    () => props.tooltipUnit,
+    effectiveTooltipUnit,
     () => props.tooltipFormatter,
     () => props.tooltipNoDataFormatter,
     () => props.max,

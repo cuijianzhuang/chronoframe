@@ -9,7 +9,7 @@ const UCheckbox = resolveComponent('UCheckbox')
 const Rating = resolveComponent('Rating')
 
 // 列名显示映射
-const columnNameMap: Record<string, string> = {
+const columnNameMap = computed<Record<string, string>>(() => ({
   thumbnailUrl: $t('dashboard.photos.table.columns.thumbnail.title'),
   id: $t('dashboard.photos.table.columns.id'),
   title: $t('dashboard.photos.table.columns.title'),
@@ -23,14 +23,14 @@ const columnNameMap: Record<string, string> = {
   colorSpace: $t('dashboard.photos.table.columns.colorSpace'),
   reactions: $t('dashboard.photos.table.columns.reactions'),
   actions: $t('dashboard.photos.table.columns.actions'),
-}
+}))
 
 definePageMeta({
   layout: 'dashboard',
 })
 
 useHead({
-  title: $t('title.photos'),
+  title: () => $t('title.photos'),
 })
 
 const maxFileSizeMB = computed(() => {
@@ -790,7 +790,7 @@ const clearAllUploads = () => {
   }
 }
 
-const columns: TableColumn<Photo>[] = [
+const columns = computed<TableColumn<Photo>[]>(() => [
   {
     id: 'select',
     header: ({ table }) =>
@@ -800,14 +800,14 @@ const columns: TableColumn<Photo>[] = [
           : table.getIsAllPageRowsSelected(),
         'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
           table.toggleAllPageRowsSelected(!!value),
-        'aria-label': 'Select all',
+        'aria-label': $t('dashboard.photos.table.selectAllAria'),
       }),
     cell: ({ row }) =>
       h(UCheckbox, {
         modelValue: row.getIsSelected(),
         'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
           row.toggleSelected(!!value),
-        'aria-label': 'Select row',
+        'aria-label': $t('dashboard.photos.table.selectRowAria'),
       }),
     enableHiding: false,
   },
@@ -819,7 +819,7 @@ const columns: TableColumn<Photo>[] = [
       const url = row.original.thumbnailUrl
       return h(ThumbImage, {
         src: url || row.original.originalUrl || '',
-        alt: row.original.title || 'Photo Thumbnail',
+        alt: row.original.title || $t('dashboard.photos.table.thumbnailAlt'),
         key: row.original.id,
         thumbhash: row.original.thumbnailHash || '',
         class: 'size-16 min-w-[100px] object-cover rounded-md shadow',
@@ -1059,7 +1059,7 @@ const columns: TableColumn<Photo>[] = [
     header: $t('dashboard.photos.table.columns.actions'),
     enableHiding: false,
   },
-]
+])
 
 // 文件验证函数
 const validateFile = (
@@ -2786,7 +2786,7 @@ onUnmounted(() => {
         <!-- 图片预览模态框 -->
         <UModal
           v-model:open="isImagePreviewOpen"
-          title="Photo Preview"
+          :title="$t('dashboard.photos.previewTitle')"
           :description="previewingPhoto?.description || ''"
         >
           <template #body>

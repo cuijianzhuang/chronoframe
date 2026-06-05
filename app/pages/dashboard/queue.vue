@@ -9,7 +9,7 @@ definePageMeta({
 })
 
 useHead({
-  title: $t('dashboard.queue.title'),
+  title: () => $t('dashboard.queue.title'),
 })
 
 const toast = useToast()
@@ -71,7 +71,7 @@ const clearNonActiveTasks = async () => {
 
     toast.add({
       title: $t('dashboard.queue.messages.clearSuccess'),
-      description: `清除了 ${result.deletedCount} 个任务`,
+      description: $t('dashboard.queue.messages.clearSuccessDescription', { count: result.deletedCount }),
       color: 'success',
     })
 
@@ -80,7 +80,7 @@ const clearNonActiveTasks = async () => {
     console.error('Clear tasks failed:', error)
     toast.add({
       title: $t('dashboard.queue.messages.operationFailed'),
-      description: error?.message || '清理任务失败',
+      description: error?.message || $t('dashboard.queue.messages.clearFailed'),
       color: 'error',
     })
   } finally {
@@ -106,7 +106,7 @@ const retryTask = async (taskId: number) => {
     console.error('Retry task failed:', error)
     toast.add({
       title: $t('dashboard.queue.messages.operationFailed'),
-      description: error?.message || '重试任务失败',
+      description: error?.message || $t('dashboard.queue.messages.retryFailed'),
       color: 'error',
     })
   }
@@ -123,7 +123,7 @@ const retryAllFailedTasks = async () => {
 
     toast.add({
       title: $t('dashboard.queue.messages.batchRetrySuccess'),
-      description: `重试了 ${result.retriedCount} 个任务`,
+      description: $t('dashboard.queue.messages.batchRetrySuccessDescription', { count: result.retriedCount }),
       color: 'success',
     })
 
@@ -132,7 +132,7 @@ const retryAllFailedTasks = async () => {
     console.error('Batch retry failed:', error)
     toast.add({
       title: $t('dashboard.queue.messages.operationFailed'),
-      description: error?.message || '批量重试失败',
+      description: error?.message || $t('dashboard.queue.messages.batchRetryFailed'),
       color: 'error',
     })
   } finally {
@@ -157,7 +157,7 @@ const deleteTask = async (taskId: number) => {
     console.error('Delete task failed:', error)
     toast.add({
       title: $t('dashboard.queue.messages.operationFailed'),
-      description: error?.message || '删除任务失败',
+      description: error?.message || $t('dashboard.queue.messages.deleteFailed'),
       color: 'error',
     })
   }
@@ -182,16 +182,16 @@ const getStatusColor = (
 }
 
 // 状态选项
-const statusOptions = [
+const statusOptions = computed(() => [
   { label: $t('dashboard.queue.filters.all'), value: 'all' },
   { label: $t('dashboard.queue.status.pending'), value: 'pending' },
   { label: $t('dashboard.queue.status.in-stages'), value: 'in-stages' },
   { label: $t('dashboard.queue.status.completed'), value: 'completed' },
   { label: $t('dashboard.queue.status.failed'), value: 'failed' },
-]
+])
 
 // 类型选项
-const typeOptions = [
+const typeOptions = computed(() => [
   { label: $t('dashboard.queue.filters.all'), value: 'all' },
   { label: $t('dashboard.queue.types.photo'), value: 'photo' },
   {
@@ -206,13 +206,13 @@ const typeOptions = [
     label: $t('dashboard.queue.types.photo-erase-location'),
     value: 'photo-erase-location',
   },
-]
+])
 
 // 展开行状态
 const expanded = ref<Record<string, boolean>>({})
 
 // 表格列定义
-const columns: TableColumn<any>[] = [
+const columns = computed<TableColumn<any>[]>(() => [
   {
     id: 'expand',
     cell: ({ row }) =>
@@ -221,7 +221,7 @@ const columns: TableColumn<any>[] = [
         variant: 'ghost',
         icon: 'tabler:chevron-down',
         square: true,
-        'aria-label': 'Expand',
+        'aria-label': $t('dashboard.queue.table.expandAria'),
         ui: {
           leadingIcon: [
             'transition-transform',
@@ -266,7 +266,7 @@ const columns: TableColumn<any>[] = [
     id: 'actions',
     header: $t('dashboard.queue.table.actions'),
   },
-]
+])
 
 // 自动刷新
 const refreshInterval = setInterval(refreshData, 10000) // 每10秒刷新一次
@@ -344,7 +344,7 @@ onBeforeUnmount(() => {
         <UCard>
           <template #header>
             <div class="flex items-center justify-between pb-2">
-              <h2 class="text-lg font-semibold">队列任务列表</h2>
+              <h2 class="text-lg font-semibold">{{ $t('dashboard.queue.taskListTitle') }}</h2>
               <div class="flex items-center gap-2">
                 <USelectMenu
                   v-model="statusFilter"
@@ -476,7 +476,7 @@ onBeforeUnmount(() => {
                     <!-- 任务ID和类型 -->
                     <div class="flex gap-4">
                       <div>
-                        <p class="text-xs text-neutral-500">PhotoId</p>
+                        <p class="text-xs text-neutral-500">{{ $t('dashboard.queue.table.detail.photoId') }}</p>
                         <p class="text-sm capitalize">
                           {{ row.original.payload.photoId || '-' }}
                         </p>
@@ -524,7 +524,7 @@ onBeforeUnmount(() => {
                       v-if="row.original.payload"
                       class="mt-3"
                     >
-                      <p class="text-xs text-gray-500 mb-1">Payload</p>
+                      <p class="text-xs text-gray-500 mb-1">{{ $t('dashboard.queue.table.detail.payload') }}</p>
                       <pre
                         class="text-xs bg-neutral-100/50 dark:bg-neutral-800/50 p-2 rounded overflow-x-auto text-neutral-700 dark:text-neutral-300"
                         >{{

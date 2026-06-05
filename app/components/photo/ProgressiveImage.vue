@@ -179,7 +179,7 @@ onUnmounted(() => {
       v-if="showThumbnail"
       :src="thumbnailSrc"
       :thumbhash="thumbhash"
-      :alt="alt"
+      :alt="alt || $t('ui.photo.altFallback')"
       class="absolute inset-0 w-full h-full object-contain"
       thumbhash-class="opacity-50"
       image-contain
@@ -217,7 +217,7 @@ onUnmounted(() => {
         name="tabler:photo-off"
         class="w-12 h-12"
       />
-      <p class="text-sm">图片加载失败</p>
+      <p class="text-sm">{{ $t('photo.image.loadError') }}</p>
     </div>
   </div>
 </template>

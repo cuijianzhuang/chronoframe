@@ -58,13 +58,13 @@ defineEmits<{
       </div>
 
       <h3 class="font-medium text-white mb-1">
-        {{ $t(option.label) || option.label }}
+        {{ $t(option.label) }}
       </h3>
       <p
         v-if="option.description"
         class="text-xs text-neutral-400 leading-relaxed"
       >
-        {{ $t(option.description) || option.description }}
+        {{ $t(option.description) }}
       </p>
     </div>
   </div>

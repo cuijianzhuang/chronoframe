@@ -21,7 +21,7 @@ const selectedLevels = ref<string[]>([])
 const selectedTags = ref<string[]>([])
 const autoScroll = ref(true)
 const isConnected = ref(false)
-const connectionStatus = ref('')
+const connectionState = ref<'idle' | 'connecting' | 'loadingHistory' | 'live' | 'error'>('idle')
 const logContainer = ref<HTMLElement>()
 const isInitialLoading = ref(false)
 const loadingProgress = ref(0)
@@ -265,11 +265,11 @@ const getLogLineStyle = (log: LogEntry) => {
 
 // 获取连接状态样式
 const getConnectionStatusClass = () => {
-  if (connectionStatus.value.includes('实时')) {
+  if (connectionState.value === 'live') {
     return 'text-success'
-  } else if (connectionStatus.value.includes('连接')) {
+  } else if (connectionState.value === 'connecting' || connectionState.value === 'loadingHistory') {
     return 'text-info'
-  } else if (connectionStatus.value.includes('错误')) {
+  } else if (connectionState.value === 'error') {
     return 'text-error'
   }
   return 'text-warning'
@@ -283,13 +283,13 @@ const getConnectionStatusColor = ():
   | 'secondary'
   | 'warning'
   | 'neutral' => {
-  if (connectionStatus.value.includes('实时')) {
+  if (connectionState.value === 'live') {
     return 'success'
   }
-  if (connectionStatus.value.includes('连接')) {
+  if (connectionState.value === 'connecting' || connectionState.value === 'loadingHistory') {
     return 'info'
   }
-  if (connectionStatus.value.includes('错误')) {
+  if (connectionState.value === 'error') {
     return 'error'
   }
   return 'warning'
@@ -362,7 +362,7 @@ const connectLogStream = () => {
   isInitialLoading.value = true
   loadingProgress.value = 5
 
-  connectionStatus.value = '正在连接...'
+  connectionState.value = 'connecting'
   eventSource = new EventSource(`/api/system/logs?initial=${INITIAL_LOG_LINES}`)
 
   let initialLoadCompleteTimer: NodeJS.Timeout | null = null
@@ -370,7 +370,7 @@ const connectLogStream = () => {
 
   eventSource.onopen = () => {
     isConnected.value = true
-    connectionStatus.value = '加载历史日志...'
+    connectionState.value = 'loadingHistory'
   }
 
   eventSource.onmessage = (event) => {
@@ -391,7 +391,7 @@ const connectLogStream = () => {
           // 设置新的定时器，如果在指定时间内没有新消息，认为初始加载完成
           initialLoadCompleteTimer = setTimeout(() => {
             if (isInitialLoading.value) {
-              connectionStatus.value = '实时'
+              connectionState.value = 'live'
               // 让加载指示器显示完成状态后再隐藏
               setTimeout(() => {
                 isInitialLoading.value = false
@@ -411,7 +411,7 @@ const connectLogStream = () => {
 
   eventSource.onerror = (error) => {
     isConnected.value = false
-    connectionStatus.value = '连接错误'
+    connectionState.value = 'error'
     console.error('EventSource error:', error)
   }
 }
@@ -480,35 +480,29 @@ onUnmounted(() => {
                   app.log
                 </h2>
                 <UBadge
-                  v-if="connectionStatus"
+                  v-if="connectionState !== 'idle'"
                   size="sm"
                   variant="soft"
                   :color="getConnectionStatusColor()"
                 >
-                  {{ connectionStatus }}
+                  {{ $t('dashboard.logs.connectionStatus.' + connectionState) }}
                 </UBadge>
               </div>
               <div
                 class="mt-1 flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400"
               >
-                <span
-                  >总条数/展示: {{ logs.length }}/{{
-                    filteredLogs.length
-                  }}</span
-                >
-                <span v-if="availableTags.length"
-                  >Tag: {{ availableTags.length }}</span
-                >
+                <span>{{ $t('dashboard.logs.countLabel', { total: logs.length, shown: filteredLogs.length }) }}</span>
+                <span v-if="availableTags.length">{{ $t('dashboard.logs.tagCount', { count: availableTags.length }) }}</span>
               </div>
             </div>
             <span
-              v-if="connectionStatus"
+              v-if="connectionState !== 'idle'"
               :class="[
                 'text-xs font-medium hidden sm:inline',
                 getConnectionStatusClass(),
               ]"
             >
-              {{ connectionStatus }}
+              {{ $t('dashboard.logs.connectionStatus.' + connectionState) }}
             </span>
           </div>
 
@@ -516,7 +510,7 @@ onUnmounted(() => {
             <!-- Search -->
             <UInput
               v-model="searchQuery"
-              placeholder="搜索日志内容..."
+              :placeholder="$t('dashboard.logs.search.placeholder')"
               size="sm"
               class="w-full sm:w-56 md:w-64"
               icon="tabler:search"
@@ -531,7 +525,7 @@ onUnmounted(() => {
                   variant="link"
                   size="sm"
                   icon="tabler:x"
-                  aria-label="Clear search input"
+                  :aria-label="$t('dashboard.logs.search.clearAriaLabel')"
                   @click="searchQuery = ''"
                 />
               </template>
@@ -547,7 +541,7 @@ onUnmounted(() => {
               "
               multiple
               size="sm"
-              placeholder="过滤级别"
+              :placeholder="$t('dashboard.logs.filter.levelPlaceholder')"
               class="w-28"
               :clearable="false"
             />
@@ -556,7 +550,7 @@ onUnmounted(() => {
               :items="availableTags"
               multiple
               size="sm"
-              placeholder="筛选 Tag"
+              :placeholder="$t('dashboard.logs.filter.tagPlaceholder')"
               class="w-40 sm:w-52"
               :clearable="false"
             />
@@ -595,7 +589,7 @@ onUnmounted(() => {
               />
             </div>
             <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-              正在加载历史日志...
+              {{ $t('dashboard.logs.connectionStatus.loadingHistory') }}
             </div>
             <div class="w-64 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
               <div
@@ -683,8 +677,8 @@ onUnmounted(() => {
               v-if="filteredLogs.length === 0"
               class="text-center py-8 text-gray-500 dark:text-gray-400 absolute inset-0"
             >
-              <div v-if="logs.length === 0">等待日志数据...</div>
-              <div v-else>没有匹配的日志条目</div>
+              <div v-if="logs.length === 0">{{ $t('dashboard.logs.empty.waiting') }}</div>
+              <div v-else>{{ $t('dashboard.logs.empty.noMatch') }}</div>
             </div>
           </div>
         </div>

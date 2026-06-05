@@ -302,7 +302,7 @@ const onClick = () => {
             <div class="absolute inset-0 overflow-hidden rounded-full">
               <ThumbImage
                 :src="marker.thumbnailUrl!"
-                :alt="marker.title || `照片 ${marker.id}`"
+                :alt="marker.title || $t('map.photo.altFallback', { id: marker.id })"
                 :thumbhash="marker.thumbnailHash"
                 :threshold="0.1"
                 root-margin="100px"
@@ -387,7 +387,7 @@ const onClick = () => {
                 <div class="relative h-36 overflow-hidden">
                   <ThumbImage
                     :src="marker.thumbnailUrl!"
-                    :alt="marker.title || `照片 ${marker.id}`"
+                    :alt="marker.title || $t('map.photo.altFallback', { id: marker.id })"
                     :thumbhash="marker.thumbnailHash"
                     :threshold="0.1"
                     root-margin="200px"
@@ -403,7 +403,7 @@ const onClick = () => {
                     class="flex items-center gap-2 text-neutral-900 dark:text-white group/link"
                   >
                     <h3 class="flex-1 text-lg font-semibold truncate">
-                      {{ marker.title || `照片 ${marker.id}` }}
+                      {{ marker.title || $t('map.photo.altFallback', { id: marker.id }) }}
                     </h3>
                     <Icon
                       name="tabler:external-link"
@@ -461,12 +461,12 @@ const onClick = () => {
                         {{
                           marker.exif?.GPSLatitude
                             ? `${Math.abs(Number(marker.exif?.GPSLatitude)).toFixed(4)}°${marker.exif?.GPSLatitudeRef}`
-                            : '未知'
+                            : $t('map.photo.unknownCoord')
                         }},
                         {{
                           marker.exif?.GPSLongitude
                             ? `${Math.abs(Number(marker.exif?.GPSLongitude)).toFixed(4)}°${marker.exif?.GPSLongitudeRef}`
-                            : '未知'
+                            : $t('map.photo.unknownCoord')
                         }}
                       </span>
                     </div>

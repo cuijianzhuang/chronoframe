@@ -89,7 +89,7 @@ const currentStepIndex = computed(() => {
         <div class="flex items-center gap-3">
           <img
             src="/favicon-96x96.png"
-            alt="ChronoFrame Logo"
+            :alt="$t('onboarding.layout.logoAlt')"
             class="size-14 object-contain"
           />
           <span
@@ -209,7 +209,7 @@ const currentStepIndex = computed(() => {
           <div class="flex items-center gap-3">
             <img
               src="/favicon-96x96.png"
-              alt="ChronoFrame Logo"
+              :alt="$t('onboarding.layout.logoAlt')"
               class="size-8 object-contain"
             />
             <span class="font-bold">ChronoFrame</span>

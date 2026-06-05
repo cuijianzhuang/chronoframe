@@ -24,7 +24,9 @@
         "rating": {
           "showAll": "Show all photos",
           "showStarsAndAbove": "Show {count} star(s) and above photos"
-        }
+        },
+        "searchPlaceholder": "Search filenames, etc...",
+        "shuffleTooltip": "Shuffle list"
       },
       "sort": {
         "tooltip": "Photo Sorting",
@@ -108,7 +110,8 @@
         }
       },
       "backtotop": {
-        "tooltip": "Back to Top"
+        "tooltip": "Back to Top",
+        "ariaLabel": "Back to top"
       }
     },
     "stats": {
@@ -116,11 +119,29 @@
       "noPhotosTip": "No photos yet, upload some now!"
     },
     "livePhoto": "Live Photo",
-    "indexPanelCountCity": "and more other cities",
+    "indexPanelCountCity": "and {count} more cities",
     "album": {
       "noImage": "Empty Album",
       "emptyAlbumTip": "Add photos to get started",
       "noDescription": "No description"
+    },
+    "loading": "Loading",
+    "photo": {
+      "untitled": "Untitled",
+      "altFallback": "Photo",
+      "loadError": "Failed to load image",
+      "avatarAlt": "Author's avatar"
+    },
+    "authForm": {
+      "logoAlt": "App Logo"
+    },
+    "histogram": {
+      "rendering": "Rendering",
+      "loadError": "Failed to load histogram"
+    },
+    "calendarHeatmap": {
+      "on": "on",
+      "contributions": "contributions"
     }
   },
   "album": {
@@ -140,12 +161,18 @@
       "photos": "Photos",
       "dateRange": "Date Range",
       "created": "Created"
-    }
+    },
+    "createdTooltip": "Created: {date}"
   },
   "map": {
     "cluster": {
       "details": "Click to view details",
-      "nearbyPhotos": "{0} photos nearby"
+      "nearbyPhotos": "{0} photos nearby",
+      "altFallback": "Cluster {id}"
+    },
+    "photo": {
+      "altFallback": "Photo {id}",
+      "unknownCoord": "Unknown"
     }
   },
   "minimap": {
@@ -171,7 +198,11 @@
       "wow": "Whoa",
       "sad": "Touching",
       "fire": "Hype",
-      "sparkle": "Shine"
+      "sparkle": "Shine",
+      "error": {
+        "title": "Reaction Failed",
+        "rateLimited": "Too many requests, please try again later"
+      }
     },
     "photoload": {
       "loadError": "Image loading failed",
@@ -346,7 +377,8 @@
         "uncalibrated": "Uncalibrated",
         "rgb": "RGB"
       }
-    }
+    },
+    "iso": "ISO"
   },
   "title": {
     "gallery": "Gallery",
@@ -365,13 +397,15 @@
     "generalSettings": "General Settings",
     "appearanceSettings": "Appearance Settings",
     "privacySettings": "Privacy Settings",
-    "mapAndLocation": "Map & Location"
+    "mapAndLocation": "Map & Location",
+    "storageSettings": "Storage Settings",
+    "systemSettings": "System Settings"
   },
   "auth": {
     "form": {
       "errors": {
         "invalidEmail": "Invalid email address",
-        "invalidPassword": ""
+        "invalidPassword": "Password must be at least 6 characters"
       },
       "signin": {
         "title": "Sign In",
@@ -430,7 +464,16 @@
         "data": "{0} took {1} photos",
         "noData": "{0} has no photos"
       }
-    }
+    },
+    "actions": {
+      "save": "Save",
+      "saveSettings": "Save Settings",
+      "reset": "Reset",
+      "cancel": "Cancel",
+      "continue": "Continue",
+      "delete": "Delete"
+    },
+    "unknownError": "Unknown error"
   },
   "upload": {
     "duplicate": {
@@ -480,6 +523,30 @@
         "title": "Upload Failed",
         "message": "An error occurred during upload, please try again later"
       }
+    },
+    "runtimeError": {
+      "networkFailed": "Network connection failed",
+      "clientError": "Client error ({status})",
+      "serverError": "Server error ({status})",
+      "networkError": "Network error (status: {status})",
+      "timeout": "Upload timed out ({timeout}ms)",
+      "aborted": "Upload aborted",
+      "badRequest": "Bad request format",
+      "unauthorized": "Unauthorized access",
+      "forbidden": "Access forbidden",
+      "notFound": "Upload endpoint not found",
+      "conflict": "File conflict",
+      "fileTooLarge": "File too large",
+      "unsupportedType": "Unsupported file type",
+      "rateLimited": "Upload rate limit exceeded",
+      "internalServerError": "Internal server error",
+      "serviceUnavailable": "Server temporarily unavailable",
+      "httpError": "HTTP error: {status}",
+      "retrying": "{message} (attempt {attempt}/{max})"
+    },
+    "progress": {
+      "calculating": "Calculating...",
+      "seconds": "{seconds}s"
     }
   },
   "dashboard": {
@@ -540,7 +607,10 @@
         "columnVisibility": {
           "button": "Columns",
           "description": "Toggle column visibility"
-        }
+        },
+        "selectAllAria": "Select all",
+        "selectRowAria": "Select row",
+        "thumbnailAlt": "Photo Thumbnail"
       },
       "actions": {
         "reprocess": "Reprocess",
@@ -650,7 +720,10 @@
         "eraseLocationQueued": "Erase location info task queued",
         "eraseLocationFailed": "Failed to queue erase location info task",
         "batchEraseLocationQueued": "Queued {count} erase-location task(s)",
-        "batchEraseLocationFailed": "Failed to queue batch erase-location tasks"
+        "batchEraseLocationFailed": "Failed to queue batch erase-location tasks",
+        "taskSubmitFailed": "Failed to submit task",
+        "taskStatusCheckFailed": "Failed to check task status",
+        "uploadFailed": "Upload failed"
       },
       "errors": {
         "noSelection": "Please select photos to upload",
@@ -739,7 +812,25 @@
           "longProcessing": "Large files may take longer to process, which is expected.",
           "success": "File uploaded and processed successfully"
         }
-      }
+      },
+      "uploadQueuePanel": {
+        "title": "File Upload Queue",
+        "stats": {
+          "waiting": "waiting",
+          "active": "in progress",
+          "completed": "completed",
+          "error": "failed",
+          "skipped": "skipped",
+          "blocked": "blocked"
+        },
+        "summary": "{completed} completed, {error} failed, {skipped} skipped, {blocked} blocked",
+        "actions": {
+          "clearCompleted": "Clear Completed",
+          "clearAll": "Clear All",
+          "goToQueue": "Queue Management"
+        }
+      },
+      "previewTitle": "Photo Preview"
     },
     "albums": {
       "title": "Album Management",
@@ -758,7 +849,9 @@
         "selectPhotos": "Select Photos",
         "editPhotos": "Edit photo selection",
         "selectedCount": "Selected {count} photos",
-        "clearAll": "Clear all"
+        "clearAll": "Clear all",
+        "isHidden": "Hide album",
+        "isHiddenHint": "Photos in hidden albums are not shown on the home page"
       },
       "table": {
         "columns": {
@@ -814,7 +907,8 @@
         "loadError": "Failed to load albums",
         "loadDetailError": "Failed to load album details",
         "loadPhotosError": "Failed to load photos"
-      }
+      },
+      "photoCount": "{count} photos"
     },
     "overview": {
       "title": "Overview",
@@ -863,7 +957,12 @@
           "totalFailed": "Failure count",
           "avgSuccessRate": "Success rate"
         }
-      }
+      },
+      "shareSite": {
+        "label": "Share Your Site",
+        "button": "Share Your Site"
+      },
+      "memoryUnavailable": "memory info not available"
     },
     "queue": {
       "title": "Queue Management",
@@ -893,7 +992,12 @@
         "errorMessage": "Error Message",
         "createdAt": "Created At",
         "completedAt": "Completed At",
-        "actions": "Actions"
+        "actions": "Actions",
+        "expandAria": "Expand",
+        "detail": {
+          "photoId": "Photo ID",
+          "payload": "Payload"
+        }
       },
       "status": {
         "pending": "Pending",
@@ -912,6 +1016,7 @@
         "metadata": "Metadata",
         "thumbnail": "Thumbnail",
         "exif": "EXIF Processing",
+        "motion-photo": "Motion Photo Processing",
         "reverse-geocoding": "Geocoding",
         "live-photo": "LivePhoto Processing",
         "location-erase": "Location Erasure"
@@ -923,16 +1028,53 @@
       "messages": {
         "noTasks": "No tasks found",
         "retrySuccess": "Task retry successful",
+        "retryFailed": "Failed to retry task",
         "deleteSuccess": "Task deleted successfully",
         "batchRetrySuccess": "Batch retry successful",
         "clearSuccess": "Clear completed",
-        "operationFailed": "Operation failed"
+        "operationFailed": "Operation failed",
+        "clearSuccessDescription": "Cleared {count} tasks",
+        "clearFailed": "Failed to clear tasks",
+        "batchRetrySuccessDescription": "Retried {count} tasks",
+        "batchRetryFailed": "Batch retry failed",
+        "deleteFailed": "Failed to delete task"
       },
       "filters": {
         "all": "All",
         "status": "Filter by Status",
         "type": "Filter by Type"
+      },
+      "taskListTitle": "Task Queue"
+    },
+    "logs": {
+      "connectionStatus": {
+        "idle": "Disconnected",
+        "connecting": "Connecting...",
+        "loadingHistory": "Loading history...",
+        "live": "Live",
+        "error": "Connection error"
+      },
+      "search": {
+        "placeholder": "Search log content...",
+        "clearAriaLabel": "Clear search input"
+      },
+      "filter": {
+        "levelPlaceholder": "Filter level",
+        "tagPlaceholder": "Filter Tag"
+      },
+      "countLabel": "Total/Shown: {total}/{shown}",
+      "tagCount": "Tags: {count}",
+      "empty": {
+        "waiting": "Waiting for log data...",
+        "noMatch": "No matching log entries"
       }
+    },
+    "access": {
+      "pleaseLogin": "Please login to view dashboard",
+      "noAccess": "Sorry, you do not have access to this page."
+    },
+    "nav": {
+      "documentation": "Documentation"
     }
   },
   "settings": {
@@ -1018,7 +1160,8 @@
             "description": "Client Secret of your GitHub OAuth app"
           }
         }
-      }
+      },
+      "sectionDescription": "Configure system-level behavior parameters. Changes here will affect global upload and service behavior."
     },
     "map": {
       "provider": {
@@ -1046,7 +1189,8 @@
           "label": "MapLibre Style",
           "description": "MapLibre map style URL"
         }
-      }
+      },
+      "sectionDescription": "Configure map display and geocoding services. The map provider affects map styles and access credentials."
     },
     "location": {
       "language": {
@@ -1076,7 +1220,8 @@
           "description": "Automatically remove EXIF GPS metadata and clear geolocation fields while processing uploaded photos",
           "help": "When enabled, location erasure will run asynchronously in the processing queue"
         }
-      }
+      },
+      "sectionDescription": "Manage data privacy policies for photo uploads. It is recommended to enable location data removal on public sites."
     },
     "storage": {
       "name": {
@@ -1194,7 +1339,59 @@
           "label": "CDN URL",
           "description": "Custom CDN URL for accessing images"
         }
+      },
+      "sectionDescription": "Manage the default storage scheme and available storage providers. Settings on this page only affect subsequent file uploads.",
+      "table": {
+        "columns": {
+          "name": "Storage Name",
+          "type": "Storage Type",
+          "actions": "Actions"
+        }
+      },
+      "messages": {
+        "saved": "Settings saved",
+        "saveError": "Error saving settings",
+        "created": "Storage scheme created",
+        "createError": "Error creating storage scheme",
+        "deleted": "Storage scheme deleted",
+        "deleteError": "Failed to delete storage scheme"
+      },
+      "providers": {
+        "s3": "AWS S3 Compatible Storage",
+        "local": "Local Storage",
+        "openlist": "OpenList"
+      },
+      "sections": {
+        "currentDefault": "Current Default Storage",
+        "management": "Storage Scheme Management"
+      },
+      "form": {
+        "schemeLabel": "Storage Scheme",
+        "schemePlaceholder": "Select a storage scheme",
+        "typeLabel": "Storage Type",
+        "typePlaceholder": "Select a storage type",
+        "nameLabel": "Storage Name"
+      },
+      "changeModal": {
+        "title": "Change Storage Scheme",
+        "alertTitle": "Note",
+        "alertDescription": "Files uploaded after changing the storage scheme will be stored in the new scheme. Files already in the original scheme will not be migrated."
+      },
+      "slideover": {
+        "title": "Create Storage Scheme"
+      },
+      "actions": {
+        "add": "Add Storage",
+        "create": "Create Storage"
       }
+    },
+    "general": {
+      "description": "Manage the site's basic information and display appearance. Changes will immediately affect the dashboard and public-facing display."
+    },
+    "form": {
+      "loadFailed": "Failed to load settings",
+      "saveSuccess": "Settings saved",
+      "saveFailed": "Failed to save settings"
     }
   },
   "wizard": {
@@ -1223,6 +1420,9 @@
           "description": "Open-source fork of Mapbox GL JS."
         }
       }
+    },
+    "form": {
+      "loadSchemaFailed": "Failed to load wizard schema"
     }
   },
   "onboarding": {
@@ -1236,7 +1436,8 @@
         "complete": "Complete"
       },
       "current": "In Progress",
-      "stepCounter": "Step {0} / {1}"
+      "stepCounter": "Step {0} / {1}",
+      "logoAlt": "ChronoFrame Logo"
     },
     "actions": {
       "next": "Next",
@@ -1339,6 +1540,11 @@
       "toggle": "Enable/Disable Timeline",
       "playPause": "Play/Pause Timeline",
       "title": "Timeline"
+    }
+  },
+  "photo": {
+    "image": {
+      "loadError": "Failed to load image"
     }
   }
 }

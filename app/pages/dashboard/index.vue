@@ -7,7 +7,7 @@ definePageMeta({
 })
 
 useHead({
-  title: $t('title.dashboard'),
+  title: () => $t('title.dashboard'),
 })
 
 const dayjs = useDayjs()
@@ -247,7 +247,7 @@ const onShareSite = () => {
         </div> -->
             <div>
               <p class="text-sm text-neutral-500 dark:text-neutral-400">
-                Share Your Site
+                {{ $t('dashboard.overview.shareSite.label') }}
               </p>
               <p class="text-lg font-bold">
                 <UButton
@@ -258,7 +258,7 @@ const onShareSite = () => {
                   trailing-icon="tabler:external-link"
                   @click="onShareSite"
                 >
-                  分享你的站点
+                  {{ $t('dashboard.overview.shareSite.button') }}
                 </UButton>
               </p>
             </div>
@@ -385,7 +385,7 @@ const onShareSite = () => {
                     {{
                       dashboardStats?.memory
                         ? `${Math.round((dashboardStats.memory.used / 1024 / 1024 / 1024) * 100) / 100}GB / ${Math.round((dashboardStats.memory.total / 1024 / 1024 / 1024) * 100) / 100}GB`
-                        : 'memory info not available'
+                        : $t('dashboard.overview.memoryUnavailable')
                     }}
                   </div>
                   <span>

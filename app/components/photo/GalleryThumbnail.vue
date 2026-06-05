@@ -178,7 +178,7 @@ watch(isMobile, scrollToActiveThumbnail)
         <img
           v-if="photo.thumbnailUrl"
           :src="photo.thumbnailUrl"
-          :alt="photo.title || 'Photo thumbnail'"
+          :alt="photo.title || $t('ui.photo.altFallback')"
           class="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
         />

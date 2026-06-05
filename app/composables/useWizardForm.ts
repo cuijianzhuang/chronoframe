@@ -11,6 +11,7 @@ import { useWizardStore } from '~/stores/wizard'
  * @param namespace Namespace for the wizard step (e.g. 'admin', 'storage')
  */
 export function useWizardForm(namespace: string) {
+  const { t } = useI18n()
   const toast = useToast()
   const fields = ref<FieldDescriptor[]>([])
   const loading = ref(false)
@@ -80,7 +81,7 @@ export function useWizardForm(namespace: string) {
     } catch (e: any) {
       error.value = e.message
       toast.add({
-        title: 'Failed to load wizard schema',
+        title: t('wizard.form.loadSchemaFailed'),
         description: e.message,
         color: 'error',
       })
