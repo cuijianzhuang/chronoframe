@@ -47,6 +47,7 @@ const dayjs = useDayjs()
 
 const { status, refresh } = usePhotos()
 const { filteredPhotos, selectedCounts, hasActiveFilters } = usePhotoFilters()
+const { currentSortIcon, currentSortOption } = usePhotoSort()
 
 const totalSelectedFilters = computed(() => {
   return Object.values(selectedCounts.value).reduce(
@@ -2294,6 +2295,25 @@ onUnmounted(() => {
                 <UCard variant="glassmorphism">
                   <OverlayFilterPanel />
                 </UCard>
+              </template>
+            </UPopover>
+            <UPopover>
+              <UTooltip :text="$t('ui.action.sort.tooltip')">
+                <UButton
+                  variant="soft"
+                  :color="
+                    currentSortOption?.key === 'dateTaken-desc'
+                      ? 'neutral'
+                      : 'info'
+                  "
+                  class="bg-transparent rounded-full cursor-pointer"
+                  :icon="currentSortIcon"
+                  size="sm"
+                />
+              </UTooltip>
+
+              <template #content>
+                <OverlaySortPanel />
               </template>
             </UPopover>
             <!-- 过滤器 -->
