@@ -34,6 +34,8 @@
         "options": {
           "dateTakenDesc": "Date Taken (Newest First)",
           "dateTakenAsc": "Date Taken (Oldest First)",
+          "lastModifiedDesc": "Date Uploaded (Newest First)",
+          "lastModifiedAsc": "Date Uploaded (Oldest First)",
           "fileSizeAsc": "File Size (Ascending)",
           "fileSizeDesc": "File Size (Descending)",
           "titleAsc": "Title (Ascending)",
